@@ -64,9 +64,9 @@ export function QrCodeGeneratorForm() {
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
                 // --- Branding ---
-                const logoSize = 40;
-                const spacing = 8;
-                ctx.font = 'bold 16px Inter';
+                const logoSize = 32;
+                const spacing = 10;
+                ctx.font = 'bold 20px Inter';
                 const textMetrics = ctx.measureText('MiniFyn');
                 const textWidth = textMetrics.width;
 
