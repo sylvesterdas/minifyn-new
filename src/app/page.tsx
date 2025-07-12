@@ -41,14 +41,11 @@ export default function Home() {
               <Button variant="ghost" asChild>
                 <Link href="/#features">Features</Link>
               </Button>
-               <Button variant="ghost" asChild>
-                <Link href="/#pricing">Pricing</Link>
-              </Button>
               <Button variant="ghost" asChild>
                 <Link href="/blog">Blog</Link>
               </Button>
               <Button asChild>
-                <Link href="/dashboard">Get Started</Link>
+                <Link href="/dashboard">Get Started Free</Link>
               </Button>
             </nav>
           </div>
@@ -68,7 +65,7 @@ export default function Home() {
                   Create, share, and track your links with the most powerful and simple-to-use platform.
                 </p>
               </div>
-              <div className="w-full max-w-2xl pt-8">
+              <div className="w-full max-w-md pt-8">
                  <UrlShortenerForm />
               </div>
             </div>
@@ -96,73 +93,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </section>
-
-        <section id="pricing" className="w-full py-12 md:py-24 lg:py-32">
-            <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
-                <div className="space-y-3">
-                    <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
-                        Simple, Transparent Pricing
-                    </h2>
-                    <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                        Choose the plan that's right for you. Get started for free.
-                    </p>
-                </div>
-                <div className="mx-auto w-full max-w-4xl pt-8">
-                    <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                        <Card className="flex flex-col">
-                            <CardHeader>
-                                <CardTitle>Free</CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex-1 space-y-4">
-                               <p className="text-4xl font-bold">$0<span className="text-sm font-normal text-muted-foreground">/month</span></p>
-                               <ul className="space-y-2 text-left text-sm text-muted-foreground">
-                                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> 5 URLs / day</li>
-                                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> 7-day expiration</li>
-                                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> Basic Analytics</li>
-                               </ul>
-                            </CardContent>
-                             <div className="p-6 pt-0">
-                                <Button className="w-full" variant="secondary">Get Started</Button>
-                            </div>
-                        </Card>
-                         <Card className="flex flex-col border-primary shadow-2xl shadow-primary/20">
-                            <CardHeader>
-                                <CardTitle>Pro</CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex-1 space-y-4">
-                                <p className="text-4xl font-bold">$10<span className="text-sm font-normal text-muted-foreground">/month</span></p>
-                                <ul className="space-y-2 text-left text-sm text-muted-foreground">
-                                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> 100 URLs / day</li>
-                                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> 90-day expiration</li>
-                                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> Advanced Analytics</li>
-                                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> API Access</li>
-                               </ul>
-                            </CardContent>
-                            <div className="p-6 pt-0">
-                                <Button className="w-full">Choose Pro</Button>
-                            </div>
-                        </Card>
-                         <Card className="flex flex-col">
-                            <CardHeader>
-                                <CardTitle>Super User</CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex-1 space-y-4">
-                                <p className="text-4xl font-bold">Custom</p>
-                                 <ul className="space-y-2 text-left text-sm text-muted-foreground">
-                                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> Unlimited URLs</li>
-                                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> No expiration</li>
-                                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> All Pro Features</li>
-                                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> Dedicated Support</li>
-                               </ul>
-                            </CardContent>
-                            <div className="p-6 pt-0">
-                                <Button className="w-full" variant="secondary">Contact Us</Button>
-                            </div>
-                        </Card>
-                    </div>
-                </div>
-            </div>
         </section>
 
       </main>
