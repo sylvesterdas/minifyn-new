@@ -2,19 +2,19 @@
 
 import nodemailer from 'nodemailer';
 
-const { ZOHO_MAIL_USER, ZOHO_MAIL_PASSWORD, ZOHO_MAIL_FROM } = process.env;
+const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = process.env;
 
-if (!ZOHO_MAIL_USER || !ZOHO_MAIL_PASSWORD || !ZOHO_MAIL_FROM) {
-  console.warn("Email service is not configured. Emails will not be sent. Please check your .env file.");
+if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !SMTP_FROM) {
+  console.warn("SMTP service is not configured. Emails will not be sent. Please check your .env file.");
 }
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.zoho.com",
-  port: 465,
-  secure: true, // true for 465, false for other ports
+  host: SMTP_HOST,
+  port: parseInt(SMTP_PORT || '587', 10),
+  secure: parseInt(SMTP_PORT || '587', 10) === 465, // true for 465, false for other ports (like 587)
   auth: {
-    user: ZOHO_MAIL_USER,
-    pass: ZOHO_MAIL_PASSWORD,
+    user: SMTP_USER,
+    pass: SMTP_PASS,
   },
 });
 
@@ -25,14 +25,15 @@ interface EmailOptions {
 }
 
 export async function sendEmail({ to, subject, html }: EmailOptions) {
-  if (!transporter.options.auth.user || !transporter.options.auth.pass) {
-    // Prevent sending emails if credentials are not set
-    return;
+  if (!SMTP_HOST) {
+    console.error("Email not sent: SMTP service is not configured.");
+    // In a real app, you might want to avoid throwing here if email is non-critical,
+    // but for auth flows, it's important.
+    throw new Error("Email service is not available.");
   }
-  
   try {
     const info = await transporter.sendMail({
-      from: ZOHO_MAIL_FROM,
+      from: SMTP_FROM,
       to,
       subject,
       html,

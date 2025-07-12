@@ -66,6 +66,7 @@ export async function resendVerificationLink(prevState: any, formData: FormData)
 
     try {
         const verificationLink = await auth.generateEmailVerificationLink(email);
+        
         await sendEmail({
             to: email,
             subject: 'Verify Your Email Address for MiniFyn',
