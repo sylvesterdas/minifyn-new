@@ -27,7 +27,8 @@ vi.mock('react', async (importOriginal) => {
                 const newState = await action(state, payload);
                 setState(newState);
             };
-            return [state, dispatch];
+            // Return isPending as false for this test
+            return [state, dispatch, false]; 
         }
     };
 });

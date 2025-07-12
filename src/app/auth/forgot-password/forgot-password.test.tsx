@@ -13,7 +13,7 @@ vi.mock('react', async (importOriginal) => {
     const mod = await importOriginal<typeof import('react')>();
     return {
         ...mod,
-        useActionState: vi.fn((_action, initialState) => [initialState, vi.fn()]),
+        useActionState: vi.fn((_action, initialState) => [initialState, vi.fn(), false]),
     };
 });
 

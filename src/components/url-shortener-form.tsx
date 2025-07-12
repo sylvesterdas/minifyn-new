@@ -1,7 +1,6 @@
 'use client';
 
-import { useFormStatus } from 'react-dom';
-import { useEffect, useState, useRef, useActionState } from 'react';
+import { useActionState, useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { shortenUrl } from '@/app/actions';
@@ -9,14 +8,22 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Clipboard, Check } from 'lucide-react';
+import { ArrowRight, Clipboard, Check, Loader2 } from 'lucide-react';
 
-function SubmitButton() {
-    const { pending } = useFormStatus();
+function SubmitButton({ pending }: { pending: boolean }) {
     return (
         <Button type="submit" className="w-full font-semibold" disabled={pending}>
-            {pending ? 'Shortening...' : 'Shorten URL'}
-            {!pending && <ArrowRight className="ml-2 h-4 w-4" />}
+            {pending ? (
+                <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Shortening...
+                </>
+            ) : (
+                <>
+                    Shorten URL
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+            )}
         </Button>
     );
 }
@@ -28,7 +35,7 @@ export function UrlShortenerForm() {
     const formRef = useRef<HTMLFormElement>(null);
 
     const initialState = { success: false, message: '', shortUrl: '' };
-    const [state, formAction] = useActionState(shortenUrl, initialState);
+    const [state, formAction, isPending] = useActionState(shortenUrl, initialState);
 
     useEffect(() => {
         if (state.message) {
@@ -79,7 +86,7 @@ export function UrlShortenerForm() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">
-                    <SubmitButton />
+                    <SubmitButton pending={isPending} />
                      {shortenedUrl && (
                         <div className="w-full p-3 rounded-md bg-accent/20 border border-accent flex items-center justify-between animate-in fade-in duration-500">
                             <a href={shortenedUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-accent-foreground truncate hover:underline">
