@@ -1,4 +1,5 @@
 import { config } from 'dotenv';
 config();
 
-import '@/ai/flows/generate-seo-metadata.ts';
+// Flows are imported here to be available for development.
+// e.g. import '@/ai/flows/your-flow.ts';

@@ -1,6 +1,6 @@
-import { generateSeoMetadata } from '@/ai/flows/generate-seo-metadata';
 import { db } from './firebase-admin';
 import type { DataSnapshot } from 'firebase-admin/database';
+import { fetchMetadata } from './scraper';
 
 export interface Link {
   id: string;
@@ -61,17 +61,18 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
 
     const now = Date.now();
     
-    // Links for verified users do not expire. Anonymous/unverified links expire in 7 days.
     const expiresAt = isVerifiedUser ? -1 : now + 7 * 24 * 60 * 60 * 1000;
 
-    let seoData;
+    let metadata;
     try {
-        seoData = await generateSeoMetadata({ url: longUrl });
+        metadata = await fetchMetadata(longUrl);
     } catch (error) {
-        console.error("Failed to generate SEO metadata:", error);
-        seoData = {
+        console.error("Failed to fetch metadata:", error);
+        metadata = {
             title: "Link via MiniFyn",
-            description: "A shortened link created with MiniFyn."
+            description: "A shortened link created with MiniFyn.",
+            ogImage: undefined,
+            twitterImage: undefined
         }
     }
 
@@ -79,10 +80,10 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         longUrl,
         createdAt: now,
         expiresAt,
-        title: seoData.title,
-        description: seoData.description,
-        ogImage: seoData.ogImage,
-        twitterImage: seoData.twitterImage,
+        title: metadata.title,
+        description: metadata.description,
+        ogImage: metadata.ogImage,
+        twitterImage: metadata.twitterImage,
         userId: userId,
         clickCount: 0
     };
