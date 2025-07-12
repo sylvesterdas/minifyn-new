@@ -1,5 +1,7 @@
 import { CheckCircle, QrCode } from 'lucide-react';
 import type { Metadata } from 'next';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Features | MiniFyn',
@@ -23,6 +25,11 @@ export default function FeaturesPage() {
         <p className="mt-6 text-lg leading-8 text-muted-foreground">
           MiniFyn provides everything you need to manage your links effectively and securely.
         </p>
+        <div className="mt-10 flex items-center justify-center gap-x-6">
+            <Button asChild size="lg">
+                <Link href="/auth/signup">Get started for free</Link>
+            </Button>
+        </div>
       </div>
 
       <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">

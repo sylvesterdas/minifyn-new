@@ -3,6 +3,8 @@ import { QrCodeGeneratorForm } from '@/components/qr-code-generator-form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Key, Zap, QrCode, Link as LinkIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 const features = [
   {
@@ -79,6 +81,11 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground">{feature.description}</p>
               </div>
             ))}
+          </div>
+          <div className="mt-12 text-center">
+            <Button asChild size="lg">
+                <Link href="/auth/signup">Get started for free</Link>
+            </Button>
           </div>
         </div>
       </section>
