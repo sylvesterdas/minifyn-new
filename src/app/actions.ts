@@ -4,6 +4,7 @@ import { urlSchema } from '@/lib/schema';
 import { checkRateLimit, createShortLink, incrementUsage } from '@/lib/data';
 import { auth } from 'firebase-admin';
 import type { UserRecord } from 'firebase-admin/auth';
+import { triggerMaintenance } from '@/lib/maintenance';
 
 export interface FormState {
     success: boolean;
@@ -12,18 +13,23 @@ export interface FormState {
 }
 
 export async function shortenUrl(prevState: FormState, formData: FormData): Promise<FormState> {
+    // Trigger maintenance task in the background (fire and forget)
+    triggerMaintenance();
+
     const userId = formData.get('userId');
     if (typeof userId !== 'string' || !userId) {
+        // This should ideally not happen if the client-side sends the UID correctly.
         return { success: false, message: 'Authentication context is missing. Please refresh the page.' };
     }
     
     let userRecord: UserRecord | null = null;
     let isVerifiedUser = false;
     try {
+        // Check if the user is a registered user (not anonymous)
         userRecord = await auth().getUser(userId);
         isVerifiedUser = userRecord.emailVerified;
     } catch (error) {
-        // User not found, which is fine for anonymous users.
+        // This error means the user is likely anonymous, which is expected.
         isVerifiedUser = false;
     }
 

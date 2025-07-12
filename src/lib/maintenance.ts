@@ -1,11 +1,38 @@
 'use server';
 
 import { db } from './firebase-admin';
-import { format, subDays } from 'date-fns';
+import { subDays } from 'date-fns';
+
+const MAINTENANCE_INTERVAL = 60 * 60 * 1000; // 1 hour in milliseconds
+
+/**
+ * Triggers maintenance tasks if the required interval has passed.
+ * This function is designed to be called in a "fire-and-forget" manner.
+ */
+export async function triggerMaintenance(): Promise<void> {
+  const lastRunRef = db.ref('maintenance/lastRun');
+  try {
+    const snapshot = await lastRunRef.once('value');
+    const lastRun = snapshot.val() || 0;
+
+    if (Date.now() - lastRun > MAINTENANCE_INTERVAL) {
+      // Update the timestamp first to prevent race conditions
+      await lastRunRef.set(Date.now());
+      console.log('Maintenance interval passed. Running cleanup tasks.');
+      
+      // Run maintenance tasks asynchronously
+      await deleteOldRateLimits();
+
+      console.log('Maintenance tasks completed.');
+    }
+  } catch (error) {
+    console.error('Error during maintenance trigger:', error);
+  }
+}
 
 /**
  * Deletes rate-limiting data from the Firebase Realtime Database that is older than a specified number of days.
- * This is intended to be run periodically by a scheduled task (e.g., a Cloud Function).
+ * This is intended to be run periodically by the triggerMaintenance function.
  * 
  * @param {number} daysToKeep - The number of days of rate-limiting data to retain. Defaults to 30.
  */
