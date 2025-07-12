@@ -68,7 +68,7 @@ export function UserNav() {
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                    <Link href="/help" className="flex items-center cursor-pointer">
+                    <Link href="/help" target="_blank" rel="noopener noreferrer" className="flex items-center cursor-pointer">
                         <LifeBuoy className="mr-2 h-4 w-4" />
                         <span>Help</span>
                     </Link>
