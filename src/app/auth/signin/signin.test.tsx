@@ -24,6 +24,13 @@ vi.mock('react', async (importOriginal) => {
     };
 });
 
+// Mock firebase-admin to prevent it from trying to initialize in a test environment
+vi.mock('@/lib/firebase-admin', () => ({
+    auth: {
+        getUserByEmail: vi.fn().mockResolvedValue({ uid: 'test-uid', emailVerified: true }),
+    }
+}));
+
 
 describe('SignInPage', () => {
   it('renders all form elements correctly', () => {

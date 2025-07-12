@@ -19,20 +19,21 @@ vi.mock('@/app/actions', () => ({
 // Mock useActionState
 vi.mock('react', async (importOriginal) => {
     const mod = await importOriginal<typeof import('react')>();
+    const useActionState = (action: any, initialState: any) => {
+        const [state, setState] = mod.useState(initialState);
+        const dispatch = async (payload: FormData) => {
+            const newState = await action(state, payload);
+            setState(newState);
+        };
+        return [state, dispatch, false]; 
+    }
     return {
         ...mod,
-        useActionState: (action: any, initialState: any) => {
-            const [state, setState] = mod.useState(initialState);
-            const dispatch = async (payload: FormData) => {
-                const newState = await action(state, payload);
-                setState(newState);
-            };
-            // Return isPending as false for this test
-            return [state, dispatch, false]; 
-        }
+        useActionState,
+        // Keep original useEffect for state updates
+        useEffect: mod.useEffect,
     };
 });
-
 
 describe('UrlShortenerForm', () => {
   beforeEach(() => {
@@ -56,10 +57,13 @@ describe('UrlShortenerForm', () => {
     render(<UrlShortenerForm />);
     
     const input = screen.getByLabelText('URL to shorten');
-    const button = screen.getByRole('button', { name: /Shorten URL/i });
+    const form = input.closest('form');
 
     fireEvent.change(input, { target: { value: 'https://www.google.com' } });
-    fireEvent.click(button);
+    
+    // Use fireEvent.submit on the form instead of click on the button
+    // This avoids issues with JSDOM's lack of `requestSubmit` implementation
+    fireEvent.submit(form!);
 
     await waitFor(() => {
         expect(screen.getByText(mockShortUrl.replace(/^https?:\/\//, ''))).toBeInTheDocument();
@@ -76,10 +80,10 @@ describe('UrlShortenerForm', () => {
     render(<UrlShortenerForm />);
 
     const input = screen.getByLabelText('URL to shorten');
-    const button = screen.getByRole('button', { name: /Shorten URL/i });
+    const form = input.closest('form');
 
     fireEvent.change(input, { target: { value: 'https://evil.org' } });
-    fireEvent.click(button);
+    fireEvent.submit(form!);
 
     await waitFor(() => {
         expect(mockToast).toHaveBeenCalledWith({

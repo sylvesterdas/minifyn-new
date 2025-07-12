@@ -3,6 +3,13 @@ import { vi } from 'vitest';
 import ForgotPasswordPage from './page';
 
 // Mock dependencies
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    refresh: vi.fn(),
+  }),
+}));
+
 vi.mock('@/hooks/use-toast', () => ({
   useToast: () => ({
     toast: vi.fn(),
@@ -16,6 +23,14 @@ vi.mock('react', async (importOriginal) => {
         useActionState: vi.fn((_action, initialState) => [initialState, vi.fn(), false]),
     };
 });
+
+// Mock firebase-admin to prevent it from trying to initialize in a test environment
+vi.mock('@/lib/firebase-admin', () => ({
+    auth: {
+        getUserByEmail: vi.fn(),
+        generatePasswordResetLink: vi.fn(),
+    }
+}));
 
 
 describe('ForgotPasswordPage', () => {
