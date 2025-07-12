@@ -37,7 +37,10 @@ export async function login(
     // but a proper implementation would involve custom tokens or a more complex auth flow.
     // We are simulating a successful password check.
 
-    const session = await lucia.createSession(userRecord.uid, {});
+    const session = await lucia.createSession(userRecord.uid, {
+        email: userRecord.email,
+        emailVerified: userRecord.emailVerified
+    });
     const sessionCookie = lucia.createSessionCookie(session.id);
     cookies().set(
       sessionCookie.name,
@@ -65,7 +68,10 @@ export async function resendVerificationLink(prevState: any, formData: FormData)
     }
 
     try {
-        const verificationLink = await auth.generateEmailVerificationLink(email);
+        const userRecord = await auth.getUserByEmail(email);
+        const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
+        
+        console.log(`VERIFICATION LINK (for testing): ${verificationLink}`);
         
         await sendEmail({
             to: email,
@@ -110,6 +116,8 @@ export async function signup(
     
     const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
 
+    console.log(`VERIFICATION LINK (for testing): ${verificationLink}`);
+
     await sendEmail({
         to: email,
         subject: 'Welcome to MiniFyn! Please Verify Your Email',
@@ -147,6 +155,8 @@ export async function sendPasswordResetLink(
         // but we won't reveal this to the client.
         await auth.getUserByEmail(email); 
         const link = await auth.generatePasswordResetLink(email);
+
+        console.log(`PASSWORD RESET LINK (for testing): ${link}`);
 
         await sendEmail({
             to: email,
