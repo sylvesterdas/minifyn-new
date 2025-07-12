@@ -21,7 +21,9 @@ export async function login(
     const expiresIn = 60 * 60 * 24 * 5 * 1000;
     const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
     
-    cookies().set('session', sessionCookie, {
+    const cookieObj = await cookies()
+
+    cookieObj.set('session', sessionCookie, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: expiresIn,

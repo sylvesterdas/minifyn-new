@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/use-auth';
 
 export default function DashboardPage() {
     const { user } = useAuth();
-
+    console.log('user', user)
     // The middleware now protects this page, so we can be sure `user` exists.
     // The client-side redirect is no longer necessary and can be removed for cleaner code.
     if (!user) {

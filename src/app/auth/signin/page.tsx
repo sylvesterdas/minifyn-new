@@ -84,6 +84,7 @@ export default function SignInPage() {
                     title: 'Success',
                     description: 'Logged in successfully! Redirecting...',
                 });
+                console.log('test', result)
                 // Use window.location.assign for a full page reload to ensure session is read by server layout
                 window.location.assign('/dashboard');
             } else {
