@@ -66,7 +66,7 @@ export function UrlShortenerForm() {
              <CardHeader>
                 <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
                     <Image src="/logo.png" alt="MiniFyn Logo" width={32} height={32} />
-                    MiniFyn
+                    mnfy.in
                 </CardTitle>
                 <CardDescription className="text-center pt-2">
                     The simplest way to shorten and share your links.

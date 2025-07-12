@@ -67,7 +67,7 @@ export function QrCodeGeneratorForm() {
                 const logoSize = 32;
                 const spacing = 10;
                 ctx.font = 'bold 20px Inter';
-                const textMetrics = ctx.measureText('MiniFyn');
+                const textMetrics = ctx.measureText('mnfy.in');
                 const textWidth = textMetrics.width;
 
                 const totalBrandingWidth = logoSize + spacing + textWidth;
@@ -83,7 +83,7 @@ export function QrCodeGeneratorForm() {
                 ctx.textBaseline = 'middle';
                 const textX = startX + logoSize + spacing;
                 const textY = logoY + (logoSize / 2);
-                ctx.fillText('MiniFyn', textX, textY);
+                ctx.fillText('mnfy.in', textX, textY);
 
                 // Draw QR Code
                 ctx.drawImage(qrImg, 0, topMargin);

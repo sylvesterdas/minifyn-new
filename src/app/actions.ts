@@ -34,9 +34,8 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     try {
         const newLink = await createShortLink(longUrl);
         
-        const host = headers().get('host');
-        const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-        const shortUrl = `${protocol}://${host}/${newLink.id}`;
+        const host = 'mnfy.in';
+        const shortUrl = `https://${host}/${newLink.id}`;
         
         return {
             success: true,
