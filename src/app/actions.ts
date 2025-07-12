@@ -3,6 +3,7 @@
 import { headers } from 'next/headers';
 import { urlSchema } from '@/lib/schema';
 import { checkRateLimit, createShortLink } from '@/lib/data';
+import { validateRequest } from '@/lib/auth';
 
 export interface FormState {
     success: boolean;
@@ -11,9 +12,11 @@ export interface FormState {
 }
 
 export async function shortenUrl(prevState: FormState, formData: FormData): Promise<FormState> {
+    const { user } = await validateRequest();
     const ip = headers().get('x-forwarded-for') ?? '127.0.0.1';
     
-    if (!checkRateLimit(ip)) {
+    // Rate limit only applies to anonymous users
+    if (!user && !checkRateLimit(ip)) {
         return { success: false, message: 'Rate limit exceeded. Please try again tomorrow.' };
     }
     
@@ -32,7 +35,7 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     const { longUrl } = validatedFields.data;
 
     try {
-        const newLink = await createShortLink(longUrl);
+        const newLink = await createShortLink({ longUrl, userId: user?.uid });
         
         const host = 'mnfy.in';
         const shortUrl = `https://${host}/${newLink.id}`;
