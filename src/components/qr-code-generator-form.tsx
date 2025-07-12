@@ -30,7 +30,7 @@ export function QrCodeGeneratorForm() {
             colorLight: "#ffffff",
             correctLevel: EasyQRCodeJS.CorrectLevel.H,
             quietZone: 15,
-            quietZoneColor: '#ffffff',
+            quietZoneColor: 'transparent',
             onRenderingEnd: (_, dataURL) => {
                 combineWithLogo(dataURL);
             },
@@ -63,18 +63,27 @@ export function QrCodeGeneratorForm() {
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                // Draw Logo
+                // --- Branding ---
                 const logoSize = 40;
-                const logoX = (canvas.width - logoSize) / 2;
-                const logoY = padding / 2;
-                ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
-
-                // Draw Text
-                const textY = logoY + logoSize + 10;
+                const spacing = 8;
                 ctx.font = 'bold 16px Inter';
+                const textMetrics = ctx.measureText('MiniFyn');
+                const textWidth = textMetrics.width;
+
+                const totalBrandingWidth = logoSize + spacing + textWidth;
+                const startX = (canvas.width - totalBrandingWidth) / 2;
+                
+                // Draw Logo
+                const logoY = (topMargin - logoSize - padding) / 2 + padding / 2;
+                ctx.drawImage(logoImg, startX, logoY, logoSize, logoSize);
+                
+                // Draw Text
                 ctx.fillStyle = '#000000';
-                ctx.textAlign = 'center';
-                ctx.fillText('MiniFyn', canvas.width / 2, textY);
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                const textX = startX + logoSize + spacing;
+                const textY = logoY + (logoSize / 2);
+                ctx.fillText('MiniFyn', textX, textY);
 
                 // Draw QR Code
                 ctx.drawImage(qrImg, 0, topMargin);
