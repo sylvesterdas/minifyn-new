@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Home, LineChart, Settings, Link as LinkIcon, PanelLeft, Sheet, SheetTrigger, SheetContent } from 'lucide-react';
+import { Home, LineChart, Settings, Link as LinkIcon, PanelLeft } from 'lucide-react';
+import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { UserNav } from '@/components/user-nav';
 
 const navItems = [
