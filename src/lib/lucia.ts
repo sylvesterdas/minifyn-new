@@ -96,6 +96,6 @@ declare module 'lucia' {
 }
 
 interface DatabaseUserAttributes {
-  email: string;
-  emailVerified: boolean;
+  email?: string;
+  emailVerified?: boolean;
 }
