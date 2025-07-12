@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/context/auth-context';
 import { validateRequest } from '@/lib/auth';
+import { auth as clientAuth } from '@/lib/firebase'; // Import client auth
 
 export const metadata: Metadata = {
   title: 'MiniFyn - Simple URL Shortener',
@@ -15,6 +16,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const { user } = await validateRequest();
+  
   return (
     <html lang="en" className="dark">
       <head>

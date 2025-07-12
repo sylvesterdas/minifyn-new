@@ -11,7 +11,8 @@ export interface AuthUser extends DecodedIdToken {
 
 export const validateRequest = cache(
   async (): Promise<{ user: AuthUser | null }> => {
-    const sessionCookie = cookies().get('session')?.value;
+    const cookiesObj = await cookies()
+    const sessionCookie = cookiesObj.get('session')?.value;
 
     if (!sessionCookie) {
       return { user: null };

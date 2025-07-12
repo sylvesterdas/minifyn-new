@@ -9,7 +9,7 @@ export interface Link {
   expiresAt: number; // timestamp, -1 for no expiry
   title?: string;
   description?: string;
-  userId?: string;
+  userId: string;
   clickCount: number;
 }
 
@@ -47,7 +47,7 @@ export const isSlugTaken = async (slug: string): Promise<boolean> => {
 
 interface CreateShortLinkInput {
     longUrl: string;
-    userId?: string;
+    userId: string;
 }
 
 export const createShortLink = async ({ longUrl, userId }: CreateShortLinkInput): Promise<Link> => {
@@ -57,8 +57,8 @@ export const createShortLink = async ({ longUrl, userId }: CreateShortLinkInput)
     } while (await isSlugTaken(slug));
 
     const now = Date.now();
-    // Links for registered users don't expire, anonymous links expire in 7 days
-    const expiresAt = userId ? -1 : now + 7 * 24 * 60 * 60 * 1000;
+    // All links do not expire by default now. Expiration can be a premium feature later.
+    const expiresAt = -1;
 
     let title, description;
     try {
