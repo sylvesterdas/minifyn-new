@@ -1,6 +1,8 @@
 import { UrlShortenerForm } from '@/components/url-shortener-form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Key, Zap, QrCode } from 'lucide-react';
+import { QrCodeGeneratorForm } from '@/components/qr-code-generator-form';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BarChart, Key, Zap, QrCode, Link as LinkIcon } from 'lucide-react';
 
 const features = [
   {
@@ -41,7 +43,18 @@ export default function Home() {
               </p>
             </div>
             <div className="w-full max-w-md pt-8">
-               <UrlShortenerForm />
+               <Tabs defaultValue="shortener" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="shortener"><LinkIcon className="h-4 w-4 mr-2"/>URL Shortener</TabsTrigger>
+                    <TabsTrigger value="qr-code"><QrCode className="h-4 w-4 mr-2"/>QR Code</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="shortener">
+                    <UrlShortenerForm />
+                  </TabsContent>
+                  <TabsContent value="qr-code">
+                    <QrCodeGeneratorForm />
+                  </TabsContent>
+                </Tabs>
             </div>
           </div>
         </div>

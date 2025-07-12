@@ -54,9 +54,9 @@ export function UrlShortenerForm() {
     };
 
     return (
-        <Card className="w-full max-w-md bg-card/50 backdrop-blur-sm border-border/20 shadow-2xl shadow-black/20">
-            <CardHeader>
-                <CardTitle className="text-3xl font-bold text-center flex items-center justify-center gap-2">
+        <Card className="w-full max-w-md bg-card/50 backdrop-blur-sm border-border/20 shadow-2xl shadow-black/20 rounded-t-none">
+             <CardHeader>
+                <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
                     <Zap className="text-primary" />
                     MiniFyn
                 </CardTitle>
@@ -66,6 +66,8 @@ export function UrlShortenerForm() {
             </CardHeader>
             <form ref={formRef} action={formAction} onSubmit={(e) => {
                 setShortenedUrl(null);
+                // We need to stop the propagation, otherwise the parent form will be submitted
+                e.stopPropagation();
                 formAction(new FormData(e.currentTarget));
             }}>
                 <CardContent className="space-y-4">
