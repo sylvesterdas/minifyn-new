@@ -1,4 +1,4 @@
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, QrCode } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -7,11 +7,12 @@ export const metadata: Metadata = {
 };
 
 const featuresList = [
-    { name: "Detailed Analytics", description: "Track clicks, referrers, and geographic data." },
-    { name: "Developer API", description: "Integrate our shortening service into your apps." },
-    { name: "Link Expiration", description: "Set links to expire automatically after a certain time." },
-    { name: "Domain Blocklist", description: "Stay safe with automatic filtering of malicious domains." },
-    { name: "User Tiers", description: "Generous limits for both anonymous and registered users." }
+    { name: "Detailed Analytics", description: "Track clicks, referrers, and geographic data.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
+    { name: "Developer API", description: "Integrate our shortening service into your apps.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
+    { name: "Link Expiration", description: "Set links to expire automatically after a certain time.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
+    { name: "Domain Blocklist", description: "Stay safe with automatic filtering of malicious domains.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
+    { name: "User Tiers", description: "Generous limits for both anonymous and registered users.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
+    { name: "QR Code Generation", description: "Instantly generate and download a QR code for any shortened link, completely free.", icon: <QrCode className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> }
 ]
 
 export default function FeaturesPage() {
@@ -30,7 +31,7 @@ export default function FeaturesPage() {
             <div key={feature.name} className="relative pl-16">
               <dt className="text-base font-semibold leading-7 text-foreground">
                 <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                  <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" />
+                  {feature.icon}
                 </div>
                 {feature.name}
               </dt>

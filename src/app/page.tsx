@@ -1,6 +1,6 @@
 import { UrlShortenerForm } from '@/components/url-shortener-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Key, Zap } from 'lucide-react';
+import { BarChart, Key, Zap, QrCode } from 'lucide-react';
 
 const features = [
   {
@@ -17,6 +17,11 @@ const features = [
     icon: <Key className="h-8 w-8 text-primary" />,
     title: 'Developer API',
     description: 'Integrate our shortening service into your own applications with a simple API.',
+  },
+  {
+    icon: <QrCode className="h-8 w-8 text-primary" />,
+    title: 'QR Code Generation',
+    description: 'Instantly generate a QR code for any shortened link, completely free.',
   },
 ];
 
