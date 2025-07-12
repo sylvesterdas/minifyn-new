@@ -1,12 +1,8 @@
 'use client';
 
-import { validateRequest } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogoutButton } from '@/components/logout-button';
-import { Activity, ArrowUpRight, CreditCard, DollarSign, Users } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Activity, DollarSign, Users, CreditCard } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function DashboardPage() {

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export interface FormState {
     error?: string;
@@ -30,6 +30,7 @@ function SubmitButton() {
 export default function SignUpPage() {
     const [state, formAction] = useActionState(signup, { success: false });
     const { toast } = useToast();
+    const router = useRouter();
 
     useEffect(() => {
         if (state.error) {
@@ -44,9 +45,10 @@ export default function SignUpPage() {
                 title: 'Account Created!',
                 description: state.message || "Please check your email to verify your account.",
             });
-            redirect('/auth/signin');
+            // After successful signup and toast, redirect to signin page
+            router.push('/auth/signin');
         }
-    }, [state, toast]);
+    }, [state, toast, router]);
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-background">
