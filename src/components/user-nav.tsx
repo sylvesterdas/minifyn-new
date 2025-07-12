@@ -17,6 +17,7 @@ import { Button } from './ui/button';
 import { useAuth } from '@/hooks/use-auth';
 import { logout } from '@/app/auth/actions';
 import Link from 'next/link';
+import { LayoutDashboard, LogOut, Settings } from 'lucide-react';
 
 export function UserNav() {
     const { user } = useAuth();
@@ -49,16 +50,23 @@ export function UserNav() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                    <Link href="/dashboard">Dashboard</Link>
+                    <Link href="/dashboard" className="flex items-center">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <span>Dashboard</span>
+                    </Link>
                 </DropdownMenuItem>
                  <DropdownMenuItem asChild>
-                    <Link href="/settings">Settings</Link>
+                    <Link href="/dashboard/settings" className="flex items-center">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Settings</span>
+                    </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <form action={logout}>
+                <form action={logout} className="w-full">
                     <button type="submit" className="w-full text-left">
                         <DropdownMenuItem>
-                            Log out
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Log out</span>
                         </DropdownMenuItem>
                     </button>
                 </form>
