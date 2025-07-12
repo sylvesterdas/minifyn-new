@@ -42,6 +42,7 @@ export default function SignInPage() {
                 variant: 'destructive',
             });
         }
+        console.log(state)
         if (state.success && !state.emailNotVerified) {
             toast({
                 title: 'Success',

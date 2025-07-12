@@ -39,7 +39,7 @@ export async function login(
 
     const session = await lucia.createSession(userRecord.uid, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
-    (await cookies()).set(
+    cookies().set(
       sessionCookie.name,
       sessionCookie.value,
       sessionCookie.attributes
@@ -175,7 +175,7 @@ export async function sendPasswordResetLink(
 
 
 export async function logout(): Promise<{ error?: string }> {
-  const sessionId = (await cookies()).get(lucia.sessionCookieName)?.value ?? null;
+  const sessionId = cookies().get(lucia.sessionCookieName)?.value ?? null;
   if (!sessionId) {
     return {
       error: 'Unauthorized',
@@ -188,7 +188,7 @@ export async function logout(): Promise<{ error?: string }> {
   }
 
   const sessionCookie = lucia.createBlankSessionCookie();
-  (await cookies()).set(
+  cookies().set(
     sessionCookie.name,
     sessionCookie.value,
     sessionCookie.attributes
