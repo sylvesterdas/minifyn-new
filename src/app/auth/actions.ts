@@ -5,6 +5,7 @@ import { lucia } from '@/lib/lucia';
 import { cookies } from 'next/headers';
 import type { FormState } from './signin/page';
 import { redirect } from 'next/navigation';
+import { sendEmail } from '@/lib/email';
 
 export async function login(
   prevState: FormState,
@@ -38,7 +39,7 @@ export async function login(
 
     const session = await lucia.createSession(userRecord.uid, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
-    cookies().set(
+    (await cookies()).set(
       sessionCookie.name,
       sessionCookie.value,
       sessionCookie.attributes
@@ -65,11 +66,17 @@ export async function resendVerificationLink(prevState: any, formData: FormData)
 
     try {
         const verificationLink = await auth.generateEmailVerificationLink(email);
-        console.log("----------------------------------------------------");
-        console.log("NEW EMAIL VERIFICATION LINK (send this to the user):");
-        console.log(verificationLink);
-        console.log("----------------------------------------------------");
-        return { success: true, message: 'A new verification link has been sent to your email. (Check server console)' };
+        await sendEmail({
+            to: email,
+            subject: 'Verify Your Email Address for MiniFyn',
+            html: `
+                <h1>Welcome to MiniFyn!</h1>
+                <p>Please click the link below to verify your email address and activate your account:</p>
+                <a href="${verificationLink}">Verify Email</a>
+                <p>This link will expire in 1 hour.</p>
+            `,
+        });
+        return { success: true, message: 'A new verification link has been sent to your email.' };
     } catch (error: any) {
         console.error('Resend verification link error:', error);
         return { error: 'Failed to send verification email. Please try again.' };
@@ -100,18 +107,21 @@ export async function signup(
       password,
     });
     
-    // Generate email verification link
     const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
 
-    // In a real app, you would send this link to the user's email address.
-    // For this example, we'll log it to the console.
-    console.log("----------------------------------------------------");
-    console.log("EMAIL VERIFICATION LINK (send this to the user):");
-    console.log(verificationLink);
-    console.log("----------------------------------------------------");
+    await sendEmail({
+        to: email,
+        subject: 'Welcome to MiniFyn! Please Verify Your Email',
+        html: `
+            <h1>Welcome to MiniFyn!</h1>
+            <p>Thanks for signing up. Please click the link below to verify your email address:</p>
+            <a href="${verificationLink}">Verify Your Email</a>
+            <p>This link will expire in 1 hour.</p>
+        `,
+    });
 
 
-    return { success: true, message: `A verification link has been sent to ${email}. (Check server console)` };
+    return { success: true, message: `A verification link has been sent to ${email}.` };
 
   } catch (error: any) {
     if (error.code === 'auth/email-already-exists') {
@@ -132,29 +142,39 @@ export async function sendPasswordResetLink(
     }
 
     try {
-        await auth.getUserByEmail(email); // Check if user exists
+        // We still check if the user exists to avoid sending emails to non-existent accounts,
+        // but we won't reveal this to the client.
+        await auth.getUserByEmail(email); 
         const link = await auth.generatePasswordResetLink(email);
 
-        // In a real app, you'd email this link. For now, log to console.
-        console.log("----------------------------------------------------");
-        console.log("PASSWORD RESET LINK:");
-        console.log(link);
-        console.log("----------------------------------------------------");
+        await sendEmail({
+            to: email,
+            subject: 'Reset Your MiniFyn Password',
+            html: `
+                <h1>Password Reset Request</h1>
+                <p>You requested a password reset for your MiniFyn account. Click the link below to set a new password:</p>
+                <a href="${link}">Reset Password</a>
+                <p>If you didn't request this, you can safely ignore this email.</p>
+            `,
+        });
 
-        return { success: true, message: 'If an account with this email exists, a password reset link has been sent. (Check server console)' };
     } catch (error: any) {
         if (error.code === 'auth/user-not-found') {
             // Don't reveal that the user does not exist.
-            return { success: true, message: 'If an account with this email exists, a password reset link has been sent. (Check server console)' };
+            // Silently succeed.
+        } else {
+            console.error('Password reset error:', error);
+            // Don't expose internal errors to the user for security reasons.
         }
-        console.error('Password reset error:', error);
-        return { error: 'An unknown error occurred. Please try again.' };
     }
+    
+    // Always return a success message to prevent user enumeration attacks.
+    return { success: true, message: 'If an account with this email exists, a password reset link has been sent.' };
 }
 
 
 export async function logout(): Promise<{ error?: string }> {
-  const sessionId = cookies().get(lucia.sessionCookieName)?.value ?? null;
+  const sessionId = (await cookies()).get(lucia.sessionCookieName)?.value ?? null;
   if (!sessionId) {
     return {
       error: 'Unauthorized',
@@ -167,7 +187,7 @@ export async function logout(): Promise<{ error?: string }> {
   }
 
   const sessionCookie = lucia.createBlankSessionCookie();
-  cookies().set(
+  (await cookies()).set(
     sessionCookie.name,
     sessionCookie.value,
     sessionCookie.attributes
