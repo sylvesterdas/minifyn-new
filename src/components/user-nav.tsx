@@ -17,7 +17,7 @@ import { Button } from './ui/button';
 import { useAuth } from '@/hooks/use-auth';
 import { logout } from '@/app/auth/actions';
 import Link from 'next/link';
-import { LayoutDashboard, LogOut, Settings } from 'lucide-react';
+import { LayoutDashboard, LogOut, Settings, Key, LifeBuoy } from 'lucide-react';
 
 export function UserNav() {
     const { user } = useAuth();
@@ -59,6 +59,18 @@ export function UserNav() {
                     <Link href="/dashboard/settings" className="flex items-center">
                         <Settings className="mr-2 h-4 w-4" />
                         <span>Settings</span>
+                    </Link>
+                </DropdownMenuItem>
+                 <DropdownMenuItem asChild>
+                    <Link href="/dashboard/settings" className="flex items-center">
+                        <Key className="mr-2 h-4 w-4" />
+                        <span>API Keys</span>
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href="/help" className="flex items-center">
+                        <LifeBuoy className="mr-2 h-4 w-4" />
+                        <span>Help</span>
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

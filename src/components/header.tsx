@@ -26,6 +26,9 @@ export function Header() {
             <Link href="/blog" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
               Blog
             </Link>
+            <Link href="/help" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+              Help
+            </Link>
             <Link href="/contact" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
               Contact
             </Link>

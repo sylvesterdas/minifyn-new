@@ -15,7 +15,7 @@ const navItems = [
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
-function NavContent() {
+function NavLinks() {
   const pathname = usePathname();
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
@@ -36,6 +36,7 @@ function NavContent() {
   );
 }
 
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
@@ -47,12 +48,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <LinkIcon className="h-6 w-6" />
               <span className="">MiniFyn</span>
             </Link>
-            <div className='ml-auto'>
-              <UserNav />
-            </div>
           </div>
           <div className="flex-1">
-            <NavContent />
+            <NavLinks />
+          </div>
+          <div className="mt-auto p-4 border-t">
+            <UserNav />
           </div>
         </div>
       </div>
@@ -76,13 +77,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <span>MiniFyn</span>
                   </Link>
                 </div>
-                <NavContent />
+                <NavLinks />
+                 <div className="mt-auto p-4 border-t">
+                    <UserNav />
+                 </div>
               </SheetContent>
             </Sheet>
             <div className="w-full flex-1">
-              {/* You can add a search bar here if needed */}
+              {/* Mobile Header content can go here if needed */}
             </div>
-            <UserNav />
+            {/* UserNav is now in the sheet for mobile */}
           </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto">
             {children}
