@@ -16,7 +16,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await validateRequest();
+  const { user } = await validateRequest();
   return (
     <html lang="en" className="dark">
       <head>
@@ -25,7 +25,7 @@ export default async function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased flex flex-col min-h-screen">
-        <AuthProvider value={session}>
+        <AuthProvider value={{ user }}>
           <Header />
           <div className="flex-1">
             {children}

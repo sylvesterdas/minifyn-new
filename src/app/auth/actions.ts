@@ -1,7 +1,6 @@
 'use server';
 
 import { auth } from '@/lib/firebase-admin';
-import { lucia } from '@/lib/lucia';
 import { cookies } from 'next/headers';
 import type { FormState } from './signin/page';
 import { redirect } from 'next/navigation';
@@ -12,22 +11,23 @@ export async function login(
   idToken: string
 ): Promise<{error?: string, success?: boolean}> {
   try {
-    const decodedToken: DecodedIdToken = await auth.verifyIdToken(idToken);
+    const decodedToken: DecodedIdToken = await auth.verifyIdToken(idToken, true);
 
     if (!decodedToken.email_verified) {
       return { error: 'Email not verified.' };
     }
 
-    const session = await lucia.createSession(decodedToken.uid, {
-        email: decodedToken.email,
-        emailVerified: decodedToken.email_verified
+    // Session cookie will be valid for 5 days.
+    const expiresIn = 60 * 60 * 24 * 5 * 1000;
+    const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
+    
+    cookies().set('session', sessionCookie, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: expiresIn,
+      path: '/',
     });
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    cookies().set(
-      sessionCookie.name,
-      sessionCookie.value,
-      sessionCookie.attributes
-    );
+
     return { success: true };
   } catch (error: any) {
     console.error('Login error:', error);
@@ -47,8 +47,6 @@ export async function resendVerificationLink(prevState: any, formData: FormData)
     try {
         const userRecord = await auth.getUserByEmail(email);
         const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
-        
-        console.log(`VERIFICATION LINK (for testing): In a real app, this link would be sent in an email. For development, you can use this link to verify the email: ${verificationLink}`);
         
         await sendEmail({
             to: email,
@@ -93,8 +91,6 @@ export async function signup(
     
     const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
 
-    console.log(`VERIFICATION LINK (for testing): In a real app, this link would be sent in an email. For development, you can use this link to verify the email: ${verificationLink}`);
-
     await sendEmail({
         to: email,
         subject: 'Welcome to MiniFyn! Please Verify Your Email',
@@ -131,8 +127,6 @@ export async function sendPasswordResetLink(
         await auth.getUserByEmail(email); 
         const link = await auth.generatePasswordResetLink(email);
 
-        console.log(`PASSWORD RESET LINK (for testing): In a real app, this link would be sent in an email. For development, you can use this link to reset the password: ${link}`);
-
         await sendEmail({
             to: email,
             subject: 'Reset Your MiniFyn Password',
@@ -156,24 +150,19 @@ export async function sendPasswordResetLink(
 
 
 export async function logout(): Promise<{ error?: string }> {
-  const sessionId = cookies().get(lucia.sessionCookieName)?.value ?? null;
-  if (!sessionId) {
-    return {
-      error: 'Unauthorized',
-    };
+  const sessionCookie = cookies().get('session')?.value;
+  if (!sessionCookie) {
+    redirect('/auth/signin');
   }
 
-  const { session } = await lucia.validateSession(sessionId);
-  if (session) {
-      await lucia.invalidateSession(session.id);
+  try {
+    const decodedClaims = await auth.verifySessionCookie(sessionCookie);
+    await auth.revokeRefreshTokens(decodedClaims.sub);
+    cookies().delete('session');
+  } catch (error) {
+    // Cookie is invalid. Just delete it.
+    cookies().delete('session');
   }
-
-  const sessionCookie = lucia.createBlankSessionCookie();
-  cookies().set(
-    sessionCookie.name,
-    sessionCookie.value,
-    sessionCookie.attributes
-  );
   
   redirect('/auth/signin');
 }

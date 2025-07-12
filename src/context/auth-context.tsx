@@ -1,16 +1,14 @@
 'use client';
 
-import type { Session, User } from 'lucia';
+import type { AuthUser } from '@/lib/auth';
 import { createContext, useContext } from 'react';
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: AuthUser | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  session: null,
 });
 
 export const AuthProvider = ({
@@ -25,7 +23,7 @@ export const AuthProvider = ({
 
 export const useAuthContext = () => {
     const context = useContext(AuthContext);
-    if (!context) {
+    if (context === undefined) {
         throw new Error('useAuthContext must be used within an AuthProvider');
     }
     return context;

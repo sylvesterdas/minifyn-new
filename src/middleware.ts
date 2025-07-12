@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isAuthenticated = request.cookies.has('lucia_session');
+  const isAuthenticated = request.cookies.has('session');
   const dashboardUrl = new URL('/dashboard', request.url);
   const signinUrl = new URL('/auth/signin', request.url);
 
