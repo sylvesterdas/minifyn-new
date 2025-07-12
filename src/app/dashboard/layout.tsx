@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col overflow-auto">
         {/* Mobile header could go here if needed */}
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             {children}
