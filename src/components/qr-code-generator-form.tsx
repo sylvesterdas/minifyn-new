@@ -23,9 +23,8 @@ export function QrCodeGeneratorForm() {
             const context = canvas.getContext('2d');
             if (!context) return;
             
-            // Generate QR code as data URL
             const qrDataURL = await QRCode.toDataURL(text, {
-                errorCorrectionLevel: 'H', // High error correction for logo
+                errorCorrectionLevel: 'H',
                 margin: 4,
                 width: 256,
                 color: {
@@ -36,32 +35,32 @@ export function QrCodeGeneratorForm() {
 
             const qrImage = new Image();
             qrImage.onload = () => {
-                // Clear canvas and draw QR code
                 canvas.width = 256;
                 canvas.height = 256;
                 context.clearRect(0, 0, canvas.width, canvas.height);
-                context.fillStyle = '#0f172a'; // Ensure bg color
+                context.fillStyle = '#0f172a';
                 context.fillRect(0, 0, canvas.width, canvas.height);
                 context.drawImage(qrImage, 0, 0);
 
                 if (withLogo) {
                     const logo = new Image();
-                    logo.src = '/logo.png'; // Path to your logo in the public folder
+                    logo.src = '/logo.png';
                     logo.onload = () => {
-                        const logoSize = canvas.width / 5; // Logo size is 20% of QR code size
+                        const logoSize = canvas.width / 5;
                         const logoX = (canvas.width - logoSize) / 2;
                         const logoY = (canvas.height - logoSize) / 2;
                         
-                        // Draw white background behind logo for clarity
-                        context.fillStyle = 'white';
-                        context.fillRect(logoX - 4, logoY - 4, logoSize + 8, logoSize + 8);
+                        // Draw a soft, rounded, semi-transparent background for the logo
+                        const padding = 4;
+                        context.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                        context.beginPath();
+                        context.roundRect(logoX - padding, logoY - padding, logoSize + padding * 2, logoSize + padding * 2, 8);
+                        context.fill();
 
-                        // Draw logo
                         context.drawImage(logo, logoX, logoY, logoSize, logoSize);
                         setQrCodeDataUrl(canvas.toDataURL('image/png'));
                     }
                     logo.onerror = () => {
-                        // If logo fails to load, just show QR code
                         setQrCodeDataUrl(canvas.toDataURL('image/png'));
                     }
                 } else {

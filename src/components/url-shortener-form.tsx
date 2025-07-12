@@ -2,13 +2,14 @@
 
 import { useFormState, useFormStatus } from 'react-dom';
 import { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { shortenUrl } from '@/app/actions';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Clipboard, Check, Zap } from 'lucide-react';
+import { ArrowRight, Clipboard, Check } from 'lucide-react';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -57,7 +58,7 @@ export function UrlShortenerForm() {
         <Card className="w-full max-w-md bg-card/50 backdrop-blur-sm border-border/20 shadow-2xl shadow-black/20 rounded-t-none">
              <CardHeader>
                 <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
-                    <Zap className="text-primary" />
+                    <Image src="/logo.png" alt="MiniFyn Logo" width={32} height={32} />
                     MiniFyn
                 </CardTitle>
                 <CardDescription className="text-center pt-2">
