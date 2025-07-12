@@ -16,7 +16,7 @@ vi.mock('@/app/actions', () => ({
     shortenUrl: vi.fn(),
 }));
 
-// Mock useActionState
+// Mock useActionState and useFormStatus
 vi.mock('react', async (importOriginal) => {
     const mod = await importOriginal<typeof import('react')>();
     const useActionState = (action: any, initialState: any) => {
@@ -34,6 +34,14 @@ vi.mock('react', async (importOriginal) => {
         useEffect: mod.useEffect,
     };
 });
+vi.mock('react-dom', async (importOriginal) => {
+    const mod = await importOriginal<typeof import('react-dom')>();
+    return {
+        ...mod,
+        useFormStatus: vi.fn(() => ({ pending: false })),
+    };
+});
+
 
 describe('UrlShortenerForm', () => {
   beforeEach(() => {
@@ -61,8 +69,6 @@ describe('UrlShortenerForm', () => {
 
     fireEvent.change(input, { target: { value: 'https://www.google.com' } });
     
-    // Use fireEvent.submit on the form instead of click on the button
-    // This avoids issues with JSDOM's lack of `requestSubmit` implementation
     fireEvent.submit(form!);
 
     await waitFor(() => {

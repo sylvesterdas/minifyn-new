@@ -24,6 +24,16 @@ vi.mock('react', async (importOriginal) => {
     };
 });
 
+// Mock react-dom to provide useFormStatus
+vi.mock('react-dom', async (importOriginal) => {
+    const mod = await importOriginal<typeof import('react-dom')>();
+    return {
+        ...mod,
+        useFormStatus: vi.fn(() => ({ pending: false })),
+    };
+});
+
+
 // Mock firebase-admin to prevent it from trying to initialize in a test environment
 vi.mock('@/lib/firebase-admin', () => ({
     auth: {
