@@ -25,7 +25,7 @@ export default function Home() {
     <main className="flex-1">
       <section className="relative w-full py-20 md:py-32 lg:py-40">
          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_800px_at_50%_200px,#1e40af33,transparent)] -z-10"></div>
-         <div className="container px-4 md:px-6">
+         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center">
             <div className="space-y-2">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none">
@@ -43,7 +43,7 @@ export default function Home() {
       </section>
 
       <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-slate-900/50">
-        <div className="container px-4 md:px-6">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
               <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm">Key Features</div>
