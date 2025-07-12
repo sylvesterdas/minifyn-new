@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
         if (!validatedFields.success) {
             const errors = validatedFields.error.flatten().fieldErrors;
-            const errorMessage = errors.longUrl?.[0] || 'Invalid input.';
+            const errorMessage = errors.longUrl?.[0] || 'Please enter a valid URL.';
             return NextResponse.json({ error: errorMessage }, { status: 400 });
         }
 
@@ -56,10 +56,11 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('API Error:', error);
         if (error instanceof Error && error.message.includes('Unauthorized')) {
              return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+        // Only log unexpected errors
+        console.error('API Error:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
