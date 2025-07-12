@@ -1,8 +1,8 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { login } from '@/app/auth/actions';
+import { login, resendVerificationLink } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,8 @@ export interface FormState {
     error?: string;
     success?: boolean;
     message?: string;
+    emailNotVerified?: boolean;
+    email?: string;
 }
 
 function SubmitButton() {
@@ -40,7 +42,7 @@ export default function SignInPage() {
                 variant: 'destructive',
             });
         }
-        if (state.success) {
+        if (state.success && !state.emailNotVerified) {
             toast({
                 title: 'Success',
                 description: 'Logged in successfully!',
@@ -49,6 +51,26 @@ export default function SignInPage() {
             router.push('/dashboard');
         }
     }, [state, toast, router]);
+
+    const handleResend = async () => {
+        if (state.email) {
+            const formData = new FormData();
+            formData.append('email', state.email);
+            const result = await resendVerificationLink({}, formData);
+            if (result.success) {
+                toast({
+                    title: 'Email Sent',
+                    description: result.message,
+                });
+            } else if (result.error) {
+                 toast({
+                    title: 'Error',
+                    description: result.error,
+                    variant: 'destructive'
+                });
+            }
+        }
+    };
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-background">
@@ -74,6 +96,11 @@ export default function SignInPage() {
                             </div>
                             <Input id="password" name="password" type="password" required />
                         </div>
+                        {state.emailNotVerified && (
+                             <p className="text-sm text-center text-muted-foreground">
+                                Your email is not verified. <Button variant="link" type="button" onClick={handleResend} className="p-0 h-auto">Resend verification email</Button>
+                            </p>
+                        )}
                     </CardContent>
                     <CardFooter className="flex flex-col gap-4">
                         <SubmitButton />

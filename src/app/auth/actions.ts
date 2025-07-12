@@ -27,7 +27,7 @@ export async function login(
   try {
     const userRecord = await auth.getUserByEmail(email);
     if (!userRecord.emailVerified) {
-        return { error: 'Email not verified. Please check your inbox for a verification link.' };
+        return { error: 'Email not verified.', emailNotVerified: true, email: email };
     }
     
     // In a real app, you would verify the password here.
@@ -55,6 +55,25 @@ export async function login(
     console.error('Login error:', error);
     return { error: 'An unknown error occurred.' };
   }
+}
+
+export async function resendVerificationLink(prevState: any, formData: FormData): Promise<{ success?: boolean; message?: string; error?: string }> {
+    const email = formData.get('email');
+    if (typeof email !== 'string' || !email.includes('@')) {
+        return { error: 'Invalid email provided.' };
+    }
+
+    try {
+        const verificationLink = await auth.generateEmailVerificationLink(email);
+        console.log("----------------------------------------------------");
+        console.log("NEW EMAIL VERIFICATION LINK (send this to the user):");
+        console.log(verificationLink);
+        console.log("----------------------------------------------------");
+        return { success: true, message: 'A new verification link has been sent to your email. (Check server console)' };
+    } catch (error: any) {
+        console.error('Resend verification link error:', error);
+        return { error: 'Failed to send verification email. Please try again.' };
+    }
 }
 
 export async function signup(
