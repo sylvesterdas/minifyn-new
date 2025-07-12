@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ApiKeysCard } from './api-keys-card';
 import { ProfileCard } from './profile-card';
+import { Button } from '@/components/ui/button';
 
 export default function SettingsPage() {
   return (

@@ -179,21 +179,3 @@ export const validateApiKey = async (apiKey: string): Promise<UserRecord | null>
         return null;
     }
 }
-
-/**
- * Retrieves the API key for a given user ID.
- * @param uid The user ID to look up.
- * @returns The API key string, or null if not found.
- */
-export async function getApiKeyForUser(uid: string): Promise<string | null> {
-    try {
-        const userApiKeySnapshot = await db.ref(`users_apikeys/${uid}`).once('value');
-        if (!userApiKeySnapshot.exists()) {
-            return null;
-        }
-        return userApiKeySnapshot.val().key;
-    } catch (error) {
-        console.error("Error fetching API key for user:", error);
-        return null;
-    }
-}

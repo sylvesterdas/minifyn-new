@@ -7,8 +7,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { Check, Clipboard, Loader2, RefreshCw } from 'lucide-react';
 import { useEffect, useState, useTransition } from 'react';
-import { generateApiKey, revokeApiKey } from './actions';
-import { getApiKeyForUser } from '@/lib/data';
+import { generateApiKey, revokeApiKey, getApiKeyForUser } from './actions';
 
 export function ApiKeysCard() {
     const { user } = useAuth();
