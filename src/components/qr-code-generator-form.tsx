@@ -31,7 +31,7 @@ export function QrCodeGeneratorForm() {
             correctLevel: EasyQRCodeJS.CorrectLevel.H,
             quietZone: 15,
             quietZoneColor: 'transparent',
-            onRenderingEnd: (_, dataURL) => {
+            onRenderingEnd: (_: any, dataURL: any) => {
                 combineWithLogo(dataURL);
             },
             tooltip: false
