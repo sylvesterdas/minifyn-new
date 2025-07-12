@@ -1,6 +1,5 @@
 'use client';
 
-import { redirect } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Activity, DollarSign, Users, CreditCard } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
@@ -8,13 +7,10 @@ import { useAuth } from '@/hooks/use-auth';
 export default function DashboardPage() {
     const { user } = useAuth();
 
+    // The middleware now protects this page, so we can be sure `user` exists.
+    // The client-side redirect is no longer necessary and can be removed for cleaner code.
     if (!user) {
-        // This is a client component, so we can't rely on server-side redirect permanently.
-        // A middleware should handle the redirect, but as a fallback:
-        if (typeof window !== 'undefined') {
-            redirect('/auth/signin');
-        }
-        return null; // or a loading spinner
+        return null; // or a loading spinner while the middleware and server sync up
     }
 
     return (

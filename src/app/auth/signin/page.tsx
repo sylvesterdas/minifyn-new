@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth as firebaseClientAuth } from '@/lib/firebase';
 
@@ -31,7 +30,6 @@ export default function SignInPage() {
     const [resendState, resendAction] = useActionState(resendVerificationLink, { success: false });
 
     const { toast } = useToast();
-    const router = useRouter();
     
     useEffect(() => {
         if (error) {
@@ -84,10 +82,10 @@ export default function SignInPage() {
             if (result.success) {
                 toast({
                     title: 'Success',
-                    description: 'Logged in successfully!',
+                    description: 'Logged in successfully! Redirecting...',
                 });
-                router.refresh();
-                router.push('/dashboard');
+                // Use window.location.assign for a full page reload to ensure session is read by server layout
+                window.location.assign('/dashboard');
             } else {
                 setError(result.error || 'An unknown server error occurred.');
             }
