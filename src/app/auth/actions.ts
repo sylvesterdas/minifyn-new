@@ -6,40 +6,21 @@ import { cookies } from 'next/headers';
 import type { FormState } from './signin/page';
 import { redirect } from 'next/navigation';
 import { sendEmail } from '@/lib/email';
+import { DecodedIdToken } from 'firebase-admin/auth';
 
 export async function login(
-  prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
-  const email = formData.get('email');
-  const password = formData.get('password');
-
-  if (
-    typeof email !== 'string' ||
-    email.length < 3 ||
-    !email.includes('@')
-  ) {
-    return { error: 'Invalid email' };
-  }
-  if (typeof password !== 'string' || password.length < 6) {
-    return { error: 'Invalid password' };
-  }
-
+  idToken: string
+): Promise<{error?: string, success?: boolean}> {
   try {
-    const userRecord = await auth.getUserByEmail(email);
-    if (!userRecord.emailVerified) {
-        return { error: 'Email not verified.', emailNotVerified: true, email: email };
-    }
-    
-    // In a real app, you would verify the password here.
-    // For this example, we assume Firebase client-side SDK would handle it,
-    // and this action is primarily for session creation. We will proceed with session creation,
-    // but a proper implementation would involve custom tokens or a more complex auth flow.
-    // We are simulating a successful password check.
+    const decodedToken: DecodedIdToken = await auth.verifyIdToken(idToken);
 
-    const session = await lucia.createSession(userRecord.uid, {
-        email: userRecord.email,
-        emailVerified: userRecord.emailVerified
+    if (!decodedToken.email_verified) {
+      return { error: 'Email not verified.' };
+    }
+
+    const session = await lucia.createSession(decodedToken.uid, {
+        email: decodedToken.email,
+        emailVerified: decodedToken.email_verified
     });
     const sessionCookie = lucia.createSessionCookie(session.id);
     cookies().set(
@@ -49,15 +30,11 @@ export async function login(
     );
     return { success: true };
   } catch (error: any) {
-    if (
-      error.code === 'auth/user-not-found' ||
-      error.code === 'auth/wrong-password' ||
-      error.code === 'auth/invalid-credential'
-    ) {
-      return { error: 'Invalid email or password' };
-    }
     console.error('Login error:', error);
-    return { error: 'An unknown error occurred.' };
+    if (error.code === 'auth/id-token-expired') {
+        return { error: 'Session expired, please sign in again.' };
+    }
+    return { error: 'An unknown error occurred during login.' };
   }
 }
 
@@ -71,7 +48,7 @@ export async function resendVerificationLink(prevState: any, formData: FormData)
         const userRecord = await auth.getUserByEmail(email);
         const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
         
-        console.log(`VERIFICATION LINK (for testing): ${verificationLink}`);
+        console.log(`VERIFICATION LINK (for testing): In a real app, this link would be sent in an email. For development, you can use this link to verify the email: ${verificationLink}`);
         
         await sendEmail({
             to: email,
@@ -116,7 +93,7 @@ export async function signup(
     
     const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
 
-    console.log(`VERIFICATION LINK (for testing): ${verificationLink}`);
+    console.log(`VERIFICATION LINK (for testing): In a real app, this link would be sent in an email. For development, you can use this link to verify the email: ${verificationLink}`);
 
     await sendEmail({
         to: email,
@@ -151,12 +128,10 @@ export async function sendPasswordResetLink(
     }
 
     try {
-        // We still check if the user exists to avoid sending emails to non-existent accounts,
-        // but we won't reveal this to the client.
         await auth.getUserByEmail(email); 
         const link = await auth.generatePasswordResetLink(email);
 
-        console.log(`PASSWORD RESET LINK (for testing): ${link}`);
+        console.log(`PASSWORD RESET LINK (for testing): In a real app, this link would be sent in an email. For development, you can use this link to reset the password: ${link}`);
 
         await sendEmail({
             to: email,
@@ -171,15 +146,11 @@ export async function sendPasswordResetLink(
 
     } catch (error: any) {
         if (error.code === 'auth/user-not-found') {
-            // Don't reveal that the user does not exist.
-            // Silently succeed.
         } else {
             console.error('Password reset error:', error);
-            // Don't expose internal errors to the user for security reasons.
         }
     }
     
-    // Always return a success message to prevent user enumeration attacks.
     return { success: true, message: 'If an account with this email exists, a password reset link has been sent.' };
 }
 
@@ -206,8 +177,3 @@ export async function logout(): Promise<{ error?: string }> {
   
   redirect('/auth/signin');
 }
-
-// We don't need a custom verifyEmail action anymore, as Firebase handles it.
-// When the user clicks the link, Firebase processes it and the `emailVerified`
-// flag will be updated automatically in their user record.
-// We can remove the /auth/verify-email page as well.

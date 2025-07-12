@@ -1,7 +1,6 @@
 'use client';
 
 import { useActionState, useEffect, useState } from 'react';
-import { useFormStatus } from 'react-dom';
 import { login, resendVerificationLink } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth as firebaseClientAuth } from '@/lib/firebase';
 
 export interface FormState {
     error?: string;
@@ -20,59 +21,91 @@ export interface FormState {
     email?: string;
 }
 
-function SubmitButton() {
-    const { pending } = useFormStatus();
-    return (
-        <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? <Loader2 className="animate-spin" /> : 'Sign In'}
-        </Button>
-    );
-}
-
 export default function SignInPage() {
-    const [state, formAction] = useActionState(login, { success: false });
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [showResend, setShowResend] = useState(false);
+    
+    const [resendState, resendAction] = useActionState(resendVerificationLink, { success: false });
+
     const { toast } = useToast();
     const router = useRouter();
     
     useEffect(() => {
-        if (state.error) {
+        if (error) {
             toast({
                 title: 'Error',
-                description: state.error,
+                description: error,
                 variant: 'destructive',
             });
+            setError(null); // Reset error after showing toast
         }
-        console.log(state)
-        if (state.success && !state.emailNotVerified) {
+    }, [error, toast]);
+    
+    useEffect(() => {
+        if (resendState.message) {
             toast({
-                title: 'Success',
-                description: 'Logged in successfully!',
+                title: resendState.success ? 'Email Sent' : 'Error',
+                description: resendState.message,
+                variant: resendState.success ? 'default' : 'destructive',
             });
-            router.refresh();
-            router.push('/dashboard');
         }
-    }, [state, toast, router]);
+        if (resendState.error) {
+            toast({
+                title: 'Error',
+                description: resendState.error,
+                variant: 'destructive'
+            });
+        }
+    }, [resendState, toast]);
 
-    const handleResend = async () => {
-        if (state.email) {
-            const formData = new FormData();
-            formData.append('email', state.email);
-            const result = await resendVerificationLink({}, formData);
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError(null);
+        setShowResend(false);
+
+        try {
+            const userCredential = await signInWithEmailAndPassword(firebaseClientAuth, email, password);
+            const user = userCredential.user;
+
+            if (!user.emailVerified) {
+                setError("Your email address is not verified.");
+                setShowResend(true);
+                setIsLoading(false);
+                return;
+            }
+
+            const idToken = await user.getIdToken();
+            const result = await login(idToken);
+
             if (result.success) {
                 toast({
-                    title: 'Email Sent',
-                    description: result.message,
+                    title: 'Success',
+                    description: 'Logged in successfully!',
                 });
-            } else if (result.error) {
-                 toast({
-                    title: 'Error',
-                    description: result.error,
-                    variant: 'destructive'
-                });
+                router.refresh();
+                router.push('/dashboard');
+            } else {
+                setError(result.error || 'An unknown server error occurred.');
             }
+
+        } catch (authError: any) {
+            if (authError.code === 'auth/invalid-credential' || authError.code === 'auth/wrong-password' || authError.code === 'auth/user-not-found') {
+                setError('Invalid email or password.');
+            } else if (authError.code === 'auth/too-many-requests') {
+                 setError('Too many failed login attempts. Please try again later.');
+            } else {
+                setError('An unexpected error occurred. Please try again.');
+                console.error('Firebase Auth Error:', authError);
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
-
+    
     return (
         <div className="flex items-center justify-center min-h-screen bg-background">
             <Card className="mx-auto max-w-sm">
@@ -82,11 +115,11 @@ export default function SignInPage() {
                         Enter your credentials to access your account.
                     </CardDescription>
                 </CardHeader>
-                <form action={formAction}>
+                <form onSubmit={handleLogin}>
                     <CardContent className="grid gap-4">
                         <div className="grid gap-2">
                             <Label htmlFor="email">Email</Label>
-                            <Input id="email" name="email" type="email" placeholder="m@example.com" required />
+                            <Input id="email" name="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
                         </div>
                         <div className="grid gap-2">
                             <div className="flex items-center">
@@ -95,16 +128,22 @@ export default function SignInPage() {
                                     Forgot your password?
                                 </Link>
                             </div>
-                            <Input id="password" name="password" type="password" required />
+                            <Input id="password" name="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
                         </div>
-                        {state.emailNotVerified && (
+                        {showResend && (
                              <p className="text-sm text-center text-muted-foreground">
-                                Your email is not verified. <Button variant="link" type="button" onClick={handleResend} className="p-0 h-auto">Resend verification email</Button>
+                                Your email is not verified.
+                                <form action={resendAction}>
+                                    <input type="hidden" name="email" value={email} />
+                                    <Button variant="link" type="submit" className="p-0 h-auto">Resend verification email</Button>
+                                </form>
                             </p>
                         )}
                     </CardContent>
                     <CardFooter className="flex flex-col gap-4">
-                        <SubmitButton />
+                       <Button type="submit" className="w-full" disabled={isLoading}>
+                            {isLoading ? <Loader2 className="animate-spin" /> : 'Sign In'}
+                        </Button>
                         <div className="text-center text-sm">
                             Don&apos;t have an account?{' '}
                             <Link href="/auth/signup" className="underline">
