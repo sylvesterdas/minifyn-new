@@ -152,7 +152,8 @@ export async function sendPasswordResetLink(
 
 
 export async function logout(): Promise<{ error?: string }> {
-  const sessionCookie = cookies().get('session')?.value;
+  const cookieObj = await cookies()
+  const sessionCookie = cookieObj.get('session')?.value;
   if (!sessionCookie) {
     redirect('/auth/signin');
   }
@@ -160,10 +161,10 @@ export async function logout(): Promise<{ error?: string }> {
   try {
     const decodedClaims = await auth.verifySessionCookie(sessionCookie);
     await auth.revokeRefreshTokens(decodedClaims.sub);
-    cookies().delete('session');
+    cookieObj.delete('session');
   } catch (error) {
     // Cookie is invalid. Just delete it.
-    cookies().delete('session');
+    cookieObj.delete('session');
   }
   
   redirect('/auth/signin');

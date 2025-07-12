@@ -11,6 +11,7 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth as firebaseClientAuth } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
 
 export interface FormState {
     error?: string;
@@ -21,6 +22,7 @@ export interface FormState {
 }
 
 export default function SignInPage() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -84,9 +86,9 @@ export default function SignInPage() {
                     title: 'Success',
                     description: 'Logged in successfully! Redirecting...',
                 });
-                console.log('test', result)
+
                 // Use window.location.assign for a full page reload to ensure session is read by server layout
-                window.location.assign('/dashboard');
+                return router.push('/dashboard');
             } else {
                 setError(result.error || 'An unknown server error occurred.');
             }

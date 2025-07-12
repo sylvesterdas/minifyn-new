@@ -6,11 +6,11 @@ import { useAuth } from '@/hooks/use-auth';
 
 export default function DashboardPage() {
     const { user } = useAuth();
-    console.log('user', user)
-    // The middleware now protects this page, so we can be sure `user` exists.
-    // The client-side redirect is no longer necessary and can be removed for cleaner code.
+    
+    // The middleware now protects this page, so we can be sure `user` exists on a full page load.
+    // In the Studio iframe, if the cookie is delayed, this prevents a flicker of content or errors.
     if (!user) {
-        return null; // or a loading spinner while the middleware and server sync up
+        return null; // or a loading spinner
     }
 
     return (
