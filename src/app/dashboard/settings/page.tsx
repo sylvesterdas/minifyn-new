@@ -1,10 +1,9 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ApiKeysCard } from './api-keys-card';
+import { ProfileCard } from './profile-card';
 
 export default function SettingsPage() {
   return (
@@ -19,38 +18,11 @@ export default function SettingsPage() {
             </TabsList>
             
             <TabsContent value="profile" className="pt-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Profile</CardTitle>
-                        <CardDescription>Update your personal information.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Name</Label>
-                            <Input id="name" placeholder="Your name" defaultValue="John Doe" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input id="email" type="email" placeholder="Your email" defaultValue="john.doe@example.com" disabled />
-                        </div>
-                    </CardContent>
-                    <CardContent>
-                        <Button>Save changes</Button>
-                    </CardContent>
-                </Card>
+                <ProfileCard />
             </TabsContent>
 
             <TabsContent value="api" className="pt-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>API Keys</CardTitle>
-                        <CardDescription>Manage your API keys for programmatic access.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <p className="text-sm text-muted-foreground">Your API keys will appear here.</p>
-                        <Button>Generate New Key</Button>
-                    </CardContent>
-                </Card>
+                <ApiKeysCard />
             </TabsContent>
 
              <TabsContent value="billing" className="pt-6">
