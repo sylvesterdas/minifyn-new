@@ -78,7 +78,6 @@ export const lucia = new Lucia(new InMemoryAdapter(), {
     },
   },
   getUserAttributes: (attributes) => {
-    console.log(attributes)
     if (!attributes) {
         return {};
     }
