@@ -78,6 +78,9 @@ export const lucia = new Lucia(new InMemoryAdapter(), {
     },
   },
   getUserAttributes: (attributes) => {
+    if (!attributes) {
+        return {};
+    }
     return {
       email: attributes.email,
       emailVerified: attributes.emailVerified,
