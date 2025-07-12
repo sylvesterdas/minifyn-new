@@ -19,6 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     
     const title = link.title || 'Redirecting...';
     const description = link.description || 'You are being redirected to your destination.';
+    const images = [link.ogImage, link.twitterImage].filter(Boolean) as string[];
 
     return {
         title: `${title} | MiniFyn`,
@@ -27,11 +28,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             title: title,
             description: description,
             url: link.longUrl,
+            images: images.length > 0 ? images : undefined,
         },
         twitter: {
             card: 'summary_large_image',
             title: title,
             description: description,
+            images: images.length > 0 ? images : undefined,
         }
     };
 }

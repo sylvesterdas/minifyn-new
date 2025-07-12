@@ -9,6 +9,8 @@ export interface Link {
   expiresAt: number; // timestamp, -1 for no expiry
   title?: string;
   description?: string;
+  ogImage?: string;
+  twitterImage?: string;
   userId: string;
   clickCount: number;
 }
@@ -62,23 +64,25 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
     // Links for verified users do not expire. Anonymous/unverified links expire in 7 days.
     const expiresAt = isVerifiedUser ? -1 : now + 7 * 24 * 60 * 60 * 1000;
 
-    let title, description;
+    let seoData;
     try {
-        const metadata = await generateSeoMetadata({ url: longUrl });
-        title = metadata.title;
-        description = metadata.description;
+        seoData = await generateSeoMetadata({ url: longUrl });
     } catch (error) {
         console.error("Failed to generate SEO metadata:", error);
-        title = "Link via MiniFyn";
-        description = "A shortened link created with MiniFyn."
+        seoData = {
+            title: "Link via MiniFyn",
+            description: "A shortened link created with MiniFyn."
+        }
     }
 
     const newLink: Omit<Link, 'id'> = {
         longUrl,
         createdAt: now,
         expiresAt,
-        title,
-        description,
+        title: seoData.title,
+        description: seoData.description,
+        ogImage: seoData.ogImage,
+        twitterImage: seoData.twitterImage,
         userId: userId,
         clickCount: 0
     };
