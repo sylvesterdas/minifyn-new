@@ -1,6 +1,5 @@
 'use server';
 
-import { headers } from 'next/headers';
 import { urlSchema } from '@/lib/schema';
 import { checkRateLimit, createShortLink, incrementUsage } from '@/lib/data';
 import { auth } from 'firebase-admin';
@@ -27,13 +26,10 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
         // User not found, which is fine for anonymous users.
         isVerifiedUser = false;
     }
-    
-    const headersObj = await headers();
-    const ip = headersObj.get('x-forwarded-for') ?? '127.0.0.1';
 
     // Check rate limit for users without a verified email (anonymous or unverified).
     if (!isVerifiedUser) {
-        const isAllowed = await checkRateLimit(ip);
+        const isAllowed = await checkRateLimit(userId);
         if (!isAllowed) {
             return { success: false, message: 'Rate limit exceeded. Please try again tomorrow or sign up for a free account for higher limits.' };
         }
@@ -56,9 +52,9 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     try {
         const newLink = await createShortLink({ longUrl, userId, isVerifiedUser });
         
-        // Increment usage count only after successful link creation
+        // Increment usage count only after successful link creation for unverified users
         if (!isVerifiedUser) {
-            await incrementUsage(ip, userId);
+            await incrementUsage(userId);
         }
 
         const host = 'mnfy.in';

@@ -18,12 +18,9 @@ export interface Link {
 
 const RATE_LIMIT = 5; // 5 requests per day for unverified users
 
-const sanitizeForFirebase = (key: string) => key.replace(/[.#$[\]/]/g, '_');
-
-export const checkRateLimit = async (ip: string): Promise<boolean> => {
+export const checkRateLimit = async (userId: string): Promise<boolean> => {
     const today = format(new Date(), 'yyyy-MM-dd');
-    const sanitizedIp = sanitizeForFirebase(ip);
-    const path = `limits/${today}/ip/${sanitizedIp}`;
+    const path = `limits/${today}/users/${userId}`;
     
     const snapshot = await db.ref(path).once('value');
     const currentCount = snapshot.val() || 0;
@@ -31,23 +28,15 @@ export const checkRateLimit = async (ip: string): Promise<boolean> => {
     return currentCount < RATE_LIMIT;
 };
 
-export const incrementUsage = async (ip: string, userId: string): Promise<void> => {
+export const incrementUsage = async (userId: string): Promise<void> => {
     const today = format(new Date(), 'yyyy-MM-dd');
-    const sanitizedIp = sanitizeForFirebase(ip);
-    
-    const ipPath = `limits/${today}/ip/${sanitizedIp}`;
-    const userPath = `limits/${today}/anonymous/${userId}`;
-
-    const ipRef = db.ref(ipPath);
+    const userPath = `limits/${today}/users/${userId}`;
     const userRef = db.ref(userPath);
     
     try {
-        // Use transactions to safely increment the counters
-        await ipRef.transaction((currentValue) => (currentValue || 0) + 1);
         await userRef.transaction((currentValue) => (currentValue || 0) + 1);
     } catch (error) {
-        console.error("Failed to increment usage counters:", error);
-        // Decide if you want to throw an error or handle it silently
+        console.error("Failed to increment usage counter:", error);
     }
 };
 
