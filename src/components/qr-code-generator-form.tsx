@@ -23,13 +23,14 @@ export function QrCodeGeneratorForm() {
             const context = canvas.getContext('2d');
             if (!context) return;
             
+            // Generate QR code to a data URL first
             const qrDataURL = await QRCode.toDataURL(text, {
-                errorCorrectionLevel: 'H',
+                errorCorrectionLevel: 'H', // Use highest error correction level
                 margin: 4,
                 width: 256,
                 color: {
                     dark: '#e2e8f0', // foreground
-                    light: '#0f172a'  // background
+                    light: '#0000'  // transparent background
                 }
             });
 
@@ -37,30 +38,35 @@ export function QrCodeGeneratorForm() {
             qrImage.onload = () => {
                 canvas.width = 256;
                 canvas.height = 256;
+                // Clear canvas and set background color
                 context.clearRect(0, 0, canvas.width, canvas.height);
-                context.fillStyle = '#0f172a';
+                context.fillStyle = '#0f172a'; // The desired background color
                 context.fillRect(0, 0, canvas.width, canvas.height);
+                
                 context.drawImage(qrImage, 0, 0);
 
                 if (withLogo) {
                     const logo = new Image();
                     logo.src = '/logo.png';
                     logo.onload = () => {
-                        const logoSize = canvas.width / 5;
+                        const logoSize = canvas.width / 5; // 20% of the QR code size
                         const logoX = (canvas.width - logoSize) / 2;
                         const logoY = (canvas.height - logoSize) / 2;
                         
-                        // Draw a soft, rounded, semi-transparent background for the logo
-                        const padding = 4;
-                        context.fillStyle = 'rgba(255, 255, 255, 0.85)';
-                        context.beginPath();
-                        context.roundRect(logoX - padding, logoY - padding, logoSize + padding * 2, logoSize + padding * 2, 8);
-                        context.fill();
+                        // Clear a rectangle in the center for the logo's background
+                        const bgSize = logoSize + 8; // A bit larger for padding
+                        const bgX = (canvas.width - bgSize) / 2;
+                        const bgY = (canvas.height - bgSize) / 2;
 
+                        context.fillStyle = '#0f172a'; // Match the main background
+                        context.fillRect(bgX, bgY, bgSize, bgSize);
+                        
+                        // Draw the logo itself
                         context.drawImage(logo, logoX, logoY, logoSize, logoSize);
                         setQrCodeDataUrl(canvas.toDataURL('image/png'));
                     }
                     logo.onerror = () => {
+                        // If logo fails, still show the QR code
                         setQrCodeDataUrl(canvas.toDataURL('image/png'));
                     }
                 } else {
