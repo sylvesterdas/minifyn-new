@@ -2,6 +2,8 @@ import { db } from './firebase-admin';
 import type { DataSnapshot } from 'firebase-admin/database';
 import { fetchMetadata } from './scraper';
 import { format } from 'date-fns';
+import { auth } from 'firebase-admin';
+import type { UserRecord } from 'firebase-admin/auth';
 
 export interface Link {
   id: string;
@@ -16,9 +18,26 @@ export interface Link {
   clickCount: number;
 }
 
-const RATE_LIMIT = 5; // 5 requests per day for unverified users
+const RATE_LIMIT = 5; // 5 requests per day for unverified/anonymous users
 
+/**
+ * Checks if a user is within their daily usage limit.
+ * @param userId The UID of the user (anonymous or registered).
+ * @returns A promise that resolves to true if the user is allowed to proceed, false otherwise.
+ */
 export const checkRateLimit = async (userId: string): Promise<boolean> => {
+    // For this MVP, we will assume registered users have a higher or no limit.
+    // The check only applies to users who are not verified.
+    // We can fetch the user record to check their status (e.g., emailVerified).
+    try {
+        const user = await auth().getUser(userId);
+        if (user.emailVerified) {
+            return true; // Verified users bypass this specific limit.
+        }
+    } catch (error) {
+        // User not found or other error, proceed with limit check for anonymous users.
+    }
+    
     const today = format(new Date(), 'yyyy-MM-dd');
     const path = `limits/${today}/users/${userId}`;
     
@@ -28,14 +47,20 @@ export const checkRateLimit = async (userId: string): Promise<boolean> => {
     return currentCount < RATE_LIMIT;
 };
 
+/**
+ * Increments the usage count for a given user for the current day.
+ * @param userId The UID of the user to increment usage for.
+ */
 export const incrementUsage = async (userId: string): Promise<void> => {
     const today = format(new Date(), 'yyyy-MM-dd');
     const userPath = `limits/${today}/users/${userId}`;
     const userRef = db.ref(userPath);
     
     try {
+        // Use a transaction to safely increment the counter.
         await userRef.transaction((currentValue) => (currentValue || 0) + 1);
     } catch (error) {
+        // Log the error but don't block the user's request if this fails.
         console.error("Failed to increment usage counter:", error);
     }
 };
@@ -69,6 +94,7 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
 
     const now = Date.now();
     
+    // Unverified (including anonymous) users' links expire in 7 days. Verified users' links don't expire.
     const expiresAt = isVerifiedUser ? -1 : now + 7 * 24 * 60 * 60 * 1000;
 
     let metadata;
@@ -76,6 +102,7 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         metadata = await fetchMetadata(longUrl);
     } catch (error) {
         console.error("Failed to fetch metadata:", error);
+        // Provide sensible defaults if metadata fetching fails
         metadata = {
             title: "Link via mnfy.in",
             description: "A shortened link created with MiniFyn.",
@@ -112,10 +139,51 @@ export const getLinkBySlug = async (slug: string): Promise<Link | null> => {
     
     // Check for expiration
     if (linkData.expiresAt !== -1 && Date.now() > linkData.expiresAt) {
-        // Asynchronously delete the expired link
+        // Asynchronously delete the expired link to clean up the database
         db.ref(`urls/${slug}`).remove().catch(err => console.error("Failed to delete expired link:", err));
         return null;
     }
     
     return { id: slug, ...linkData };
+}
+
+/**
+ * Validates an API key and returns the corresponding user if valid.
+ * For now, this is a placeholder. In a real app, you would look up the key in a database.
+ * @param apiKey The API key to validate.
+ * @returns A promise that resolves to the UserRecord if the key is valid, null otherwise.
+ */
+export const validateApiKey = async (apiKey: string): Promise<UserRecord | null> => {
+    // In a real application, you would store API keys securely, likely hashed,
+    // in your database and look up the user associated with that key.
+    // e.g., const keyRecord = await db.ref(`apiKeys/${hashedKey}`).once('value');
+    // For this MVP, we will use a hardcoded key that maps to a specific user UID for testing.
+    // IMPORTANT: This is NOT secure and is for demonstration purposes only.
+    
+    const DEMO_API_KEY = process.env.DEMO_API_KEY || 'supersecretkey';
+    const DEMO_USER_ID = process.env.DEMO_USER_ID; // The UID of a verified user in your Firebase project.
+
+    if (apiKey === DEMO_API_KEY && DEMO_USER_ID) {
+        try {
+            const user = await auth().getUser(DEMO_USER_ID);
+            // Ensure the user associated with the demo key is verified.
+            if (user.emailVerified) {
+                return user;
+            }
+            return null;
+        } catch (error) {
+            console.error("Error fetching user for demo API key:", error);
+            return null;
+        }
+    }
+
+    // A more scalable approach would be to look up the key in the database:
+    // const snapshot = await db.ref('apiKeys').orderByChild('key').equalTo(apiKey).once('value');
+    // if (snapshot.exists()) {
+    //     const data = snapshot.val();
+    //     const userId = Object.keys(data)[0];
+    //     return auth().getUser(userId);
+    // }
+
+    return null;
 }
