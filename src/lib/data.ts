@@ -1,6 +1,7 @@
 import { db } from './firebase-admin';
 import type { DataSnapshot } from 'firebase-admin/database';
 import { fetchMetadata } from './scraper';
+import { format } from 'date-fns';
 
 export interface Link {
   id: string;
@@ -15,23 +16,41 @@ export interface Link {
   clickCount: number;
 }
 
-const usage = new Map<string, number[]>();
-const RATE_LIMIT = 5;
-const RATE_LIMIT_WINDOW = 24 * 60 * 60 * 1000;
+const RATE_LIMIT = 5; // 5 requests per day for unverified users
 
-export const checkRateLimit = (ip: string): boolean => {
-    const now = Date.now();
-    const userUsage = usage.get(ip) || [];
+const sanitizeForFirebase = (key: string) => key.replace(/[.#$[\]/]/g, '_');
+
+export const checkRateLimit = async (ip: string): Promise<boolean> => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const sanitizedIp = sanitizeForFirebase(ip);
+    const path = `limits/${today}/ip/${sanitizedIp}`;
     
-    const recentUsage = userUsage.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW);
+    const snapshot = await db.ref(path).once('value');
+    const currentCount = snapshot.val() || 0;
 
-    if (recentUsage.length >= RATE_LIMIT) {
-        return false;
-    }
-
-    usage.set(ip, [...recentUsage, now]);
-    return true;
+    return currentCount < RATE_LIMIT;
 };
+
+export const incrementUsage = async (ip: string, userId: string): Promise<void> => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const sanitizedIp = sanitizeForFirebase(ip);
+    
+    const ipPath = `limits/${today}/ip/${sanitizedIp}`;
+    const userPath = `limits/${today}/anonymous/${userId}`;
+
+    const ipRef = db.ref(ipPath);
+    const userRef = db.ref(userPath);
+    
+    try {
+        // Use transactions to safely increment the counters
+        await ipRef.transaction((currentValue) => (currentValue || 0) + 1);
+        await userRef.transaction((currentValue) => (currentValue || 0) + 1);
+    } catch (error) {
+        console.error("Failed to increment usage counters:", error);
+        // Decide if you want to throw an error or handle it silently
+    }
+};
+
 
 const generateShortCode = (length = 6): string => {
     const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

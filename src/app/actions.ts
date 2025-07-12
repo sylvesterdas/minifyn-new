@@ -2,7 +2,7 @@
 
 import { headers } from 'next/headers';
 import { urlSchema } from '@/lib/schema';
-import { checkRateLimit, createShortLink } from '@/lib/data';
+import { checkRateLimit, createShortLink, incrementUsage } from '@/lib/data';
 import { auth } from 'firebase-admin';
 import type { UserRecord } from 'firebase-admin/auth';
 
@@ -19,18 +19,23 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     }
     
     let userRecord: UserRecord | null = null;
+    let isVerifiedUser = false;
     try {
         userRecord = await auth().getUser(userId);
+        isVerifiedUser = userRecord.emailVerified;
     } catch (error) {
         // User not found, which is fine for anonymous users.
+        isVerifiedUser = false;
     }
+    
+    const headersObj = await headers();
+    const ip = headersObj.get('x-forwarded-for') ?? '127.0.0.1';
 
     // Check rate limit for users without a verified email (anonymous or unverified).
-    if (!userRecord || !userRecord.emailVerified) {
-        const headersObj = await headers();
-        const ip = headersObj.get('x-forwarded-for') ?? '127.0.0.1';
-        if (!checkRateLimit(ip)) {
-                return { success: false, message: 'Rate limit exceeded. Please try again tomorrow or sign up for a free account for higher limits.' };
+    if (!isVerifiedUser) {
+        const isAllowed = await checkRateLimit(ip);
+        if (!isAllowed) {
+            return { success: false, message: 'Rate limit exceeded. Please try again tomorrow or sign up for a free account for higher limits.' };
         }
     }
     
@@ -49,8 +54,13 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     const { longUrl } = validatedFields.data;
 
     try {
-        const newLink = await createShortLink({ longUrl, userId, isVerifiedUser: !!userRecord?.emailVerified });
+        const newLink = await createShortLink({ longUrl, userId, isVerifiedUser });
         
+        // Increment usage count only after successful link creation
+        if (!isVerifiedUser) {
+            await incrementUsage(ip, userId);
+        }
+
         const host = 'mnfy.in';
         const shortUrl = `https://${host}/${newLink.id}`;
         
