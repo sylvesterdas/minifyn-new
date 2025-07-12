@@ -1,6 +1,6 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Zap } from 'lucide-react';
 
 export function Header() {
   return (
@@ -8,7 +8,7 @@ export function Header() {
       <div className="container flex h-14 items-center mx-auto">
         <div className="mr-4 flex items-center">
           <Link href="/" className="flex items-center gap-2">
-            <Zap className="h-6 w-6 text-primary" />
+            <Image src="/logo.png" alt="MiniFyn Logo" width={32} height={32} />
             <span className="font-bold">MiniFyn</span>
           </Link>
         </div>
