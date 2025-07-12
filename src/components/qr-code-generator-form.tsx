@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import EasyQRCodeJS from 'easyqrcodejs';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -24,16 +24,16 @@ export function QrCodeGeneratorForm() {
             text: text,
             width: 256,
             height: 256,
-            colorDark: "#e2e8f0", // foreground
-            colorLight: "#0f172a", // background
+            colorDark: "#000000", // black for max readability
+            colorLight: "#ffffff", // white for max readability
             correctLevel: EasyQRCodeJS.CorrectLevel.H,
             logo: '/logo.png',
             logoWidth: 64,
             logoHeight: 64,
-            logoBackgroundColor: '#0f172a',
+            logoBackgroundColor: '#ffffff',
             logoBackgroundTransparent: false,
             quietZone: 10,
-            quietZoneColor: '#0f172a',
+            quietZoneColor: '#ffffff',
             tooltip: false
         };
 
@@ -82,10 +82,10 @@ export function QrCodeGeneratorForm() {
                         />
                     </div>
                       <div className="flex items-center justify-center pt-4">
-                           <div ref={qrcodeRef} className={`${showQr ? 'block' : 'hidden'} p-2 bg-background rounded-lg`}></div>
+                           <div ref={qrcodeRef} className={`${showQr ? 'block' : 'hidden'}`}></div>
                       </div>
                      {showQr && (
-                        <div className="flex flex-col items-center justify-center gap-4 animate-in fade-in duration-500">
+                        <div className="flex flex-col items-center justify-center gap-4 animate-in fade-in duration-500 pt-4">
                             <Button type="button" onClick={handleDownload} variant="secondary">
                                 <Download className="mr-2 h-4 w-4" />
                                 Download QR Code
