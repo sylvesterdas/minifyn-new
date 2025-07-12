@@ -1,41 +1,98 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
+import { useState, useRef } from 'react';
+import QRCode from 'qrcode';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox"
 import { QrCode, Download } from 'lucide-react';
 
 export function QrCodeGeneratorForm() {
-    const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+    const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
     const [inputValue, setInputValue] = useState('');
+    const [includeLogo, setIncludeLogo] = useState(true);
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+    const generateQrCode = async (text: string, withLogo: boolean) => {
+        try {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+
+            const context = canvas.getContext('2d');
+            if (!context) return;
+            
+            // Generate QR code as data URL
+            const qrDataURL = await QRCode.toDataURL(text, {
+                errorCorrectionLevel: 'H', // High error correction for logo
+                margin: 4,
+                width: 256,
+                color: {
+                    dark: '#e2e8f0', // foreground
+                    light: '#0f172a'  // background
+                }
+            });
+
+            const qrImage = new Image();
+            qrImage.onload = () => {
+                // Clear canvas and draw QR code
+                canvas.width = 256;
+                canvas.height = 256;
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.fillStyle = '#0f172a'; // Ensure bg color
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(qrImage, 0, 0);
+
+                if (withLogo) {
+                    const logo = new Image();
+                    logo.src = '/logo.png'; // Path to your logo in the public folder
+                    logo.onload = () => {
+                        const logoSize = canvas.width / 5; // Logo size is 20% of QR code size
+                        const logoX = (canvas.width - logoSize) / 2;
+                        const logoY = (canvas.height - logoSize) / 2;
+                        
+                        // Draw white background behind logo for clarity
+                        context.fillStyle = 'white';
+                        context.fillRect(logoX - 4, logoY - 4, logoSize + 8, logoSize + 8);
+
+                        // Draw logo
+                        context.drawImage(logo, logoX, logoY, logoSize, logoSize);
+                        setQrCodeDataUrl(canvas.toDataURL('image/png'));
+                    }
+                    logo.onerror = () => {
+                        // If logo fails to load, just show QR code
+                        setQrCodeDataUrl(canvas.toDataURL('image/png'));
+                    }
+                } else {
+                     setQrCodeDataUrl(canvas.toDataURL('image/png'));
+                }
+            };
+            qrImage.src = qrDataURL;
+
+        } catch (err) {
+            console.error(err);
+            setQrCodeDataUrl(null);
+        }
+    }
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!inputValue.trim()) {
-            setQrCodeUrl(null);
+            setQrCodeDataUrl(null);
             return;
         }
-        const encodedData = encodeURIComponent(inputValue);
-        setQrCodeUrl(`https://api.qrserver.com/v1/create-qr-code/?data=${encodedData}&size=256x256&bgcolor=0f172a&color=e2e8f0&qzone=1`);
+        generateQrCode(inputValue, includeLogo);
     };
     
     const handleDownload = () => {
-        if (qrCodeUrl) {
+        if (qrCodeDataUrl) {
             const link = document.createElement('a');
-            // Use a fetch request to get the image as a blob, which works around CORS issues with direct downloads.
-            fetch(qrCodeUrl)
-                .then(response => response.blob())
-                .then(blob => {
-                    link.href = URL.createObjectURL(blob);
-                    link.download = 'qrcode.png';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                })
-                .catch(console.error);
+            link.href = qrCodeDataUrl;
+            link.download = 'qrcode.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     };
 
@@ -64,17 +121,24 @@ export function QrCodeGeneratorForm() {
                             rows={4}
                         />
                     </div>
-                     {qrCodeUrl && (
-                        <div className="flex flex-col items-center justify-center gap-4 pt-4 animate-in fade-in duration-500">
-                           <div className="p-2 bg-white rounded-lg">
-                             <Image
-                                src={qrCodeUrl}
-                                alt="Generated QR Code"
-                                width={200}
-                                height={200}
-                                unoptimized // QR code APIs may not support Next.js image optimization
-                             />
-                           </div>
+                     <div className="flex items-center space-x-2">
+                        <Checkbox 
+                            id="include-logo" 
+                            checked={includeLogo}
+                            onCheckedChange={(checked) => setIncludeLogo(checked === true)}
+                        />
+                        <label
+                          htmlFor="include-logo"
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          Include logo in QR code
+                        </label>
+                      </div>
+                      <div className="flex items-center justify-center pt-4">
+                          <canvas ref={canvasRef} style={{ display: qrCodeDataUrl ? 'block' : 'none' }} className="rounded-lg bg-white p-2" />
+                      </div>
+                     {qrCodeDataUrl && (
+                        <div className="flex flex-col items-center justify-center gap-4 animate-in fade-in duration-500">
                             <Button type="button" onClick={handleDownload} variant="secondary">
                                 <Download className="mr-2 h-4 w-4" />
                                 Download QR Code
