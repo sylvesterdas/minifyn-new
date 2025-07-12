@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import EasyQRCodeJS from 'easyqrcodejs';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,23 +18,17 @@ export function QrCodeGeneratorForm() {
     const generateQrCode = (text: string) => {
         if (!qrcodeRef.current) return;
         
-        // Clear previous QR code if it exists
         qrcodeRef.current.innerHTML = '';
 
         const options = {
             text: text,
             width: 256,
             height: 256,
-            colorDark: "#000000", // black for max readability
-            colorLight: "#ffffff", // white for max readability
+            colorDark: "#000000",
+            colorLight: "#ffffff",
             correctLevel: EasyQRCodeJS.CorrectLevel.H,
-            logo: '/logo.png',
-            logoWidth: 64,
-            logoHeight: 64,
-            logoBackgroundColor: 'transparent',
-            logoBackgroundTransparent: false,
             quietZone: 10,
-            quietZoneColor: '#ffffff',
+            quietZoneColor: 'transparent',
             tooltip: false
         };
 
@@ -64,7 +59,7 @@ export function QrCodeGeneratorForm() {
                     QR Code Generator
                 </CardTitle>
                 <CardDescription className="text-center pt-2">
-                    Enter a URL or text to generate a QR code with our logo.
+                    Enter a URL or text to generate a QR code.
                 </CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit}>
@@ -81,8 +76,12 @@ export function QrCodeGeneratorForm() {
                             rows={4}
                         />
                     </div>
-                      <div className="flex items-center justify-center pt-4">
-                           <div ref={qrcodeRef} className={`${showQr ? 'block' : 'hidden'}`}></div>
+                      <div className={`flex flex-col items-center justify-center pt-4 ${showQr ? 'block' : 'hidden'}`}>
+                           <div className="flex items-center gap-2 mb-4 animate-in fade-in duration-500">
+                                <Image src="/logo.png" alt="MiniFyn Logo" width={24} height={24} />
+                                <span className="text-lg font-semibold">MiniFyn</span>
+                           </div>
+                           <div ref={qrcodeRef}></div>
                       </div>
                      {showQr && (
                         <div className="flex flex-col items-center justify-center gap-4 animate-in fade-in duration-500 pt-4">
