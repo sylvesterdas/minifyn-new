@@ -50,37 +50,37 @@ export function UserNav() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="flex items-center">
+                    <Link href="/dashboard" className="flex items-center cursor-pointer">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         <span>Dashboard</span>
                     </Link>
                 </DropdownMenuItem>
                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/settings" className="flex items-center">
+                    <Link href="/dashboard/settings" className="flex items-center cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />
                         <span>Settings</span>
                     </Link>
                 </DropdownMenuItem>
                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/settings" className="flex items-center">
+                    <Link href="/dashboard/settings" className="flex items-center cursor-pointer">
                         <Key className="mr-2 h-4 w-4" />
                         <span>API Keys</span>
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                    <Link href="/help" className="flex items-center">
+                    <Link href="/help" className="flex items-center cursor-pointer">
                         <LifeBuoy className="mr-2 h-4 w-4" />
                         <span>Help</span>
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <form action={logout} className="w-full">
-                    <button type="submit" className="w-full text-left">
-                        <DropdownMenuItem>
+                     <DropdownMenuItem asChild>
+                        <button type="submit" className="w-full text-left flex items-center cursor-pointer">
                             <LogOut className="mr-2 h-4 w-4" />
                             <span>Log out</span>
-                        </DropdownMenuItem>
-                    </button>
+                        </button>
+                    </DropdownMenuItem>
                 </form>
             </DropdownMenuContent>
         </DropdownMenu>
