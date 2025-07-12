@@ -30,7 +30,7 @@ export function QrCodeGeneratorForm() {
             logo: '/logo.png',
             logoWidth: 64,
             logoHeight: 64,
-            logoBackgroundColor: '#ffffff',
+            logoBackgroundColor: 'transparent',
             logoBackgroundTransparent: false,
             quietZone: 10,
             quietZoneColor: '#ffffff',

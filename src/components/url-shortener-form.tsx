@@ -1,7 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
-import { useEffect, useState, useRef } from 'react';
+import { useFormStatus } from 'react-dom';
+import { useEffect, useState, useRef, useActionState } from 'react';
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { shortenUrl } from '@/app/actions';
@@ -28,7 +28,7 @@ export function UrlShortenerForm() {
     const formRef = useRef<HTMLFormElement>(null);
 
     const initialState = { success: false, message: '', shortUrl: '' };
-    const [state, formAction] = useFormState(shortenUrl, initialState);
+    const [state, formAction] = useActionState(shortenUrl, initialState);
 
     useEffect(() => {
         if (state.message) {
@@ -65,12 +65,7 @@ export function UrlShortenerForm() {
                     The simplest way to shorten and share your links.
                 </CardDescription>
             </CardHeader>
-            <form ref={formRef} action={formAction} onSubmit={(e) => {
-                setShortenedUrl(null);
-                // We need to stop the propagation, otherwise the parent form will be submitted
-                e.stopPropagation();
-                formAction(new FormData(e.currentTarget));
-            }}>
+            <form ref={formRef} action={formAction}>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="longUrl">URL to shorten</Label>
