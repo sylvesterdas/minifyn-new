@@ -3,14 +3,8 @@
 import { auth } from '@/lib/firebase-admin';
 import { lucia } from '@/lib/lucia';
 import { cookies } from 'next/headers';
-import { isWithinExpirationDate, TimeSpan } from 'oslo';
-import { alphabet, generateRandomString } from 'oslo/crypto';
 import type { FormState } from './signin/page';
-
-const EMAIL_VERIFICATION_TOKEN_EXPIRES_IN = 1000 * 60 * 60 * 2; // 2 hours
-
-// In-memory store for verification tokens. In production, use a database.
-const verificationTokens = new Map<string, { email: string; expiresAt: Date }>();
+import { redirect } from 'next/navigation';
 
 export async function login(
   prevState: FormState,
@@ -33,14 +27,14 @@ export async function login(
   try {
     const userRecord = await auth.getUserByEmail(email);
     if (!userRecord.emailVerified) {
-        return { error: 'Email not verified.' };
+        return { error: 'Email not verified. Please check your inbox for a verification link.' };
     }
-
-    // This is a simplified password check.
-    // In a real app, you would verify a hashed password.
-    // For this example, we're assuming Firebase Auth client SDK handled login and this is for session creation.
-    // The proper way to do this server-side would be to use a custom token from the client.
-    // However, to keep it server-action focused, we proceed with creating a session.
+    
+    // In a real app, you would verify the password here.
+    // For this example, we assume Firebase client-side SDK would handle it,
+    // and this action is primarily for session creation. We will proceed with session creation,
+    // but a proper implementation would involve custom tokens or a more complex auth flow.
+    // We are simulating a successful password check.
 
     const session = await lucia.createSession(userRecord.uid, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
@@ -53,7 +47,8 @@ export async function login(
   } catch (error: any) {
     if (
       error.code === 'auth/user-not-found' ||
-      error.code === 'auth/wrong-password'
+      error.code === 'auth/wrong-password' ||
+      error.code === 'auth/invalid-credential'
     ) {
       return { error: 'Invalid email or password' };
     }
@@ -85,18 +80,19 @@ export async function signup(
       email,
       password,
     });
+    
+    // Generate email verification link
+    const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
 
-    const token = generateRandomString(40, alphabet('0-9', 'a-z'));
-    verificationTokens.set(token, {
-        email: userRecord.email!,
-        expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TOKEN_EXPIRES_IN)
-    });
+    // In a real app, you would send this link to the user's email address.
+    // For this example, we'll log it to the console.
+    console.log("----------------------------------------------------");
+    console.log("EMAIL VERIFICATION LINK (send this to the user):");
+    console.log(verificationLink);
+    console.log("----------------------------------------------------");
 
-    // In a real app, you would send an email with this link
-    const verificationLink = `${process.env.NEXT_PUBLIC_URL}/auth/verify-email?token=${token}`;
-    console.log(`Verification link for ${email}: ${verificationLink}`); // For demonstration
 
-    return { success: true, message: `A verification link has been sent to ${email}. Check your console for the link.` };
+    return { success: true, message: `A verification link has been sent to ${email}. (Check server console)` };
 
   } catch (error: any) {
     if (error.code === 'auth/email-already-exists') {
@@ -105,6 +101,36 @@ export async function signup(
     console.error('Signup error:', error);
     return { error: 'An unknown error occurred' };
   }
+}
+
+export async function sendPasswordResetLink(
+  prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+    const email = formData.get('email');
+    if (typeof email !== 'string' || !email.includes('@')) {
+        return { error: 'Please enter a valid email address.' };
+    }
+
+    try {
+        await auth.getUserByEmail(email); // Check if user exists
+        const link = await auth.generatePasswordResetLink(email);
+
+        // In a real app, you'd email this link. For now, log to console.
+        console.log("----------------------------------------------------");
+        console.log("PASSWORD RESET LINK:");
+        console.log(link);
+        console.log("----------------------------------------------------");
+
+        return { success: true, message: 'If an account with this email exists, a password reset link has been sent. (Check server console)' };
+    } catch (error: any) {
+        if (error.code === 'auth/user-not-found') {
+            // Don't reveal that the user does not exist.
+            return { success: true, message: 'If an account with this email exists, a password reset link has been sent. (Check server console)' };
+        }
+        console.error('Password reset error:', error);
+        return { error: 'An unknown error occurred. Please try again.' };
+    }
 }
 
 
@@ -127,35 +153,11 @@ export async function logout(): Promise<{ error?: string }> {
     sessionCookie.value,
     sessionCookie.attributes
   );
-
-  return {};
+  
+  redirect('/auth/signin');
 }
 
-export async function verifyEmail(token: string): Promise<{ success?: boolean, error?: string }> {
-    if (!token) {
-        return { error: "Invalid token." };
-    }
-    
-    const storedToken = verificationTokens.get(token);
-    
-    if (!storedToken) {
-        return { error: "Invalid or expired verification token." };
-    }
-
-    if (!isWithinExpirationDate(storedToken.expiresAt)) {
-        verificationTokens.delete(token);
-        return { error: "Verification token has expired." };
-    }
-
-    try {
-        const user = await auth.getUserByEmail(storedToken.email);
-        await auth.updateUser(user.uid, { emailVerified: true });
-        
-        verificationTokens.delete(token);
-
-        return { success: true };
-    } catch (error) {
-        console.error("Email verification error:", error);
-        return { error: "Failed to verify email." };
-    }
-}
+// We don't need a custom verifyEmail action anymore, as Firebase handles it.
+// When the user clicks the link, Firebase processes it and the `emailVerified`
+// flag will be updated automatically in their user record.
+// We can remove the /auth/verify-email page as well.

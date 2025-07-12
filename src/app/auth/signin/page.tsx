@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export interface FormState {
     error?: string;
@@ -30,6 +30,7 @@ function SubmitButton() {
 export default function SignInPage() {
     const [state, formAction] = useActionState(login, { success: false });
     const { toast } = useToast();
+    const router = useRouter();
     
     useEffect(() => {
         if (state.error) {
@@ -44,9 +45,10 @@ export default function SignInPage() {
                 title: 'Success',
                 description: 'Logged in successfully!',
             });
-            redirect('/dashboard');
+            router.refresh();
+            router.push('/dashboard');
         }
-    }, [state, toast]);
+    }, [state, toast, router]);
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-background">

@@ -16,22 +16,14 @@ import {
 import { Button } from './ui/button';
 import { useAuth } from '@/hooks/use-auth';
 import { logout } from '@/app/auth/actions';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export function UserNav() {
     const { user } = useAuth();
-    const router = useRouter();
 
     if (!user) {
         return null;
     }
-
-    const handleLogout = async () => {
-        await logout();
-        router.push('/');
-        router.refresh();
-    };
 
     const getInitials = (email: string) => {
         return email?.[0]?.toUpperCase() ?? 'U';
@@ -63,9 +55,13 @@ export function UserNav() {
                     <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                    Log out
-                </DropdownMenuItem>
+                <form action={logout}>
+                    <button type="submit" className="w-full text-left">
+                        <DropdownMenuItem>
+                            Log out
+                        </DropdownMenuItem>
+                    </button>
+                </form>
             </DropdownMenuContent>
         </DropdownMenu>
     );

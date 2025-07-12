@@ -1,39 +1,25 @@
+// This page is no longer needed. Firebase handles the verification link page automatically.
+// You can safely delete this file.
+// We are keeping it for now to avoid breaking builds, but it's unused.
 import Link from 'next/link';
-import { verifyEmail } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { MailCheck } from 'lucide-react';
 
-interface VerifyEmailPageProps {
-  searchParams: {
-    token?: string;
-  };
-}
-
-export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) {
-  const { token } = searchParams;
-  const result = await verifyEmail(token || '');
-
+export default function VerifyEmailPage() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Email Verification</CardTitle>
+          <CardTitle className="text-2xl">Check Your Email</CardTitle>
           <CardDescription>
-            {result.success ? 'Your email has been successfully verified.' : 'There was an issue verifying your email.'}
+            We've sent a verification link to your email address. Please click the link to continue.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center gap-4">
-          {result.success ? (
-            <CheckCircle className="h-16 w-16 text-green-500" />
-          ) : (
-            <XCircle className="h-16 w-16 text-destructive" />
-          )}
-          <p className="text-muted-foreground text-center">
-            {result.success ? 'You can now sign in to your account.' : result.error}
-          </p>
+          <MailCheck className="h-16 w-16 text-primary" />
           <Button asChild>
-            <Link href="/auth/signin">Go to Sign In</Link>
+            <Link href="/auth/signin">Back to Sign In</Link>
           </Button>
         </CardContent>
       </Card>
