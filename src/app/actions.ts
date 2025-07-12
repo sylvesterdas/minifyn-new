@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { urlSchema } from '@/lib/schema';
 import { checkRateLimit, createShortLink } from '@/lib/data';
 import { auth } from 'firebase-admin';
+import type { UserRecord } from 'firebase-admin/auth';
 
 export interface FormState {
     success: boolean;
@@ -17,23 +18,19 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
         return { success: false, message: 'Authentication context is missing. Please refresh the page.' };
     }
     
-    // Check rate limit for non-verified users
+    let userRecord: UserRecord | null = null;
     try {
-        const userRecord = await auth().getUser(userId);
-        if (!userRecord.emailVerified) {
-            const headersObj = await headers();
-            const ip = headersObj.get('x-forwarded-for') ?? '127.0.0.1';
-            if (!checkRateLimit(ip)) {
-                 return { success: false, message: 'Rate limit exceeded. Please try again tomorrow or sign up for a free account for higher limits.' };
-            }
-        }
+        userRecord = await auth().getUser(userId);
     } catch (error) {
-        // This could happen if the userId is for an anonymous user not yet fully synced.
-        // For simplicity, we'll apply the rate limit. A more robust solution might check the error type.
+        // User not found, which is fine for anonymous users.
+    }
+
+    // Check rate limit for users without a verified email (anonymous or unverified).
+    if (!userRecord || !userRecord.emailVerified) {
         const headersObj = await headers();
         const ip = headersObj.get('x-forwarded-for') ?? '127.0.0.1';
         if (!checkRateLimit(ip)) {
-             return { success: false, message: 'Rate limit exceeded. Please try again tomorrow or sign up for a free account for higher limits.' };
+                return { success: false, message: 'Rate limit exceeded. Please try again tomorrow or sign up for a free account for higher limits.' };
         }
     }
     
@@ -52,7 +49,7 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     const { longUrl } = validatedFields.data;
 
     try {
-        const newLink = await createShortLink({ longUrl, userId });
+        const newLink = await createShortLink({ longUrl, userId, isVerifiedUser: !!userRecord?.emailVerified });
         
         const host = 'mnfy.in';
         const shortUrl = `https://${host}/${newLink.id}`;

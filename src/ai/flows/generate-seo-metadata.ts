@@ -32,12 +32,17 @@ const generateSeoMetadataPrompt = ai.definePrompt({
   name: 'generateSeoMetadataPrompt',
   input: {schema: GenerateSeoMetadataInputSchema},
   output: {schema: GenerateSeoMetadataOutputSchema},
-  prompt: `You are an SEO expert. Generate a title and description for the following URL that is engaging and relevant for social media sharing.
+  prompt: `You are an SEO expert. Your task is to analyze the content of the provided URL and generate a concise, engaging, and SEO-friendly title and description. This metadata will be used for social media sharing and search engine results.
+
+Focus on creating a compelling summary that entices users to click.
 
 URL: {{{url}}}
 
-Title:
-Description: `,
+Based on the content at the URL, provide the following:
+
+- A title (max 60 characters)
+- A description (max 160 characters)
+`,
 });
 
 const generateSeoMetadataFlow = ai.defineFlow(

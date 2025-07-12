@@ -48,17 +48,19 @@ export const isSlugTaken = async (slug: string): Promise<boolean> => {
 interface CreateShortLinkInput {
     longUrl: string;
     userId: string;
+    isVerifiedUser: boolean;
 }
 
-export const createShortLink = async ({ longUrl, userId }: CreateShortLinkInput): Promise<Link> => {
+export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: CreateShortLinkInput): Promise<Link> => {
     let slug;
     do {
         slug = generateShortCode();
     } while (await isSlugTaken(slug));
 
     const now = Date.now();
-    // All links do not expire by default now. Expiration can be a premium feature later.
-    const expiresAt = -1;
+    
+    // Links for verified users do not expire. Anonymous/unverified links expire in 7 days.
+    const expiresAt = isVerifiedUser ? -1 : now + 7 * 24 * 60 * 60 * 1000;
 
     let title, description;
     try {
