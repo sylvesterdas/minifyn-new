@@ -30,7 +30,7 @@ export default function ReportAbusePage() {
                     To report a link, please go to our contact page and provide the following information in your message:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                    <li>The full, abusive MiniFyn URL (e.g., `minifyn.io/xxxxxx`).</li>
+                    <li>The full, abusive MiniFyn URL (e.g., `mnfy.in/xxxxxx`).</li>
                     <li>A brief description of why the link is abusive (e.g., "This link leads to a phishing site impersonating my bank.").</li>
                     <li>The destination URL, if you know it and feel it's safe to share.</li>
                 </ul>
