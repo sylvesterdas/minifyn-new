@@ -25,14 +25,9 @@ export function UrlShortenerForm() {
     const [copied, setCopied] = useState(false);
     const { toast } = useToast();
     const formRef = useRef<HTMLFormElement>(null);
-    const [domain, setDomain] = useState('');
 
     const initialState = { success: false, message: '', shortUrl: '' };
     const [state, formAction] = useFormState(shortenUrl, initialState);
-
-    useEffect(() => {
-        setDomain(window.location.host);
-    }, []);
 
     useEffect(() => {
         if (state.message) {
@@ -83,18 +78,6 @@ export function UrlShortenerForm() {
                             required
                             type="url"
                         />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="customSlug">Custom name (optional)</Label>
-                        <div className="flex items-center">
-                            <span className="h-10 flex items-center text-sm text-muted-foreground px-3 rounded-l-md bg-background border border-r-0 border-input">{domain}/</span>
-                            <Input
-                                id="customSlug"
-                                name="customSlug"
-                                placeholder="my-awesome-link"
-                                className="rounded-l-none"
-                            />
-                        </div>
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">

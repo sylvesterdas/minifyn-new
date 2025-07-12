@@ -46,13 +46,11 @@ export const isSlugTaken = async (slug: string): Promise<boolean> => {
     return links.has(slug);
 }
 
-export const createShortLink = async (longUrl: string, customSlug?: string): Promise<Link> => {
-    let slug = customSlug;
-    if (!slug) {
-        do {
-            slug = generateShortCode();
-        } while (links.has(slug));
-    }
+export const createShortLink = async (longUrl: string): Promise<Link> => {
+    let slug;
+    do {
+        slug = generateShortCode();
+    } while (links.has(slug));
 
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now

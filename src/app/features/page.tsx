@@ -7,7 +7,6 @@ export const metadata: Metadata = {
 };
 
 const featuresList = [
-    { name: "Custom Slugs", description: "Create branded, memorable short links." },
     { name: "Detailed Analytics", description: "Track clicks, referrers, and geographic data." },
     { name: "Developer API", description: "Integrate our shortening service into your apps." },
     { name: "Link Expiration", description: "Set links to expire automatically after a certain time." },

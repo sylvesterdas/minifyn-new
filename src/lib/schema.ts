@@ -16,11 +16,4 @@ export const urlSchema = z.object({
             return false;
         }
     }, { message: 'This domain is not allowed.' }),
-  customSlug: z.string()
-    .max(20, { message: 'Custom name must be 20 characters or less.' })
-    .regex(/^[a-zA-Z0-9_-]*$/, {
-        message: 'Custom name can only contain letters, numbers, hyphens, and underscores.'
-    })
-    .optional()
-    .transform(slug => slug === '' ? undefined : slug),
 });

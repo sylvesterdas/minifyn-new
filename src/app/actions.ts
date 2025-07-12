@@ -2,7 +2,7 @@
 
 import { headers } from 'next/headers';
 import { urlSchema } from '@/lib/schema';
-import { checkRateLimit, createShortLink, isSlugTaken } from '@/lib/data';
+import { checkRateLimit, createShortLink } from '@/lib/data';
 
 export interface FormState {
     success: boolean;
@@ -19,25 +19,20 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     
     const validatedFields = urlSchema.safeParse({
         longUrl: formData.get('longUrl'),
-        customSlug: formData.get('customSlug'),
     });
 
     if (!validatedFields.success) {
         const errors = validatedFields.error.flatten().fieldErrors;
         return {
             success: false,
-            message: errors.longUrl?.[0] || errors.customSlug?.[0] || 'Invalid input.',
+            message: errors.longUrl?.[0] || 'Invalid input.',
         };
     }
     
-    const { longUrl, customSlug } = validatedFields.data;
+    const { longUrl } = validatedFields.data;
 
     try {
-        if(customSlug && await isSlugTaken(customSlug)) {
-             return { success: false, message: 'This custom name is already taken.' };
-        }
-        
-        const newLink = await createShortLink(longUrl, customSlug);
+        const newLink = await createShortLink(longUrl);
         
         const host = headers().get('host');
         const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';

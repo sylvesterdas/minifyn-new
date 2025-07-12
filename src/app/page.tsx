@@ -1,6 +1,6 @@
 import { UrlShortenerForm } from '@/components/url-shortener-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, BarChart, Key, Zap } from 'lucide-react';
+import { BarChart, Key, Zap } from 'lucide-react';
 
 const features = [
   {
@@ -17,11 +17,6 @@ const features = [
     icon: <Key className="h-8 w-8 text-primary" />,
     title: 'Developer API',
     description: 'Integrate our shortening service into your own applications with a simple API.',
-  },
-   {
-    icon: <CheckCircle className="h-8 w-8 text-primary" />,
-    title: 'Custom Slugs',
-    description: 'Brand your links with custom slugs that are easy to remember and share.',
   },
 ];
 
