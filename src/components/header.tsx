@@ -12,21 +12,21 @@ export function Header() {
             <span className="font-bold">MiniFyn</span>
           </Link>
         </div>
-        <div className="flex flex-1 items-center justify-end space-x-2">
-          <nav className="hidden md:flex items-center">
-            <Button variant="ghost" asChild>
-              <Link href="/features">Features</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/blog">Blog</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/contact">Contact</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/dashboard">Get Started Free</Link>
-            </Button>
+        <div className="flex flex-1 items-center justify-end space-x-6">
+          <nav className="hidden md:flex items-center space-x-6">
+            <Link href="/features" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+              Features
+            </Link>
+            <Link href="/blog" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+              Blog
+            </Link>
+            <Link href="/contact" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+              Contact
+            </Link>
           </nav>
+          <Button asChild>
+            <Link href="/dashboard">Get Started Free</Link>
+          </Button>
           {/* Add mobile menu button here if needed */}
         </div>
       </div>
