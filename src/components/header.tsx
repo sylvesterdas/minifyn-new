@@ -1,8 +1,14 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/use-auth';
+import { UserNav } from './user-nav';
 
 export function Header() {
+  const { user } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center mx-auto">
@@ -24,10 +30,13 @@ export function Header() {
               Contact
             </Link>
           </nav>
-          <Button asChild>
-            <Link href="/dashboard">Get Started Free</Link>
-          </Button>
-          {/* Add mobile menu button here if needed */}
+          {user ? (
+            <UserNav />
+          ) : (
+            <Button asChild>
+              <Link href="/auth/signin">Sign In</Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>
