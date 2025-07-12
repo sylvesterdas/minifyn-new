@@ -1,8 +1,6 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
 import { AuthProvider } from '@/context/auth-context';
 import { validateRequest } from '@/lib/auth';
 
@@ -24,14 +22,10 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased flex flex-col min-h-screen">
+      <body className="font-body antialiased">
         <AuthProvider value={{ user }}>
-          <Header />
-          <div className="flex-1">
             {children}
-          </div>
-          <Footer />
-          <Toaster />
+            <Toaster />
         </AuthProvider>
       </body>
     </html>
