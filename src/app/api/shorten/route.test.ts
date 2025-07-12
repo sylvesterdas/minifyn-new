@@ -4,17 +4,13 @@ import * as data from '@/lib/data';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { UserRecord } from 'firebase-admin/auth';
 
-// Mock the data module
-vi.mock('@/lib/data', async () => {
-    const actual = await vi.importActual('@/lib/data');
-    return {
-        ...actual,
-        validateApiKey: vi.fn(),
-        checkRateLimit: vi.fn(),
-        createShortLink: vi.fn(),
-        incrementUsage: vi.fn(),
-    };
-});
+// Mock the data module completely to prevent Firebase Admin from initializing
+vi.mock('@/lib/data', () => ({
+    validateApiKey: vi.fn(),
+    checkRateLimit: vi.fn(),
+    createShortLink: vi.fn(),
+    incrementUsage: vi.fn(),
+}));
 
 const mockValidateApiKey = data.validateApiKey as vi.Mock;
 const mockCheckRateLimit = data.checkRateLimit as vi.Mock;
