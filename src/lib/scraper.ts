@@ -22,7 +22,7 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
     try {
         const response = await fetch(url, {
             headers: {
-                'User-Agent': 'MiniFynBot/1.0 (+https://minifyn.io/bot)' // Be a good citizen
+                'User-Agent': 'MiniFynBot/1.0 (+https://minifyn.com/bot)' // Be a good citizen
             }
         });
 

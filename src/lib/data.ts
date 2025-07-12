@@ -77,7 +77,7 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
     } catch (error) {
         console.error("Failed to fetch metadata:", error);
         metadata = {
-            title: "Link via MiniFyn",
+            title: "Link via mnfy.in",
             description: "A shortened link created with MiniFyn.",
             ogImage: undefined,
             twitterImage: undefined

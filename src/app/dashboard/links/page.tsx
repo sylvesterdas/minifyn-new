@@ -93,7 +93,7 @@ export default function LinksPage() {
               {mockLinks.map((link) => (
                 <TableRow key={link.id}>
                   <TableCell className="font-medium">
-                    <div className="font-medium">minifyn.io/{link.id}</div>
+                    <div className="font-medium">mnfy.in/{link.id}</div>
                     <div className="hidden text-sm text-muted-foreground md:inline">
                       {link.longUrl}
                     </div>
