@@ -1,27 +1,91 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { UrlShortenerForm } from './url-shortener-form';
 import { vi } from 'vitest';
+import * as actions from '@/app/actions';
 
-// Mock useToast hook
+// Mock the useToast hook
+const mockToast = vi.fn();
 vi.mock('@/hooks/use-toast', () => ({
   useToast: () => ({
-    toast: vi.fn(),
+    toast: mockToast,
   }),
 }));
 
+// Mock the server action
+vi.mock('@/app/actions', () => ({
+    shortenUrl: vi.fn(),
+}));
+
+// Mock useActionState
+vi.mock('react', async (importOriginal) => {
+    const mod = await importOriginal<typeof import('react')>();
+    return {
+        ...mod,
+        useActionState: (action: any, initialState: any) => {
+            const [state, setState] = mod.useState(initialState);
+            const dispatch = async (payload: FormData) => {
+                const newState = await action(state, payload);
+                setState(newState);
+            };
+            return [state, dispatch];
+        }
+    };
+});
+
+
 describe('UrlShortenerForm', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders the form with an input field and a submit button', () => {
     render(<UrlShortenerForm />);
+    expect(screen.getByLabelText('URL to shorten')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Shorten URL/i })).toBeInTheDocument();
+  });
 
-    // Check for the input field
-    const inputElement = screen.getByPlaceholderText('https://your-super-long-url.com/goes-here');
-    expect(inputElement).toBeInTheDocument();
+  it('shows the shortened URL on successful submission', async () => {
+    const mockShortUrl = 'http://localhost:3000/abcdef';
+    (actions.shortenUrl as vi.Mock).mockResolvedValue({
+        success: true,
+        message: 'URL shortened successfully!',
+        shortUrl: mockShortUrl
+    });
 
-    // Check for the submit button
-    const buttonElement = screen.getByRole('button', { name: /Shorten URL/i });
-    expect(buttonElement).toBeInTheDocument();
+    render(<UrlShortenerForm />);
+    
+    const input = screen.getByLabelText('URL to shorten');
+    const button = screen.getByRole('button', { name: /Shorten URL/i });
 
-    // Check for the title
-    expect(screen.getByText('MiniFyn')).toBeInTheDocument();
+    fireEvent.change(input, { target: { value: 'https://www.google.com' } });
+    fireEvent.click(button);
+
+    await waitFor(() => {
+        expect(screen.getByText(mockShortUrl.replace(/^https?:\/\//, ''))).toBeInTheDocument();
+    });
+  });
+
+  it('shows an error toast on failed submission', async () => {
+    const errorMessage = 'This domain is not allowed.';
+    (actions.shortenUrl as vi.Mock).mockResolvedValue({
+        success: false,
+        message: errorMessage,
+    });
+
+    render(<UrlShortenerForm />);
+
+    const input = screen.getByLabelText('URL to shorten');
+    const button = screen.getByRole('button', { name: /Shorten URL/i });
+
+    fireEvent.change(input, { target: { value: 'https://evil.org' } });
+    fireEvent.click(button);
+
+    await waitFor(() => {
+        expect(mockToast).toHaveBeenCalledWith({
+            title: "Oops!",
+            description: errorMessage,
+            variant: "destructive",
+        });
+    });
   });
 });
