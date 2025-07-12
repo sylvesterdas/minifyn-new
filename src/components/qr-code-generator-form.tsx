@@ -11,43 +11,96 @@ import { QrCode, Download } from 'lucide-react';
 
 export function QrCodeGeneratorForm() {
     const [inputValue, setInputValue] = useState('');
-    const [showQr, setShowQr] = useState(false);
+    const [qrImageDataUrl, setQrImageDataUrl] = useState<string | null>(null);
     const qrcodeRef = useRef<HTMLDivElement>(null);
-    const qrCodeInstance = useRef<EasyQRCodeJS | null>(null);
 
     const generateQrCode = (text: string) => {
         if (!qrcodeRef.current) return;
         
+        // Hide the container and clear previous QR code before generating new one
+        qrcodeRef.current.style.display = 'none';
         qrcodeRef.current.innerHTML = '';
+        setQrImageDataUrl(null);
 
-        const options = {
+        const qrCodeInstance = new EasyQRCodeJS(qrcodeRef.current, {
             text: text,
             width: 256,
             height: 256,
             colorDark: "#000000",
             colorLight: "#ffffff",
             correctLevel: EasyQRCodeJS.CorrectLevel.H,
-            quietZone: 10,
-            quietZoneColor: 'transparent',
+            quietZone: 15,
+            quietZoneColor: '#ffffff',
+            onRenderingEnd: (_, dataURL) => {
+                combineWithLogo(dataURL);
+            },
             tooltip: false
-        };
+        });
+    }
 
-        qrCodeInstance.current = new EasyQRCodeJS(qrcodeRef.current, options);
-        setShowQr(true);
+    const combineWithLogo = (qrDataUrl: string) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const logoImg = new window.Image();
+        logoImg.src = '/logo.png';
+        
+        logoImg.onload = () => {
+            const qrImg = new window.Image();
+            qrImg.src = qrDataUrl;
+            
+            qrImg.onload = () => {
+                // Define dimensions
+                const qrSize = qrImg.width;
+                const topMargin = 70; // Space for logo and text
+                const padding = 20;
+
+                canvas.width = qrSize;
+                canvas.height = qrSize + topMargin;
+
+                // White background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw Logo
+                const logoSize = 40;
+                const logoX = (canvas.width - logoSize) / 2;
+                const logoY = padding / 2;
+                ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+
+                // Draw Text
+                const textY = logoY + logoSize + 10;
+                ctx.font = 'bold 16px Inter';
+                ctx.fillStyle = '#000000';
+                ctx.textAlign = 'center';
+                ctx.fillText('MiniFyn', canvas.width / 2, textY);
+
+                // Draw QR Code
+                ctx.drawImage(qrImg, 0, topMargin);
+                
+                setQrImageDataUrl(canvas.toDataURL('image/png'));
+            };
+        };
     }
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!inputValue.trim()) {
-            setShowQr(false);
+            setQrImageDataUrl(null);
             return;
         }
         generateQrCode(inputValue);
     };
     
     const handleDownload = () => {
-       if (qrCodeInstance.current) {
-           qrCodeInstance.current.download("minifyn-qrcode");
+       if (qrImageDataUrl) {
+           const link = document.createElement('a');
+           link.href = qrImageDataUrl;
+           link.download = 'minifyn-qrcode.png';
+           document.body.appendChild(link);
+           link.click();
+           document.body.removeChild(link);
        }
     };
 
@@ -76,14 +129,12 @@ export function QrCodeGeneratorForm() {
                             rows={4}
                         />
                     </div>
-                      <div className={`flex flex-col items-center justify-center pt-4 ${showQr ? 'block' : 'hidden'}`}>
-                           <div className="flex items-center gap-2 mb-4 animate-in fade-in duration-500">
-                                <Image src="/logo.png" alt="MiniFyn Logo" width={24} height={24} />
-                                <span className="text-lg font-semibold">MiniFyn</span>
-                           </div>
-                           <div ref={qrcodeRef}></div>
+                      <div className="flex flex-col items-center justify-center pt-4">
+                            {qrImageDataUrl && <Image src={qrImageDataUrl} alt="Generated QR Code" width={280} height={350} className="rounded-lg shadow-md animate-in fade-in duration-500" />}
+                            {/* This div is used by easyqrcodejs to render the initial qr code, but it's hidden from the user */}
+                            <div ref={qrcodeRef} style={{ display: 'none' }}></div>
                       </div>
-                     {showQr && (
+                     {qrImageDataUrl && (
                         <div className="flex flex-col items-center justify-center gap-4 animate-in fade-in duration-500 pt-4">
                             <Button type="button" onClick={handleDownload} variant="secondary">
                                 <Download className="mr-2 h-4 w-4" />
