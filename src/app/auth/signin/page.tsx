@@ -86,9 +86,7 @@ export default function SignInPage() {
                     title: 'Success',
                     description: 'Logged in successfully! Redirecting...',
                 });
-
-                // Use window.location.assign for a full page reload to ensure session is read by server layout
-                return router.push('/dashboard');
+                window.location.assign('/dashboard');
             } else {
                 setError(result.error || 'An unknown server error occurred.');
             }
@@ -108,52 +106,50 @@ export default function SignInPage() {
     };
     
     return (
-        <div className="flex items-center justify-center min-h-screen bg-background">
-            <Card className="mx-auto max-w-sm">
-                <CardHeader>
-                    <CardTitle className="text-2xl">Sign In</CardTitle>
-                    <CardDescription>
-                        Enter your credentials to access your account.
-                    </CardDescription>
-                </CardHeader>
-                <form onSubmit={handleLogin}>
-                    <CardContent className="grid gap-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input id="email" name="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
-                        </div>
-                        <div className="grid gap-2">
-                            <div className="flex items-center">
-                                <Label htmlFor="password">Password</Label>
-                                <Link href="/auth/forgot-password" passHref className="ml-auto inline-block text-sm underline">
-                                    Forgot your password?
-                                </Link>
-                            </div>
-                            <Input id="password" name="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-                        </div>
-                        {showResend && (
-                             <p className="text-sm text-center text-muted-foreground">
-                                Your email is not verified.
-                                <form action={resendAction}>
-                                    <input type="hidden" name="email" value={email} />
-                                    <Button variant="link" type="submit" className="p-0 h-auto">Resend verification email</Button>
-                                </form>
-                            </p>
-                        )}
-                    </CardContent>
-                    <CardFooter className="flex flex-col gap-4">
-                       <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isLoading ? <Loader2 className="animate-spin" /> : 'Sign In'}
-                        </Button>
-                        <div className="text-center text-sm">
-                            Don&apos;t have an account?{' '}
-                            <Link href="/auth/signup" className="underline">
-                                Sign up
+        <Card className="mx-auto max-w-sm">
+            <CardHeader>
+                <CardTitle className="text-2xl">Sign In</CardTitle>
+                <CardDescription>
+                    Enter your credentials to access your account.
+                </CardDescription>
+            </CardHeader>
+            <form onSubmit={handleLogin}>
+                <CardContent className="grid gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" name="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                    </div>
+                    <div className="grid gap-2">
+                        <div className="flex items-center">
+                            <Label htmlFor="password">Password</Label>
+                            <Link href="/auth/forgot-password" passHref className="ml-auto inline-block text-sm underline">
+                                Forgot your password?
                             </Link>
                         </div>
-                    </CardFooter>
-                </form>
-            </Card>
-        </div>
+                        <Input id="password" name="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                    </div>
+                    {showResend && (
+                         <p className="text-sm text-center text-muted-foreground">
+                            Your email is not verified.
+                            <form action={resendAction}>
+                                <input type="hidden" name="email" value={email} />
+                                <Button variant="link" type="submit" className="p-0 h-auto">Resend verification email</Button>
+                            </form>
+                        </p>
+                    )}
+                </CardContent>
+                <CardFooter className="flex flex-col gap-4">
+                   <Button type="submit" className="w-full" disabled={isLoading}>
+                        {isLoading ? <Loader2 className="animate-spin" /> : 'Sign In'}
+                    </Button>
+                    <div className="text-center text-sm">
+                        Don&apos;t have an account?{' '}
+                        <Link href="/auth/signup" className="underline">
+                            Sign up
+                        </Link>
+                    </div>
+                </CardFooter>
+            </form>
+        </Card>
     );
 }

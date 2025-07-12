@@ -51,42 +51,40 @@ export default function SignUpPage() {
     }, [state, toast, router]);
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-background">
-            <Card className="mx-auto max-w-sm">
-                <CardHeader>
-                    <CardTitle className="text-xl">Sign Up</CardTitle>
-                    <CardDescription>
-                        Enter your information to create an account
-                    </CardDescription>
-                </CardHeader>
-                <form action={formAction}>
-                    <CardContent className="grid gap-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                name="email"
-                                type="email"
-                                placeholder="m@example.com"
-                                required
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input id="password" name="password" type="password" required />
-                        </div>
-                    </CardContent>
-                    <CardFooter className="flex flex-col gap-4">
-                        <SubmitButton />
-                        <div className="text-center text-sm">
-                            Already have an account?{' '}
-                            <Link href="/auth/signin" className="underline">
-                                Sign in
-                            </Link>
-                        </div>
-                    </CardFooter>
-                </form>
-            </Card>
-        </div>
+        <Card className="mx-auto max-w-sm">
+            <CardHeader>
+                <CardTitle className="text-xl">Sign Up</CardTitle>
+                <CardDescription>
+                    Enter your information to create an account
+                </CardDescription>
+            </CardHeader>
+            <form action={formAction}>
+                <CardContent className="grid gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            placeholder="m@example.com"
+                            required
+                        />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="password">Password</Label>
+                        <Input id="password" name="password" type="password" required />
+                    </div>
+                </CardContent>
+                <CardFooter className="flex flex-col gap-4">
+                    <SubmitButton />
+                    <div className="text-center text-sm">
+                        Already have an account?{' '}
+                        <Link href="/auth/signin" className="underline">
+                            Sign in
+                        </Link>
+                    </div>
+                </CardFooter>
+            </form>
+        </Card>
     );
 }
