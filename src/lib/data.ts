@@ -149,41 +149,37 @@ export const getLinkBySlug = async (slug: string): Promise<Link | null> => {
 
 /**
  * Validates an API key and returns the corresponding user if valid.
- * For now, this is a placeholder. In a real app, you would look up the key in a database.
  * @param apiKey The API key to validate.
  * @returns A promise that resolves to the UserRecord if the key is valid, null otherwise.
  */
 export const validateApiKey = async (apiKey: string): Promise<UserRecord | null> => {
-    // In a real application, you would store API keys securely, likely hashed,
-    // in your database and look up the user associated with that key.
-    // e.g., const keyRecord = await db.ref(`apiKeys/${hashedKey}`).once('value');
-    // For this MVP, we will use a hardcoded key that maps to a specific user UID for testing.
-    // IMPORTANT: This is NOT secure and is for demonstration purposes only.
-    
-    const DEMO_API_KEY = process.env.DEMO_API_KEY || 'supersecretkey';
-    const DEMO_USER_ID = process.env.DEMO_USER_ID; // The UID of a verified user in your Firebase project.
-
-    if (apiKey === DEMO_API_KEY && DEMO_USER_ID) {
-        try {
-            const user = await auth().getUser(DEMO_USER_ID);
-            // Ensure the user associated with the demo key is verified.
-            if (user.emailVerified) {
-                return user;
-            }
-            return null;
-        } catch (error) {
-            console.error("Error fetching user for demo API key:", error);
+    try {
+        const apiKeySnapshot = await db.ref(`apikeys/${apiKey}`).once('value');
+        
+        if (!apiKeySnapshot.exists()) {
+            // Key does not exist in the database
             return null;
         }
+
+        const { uid } = apiKeySnapshot.val();
+
+        if (!uid) {
+            // Malformed API key entry
+            return null;
+        }
+
+        const user = await auth().getUser(uid);
+        
+        // Ensure the user associated with the key is verified.
+        if (user.emailVerified) {
+            return user;
+        }
+
+        // User is not verified, so the key is not considered active.
+        return null;
+
+    } catch (error) {
+        console.error("Error during API key validation:", error);
+        return null;
     }
-
-    // A more scalable approach would be to look up the key in the database:
-    // const snapshot = await db.ref('apiKeys').orderByChild('key').equalTo(apiKey).once('value');
-    // if (snapshot.exists()) {
-    //     const data = snapshot.val();
-    //     const userId = Object.keys(data)[0];
-    //     return auth().getUser(userId);
-    // }
-
-    return null;
 }
