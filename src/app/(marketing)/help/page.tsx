@@ -17,7 +17,7 @@ const helpSections = [
         description: 'Find answers to common questions about MiniFyn.'
     },
     {
-        href: '/help/guides',
+        href: '/docs/guides',
         icon: <BookOpen className="h-8 w-8 text-primary" />,
         title: 'Guides',
         description: 'Step-by-step tutorials on how to use our features.'
