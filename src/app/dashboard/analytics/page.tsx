@@ -2,8 +2,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { getAnalyticsSummary } from '../actions';
 import { ClicksChart } from './clicks-chart';
 import { AnalyticsDetailCard } from './analytics-detail-card';
-import { Globe, Smartphone, Laptop, SmartphoneNfc } from 'lucide-react';
-
 
 export default async function AnalyticsPage() {
     const summary = await getAnalyticsSummary();
@@ -28,19 +26,19 @@ export default async function AnalyticsPage() {
                     data={summary.referrers}
                     categoryKey="referrer"
                     valueKey="clicks"
-                    icon={Globe}
+                    defaultIconName="globe"
                  />
                 <AnalyticsDetailCard
                     title="Clicks by Platform"
                     data={summary.platforms}
                     categoryKey="platform"
                     valueKey="clicks"
-                    iconMap={{
-                        'Windows': Laptop,
-                        'macOS': Laptop,
-                        'Linux': Laptop,
-                        'iOS': Smartphone,
-                        'Android': SmartphoneNfc,
+                    iconNameMap={{
+                        'Windows': 'laptop',
+                        'macOS': 'laptop',
+                        'Linux': 'laptop',
+                        'iOS': 'smartphone',
+                        'Android': 'smartphonenfc',
                     }}
                  />
             </div>

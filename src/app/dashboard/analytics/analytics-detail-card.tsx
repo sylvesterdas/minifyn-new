@@ -2,18 +2,26 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { type LucideIcon } from 'lucide-react';
+import { type LucideIcon, Globe, Laptop, Smartphone, SmartphoneNfc, type Icon as LucideIconType } from 'lucide-react';
+
+const iconComponents: Record<string, LucideIconType> = {
+  globe: Globe,
+  laptop: Laptop,
+  smartphone: Smartphone,
+  smartphonenfc: SmartphoneNfc,
+};
+
 
 interface AnalyticsDetailCardProps<T> {
   title: string;
   data: T[];
   categoryKey: keyof T;
   valueKey: keyof T;
-  icon?: LucideIcon;
-  iconMap?: Record<string, LucideIcon>;
+  defaultIconName?: keyof typeof iconComponents;
+  iconNameMap?: Record<string, keyof typeof iconComponents>;
 }
 
-export function AnalyticsDetailCard<T>({ title, data, categoryKey, valueKey, icon: DefaultIcon, iconMap }: AnalyticsDetailCardProps<T>) {
+export function AnalyticsDetailCard<T>({ title, data, categoryKey, valueKey, defaultIconName, iconNameMap }: AnalyticsDetailCardProps<T>) {
 
   const total = data.reduce((acc, item) => acc + (Number(item[valueKey]) || 0), 0);
   
@@ -41,7 +49,9 @@ export function AnalyticsDetailCard<T>({ title, data, categoryKey, valueKey, ico
             const category = String(item[categoryKey]);
             const value = Number(item[valueKey]);
             const percentage = total > 0 ? (value / total) * 100 : 0;
-            const Icon = iconMap ? (iconMap[category] ?? DefaultIcon) : DefaultIcon;
+            
+            const iconName = iconNameMap?.[category] ?? defaultIconName;
+            const Icon = iconName ? iconComponents[iconName] : null;
 
             return (
               <div key={index} className="flex items-center">
