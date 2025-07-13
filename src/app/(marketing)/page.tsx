@@ -37,6 +37,7 @@ export default function Home() {
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
+      // In a real application, you might want to debounce this for performance
       const { clientX, clientY, currentTarget } = event;
       if (currentTarget instanceof Window) {
         const x = (clientX / currentTarget.innerWidth) * 100;
