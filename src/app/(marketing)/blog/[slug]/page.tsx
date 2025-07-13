@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { format } from 'date-fns';
+import { Clock, Tag } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 type Props = {
   params: { slug: string };
@@ -48,15 +50,33 @@ export default async function PostPage({ params }: Props) {
     if (!post) {
         notFound();
     }
+    
+    const authorName = post.author?.name || 'Sylvester Das';
 
     return (
         <article className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
             <div className="prose prose-invert mx-auto prose-lg">
-                <header className="mb-12 text-center">
+                <header className="mb-12">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
+                        <p>By {authorName}</p>
+                        <span>&bull;</span>
+                        <p>{format(new Date(post.publishedAt), 'MMMM d, yyyy')}</p>
+                        <span>&bull;</span>
+                        <p className="flex items-center gap-1.5">
+                            <Clock className="h-4 w-4" />
+                            {post.readTimeInMinutes} min read
+                        </p>
+                    </div>
+
                     <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{post.title}</h1>
-                    <p className="mt-4 text-muted-foreground">
-                        Published on {format(new Date(post.publishedAt), 'MMMM d, yyyy')}
-                    </p>
+                    
+                    {post.tags && post.tags.length > 0 && (
+                        <div className="mt-6 flex flex-wrap gap-2">
+                            {post.tags.map(tag => (
+                                <Badge key={tag.slug} variant="secondary">{tag.name}</Badge>
+                            ))}
+                        </div>
+                    )}
                 </header>
 
                 {post.coverImage?.url && (

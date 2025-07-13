@@ -9,6 +9,14 @@ export interface HashnodePost {
     title: string;
     brief: string;
     publishedAt: string;
+    readTimeInMinutes: number;
+    author: {
+        name: string;
+    };
+    tags: {
+        name: string;
+        slug: string;
+    }[];
     coverImage: {
         url: string;
     } | null;
@@ -74,6 +82,14 @@ const GET_POSTS_QUERY = `
             title
             brief
             publishedAt
+            readTimeInMinutes
+            author {
+                name
+            }
+            tags {
+                name
+                slug
+            }
             coverImage {
               url
             }
@@ -108,6 +124,14 @@ const GET_POST_BY_SLUG_QUERY = `
         title
         brief
         publishedAt
+        readTimeInMinutes
+        author {
+            name
+        }
+        tags {
+            name
+            slug
+        }
         ogImage: ogMetaData {
             image
         }
