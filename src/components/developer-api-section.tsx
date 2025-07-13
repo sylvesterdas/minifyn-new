@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -77,8 +78,6 @@ if ($response) {
 type Language = keyof typeof snippets;
 
 export function DeveloperApiSection() {
-    const [activeLang, setActiveLang] = useState<Language>('curl');
-
     return (
         <section id="for-developers" className="relative w-full py-12 md:py-24 lg:py-32">
          <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-5"></div>
@@ -93,7 +92,7 @@ export function DeveloperApiSection() {
                     </div>
                 </div>
                 <div className="mx-auto max-w-3xl pt-12">
-                    <Tabs defaultValue="curl" onValueChange={(value) => setActiveLang(value as Language)} className="w-full">
+                    <Tabs defaultValue="curl" className="w-full">
                         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto">
                             <TabsTrigger value="curl">cURL</TabsTrigger>
                             <TabsTrigger value="javascript">JavaScript</TabsTrigger>
@@ -101,7 +100,18 @@ export function DeveloperApiSection() {
                             <TabsTrigger value="php">PHP</TabsTrigger>
                         </TabsList>
                          <div className="mt-4">
-                            <CodeBlock code={snippets[activeLang]} language={activeLang === 'curl' ? 'bash' : activeLang} />
+                            <TabsContent value="curl">
+                               <CodeBlock code={snippets.curl} language="bash" />
+                            </TabsContent>
+                            <TabsContent value="javascript">
+                               <CodeBlock code={snippets.javascript} language="javascript" />
+                            </TabsContent>
+                            <TabsContent value="python">
+                               <CodeBlock code={snippets.python} language="python" />
+                            </TabsContent>
+                            <TabsContent value="php">
+                               <CodeBlock code={snippets.php} language="php" />
+                            </TabsContent>
                          </div>
                     </Tabs>
                 </div>
