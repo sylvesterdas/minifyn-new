@@ -114,11 +114,6 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
 
     const now = Date.now();
     
-    // Super users have non-expiring links.
-    if (userId === SUPER_USER_ID) {
-        isVerifiedUser = true; // Ensure they get non-expiring link logic
-    }
-    
     let expiresAt: number;
     if (userId === SUPER_USER_ID) {
         expiresAt = -1; // Never expires for super user
