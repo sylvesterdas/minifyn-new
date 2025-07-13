@@ -33,6 +33,10 @@ export default {
               padding: '0.2rem 0.4rem',
               borderRadius: '0.25rem',
             },
+            // Hide horizontal scrollbar on code blocks
+            pre: {
+              overflowX: 'hidden',
+            },
             // Style links
             a: {
               color: theme('colors.accent.DEFAULT'),
