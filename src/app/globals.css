@@ -57,3 +57,83 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom styles for blog post content */
+@layer components {
+    .prose {
+        /* Style links within blog posts */
+        a {
+            @apply text-accent hover:underline;
+        }
+
+        /* Style inline code (backticks) */
+        code:not(pre > code) {
+            @apply bg-muted text-foreground/80 font-mono text-sm rounded px-1.5 py-0.5;
+        }
+
+        /* Style code blocks */
+        pre {
+            @apply bg-slate-900 border border-border rounded-lg p-4 text-sm font-mono overflow-x-auto;
+        }
+
+        pre code {
+            @apply bg-transparent p-0;
+        }
+
+        /* Basic syntax highlighting for code blocks */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            @apply text-muted-foreground;
+        }
+
+        .token.punctuation {
+            @apply text-slate-500;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.boolean,
+        .token.number,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            @apply text-sky-400;
+        }
+
+        .token.selector,
+        .token.attr-name,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            @apply text-emerald-400;
+        }
+        
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            @apply text-yellow-400;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            @apply text-fuchsia-400;
+        }
+        
+        .token.function,
+        .token.class-name {
+            @apply text-pink-500;
+        }
+
+        .token.regex,
+        .token.important,
+        .token.variable {
+            @apply text-orange-400;
+        }
+    }
+}
