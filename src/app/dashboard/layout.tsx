@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Home, Settings, Link as LinkIcon, PanelLeft, Key, LineChart } from 'lucide-react';
+import { Home, Settings, Link as LinkIcon, PanelLeft, Key, LineChart, BookText } from 'lucide-react';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { UserNav } from '@/components/user-nav';
 import { useAuth } from '@/hooks/use-auth';
@@ -22,6 +22,7 @@ const superUserNavItems = [
 
 const settingsNavItems = [
   { href: '/dashboard/settings/api-keys', label: 'API Keys', icon: Key },
+  { href: '/docs/api', label: 'API Docs', icon: BookText },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -32,7 +33,7 @@ function NavLinks() {
   if (isLoading) {
     return (
        <div className="grid items-start px-2 text-sm font-medium lg:px-4 space-y-2">
-         {[...Array(5)].map((_, i) => (
+         {[...Array(6)].map((_, i) => (
             <Skeleton key={i} className="h-9 w-full rounded-lg" />
          ))}
        </div>
@@ -53,6 +54,7 @@ function NavLinks() {
         <Link
           key={href}
           href={href}
+          target={href.startsWith('/docs') ? '_blank' : '_self'}
           className={cn(
             'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
             { 'bg-muted text-primary': pathname === href }
