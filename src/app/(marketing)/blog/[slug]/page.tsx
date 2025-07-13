@@ -102,6 +102,22 @@ export default async function PostPage({ params }: Props) {
             <article className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
                 <div className="prose prose-invert mx-auto prose-lg">
                     <header className="mb-12">
+                         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{post.title}</h1>
+                    </header>
+
+                    {post.coverImage?.url && (
+                        <div className="relative aspect-[16/9] mb-8">
+                            <Image
+                                src={post.coverImage.url}
+                                alt={post.title}
+                                fill
+                                className="rounded-lg object-cover"
+                                priority
+                            />
+                        </div>
+                    )}
+
+                    <header className="mb-8">
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
                             <p>By {authorName}</p>
                             <span>&bull;</span>
@@ -112,9 +128,6 @@ export default async function PostPage({ params }: Props) {
                                 {post.readTimeInMinutes} min read
                             </p>
                         </div>
-
-                        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{post.title}</h1>
-                        
                         {post.tags && post.tags.length > 0 && (
                             <div className="mt-6 flex flex-wrap gap-2">
                                 {post.tags.map(tag => (
@@ -123,18 +136,6 @@ export default async function PostPage({ params }: Props) {
                             </div>
                         )}
                     </header>
-
-                    {post.coverImage?.url && (
-                        <div className="relative aspect-[16/9] mb-12">
-                            <Image
-                                src={post.coverImage.url}
-                                alt={post.title}
-                                fill
-                                className="rounded-lg object-cover"
-                                priority
-                            />
-                        </div>
-                    )}
                     
                     <div dangerouslySetInnerHTML={{ __html: post.content.html }}></div>
                 </div>
