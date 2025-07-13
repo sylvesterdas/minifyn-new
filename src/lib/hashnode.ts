@@ -1,4 +1,3 @@
-
 const HASHNODE_GQL_ENDPOINT = process.env.HASHNODE_GQL_ENDPOINT!;
 const HASHNODE_PUBLICATION_ID = process.env.HASHNODE_PUBLICATION_ID!;
 const HASHNODE_ACCESS_TOKEN = process.env.NEXT_HASHNODE_ACCESS_TOKEN!;
@@ -9,6 +8,7 @@ export interface HashnodePost {
     title: string;
     brief: string;
     publishedAt: string;
+    updatedAt: string;
     readTimeInMinutes: number;
     author: {
         name: string;
@@ -37,7 +37,7 @@ interface HashnodePostsResponse {
     data: {
         publication: {
             posts: {
-                edges: { node: Omit<HashnodePost, 'content' | 'ogImage'> }[];
+                edges: { node: Omit<HashnodePost, 'content' | 'ogImage' | 'updatedAt'> }[];
                 pageInfo: PageInfo;
             };
         }
@@ -104,7 +104,7 @@ const GET_POSTS_QUERY = `
   }
 `;
 
-export async function getPosts(first: number = 6, after?: string | null): Promise<{ posts: Omit<HashnodePost, 'content' | 'ogImage'>[], pageInfo: PageInfo }> {
+export async function getPosts(first: number = 6, after?: string | null): Promise<{ posts: Omit<HashnodePost, 'content' | 'ogImage' | 'updatedAt'>[], pageInfo: PageInfo }> {
     const response = await fetchFromHashnode<HashnodePostsResponse>(GET_POSTS_QUERY, {
         publicationId: HASHNODE_PUBLICATION_ID,
         first,
@@ -124,6 +124,7 @@ const GET_POST_BY_SLUG_QUERY = `
         title
         brief
         publishedAt
+        updatedAt
         readTimeInMinutes
         author {
             name
@@ -151,5 +152,11 @@ export async function getPostBySlug(slug: string): Promise<HashnodePost | null> 
         publicationId: HASHNODE_PUBLICATION_ID,
         slug
     });
-    return response.data.publication.post;
+    // The response has `ogImage.image`, so we need to flatten it
+    const post = response.data.publication.post;
+    if (post && post.ogImage) {
+        (post.ogImage as any).url = (post.ogImage as any).image;
+        delete (post.ogImage as any).image;
+    }
+    return post;
 }
