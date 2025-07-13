@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Key, Zap, QrCode, Link as LinkIcon, ClipboardPaste, Wand, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { CodeBlock } from '@/components/code-block';
 
 const features = [
   {
@@ -27,6 +28,11 @@ const features = [
     description: 'Instantly generate a QR code for any shortened link, completely free.',
   },
 ];
+
+const curlSnippet = `curl -X POST https://minifyn.com/api/shorten \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"url": "https://your-long-url.com"}'`;
 
 export default function Home() {
   return (
@@ -137,13 +143,32 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div className="mt-12 text-center">
+        </div>
+      </section>
+      
+      <section id="for-developers" className="relative w-full py-12 md:py-24 lg:py-32">
+         <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-5"></div>
+        <div className="container mx-auto px-4 md:px-6 relative">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <div className="space-y-2">
+              <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm">For Developers</div>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Integrate with Ease</h2>
+              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                Use our simple and powerful API to integrate link shortening into your own applications.
+              </p>
+            </div>
+          </div>
+          <div className="mx-auto max-w-3xl pt-12">
+            <CodeBlock code={curlSnippet} language="bash" />
+          </div>
+           <div className="mt-12 text-center">
             <Button asChild size="lg">
-                <Link href="/auth/signup">Get started for free</Link>
+                <Link href="/auth/signup">Get your API Key</Link>
             </Button>
           </div>
         </div>
       </section>
+
     </main>
   );
 }
