@@ -4,20 +4,37 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Home, Settings, Link as LinkIcon, PanelLeft, Key } from 'lucide-react';
+import { Home, Settings, Link as LinkIcon, PanelLeft, Key, LineChart } from 'lucide-react';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { UserNav } from '@/components/user-nav';
+import { useAuth } from '@/hooks/use-auth';
+import { SUPER_USER_ID } from '@/lib/config';
 
-const navItems = [
+const baseNavItems = [
   { href: '/dashboard', label: 'Overview', icon: Home },
   { href: '/dashboard/links', label: 'Links', icon: LinkIcon },
-  // { href: '/dashboard/analytics', label: 'Analytics', icon: LineChart }, // Temporarily hidden
+];
+
+const superUserNavItems = [
+  { href: '/dashboard/analytics', label: 'Analytics', icon: LineChart },
+]
+
+const settingsNavItems = [
   { href: '/dashboard/settings/api-keys', label: 'API Keys', icon: Key },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
 function NavLinks() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const isSuperUser = user?.uid === SUPER_USER_ID;
+
+  const navItems = [
+    ...baseNavItems,
+    ...(isSuperUser ? superUserNavItems : []),
+    ...settingsNavItems
+  ];
+
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
       {navItems.map(({ href, label, icon: Icon }) => (
