@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { UrlShortenerForm } from '@/components/url-shortener-form';
 import { QrCodeGeneratorForm } from '@/components/qr-code-generator-form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -33,37 +33,49 @@ const features = [
 ];
 
 export default function Home() {
-  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
-      const { clientX, clientY } = event;
-      const x = (clientX / window.innerWidth) * 100;
-      const y = (clientY / window.innerHeight) * 100;
-      setMousePosition({ x, y });
+      const container = containerRef.current;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      container.style.setProperty('--x', `${x}px`);
+      container.style.setProperty('--y', `${y}px`);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('mousemove', handleMouseMove);
+    }
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      if (container) {
+        container.removeEventListener('mousemove', handleMouseMove);
+      }
     };
   }, []);
 
-  const gradientStyle = {
-    backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
-  };
-
   return (
     <main className="flex-1">
-      <section className="relative w-full py-20 md:py-32 lg:py-40 overflow-hidden">
-         <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
-            <div 
-              className="absolute inset-0 -z-10 bg-[radial-gradient(circle_500px_at_50%_50%,hsl(var(--primary)/0.2),transparent)] transition-all duration-300 ease-out"
-              style={gradientStyle}
-            ></div>
-         </div>
-         <div className="container mx-auto px-4 md:px-6">
+      <section
+        ref={containerRef}
+        className="group relative w-full py-20 md:py-32 lg:py-40 overflow-hidden"
+        style={
+          {
+            '--x': '50%',
+            '--y': '50%',
+          } as React.CSSProperties
+        }
+      >
+        <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_500px_at_var(--x)_var(--y),hsl(var(--primary)/0.15),transparent)]"></div>
+        </div>
+        <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center">
             <div className="space-y-2">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none">
