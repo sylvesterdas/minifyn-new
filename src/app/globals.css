@@ -58,27 +58,6 @@
   }
 }
 
-/* Custom styles for blog post content */
-@layer components {
-    .prose {
-        /* Style links within blog posts */
-        a {
-            @apply text-accent hover:underline;
-        }
-
-        /* Style inline code (backticks) */
-        code:not(pre > code) {
-            @apply bg-muted text-foreground/80 font-mono text-sm rounded px-1.5 py-0.5;
-        }
-
-        /* Disable the automatic quotes/backticks from the typography plugin */
-        .prose :where(code):not(:where(pre *))::before,
-        .prose :where(code):not(:where(pre *))::after {
-            content: "";
-        }
-    }
-}
-
 /* highlight.js theme: Atom One Dark */
 .hljs {
     background: #282c34;

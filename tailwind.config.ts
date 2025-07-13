@@ -14,6 +14,36 @@ export default {
         headline: ['Inter', 'sans-serif'],
         code: ['monospace'],
       },
+      // This is the officially recommended way to customize the typography plugin.
+      typography: ({ theme }: { theme: any }) => ({
+        DEFAULT: {
+          css: {
+            // Remove backticks from inline code
+            'code::before': {
+              content: '""',
+            },
+            'code::after': {
+              content: '""',
+            },
+            // Style inline code
+            code: {
+              backgroundColor: theme('colors.muted'),
+              color: theme('colors.foreground'),
+              fontWeight: '400',
+              padding: '0.2rem 0.4rem',
+              borderRadius: '0.25rem',
+            },
+            // Style links
+            a: {
+              color: theme('colors.accent.DEFAULT'),
+              '&:hover': {
+                color: theme('colors.accent.DEFAULT'),
+                textDecoration: 'underline',
+              },
+            },
+          },
+        },
+      }),
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
