@@ -32,7 +32,7 @@ const features = [
 export default function Home() {
   return (
     <main className="flex-1">
-      <section className="relative w-full py-20 md:py-32 lg:py-40">
+      <section className="relative w-full py-20 md:py-32 lg:py-40 overflow-hidden">
          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_800px_at_50%_200px,#1e40af33,transparent)] -z-10"></div>
          <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center">

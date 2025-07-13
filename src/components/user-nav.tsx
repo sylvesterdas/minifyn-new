@@ -62,7 +62,7 @@ export function UserNav() {
                     </Link>
                 </DropdownMenuItem>
                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/settings" className="flex items-center cursor-pointer">
+                    <Link href="/dashboard/settings/api-keys" className="flex items-center cursor-pointer">
                         <Key className="mr-2 h-4 w-4" />
                         <span>API Keys</span>
                     </Link>

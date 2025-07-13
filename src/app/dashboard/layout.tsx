@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Home, LineChart, Settings, Link as LinkIcon, PanelLeft } from 'lucide-react';
+import { Home, LineChart, Settings, Link as LinkIcon, PanelLeft, Key } from 'lucide-react';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { UserNav } from '@/components/user-nav';
 
@@ -12,6 +12,7 @@ const navItems = [
   { href: '/dashboard', label: 'Overview', icon: Home },
   { href: '/dashboard/links', label: 'Links', icon: LinkIcon },
   { href: '/dashboard/analytics', label: 'Analytics', icon: LineChart },
+  { href: '/dashboard/settings/api-keys', label: 'API Keys', icon: Key },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
