@@ -121,7 +121,7 @@ async function getClickEvents(): Promise<ClickEvent[]> {
 }
 
 
-interface AnalyticsSummary {
+export interface AnalyticsSummary {
     clicksByDay: { date: string; clicks: number }[];
     referrers: { referrer: string; clicks: number }[];
     platforms: { platform: string; clicks: number }[];
