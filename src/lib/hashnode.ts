@@ -1,8 +1,9 @@
+
 const HASHNODE_GQL_ENDPOINT = process.env.HASHNODE_GQL_ENDPOINT!;
 const HASHNODE_PUBLICATION_ID = process.env.HASHNODE_PUBLICATION_ID!;
 const HASHNODE_ACCESS_TOKEN = process.env.NEXT_HASHNODE_ACCESS_TOKEN!;
 
-interface HashnodePost {
+export interface HashnodePost {
     id: string;
     slug: string;
     title: string;
@@ -19,11 +20,17 @@ interface HashnodePost {
     };
 }
 
-interface HashnodeResponse {
+interface PageInfo {
+    hasNextPage: boolean;
+    endCursor: string | null;
+}
+
+interface HashnodePostsResponse {
     data: {
         publication: {
             posts: {
-                edges: { node: HashnodePost }[];
+                edges: { node: Omit<HashnodePost, 'content' | 'ogImage'> }[];
+                pageInfo: PageInfo;
             };
         }
     }
@@ -57,9 +64,9 @@ async function fetchFromHashnode<T>(query: string, variables: Record<string, any
 }
 
 const GET_POSTS_QUERY = `
-  query GetPosts($publicationId: ObjectId!) {
+  query GetPosts($publicationId: ObjectId!, $first: Int!, $after: String) {
     publication(id: $publicationId) {
-      posts(first: 10) {
+      posts(first: $first, after: $after) {
         edges {
           node {
             id
@@ -72,16 +79,24 @@ const GET_POSTS_QUERY = `
             }
           }
         }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
       }
     }
   }
 `;
 
-export async function getPosts(): Promise<Omit<HashnodePost, 'content' | 'ogImage'>[]> {
-    const response = await fetchFromHashnode<HashnodeResponse>(GET_POSTS_QUERY, {
-        publicationId: HASHNODE_PUBLICATION_ID
+export async function getPosts(first: number = 6, after?: string | null): Promise<{ posts: Omit<HashnodePost, 'content' | 'ogImage'>[], pageInfo: PageInfo }> {
+    const response = await fetchFromHashnode<HashnodePostsResponse>(GET_POSTS_QUERY, {
+        publicationId: HASHNODE_PUBLICATION_ID,
+        first,
+        after: after ?? null,
     });
-    return response.data.publication.posts.edges.map(edge => edge.node);
+    const posts = response.data.publication.posts.edges.map(edge => edge.node);
+    const pageInfo = response.data.publication.posts.pageInfo;
+    return { posts, pageInfo };
 }
 
 const GET_POST_BY_SLUG_QUERY = `
