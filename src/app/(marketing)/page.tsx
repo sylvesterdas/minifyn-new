@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useRef, useEffect } from 'react';
@@ -113,34 +114,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-slate-900/50">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="space-y-2">
-              <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm">Key Features</div>
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Everything You Need to Succeed</h2>
-              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                From robust analytics to developer-friendly APIs, we've got you covered.
-              </p>
-            </div>
-          </div>
-          <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-2 pt-12">
-            {features.map((feature, index) => (
-              <div key={index} className="grid gap-1 p-4 rounded-lg hover:bg-card/50 transition-colors">
-                {feature.icon}
-                <h3 className="text-lg font-bold">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-12 text-center">
-            <Button asChild size="lg">
-                <Link href="/auth/signup">Get started for free</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
       <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -186,6 +159,34 @@ export default function Home() {
                 Share your new link and monitor its performance with our detailed analytics dashboard.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-slate-900/50">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <div className="space-y-2">
+              <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm">Key Features</div>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Everything You Need to Succeed</h2>
+              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                From robust analytics to developer-friendly APIs, we've got you covered.
+              </p>
+            </div>
+          </div>
+          <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-2 pt-12">
+            {features.map((feature, index) => (
+              <div key={index} className="grid gap-1 p-4 rounded-lg hover:bg-card/50 transition-colors">
+                {feature.icon}
+                <h3 className="text-lg font-bold">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-12 text-center">
+            <Button asChild size="lg">
+                <Link href="/auth/signup">Get started for free</Link>
+            </Button>
           </div>
         </div>
       </section>
