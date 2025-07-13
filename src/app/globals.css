@@ -78,7 +78,7 @@
     background: #282c34;
     color: #abb2bf;
     display: block;
-    overflow-x: auto;
+    overflow-x: hidden; /* Remove horizontal scrollbar */
     padding: 1em;
     border-radius: 0.5rem; /* Match site's border radius */
 }

@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { HashnodePost } from '@/lib/hashnode';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import hljs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
 import typescript from 'highlight.js/lib/languages/typescript';
@@ -17,6 +17,7 @@ import bash from 'highlight.js/lib/languages/bash';
 import { SocialShare } from './social-share';
 import { CtaCard } from './cta-card';
 import { SocialLinks } from './social-links';
+import { getOrCreateShortUrlForPost } from '@/app/(marketing)/blog/actions';
 
 // Register languages we expect to use
 hljs.registerLanguage('javascript', javascript);
@@ -34,9 +35,15 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
     const authorName = post.author?.name || 'Sylvester Das';
     const contentRef = useRef<HTMLDivElement>(null);
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.minifyn.com';
-    const postUrl = `${siteUrl}/blog/${post.slug}`;
+    const longPostUrl = `${siteUrl}/blog/${post.slug}`;
+    const [shareUrl, setShareUrl] = useState(longPostUrl);
 
     useEffect(() => {
+        // Fetch the short URL for sharing
+        getOrCreateShortUrlForPost(longPostUrl).then(url => {
+            if (url) setShareUrl(url);
+        });
+
         if (contentRef.current) {
             // Find all <pre><code> blocks and apply highlighting
             contentRef.current.querySelectorAll('pre code').forEach((block) => {
@@ -50,7 +57,7 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
                 }
             });
         }
-    }, [post.content.html]);
+    }, [post.content.html, longPostUrl]);
 
     return (
         <article className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
@@ -70,7 +77,7 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
                 </div>
             )}
             
-            <div className="prose prose-invert mx-auto prose-lg">
+             <div className="prose prose-invert mx-auto prose-lg">
                 <header className="mb-8">
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
                         <p>By {authorName}</p>
@@ -103,7 +110,7 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
 
             <div className="max-w-2xl mx-auto mt-12">
                 <hr className="border-border my-8" />
-                <SocialShare url={postUrl} title={post.title} />
+                <SocialShare url={shareUrl} title={post.title} />
                 <hr className="border-border my-8" />
                 <CtaCard />
                 <hr className="border-border my-8" />
