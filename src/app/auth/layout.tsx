@@ -3,6 +3,7 @@ import { GoogleAnalytics } from '@/components/google-analytics';
 import { ConsentManager } from '@/components/consent-manager';
 import Image from 'next/image';
 import Link from 'next/link';
+import { CookieBanner } from '@/components/cookie-banner';
 
 export default function AuthLayout({
   children,
@@ -23,6 +24,7 @@ export default function AuthLayout({
         {children}
       </main>
       <Footer />
+      <CookieBanner />
     </div>
   );
 }

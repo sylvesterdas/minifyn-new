@@ -3,6 +3,7 @@ import { Footer } from '@/components/footer';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { GoogleAnalytics } from '@/components/google-analytics';
 import { ConsentManager } from '@/components/consent-manager';
+import { CookieBanner } from '@/components/cookie-banner';
 
 export default function MarketingLayout({
   children,
@@ -19,6 +20,7 @@ export default function MarketingLayout({
         {children}
       </main>
       <Footer />
+      <CookieBanner />
     </div>
   );
 }
