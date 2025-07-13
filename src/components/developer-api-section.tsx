@@ -6,6 +6,7 @@ import { CodeBlock } from "./code-block";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Button } from "./ui/button";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 const snippets = {
     curl: `curl -X POST https://minifyn.com/api/shorten \\
@@ -114,8 +115,13 @@ export function DeveloperApiSection() {
                             </TabsContent>
                          </div>
                     </Tabs>
+                    <p className="text-center text-sm text-muted-foreground mt-6">
+                        <Link href="/docs/api" className="inline-flex items-center gap-1 underline underline-offset-4 hover:text-primary transition-colors">
+                            Read the full API Documentation <ArrowRight className="h-4 w-4" />
+                        </Link>
+                    </p>
                 </div>
-                <div className="mt-12 text-center">
+                <div className="mt-8 text-center">
                     <Button asChild size="lg">
                         <Link href="/auth/signup">Get your API Key</Link>
                     </Button>
