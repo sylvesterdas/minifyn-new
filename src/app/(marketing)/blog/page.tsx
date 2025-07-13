@@ -8,11 +8,10 @@ export async function generateMetadata(): Promise<Metadata> {
     const title = 'Blog | MiniFyn';
     const description = 'Insights, tips, and updates from the MiniFyn team.';
 
-    // Fetch the latest post to create a dynamic OG image for the main blog page
     const { posts } = await getPosts(1);
     const latestPost = posts[0];
 
-    const ogUrl = new URL(`${siteUrl}/api/og`);
+    const ogUrl = new URL(`${siteUrl}/blog/og`);
     ogUrl.searchParams.set('title', latestPost ? latestPost.title : title);
     if (latestPost && latestPost.tags && latestPost.tags.length > 0) {
         ogUrl.searchParams.set('tags', latestPost.tags.map(t => t.name).join(','));

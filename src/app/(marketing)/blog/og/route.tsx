@@ -7,12 +7,11 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url)
+    const { searchParams, host } = new URL(req.url)
     const title = searchParams.get('title')
     const tagsParam = searchParams.get('tags');
     const tags = tagsParam ? tagsParam.split(',').filter(Boolean) : [];
     
-    // A simple hash function to generate a hue from the title
     const hue = Math.abs((title || '').split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0)) % 360;
 
     const fontData = await fetch(
@@ -55,7 +54,7 @@ export async function GET(req: Request) {
             color: 'rgba(255, 255, 255, 0.7)',
             fontWeight: '600',
           }}>
-            mnfy.in/blog
+            {host}/blog
           </div>
 
           <div

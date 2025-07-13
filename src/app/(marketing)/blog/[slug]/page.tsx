@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
     
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.minifyn.com';
-    const ogUrl = new URL(`${siteUrl}/api/og`);
+    const ogUrl = new URL(`${siteUrl}/blog/og`);
     ogUrl.searchParams.set('title', post.title);
     if(post.tags && post.tags.length > 0) {
       ogUrl.searchParams.set('tags', post.tags.map(t => t.name).join(','));
