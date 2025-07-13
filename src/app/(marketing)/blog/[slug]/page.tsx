@@ -20,25 +20,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         };
     }
     
-    const imageUrl = post.ogImage?.url || post.coverImage?.url || 'https://www.minifyn.com/logo.png';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.minifyn.com';
+    const ogUrl = new URL(`${siteUrl}/api/og`);
+    ogUrl.searchParams.set('title', post.title);
+    if(post.tags && post.tags.length > 0) {
+      ogUrl.searchParams.set('tags', post.tags.map(t => t.name).join(','));
+    }
+
     const authorName = post.author?.name || 'Sylvester Das';
 
     return {
         title: `${post.title} | MiniFyn Blog`,
         description: post.brief,
         alternates: {
-            canonical: `https://www.minifyn.com/blog/${post.slug}`,
+            canonical: `${siteUrl}/blog/${post.slug}`,
         },
         openGraph: {
             title: post.title,
             description: post.brief,
-            url: `https://www.minifyn.com/blog/${post.slug}`,
+            url: `${siteUrl}/blog/${post.slug}`,
             type: 'article',
             publishedTime: post.publishedAt,
             authors: [authorName],
             images: [
                 {
-                    url: imageUrl,
+                    url: ogUrl.toString(),
                     width: 1200,
                     height: 630,
                     alt: post.title,
@@ -49,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             card: 'summary_large_image',
             title: post.title,
             description: post.brief,
-            images: [imageUrl],
+            images: [ogUrl.toString()],
         }
     };
 }
@@ -62,7 +68,8 @@ export default async function PostPage({ params }: Props) {
     }
     
     const authorName = post.author?.name || 'Sylvester Das';
-    const imageUrl = post.coverImage?.url || 'https://www.minifyn.com/logo.png';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.minifyn.com';
+    const imageUrl = post.coverImage?.url || `${siteUrl}/logo.png`;
 
     const jsonLd: WithContext<Article> = {
         '@context': 'https://schema.org',
@@ -79,7 +86,7 @@ export default async function PostPage({ params }: Props) {
             name: 'MiniFyn',
             logo: {
                 '@type': 'ImageObject',
-                url: 'https://www.minifyn.com/logo.png',
+                url: `${siteUrl}/logo.png`,
             }
         },
         datePublished: post.publishedAt,

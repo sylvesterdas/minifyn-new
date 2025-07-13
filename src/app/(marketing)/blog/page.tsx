@@ -1,59 +1,70 @@
 import type { Metadata } from 'next';
 import { getPosts } from '@/lib/hashnode';
 import { BlogPostList } from '@/components/blog-post-list';
-import type { Blog, WithContext, WebSite } from 'schema-dts';
+import type { Blog, WithContext } from 'schema-dts';
 
 export async function generateMetadata(): Promise<Metadata> {
-    // A static, branded image is better for the main blog page's social sharing.
-    const ogImageUrl = 'https://www.minifyn.com/logo.png';
-    const siteUrl = 'https://www.minifyn.com/blog';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.minifyn.com';
     const title = 'Blog | MiniFyn';
     const description = 'Insights, tips, and updates from the MiniFyn team.';
+
+    // Fetch the latest post to create a dynamic OG image for the main blog page
+    const { posts } = await getPosts(1);
+    const latestPost = posts[0];
+
+    const ogUrl = new URL(`${siteUrl}/api/og`);
+    ogUrl.searchParams.set('title', latestPost ? latestPost.title : title);
+    if (latestPost && latestPost.tags && latestPost.tags.length > 0) {
+        ogUrl.searchParams.set('tags', latestPost.tags.map(t => t.name).join(','));
+    } else {
+        ogUrl.searchParams.set('tags', 'URL Shortening,Tech,Tips');
+    }
 
     return {
         title,
         description,
         alternates: {
-            canonical: siteUrl,
+            canonical: `${siteUrl}/blog`,
         },
         openGraph: {
             title,
             description,
-            url: siteUrl,
+            url: `${siteUrl}/blog`,
             type: 'website',
             images: [
                 {
-                    url: ogImageUrl,
-                    width: 512, // Standard logo dimensions
-                    height: 512,
+                    url: ogUrl.toString(),
+                    width: 1200,
+                    height: 630,
                     alt: 'MiniFyn Blog',
                 },
             ],
         },
         twitter: {
-            card: 'summary', // Summary card is better for logo-sized images
+            card: 'summary_large_image',
             title,
             description,
-            images: [ogImageUrl],
+            images: [ogUrl.toString()],
         },
     };
 }
 
 export default async function BlogPage() {
   const { posts, pageInfo } = await getPosts(6);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.minifyn.com';
   
   const jsonLd: WithContext<Blog> = {
     '@context': 'https://schema.org',
     '@type': 'Blog',
     name: 'MiniFyn Blog',
     description: 'Insights, tips, and updates from the MiniFyn team.',
-    url: 'https://www.minifyn.com/blog',
+    url: `${siteUrl}/blog`,
     publisher: {
       '@type': 'Organization',
       name: 'MiniFyn',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://www.minifyn.com/logo.png',
+        url: `${siteUrl}/logo.png`,
       },
     },
   };
