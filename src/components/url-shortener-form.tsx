@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Clipboard, Check, Loader2 } from 'lucide-react';
 import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, type User } from 'firebase/auth';
+import { onAuthStateChanged, signInAnonymously, type User } from 'firebase/auth';
 
 function SubmitButton({ pending, disabled }: { pending: boolean, disabled: boolean }) {
     return (
@@ -34,12 +34,27 @@ export function UrlShortenerForm() {
     const [shortenedUrl, setShortenedUrl] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
     const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [isAuthLoading, setIsAuthLoading] = useState(true);
     const { toast } = useToast();
     const formRef = useRef<HTMLFormElement>(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setCurrentUser(user);
+            if (user) {
+                setCurrentUser(user);
+                setIsAuthLoading(false);
+            } else {
+                signInAnonymously(auth)
+                    .then((anonUser) => {
+                        setCurrentUser(anonUser.user);
+                    })
+                    .catch((error) => {
+                        console.error("Anonymous sign-in failed:", error);
+                    })
+                    .finally(() => {
+                         setIsAuthLoading(false);
+                    });
+            }
         });
         return () => unsubscribe();
     }, []);
@@ -97,7 +112,7 @@ export function UrlShortenerForm() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">
-                    <SubmitButton pending={isPending} disabled={!currentUser} />
+                    <SubmitButton pending={isPending} disabled={isAuthLoading} />
                      {shortenedUrl && (
                         <div className="w-full p-3 rounded-md bg-accent/20 border border-accent flex items-center justify-between animate-in fade-in duration-500">
                             <a href={shortenedUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-accent-foreground truncate hover:underline">

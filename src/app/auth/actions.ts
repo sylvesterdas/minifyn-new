@@ -13,7 +13,7 @@ export async function login(
     const decodedToken: DecodedIdToken = await auth.verifyIdToken(idToken, true);
 
     if (!decodedToken.email_verified) {
-      return { error: 'Email not verified.' };
+      return { error: 'Email not verified. Please check your inbox for a verification link.' };
     }
 
     // Session cookie will be valid for 5 days.
