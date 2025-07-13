@@ -4,9 +4,8 @@ import { BlogPostList } from '@/components/blog-post-list';
 import type { Blog, WithContext, WebSite } from 'schema-dts';
 
 export async function generateMetadata(): Promise<Metadata> {
-    const { posts } = await getPosts(1);
-    const mostRecentPost = posts[0];
-    const ogImageUrl = mostRecentPost?.coverImage?.url || 'https://www.minifyn.com/logo.png';
+    // A static, branded image is better for the main blog page's social sharing.
+    const ogImageUrl = 'https://www.minifyn.com/logo.png';
     const siteUrl = 'https://www.minifyn.com/blog';
     const title = 'Blog | MiniFyn';
     const description = 'Insights, tips, and updates from the MiniFyn team.';
@@ -25,14 +24,14 @@ export async function generateMetadata(): Promise<Metadata> {
             images: [
                 {
                     url: ogImageUrl,
-                    width: 1200,
-                    height: 630,
+                    width: 512, // Standard logo dimensions
+                    height: 512,
                     alt: 'MiniFyn Blog',
                 },
             ],
         },
         twitter: {
-            card: 'summary_large_image',
+            card: 'summary', // Summary card is better for logo-sized images
             title,
             description,
             images: [ogImageUrl],
