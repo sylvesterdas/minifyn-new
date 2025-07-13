@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { signup } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export interface FormState {
     error?: string;
@@ -18,10 +19,10 @@ export interface FormState {
     message?: string;
 }
 
-function SubmitButton() {
+function SubmitButton({ disabled }: { disabled: boolean }) {
     const { pending } = useFormStatus();
     return (
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button type="submit" className="w-full" disabled={pending || disabled}>
             {pending ? <Loader2 className="animate-spin" /> : 'Create an account'}
         </Button>
     );
@@ -31,6 +32,7 @@ export default function SignUpPage() {
     const [state, formAction] = useActionState(signup, { success: false });
     const { toast } = useToast();
     const router = useRouter();
+    const [termsAccepted, setTermsAccepted] = useState(false);
 
     useEffect(() => {
         if (state.error) {
@@ -74,9 +76,25 @@ export default function SignUpPage() {
                         <Label htmlFor="password">Password</Label>
                         <Input id="password" name="password" type="password" required />
                     </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox 
+                            id="terms-accepted" 
+                            name="terms-accepted"
+                            checked={termsAccepted}
+                            onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                        />
+                        <div className="grid gap-1.5 leading-none">
+                            <label
+                                htmlFor="terms-accepted"
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                                I accept the <Link href="/terms" target="_blank" className="underline hover:text-primary">Terms of Service</Link>
+                            </label>
+                        </div>
+                    </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">
-                    <SubmitButton />
+                    <SubmitButton disabled={!termsAccepted} />
                     <div className="text-center text-sm">
                         Already have an account?{' '}
                         <Link href="/auth/signin" className="underline">

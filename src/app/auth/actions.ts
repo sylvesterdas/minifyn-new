@@ -1,6 +1,6 @@
 'use server';
 
-import { auth } from '@/lib/firebase-admin';
+import { auth, db } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
 import type { FormState } from './signin/page';
 import { sendEmail } from '@/lib/email';
@@ -72,6 +72,7 @@ export async function signup(
   ): Promise<FormState> {
   const email = formData.get('email');
   const password = formData.get('password');
+  const termsAccepted = formData.get('terms-accepted');
 
   if (
     typeof email !== 'string' ||
@@ -83,11 +84,21 @@ export async function signup(
   if (typeof password !== 'string' || password.length < 6) {
     return { error: 'Password must be at least 6 characters long' };
   }
+  if (termsAccepted !== 'on') {
+    return { error: 'You must accept the Terms of Service to create an account.' };
+  }
 
   try {
     const userRecord = await auth.createUser({
       email,
       password,
+    });
+    
+    // Store terms acceptance in the database
+    await db.ref(`user_profiles/${userRecord.uid}`).set({
+      email: userRecord.email,
+      termsAcceptedAt: Date.now(),
+      createdAt: userRecord.metadata.creationTime,
     });
     
     const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
