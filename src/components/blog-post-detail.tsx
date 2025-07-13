@@ -50,13 +50,6 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
             contentRef.current.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightElement(block as HTMLElement);
             });
-            // Remove backticks from inline code if they exist
-            contentRef.current.querySelectorAll('code:not(pre > code)').forEach((el) => {
-                const element = el as HTMLElement;
-                if (element.innerText.startsWith('`') && element.innerText.endsWith('`')) {
-                    element.innerText = element.innerText.slice(1, -1);
-                }
-            });
         }
     }, [post.content.html, longPostUrl]);
 
