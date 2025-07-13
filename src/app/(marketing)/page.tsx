@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Key, Zap, QrCode, Link as LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 
 const features = [
   {
@@ -34,8 +33,15 @@ const features = [
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [textPosition, setTextPosition] = useState<{ top: string; left: string; } | null>(null);
 
   useEffect(() => {
+    // Randomize position on client mount to avoid hydration errors
+    setTextPosition({
+      top: `${Math.random() * 80 + 10}%`,
+      left: `${Math.random() * 80 + 10}%`,
+    });
+    
     const handleMouseMove = (event: MouseEvent) => {
       const container = containerRef.current;
       if (!container) return;
@@ -75,16 +81,26 @@ export default function Home() {
         <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_500px_at_var(--x)_var(--y),hsl(var(--primary)/0.15),transparent)]"></div>
           
-          {/* Easter Egg Text */}
-          <div 
-            className="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none"
-            style={{
-              maskImage: 'radial-gradient(circle 500px at var(--x) var(--y), black, transparent)',
-              WebkitMaskImage: 'radial-gradient(circle 500px at var(--x) var(--y), black, transparent)',
-            }}
-          >
-              <h2 className="text-[20vw] font-bold text-primary/10 select-none">MiniFyn</h2>
-          </div>
+          {textPosition && (
+            <div 
+              className="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none"
+              style={{
+                maskImage: 'radial-gradient(circle 500px at var(--x) var(--y), black, transparent)',
+                WebkitMaskImage: 'radial-gradient(circle 500px at var(--x) var(--y), black, transparent)',
+              }}
+            >
+                <h2 
+                  className="text-6xl font-bold text-primary/20 select-none absolute"
+                  style={{
+                    top: textPosition.top,
+                    left: textPosition.left,
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                >
+                  MiniFyn
+                </h2>
+            </div>
+          )}
         </div>
 
         <div className="container mx-auto px-4 md:px-6">
