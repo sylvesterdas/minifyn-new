@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPage() {
-  const lastUpdated = new Date('2024-01-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const lastUpdated = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
         <div className="prose prose-invert mx-auto">
