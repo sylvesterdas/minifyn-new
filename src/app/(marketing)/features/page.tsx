@@ -1,3 +1,4 @@
+
 import { CheckCircle, QrCode, FileQuestion, LifeBuoy } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
@@ -9,11 +10,11 @@ export const metadata: Metadata = {
 };
 
 const featuresList = [
-    { name: "Detailed Analytics", description: "Track clicks, referrers, and geographic data.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
+    { name: "Detailed Analytics", description: "Track clicks, referrers, and geographic data for your links.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
     { name: "Developer API", description: "Integrate our shortening service into your apps.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
     { name: "Link Expiration", description: "Set links to expire automatically after a certain time.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
     { name: "Domain Blocklist", description: "Stay safe with automatic filtering of malicious domains.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
-    { name: "User Tiers", description: "Generous limits for both anonymous and registered users.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
+    { name: "User Tiers", description: "Free accounts get 20 links/day that expire in 60 days. Anonymous users get 5 links/day expiring in 7 days.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
     { name: "QR Code Generation", description: "Instantly generate and download a QR code for any shortened link, completely free.", icon: <QrCode className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> }
 ]
 
