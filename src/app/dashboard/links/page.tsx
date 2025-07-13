@@ -1,8 +1,7 @@
 import { getUserLinks, type UserLink } from '../actions';
 import { LinksDataTable } from './links-data-table';
 import { columns } from './links-data-table-column-def';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import { CreateLinkDialog } from './create-link-dialog';
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -13,9 +12,7 @@ export default async function LinksPage() {
     <div className="flex flex-col gap-6">
        <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold md:text-2xl">Links</h1>
-        <Button asChild>
-            <Link href="/">Create New Link</Link>
-        </Button>
+        <CreateLinkDialog />
       </div>
       <div className="container mx-auto py-2 px-0">
         <LinksDataTable columns={columns} data={links} />

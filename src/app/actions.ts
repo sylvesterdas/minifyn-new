@@ -5,6 +5,7 @@ import { checkRateLimit, createShortLink, incrementUsage } from '@/lib/data';
 import { auth } from 'firebase-admin';
 import type { UserRecord } from 'firebase-admin/auth';
 import { triggerMaintenance } from '@/lib/maintenance';
+import { revalidatePath } from 'next/cache';
 
 export interface FormState {
     success: boolean;
@@ -64,6 +65,8 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
         const host = 'mnfy.in';
         const shortUrl = `https://${host}/${newLink.id}`;
         
+        revalidatePath('/dashboard/links');
+
         return {
             success: true,
             message: 'URL shortened successfully!',
