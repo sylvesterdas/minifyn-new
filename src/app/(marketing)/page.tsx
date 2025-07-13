@@ -1,7 +1,3 @@
-
-'use client';
-
-import { useRef, useEffect, useState } from 'react';
 import { UrlShortenerForm } from '@/components/url-shortener-form';
 import { QrCodeGeneratorForm } from '@/components/qr-code-generator-form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -33,61 +29,15 @@ const features = [
 ];
 
 export default function Home() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      const container = containerRef.current;
-      if (!container) return;
-
-      const rect = container.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-
-      container.style.setProperty('--x', `${x}px`);
-      container.style.setProperty('--y', `${y}px`);
-    };
-
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('mousemove', handleMouseMove);
-    }
-
-    return () => {
-      if (container) {
-        container.removeEventListener('mousemove', handleMouseMove);
-      }
-    };
-  }, []);
-
   return (
-    <main
-      ref={containerRef}
-      className="flex-1 relative overflow-hidden"
-       style={
-          {
-            '--x': '50%',
-            '--y': '50%',
-          } as React.CSSProperties
-        }
-    >
-       <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_500px_at_var(--x)_var(--y),hsl(var(--primary)/0.15),transparent)]"></div>
-          
-          <div 
-            className="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none"
-            style={{
-              maskImage: 'radial-gradient(circle 500px at var(--x) var(--y), black, transparent)',
-              WebkitMaskImage: 'radial-gradient(circle 500px at var(--x) var(--y), black, transparent)',
-            }}
-          >
-              <h2 className="text-[20vw] font-bold text-primary/20 select-none">MiniFyn</h2>
+    <main className="flex-1">
+      <section className="relative w-full py-20 md:py-32 lg:py-40 overflow-hidden">
+        <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_500px_at_50%_50%,hsl(var(--primary)/0.15),transparent)]"></div>
+          <div className="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none">
+            <h2 className="text-[20vw] font-bold text-primary/20 select-none">MiniFyn</h2>
           </div>
         </div>
-
-      <section
-        className="group relative w-full py-20 md:py-32 lg:py-40"
-      >
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center">
             <div className="space-y-2">
@@ -117,7 +67,8 @@ export default function Home() {
       </section>
 
       <section id="how-it-works" className="relative w-full py-12 md:py-24 lg:py-32">
-        <div className="container mx-auto px-4 md:px-6">
+        <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-5"></div>
+        <div className="container mx-auto px-4 md:px-6 relative">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
               <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm">How It Works</div>
@@ -165,8 +116,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="features" className="relative w-full py-12 md:py-24 lg:py-32">
-        <div className="container mx-auto px-4 md:px-6">
+      <section id="features" className="relative w-full py-12 md:py-24 lg:py-32 bg-card/50">
+        <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-5"></div>
+        <div className="container mx-auto px-4 md:px-6 relative">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
               <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm">Key Features</div>
