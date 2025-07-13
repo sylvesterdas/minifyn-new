@@ -1,9 +1,30 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { HashnodePost } from '@/lib/hashnode';
+import { useEffect, useRef } from 'react';
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+import typescript from 'highlight.js/lib/languages/typescript';
+import xml from 'highlight.js/lib/languages/xml';
+import css from 'highlight.js/lib/languages/css';
+import json from 'highlight.js/lib/languages/json';
+import bash from 'highlight.js/lib/languages/bash';
+import { SocialShare } from './social-share';
+import { CtaCard } from './cta-card';
+import { SocialLinks } from './social-links';
+
+// Register languages we expect to use
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('typescript', typescript);
+hljs.registerLanguage('xml', xml);
+hljs.registerLanguage('css', css);
+hljs.registerLanguage('json', json);
+hljs.registerLanguage('bash', bash);
 
 interface BlogPostDetailProps {
     post: HashnodePost;
@@ -11,6 +32,25 @@ interface BlogPostDetailProps {
 
 export function BlogPostDetail({ post }: BlogPostDetailProps) {
     const authorName = post.author?.name || 'Sylvester Das';
+    const contentRef = useRef<HTMLDivElement>(null);
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.minifyn.com';
+    const postUrl = `${siteUrl}/blog/${post.slug}`;
+
+    useEffect(() => {
+        if (contentRef.current) {
+            // Find all <pre><code> blocks and apply highlighting
+            contentRef.current.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block as HTMLElement);
+            });
+            // Remove backticks from inline code if they exist
+            contentRef.current.querySelectorAll('code:not(pre > code)').forEach((el) => {
+                const element = el as HTMLElement;
+                if (element.innerText.startsWith('`') && element.innerText.endsWith('`')) {
+                    element.innerText = element.innerText.slice(1, -1);
+                }
+            });
+        }
+    }, [post.content.html]);
 
     return (
         <article className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
@@ -58,7 +98,19 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
                     )}
                 </header>
                 
-                <div dangerouslySetInnerHTML={{ __html: post.content.html }}></div>
+                <div ref={contentRef} dangerouslySetInnerHTML={{ __html: post.content.html }}></div>
+            </div>
+
+            <div className="max-w-2xl mx-auto mt-12">
+                <hr className="border-border my-8" />
+                <SocialShare url={postUrl} title={post.title} />
+                <hr className="border-border my-8" />
+                <CtaCard />
+                <hr className="border-border my-8" />
+                <div className="text-center">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">Follow Us for Updates</h3>
+                    <SocialLinks />
+                </div>
             </div>
         </article>
     );

@@ -1,0 +1,72 @@
+'use client';
+
+import { useState } from 'react';
+import { Button } from './ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { Twitter, Linkedin, Facebook, Link as LinkIcon, Send } from 'lucide-react'; // Using Send for Reddit
+
+interface SocialShareProps {
+    url: string;
+    title: string;
+}
+
+export function SocialShare({ url, title }: SocialShareProps) {
+    const { toast } = useToast();
+    const [copied, setCopied] = useState(false);
+
+    const shareLinks = {
+        twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
+        linkedin: `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`,
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+        reddit: `https://www.reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`,
+    };
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(url).then(() => {
+            setCopied(true);
+            toast({
+                title: 'Copied!',
+                description: 'Link copied to clipboard.',
+            });
+            setTimeout(() => setCopied(false), 2000);
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+            toast({
+                title: 'Error',
+                description: 'Could not copy link to clipboard.',
+                variant: 'destructive',
+            });
+        });
+    };
+
+    return (
+        <div className="text-center">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Share this article</h3>
+            <div className="flex justify-center items-center gap-2 flex-wrap">
+                <Button variant="outline" size="icon" asChild>
+                    <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter">
+                        <Twitter className="h-5 w-5" />
+                    </a>
+                </Button>
+                <Button variant="outline" size="icon" asChild>
+                    <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn">
+                        <Linkedin className="h-5 w-5" />
+                    </a>
+                </Button>
+                <Button variant="outline" size="icon" asChild>
+                    <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook">
+                        <Facebook className="h-5 w-5" />
+                    </a>
+                </Button>
+                 <Button variant="outline" size="icon" asChild>
+                    <a href={shareLinks.reddit} target="_blank" rel="noopener noreferrer" aria-label="Share on Reddit">
+                        <Send className="h-5 w-5" />
+                    </a>
+                </Button>
+                <Button variant="outline" size="icon" onClick={handleCopy} aria-label="Copy link">
+                    <LinkIcon className={`h-5 w-5 ${copied ? 'text-green-500' : ''}`} />
+                </Button>
+            </div>
+        </div>
+    );
+}
