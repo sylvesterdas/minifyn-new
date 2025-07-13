@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useTransition, useMemo } from 'react';
+import { useState, useTransition, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { format } from 'date-fns';
@@ -9,10 +9,11 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { Button } from '@/components/ui/button';
 import { HashnodePost } from '@/lib/hashnode';
 import { loadMorePosts } from '@/app/(marketing)/blog/actions';
-import { Loader2, Clock, Tag, X } from 'lucide-react';
+import { Loader2, Clock, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useDebounce } from 'use-debounce';
 
 type Post = Omit<HashnodePost, 'content' | 'ogImage'>;
 
@@ -27,12 +28,35 @@ interface BlogPostListProps {
 }
 
 export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProps) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
     const [posts, setPosts] = useState<Post[]>(initialPosts);
     const [pageInfo, setPageInfo] = useState<PageInfo>(initialPageInfo);
     const [isPending, startTransition] = useTransition();
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedTag, setSelectedTag] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+    const [selectedTag, setSelectedTag] = useState<string | null>(searchParams.get('tag'));
+    
+    const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+
+    // Update URL when filters change
+    useEffect(() => {
+        const params = new URLSearchParams(searchParams);
+        if (debouncedSearchTerm) {
+            params.set('search', debouncedSearchTerm);
+        } else {
+            params.delete('search');
+        }
+        if (selectedTag) {
+            params.set('tag', selectedTag);
+        } else {
+            params.delete('tag');
+        }
+        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }, [debouncedSearchTerm, selectedTag, pathname, router, searchParams]);
+    
 
     const allTags = useMemo(() => {
         const tags = new Set<string>();
@@ -49,13 +73,13 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
                 return post.tags?.some(tag => tag.name === selectedTag);
             })
             .filter(post => {
-                if (!searchTerm) return true;
-                const searchLower = searchTerm.toLowerCase();
-                const titleMatch = post.title.toLowerCase().includes(searchLower);
-                const briefMatch = post.brief.toLowerCase().includes(searchLower);
+                const search = debouncedSearchTerm.toLowerCase();
+                if (!search) return true;
+                const titleMatch = post.title.toLowerCase().includes(search);
+                const briefMatch = post.brief.toLowerCase().includes(search);
                 return titleMatch || briefMatch;
             });
-    }, [posts, searchTerm, selectedTag]);
+    }, [posts, debouncedSearchTerm, selectedTag]);
 
     const handleLoadMore = () => {
         if (!pageInfo.endCursor) return;
@@ -70,6 +94,10 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
             }
         });
     };
+    
+    const handleTagClick = (tagName: string) => {
+        setSelectedTag(currentTag => (currentTag === tagName ? null : tagName));
+    };
 
     return (
         <>
@@ -80,14 +108,18 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
                     className="max-w-lg mx-auto"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    aria-label="Search posts"
                 />
                 <div className="flex flex-wrap items-center justify-center gap-2">
                     {allTags.map(tag => (
                         <Badge
                             key={tag}
                             variant={selectedTag === tag ? 'default' : 'secondary'}
-                            onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                            onClick={() => handleTagClick(tag)}
                             className="cursor-pointer transition-all"
+                            role="button"
+                            aria-pressed={selectedTag === tag}
+                            tabIndex={0}
                         >
                             {tag}
                             {selectedTag === tag && <X className="ml-1.5 h-3 w-3" />}
@@ -152,7 +184,7 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
                 </div>
             )}
 
-            {pageInfo.hasNextPage && !searchTerm && !selectedTag && (
+            {pageInfo.hasNextPage && !debouncedSearchTerm && !selectedTag && (
                 <div className="mt-12 text-center">
                     <Button onClick={handleLoadMore} disabled={isPending} size="lg">
                         {isPending ? (
