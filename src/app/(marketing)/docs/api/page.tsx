@@ -114,7 +114,13 @@ export default function ApiDocsPage() {
 
                 <h2 className="mt-12 text-2xl font-semibold">Rate Limiting</h2>
                 <p>
-                    API usage is subject to rate limits based on your account plan. The specific limits are generous for registered users. If you exceed the rate limit, you will receive a <code className="text-sm">429 Too Many Requests</code> HTTP status code. Check the response headers for more details on your current limit status.
+                    To ensure fair usage and protect the service from abuse, the API is subject to rate limiting. Your API key allows for up to <strong>1,000 requests per day</strong>.
+                </p>
+                <p className="mt-4">
+                    In addition to the daily quota, a time-based throttle is in place to prevent rapid-fire requests. You are limited to <strong>1 request per second</strong> per API key.
+                </p>
+                <p className="mt-4">
+                    If you exceed either of these limits, you will receive a <code className="text-sm">429 Too Many Requests</code> HTTP status code.
                 </p>
             </div>
         </div>
