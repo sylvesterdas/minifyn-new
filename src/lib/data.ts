@@ -212,3 +212,28 @@ export const validateApiKey = async (apiKey: string): Promise<UserRecord | null>
         return null;
     }
 }
+
+interface ClickData {
+    userAgent: string;
+    ip: string;
+    referer: string;
+    language: string;
+}
+
+export const recordClick = async (slug: string, clickData: ClickData): Promise<void> => {
+    const linkRef = db.ref(`urls/${slug}`);
+    
+    try {
+        // Increment click count atomically
+        await linkRef.child('clickCount').transaction((currentValue) => (currentValue || 0) + 1);
+
+        // Add detailed analytics data
+        const analyticsRef = db.ref(`analytics/${slug}`).push();
+        await analyticsRef.set({
+            ...clickData,
+            timestamp: Date.now(),
+        });
+    } catch (error) {
+        console.error(`Failed to record click for slug ${slug}:`, error);
+    }
+};

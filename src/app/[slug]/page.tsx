@@ -1,7 +1,9 @@
-import { getLinkBySlug } from '@/lib/data';
+import { getLinkBySlug, recordClick } from '@/lib/data';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Redirector } from '@/components/redirector';
+import { headers } from 'next/headers';
+import type { NextRequest } from 'next/server';
 
 type Props = {
   params: { slug: string };
@@ -46,6 +48,22 @@ export default async function SlugPage({ params }: Props) {
     if (!link) {
         notFound();
     }
+    
+    const headerList = headers();
+    const userAgent = headerList.get('user-agent');
+    const referer = headerList.get('referer');
+    const language = headerList.get('accept-language');
+    // NOTE: In a real production environment behind a load balancer/proxy,
+    // you would use the 'x-forwarded-for' header.
+    const ip = headerList.get('x-forwarded-for') ?? '127.0.0.1';
+
+    // Record the click in the background (fire and forget)
+    recordClick(params.slug, {
+        userAgent: userAgent || 'Unknown',
+        ip: ip,
+        referer: referer || 'Direct',
+        language: language || 'Unknown',
+    });
     
     return <Redirector longUrl={link.longUrl} />;
 }
