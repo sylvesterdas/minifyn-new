@@ -81,7 +81,7 @@ export default function Home() {
               WebkitMaskImage: 'radial-gradient(circle 500px at var(--x) var(--y), black, transparent)',
             }}
           >
-              <h2 className="text-9xl font-bold text-primary/20 select-none">MiniFyn</h2>
+              <h2 className="text-[20vw] font-bold text-primary/20 select-none">MiniFyn</h2>
           </div>
         </div>
 
