@@ -1,4 +1,3 @@
-'use server';
 
 import { ImageResponse } from 'next/og'
 
