@@ -57,11 +57,12 @@
     @apply bg-background text-foreground;
   }
   
-  .prose pre {
+  /* Hides scrollbar for code blocks in blog posts */
+  .blog-content pre {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* Internet Explorer 10+ */
   }
-  .prose pre::-webkit-scrollbar {
+  .blog-content pre::-webkit-scrollbar {
     width: 0;
     height: 0;
   }

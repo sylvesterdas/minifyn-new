@@ -19,6 +19,7 @@ import { SocialShare } from './social-share';
 import { CtaCard } from './cta-card';
 import { SocialLinks } from './social-links';
 import { getOrCreateShortUrlForPost } from '@/app/(marketing)/blog/actions';
+import { cn } from '@/lib/utils';
 
 // Register languages we expect to use
 hljs.registerLanguage('javascript', javascript);
@@ -69,7 +70,7 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
                 </div>
             )}
             
-             <div className="prose prose-invert mx-auto prose-lg">
+             <div className={cn("prose prose-invert mx-auto prose-lg", "blog-content")}>
                 <header className="mb-8">
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
                         <p>By {authorName}</p>
