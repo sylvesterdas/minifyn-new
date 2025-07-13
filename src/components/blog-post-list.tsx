@@ -5,15 +5,16 @@ import { useState, useTransition, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { format } from 'date-fns';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { HashnodePost } from '@/lib/hashnode';
 import { loadMorePosts } from '@/app/(marketing)/blog/actions';
-import { Loader2, Clock, X } from 'lucide-react';
+import { Loader2, Clock, X, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDebounce } from 'use-debounce';
+import { Button } from './ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 type Post = Omit<HashnodePost, 'content' | 'ogImage'>;
 
@@ -129,51 +130,54 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
             </div>
 
             {filteredPosts.length > 0 ? (
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     {filteredPosts.map((post) => {
                         const authorName = post.author?.name || "Sylvester Das";
+                        const authorImage = post.author?.profilePicture;
                         return (
-                        <Card key={post.slug} className="flex flex-col">
-                            <CardHeader>
-                                {post.coverImage?.url && (
-                                    <Link href={`/blog/${post.slug}`} className="aspect-[16/9] relative block mb-4">
-                                        <Image
-                                            src={post.coverImage.url}
-                                            alt={post.title}
-                                            fill
-                                            className="rounded-t-lg object-cover"
-                                        />
-                                    </Link>
-                                )}
-                                <CardTitle>
-                                <Link href={`/blog/${post.slug}`}>{post.title}</Link>
-                                </CardTitle>
-                                <CardDescription className="flex flex-wrap items-center gap-x-2 text-xs">
-                                    <span>By {authorName}</span>
-                                    <span className="text-muted-foreground/50">&bull;</span>
-                                    <span>{format(new Date(post.publishedAt), 'MMM d, yyyy')}</span>
-                                    <span className="text-muted-foreground/50">&bull;</span>
-                                    <span className="flex items-center gap-1">
-                                        <Clock className="h-3 w-3" />
-                                        {post.readTimeInMinutes} min read
-                                    </span>
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="flex-1">
-                                <p className="text-muted-foreground">{post.brief}</p>
+                        <Card key={post.slug} className="flex flex-col group overflow-hidden rounded-lg shadow-lg hover:shadow-primary/20 transition-all duration-300">
+                             <Link href={`/blog/${post.slug}`} className="block overflow-hidden">
+                                <div className="aspect-[16/9] relative">
+                                    <Image
+                                        src={post.coverImage?.url || 'https://placehold.co/600x400.png'}
+                                        alt={post.title}
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                        data-ai-hint="blog post"
+                                    />
+                                </div>
+                            </Link>
+                            <CardContent className="p-6 flex flex-col flex-grow">
                                 {post.tags && post.tags.length > 0 && (
-                                    <div className="mt-4 flex flex-wrap gap-2">
-                                        {post.tags.map(tag => (
-                                            <Badge key={tag.slug} variant="secondary">{tag.name}</Badge>
+                                    <div className="mb-3 flex flex-wrap gap-2">
+                                        {post.tags.slice(0, 2).map(tag => (
+                                            <Badge key={tag.slug} variant="secondary" className="text-xs">{tag.name}</Badge>
                                         ))}
                                     </div>
                                 )}
+                                <h2 className="text-xl font-bold mb-3 flex-grow">
+                                    <Link href={`/blog/${post.slug}`} className="hover:text-primary transition-colors">{post.title}</Link>
+                                </h2>
+                                <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
+                                    {post.brief}
+                                </p>
+                                
+                                <div className="mt-auto pt-4 border-t border-border/50">
+                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                        <div className="flex items-center gap-2">
+                                            <Avatar className="h-6 w-6">
+                                                <AvatarImage src={authorImage} alt={authorName} />
+                                                <AvatarFallback>{authorName.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <span className="font-medium">{authorName}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <Clock className="h-3 w-3" />
+                                            <span>{post.readTimeInMinutes} min read</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </CardContent>
-                            <CardFooter>
-                                <Button asChild variant="secondary">
-                                    <Link href={`/blog/${post.slug}`}>Read More</Link>
-                                </Button>
-                            </CardFooter>
                         </Card>
                     )})}
                 </div>

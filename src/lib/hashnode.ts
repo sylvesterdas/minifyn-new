@@ -14,6 +14,7 @@ export interface HashnodePost {
     readTimeInMinutes: number;
     author: {
         name: string;
+        profilePicture?: string;
     };
     tags: {
         name: string;
@@ -91,6 +92,7 @@ const GET_POSTS_QUERY = `
             readTimeInMinutes
             author {
                 name
+                profilePicture
             }
             tags {
                 name
@@ -135,6 +137,7 @@ const GET_POST_BY_SLUG_QUERY = `
         readTimeInMinutes
         author {
             name
+            profilePicture
         }
         tags {
             name
