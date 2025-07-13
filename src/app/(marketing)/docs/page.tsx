@@ -1,7 +1,8 @@
-import { Key, BookOpen, ArrowRight } from 'lucide-react';
+import { Key, BookOpen, ArrowRight, FileQuestion, LifeBuoy } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'Documentation | MiniFyn',
@@ -48,6 +49,27 @@ export default function DocsPage() {
                 </Card>
             </Link>
         ))}
+      </div>
+
+      <div className="mt-16 text-center border-t pt-12">
+        <h3 className="text-2xl font-semibold">Need More Help?</h3>
+        <p className="mt-2 text-muted-foreground">
+          If you can't find what you're looking for, check out these resources.
+        </p>
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Button asChild variant="outline">
+            <Link href="/help/faq">
+              <FileQuestion className="mr-2 h-4 w-4" />
+              Read our FAQ
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/contact">
+              <LifeBuoy className="mr-2 h-4 w-4" />
+              Contact Support
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
