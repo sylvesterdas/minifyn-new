@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { UrlShortenerForm } from '@/components/url-shortener-form';
 import { QrCodeGeneratorForm } from '@/components/qr-code-generator-form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -114,7 +114,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32">
+      <section id="how-it-works" className="relative w-full py-12 md:py-24 lg:py-32">
+        <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#e5e7eb11,transparent_1px)] [background-size:16px_16px]"></div>
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
@@ -163,7 +164,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-slate-900/50">
+      <section id="features" className="relative w-full py-12 md:py-24 lg:py-32 bg-card/50">
+        <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#e5e7eb11,transparent_1px)] [background-size:16px_16px]"></div>
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
@@ -176,7 +178,7 @@ export default function Home() {
           </div>
           <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-2 pt-12">
             {features.map((feature, index) => (
-              <div key={index} className="grid gap-1 p-4 rounded-lg hover:bg-card/50 transition-colors">
+              <div key={index} className="grid gap-1 p-4 rounded-lg hover:bg-card transition-colors">
                 {feature.icon}
                 <h3 className="text-lg font-bold">{feature.title}</h3>
                 <p className="text-sm text-muted-foreground">{feature.description}</p>
