@@ -6,7 +6,8 @@ const legalLinks = [
   { href: '/cookie-policy', label: 'Cookie Policy' },
   { href: '/acceptable-use', label: 'Acceptable Use' },
   { href: '/dmca', label: 'DMCA Policy' },
-  { href: '/refund-policy', label: 'Refund Policy' },
+  { href: '/refund-policy', 'label': 'Refund Policy' },
+  { href: '/docs/api', 'label': 'API Docs' },
 ];
 
 export function Footer() {
