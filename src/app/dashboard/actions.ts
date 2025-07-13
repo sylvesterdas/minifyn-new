@@ -57,7 +57,17 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     }
 
     try {
-        const links = await getUserLinks();
+        const linksSnapshot = await db.ref('urls')
+            .orderByChild('userId')
+            .equalTo(user.uid)
+            .once('value');
+
+        if (!linksSnapshot.exists()) {
+            return { totalLinks: 0, totalClicks: 0 };
+        }
+        
+        const linksData = linksSnapshot.val();
+        const links = Object.values(linksData) as Omit<Link, 'id'>[];
         
         const totalLinks = links.length;
         const totalClicks = links.reduce((sum, link) => sum + (link.clickCount || 0), 0);

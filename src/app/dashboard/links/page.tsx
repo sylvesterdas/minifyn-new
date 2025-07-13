@@ -25,7 +25,6 @@ import { Button } from '@/components/ui/button';
 import { MoreHorizontal, BarChart3, Copy, Trash2, Pencil } from 'lucide-react';
 import { getUserLinks } from '../actions';
 import { formatDistanceToNow } from 'date-fns';
-import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
 export default async function LinksPage() {
@@ -64,9 +63,9 @@ export default async function LinksPage() {
                   <TableRow key={link.id}>
                     <TableCell className="font-medium">
                       <a href={`https://mnfy.in/${link.id}`} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline">mnfy.in/{link.id}</a>
-                      <div className="block text-sm text-muted-foreground md:inline max-w-[200px] md:max-w-sm truncate">
+                      <p className="text-sm text-muted-foreground truncate max-w-[200px] md:max-w-xs">
                         {link.longUrl}
-                      </div>
+                      </p>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">{link.clickCount.toLocaleString()}</TableCell>
                     <TableCell className="hidden md:table-cell">
