@@ -56,6 +56,15 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  .prose pre {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+  }
+  .prose pre::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
 }
 
 /* highlight.js theme: Atom One Dark */
@@ -63,7 +72,6 @@
     background: #282c34;
     color: #abb2bf;
     display: block;
-    overflow-x: hidden; /* Remove horizontal scrollbar */
     padding: 1em;
     border-radius: 0.5rem; /* Match site's border radius */
 }
