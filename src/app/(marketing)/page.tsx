@@ -61,18 +61,17 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex-1">
-      <section
-        ref={containerRef}
-        className="group relative w-full py-20 md:py-32 lg:py-40 overflow-hidden"
-        style={
+    <main
+      ref={containerRef}
+      className="flex-1 relative overflow-hidden"
+       style={
           {
             '--x': '50%',
             '--y': '50%',
           } as React.CSSProperties
         }
-      >
-        <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
+    >
+       <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_500px_at_var(--x)_var(--y),hsl(var(--primary)/0.15),transparent)]"></div>
           
           <div 
@@ -86,6 +85,9 @@ export default function Home() {
           </div>
         </div>
 
+      <section
+        className="group relative w-full py-20 md:py-32 lg:py-40"
+      >
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center">
             <div className="space-y-2">
@@ -115,7 +117,6 @@ export default function Home() {
       </section>
 
       <section id="how-it-works" className="relative w-full py-12 md:py-24 lg:py-32">
-        <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#e5e7eb11,transparent_1px)] [background-size:16px_16px]"></div>
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
@@ -164,8 +165,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="features" className="relative w-full py-12 md:py-24 lg:py-32 bg-card/50">
-        <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#e5e7eb11,transparent_1px)] [background-size:16px_16px]"></div>
+      <section id="features" className="relative w-full py-12 md:py-24 lg:py-32">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
