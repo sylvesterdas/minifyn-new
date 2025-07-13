@@ -26,7 +26,7 @@ const faqs = [
     },
     {
         question: "How long do my links last?",
-        answer: "For anonymous users, links expire after 7 days. For registered users, links do not expire but can be manually paused or deleted from your dashboard."
+        answer: "For anonymous users, links expire after 7 days. For registered users, links expire after 60 days. This extended period allows for longer campaigns and usage."
     },
     {
         question: "How do I view analytics for my links?",

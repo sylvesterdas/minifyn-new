@@ -76,7 +76,7 @@ export default function ApiDocsPage() {
                     <TableBody>
                         <TableRow>
                             <TableCell><code className="text-sm">Authorization</code></TableCell>
-                            <TableCell>Required. Your API key as a Bearer token (e.g., <code className="text-sm">Bearer mk_yourkey...</code>).</TableCell>
+                            <TableCell>Required. Your API key as a Bearer token (e.g., <code className="text-sm">mk_yourkey...</code>).</TableCell>
                         </TableRow>
                         <TableRow>
                             <TableCell><code className="text-sm">Content-Type</code></TableCell>
@@ -114,7 +114,7 @@ export default function ApiDocsPage() {
 
                 <h2 className="mt-12 text-2xl font-semibold">Rate Limiting</h2>
                 <p>
-                    To ensure fair usage and protect the service from abuse, the API is subject to rate limiting. Your API key allows for up to <strong>1,000 requests per day</strong>.
+                    To ensure fair usage and protect the service from abuse, the API is subject to rate limiting. Your API key allows for up to <strong>20 requests per day</strong>.
                 </p>
                 <p className="mt-4">
                     In addition to the daily quota, a time-based throttle is in place to prevent rapid-fire requests. You are limited to <strong>1 request per second</strong> per API key.

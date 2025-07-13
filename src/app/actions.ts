@@ -6,6 +6,7 @@ import { auth } from 'firebase-admin';
 import type { UserRecord } from 'firebase-admin/auth';
 import { triggerMaintenance } from '@/lib/maintenance';
 import { revalidatePath } from 'next/cache';
+import { SUPER_USER_ID } from '@/lib/config';
 
 export interface FormState {
     success: boolean;
@@ -23,6 +24,19 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
         return { success: false, message: 'Authentication context is missing. Please refresh the page.' };
     }
     
+    // Super user bypasses all checks
+    if (userId === SUPER_USER_ID) {
+        const validatedFields = urlSchema.safeParse({ longUrl: formData.get('longUrl') });
+         if (!validatedFields.success) {
+            return { success: false, message: 'Invalid URL for Super User.' };
+        }
+        const newLink = await createShortLink({ longUrl: validatedFields.data.longUrl, userId, isVerifiedUser: true });
+        const host = process.env.NEXT_PUBLIC_SHORT_DOMAIN || 'mnfy.in';
+        const shortUrl = `https://${host}/${newLink.id}`;
+        revalidatePath('/dashboard/links');
+        return { success: true, message: 'URL shortened successfully!', shortUrl };
+    }
+
     let userRecord: UserRecord | null = null;
     let isVerifiedUser = false;
     try {
@@ -39,7 +53,7 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     if (!isAllowed) {
         const message = isVerifiedUser 
             ? 'Daily limit of 20 URLs reached. Please try again tomorrow.' 
-            : 'Daily limit reached. Please sign up for a free account for higher limits.';
+            : 'Daily limit of 5 URLs reached. Please sign up for a free account for higher limits.';
         return { success: false, message };
     }
     
@@ -63,7 +77,7 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
         // Increment usage count for all users after successful link creation
         await incrementUsage(userId);
 
-        const host = 'mnfy.in';
+        const host = process.env.NEXT_PUBLIC_SHORT_DOMAIN || 'mnfy.in';
         const shortUrl = `https://${host}/${newLink.id}`;
         
         revalidatePath('/dashboard/links');
