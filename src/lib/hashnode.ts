@@ -1,4 +1,5 @@
-const HASHNODE_GQL_ENDPOINT = process.env.HASHNODE_GQL_ENDPOINT!;
+
+const HASHNODE_GQL_ENDPOINT = (process.env.HASHNODE_GQL_ENDPOINT || '').replace(/;$/, '');
 const HASHNODE_PUBLICATION_ID = process.env.HASHNODE_PUBLICATION_ID!;
 const HASHNODE_ACCESS_TOKEN = process.env.NEXT_HASHNODE_ACCESS_TOKEN!;
 
@@ -53,6 +54,9 @@ interface HashnodePostResponse {
 }
 
 async function fetchFromHashnode<T>(query: string, variables: Record<string, any>): Promise<T> {
+    if (!HASHNODE_GQL_ENDPOINT) {
+        throw new Error('Hashnode GraphQL endpoint is not configured.');
+    }
     const res = await fetch(HASHNODE_GQL_ENDPOINT, {
         method: 'POST',
         headers: {
