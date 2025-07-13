@@ -52,13 +52,13 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
              <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-2 right-2 h-8 w-8 text-muted-foreground hover:text-foreground"
+                className="absolute top-2 right-2 z-10 h-8 w-8 text-muted-foreground hover:text-foreground"
                 onClick={handleCopy}
                 aria-label="Copy code"
             >
                 {copied ? <Check className="h-5 w-5 text-green-500" /> : <Clipboard className="h-5 w-5" />}
             </Button>
-            <pre className="hljs !pt-12">
+            <pre className="hljs !p-4 !pt-12 overflow-x-auto">
                 <code ref={codeRef} className={`language-${language}`}>
                     {code}
                 </code>
