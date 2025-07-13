@@ -1,7 +1,7 @@
 'use server';
 
 import { validateRequest } from '@/lib/auth';
-import { db } from '@/lib/firebase-admin';
+import { db, auth } from '@/lib/firebase-admin';
 import { revalidatePath } from 'next/cache';
 import crypto from 'crypto';
 
@@ -84,5 +84,33 @@ export async function revokeApiKey(): Promise<{ success: boolean } | { error: st
     } catch (error) {
         console.error("Failed to revoke API key:", error);
         return { error: 'An unexpected error occurred while revoking the key.' };
+    }
+}
+
+export async function updateUserProfile(prevState: any, formData: FormData): Promise<{ success?: boolean; error?: string; message?: string }> {
+    const { user } = await validateRequest();
+    if (!user) {
+        return { error: 'Unauthorized' };
+    }
+
+    const name = formData.get('name') as string;
+
+    if (!name || name.trim().length < 2) {
+        return { error: 'Name must be at least 2 characters long.' };
+    }
+
+    try {
+        await auth.updateUser(user.uid, {
+            displayName: name,
+        });
+        
+        // Revalidate the path to ensure data is fresh on next load.
+        // NOTE: This won't update the current page's auth context instantly without a refresh.
+        revalidatePath('/dashboard/settings', 'page');
+
+        return { success: true, message: 'Profile updated successfully!' };
+    } catch (error) {
+        console.error('Failed to update user profile:', error);
+        return { error: 'An unexpected error occurred while updating your profile.' };
     }
 }
