@@ -37,14 +37,14 @@ export default function Home() {
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
-      const { clientX, clientY, currentTarget } = event;
-      if (currentTarget instanceof Window) {
-        const x = (clientX / currentTarget.innerWidth) * 100;
-        const y = (clientY / currentTarget.innerHeight) * 100;
-        setMousePosition({ x, y });
-      }
+      const { clientX, clientY } = event;
+      const x = (clientX / window.innerWidth) * 100;
+      const y = (clientY / window.innerHeight) * 100;
+      setMousePosition({ x, y });
     };
+
     window.addEventListener('mousemove', handleMouseMove);
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
@@ -59,7 +59,7 @@ export default function Home() {
       <section className="relative w-full py-20 md:py-32 lg:py-40 overflow-hidden">
          <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
             <div 
-              className="absolute inset-0 -z-10 bg-[radial-gradient(circle_500px_at_50%_50%,#1e40af33,transparent)] transition-all duration-300 ease-out"
+              className="absolute inset-0 -z-10 bg-[radial-gradient(circle_500px_at_50%_50%,hsl(var(--primary)/0.2),transparent)] transition-all duration-300 ease-out"
               style={gradientStyle}
             ></div>
          </div>
