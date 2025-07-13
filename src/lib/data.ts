@@ -1,21 +1,23 @@
 import { db } from './firebase-admin';
 import type { DataSnapshot } from 'firebase-admin/database';
-import { fetchMetadata } from './scraper';
+import { fetchMetadata, type Metadata } from './scraper';
 import { format } from 'date-fns';
 import { auth } from 'firebase-admin';
 import type { UserRecord } from 'firebase-admin/auth';
+import { SUPER_USER_ID } from './config';
 
 export interface Link {
   id: string;
   longUrl: string;
   createdAt: number;
   expiresAt: number; // timestamp, -1 for no expiry
+  userId: string;
+  clickCount: number;
   title?: string;
   description?: string;
   ogImage?: string;
   twitterImage?: string;
-  userId: string;
-  clickCount: number;
+  seo: Metadata;
 }
 
 const RATE_LIMIT = 5; // 5 requests per day for unverified/anonymous users
@@ -28,7 +30,7 @@ const RATE_LIMIT = 5; // 5 requests per day for unverified/anonymous users
  */
 export const checkRateLimit = async (userId: string, isVerifiedUser: boolean): Promise<boolean> => {
     // Verified users bypass this specific limit.
-    if (isVerifiedUser) {
+    if (isVerifiedUser || userId === SUPER_USER_ID) {
         return true;
     }
     
@@ -88,38 +90,35 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
 
     const now = Date.now();
     
-    // Unverified (including anonymous) users' links expire in 7 days. Verified users' links don't expire.
-    const expiresAt = isVerifiedUser ? -1 : now + 7 * 24 * 60 * 60 * 1000;
+    const isSuperUser = userId === SUPER_USER_ID;
+    const expiresAt = isVerifiedUser || isSuperUser ? -1 : now + 7 * 24 * 60 * 60 * 1000;
 
-    let metadata;
+    let metadata: Metadata;
     try {
         metadata = await fetchMetadata(longUrl);
     } catch (error) {
         console.error("Failed to fetch metadata:", error);
-        // Provide sensible defaults if metadata fetching fails
         metadata = {
             title: "Link via mnfy.in",
             description: "A shortened link created with MiniFyn.",
-            ogImage: undefined,
-            twitterImage: undefined
         }
     }
 
-    const newLink: Omit<Link, 'id'> = {
+    const newLinkData = {
         longUrl,
         createdAt: now,
         expiresAt,
+        userId: userId,
+        clickCount: 0,
+        // For convenience, store top-level title and description
         title: metadata.title,
         description: metadata.description,
-        ogImage: metadata.ogImage,
-        twitterImage: metadata.twitterImage,
-        userId: userId,
-        clickCount: 0
+        seo: metadata,
     };
 
-    await db.ref(`urls/${slug}`).set(newLink);
+    await db.ref(`urls/${slug}`).set(newLinkData);
     
-    return { ...newLink, id: slug };
+    return { ...newLinkData, id: slug };
 }
 
 export const getLinkBySlug = async (slug: string): Promise<Link | null> => {
@@ -129,7 +128,7 @@ export const getLinkBySlug = async (slug: string): Promise<Link | null> => {
         return null;
     }
 
-    const linkData = snapshot.val() as Omit<Link, 'id'>;
+    const linkData = snapshot.val();
     
     // Check for expiration
     if (linkData.expiresAt !== -1 && Date.now() > linkData.expiresAt) {
@@ -138,7 +137,21 @@ export const getLinkBySlug = async (slug: string): Promise<Link | null> => {
         return null;
     }
     
-    return { id: slug, ...linkData };
+    // For backwards compatibility and ease of use in other components,
+    // flatten the structure for the return value.
+    return {
+        id: slug,
+        longUrl: linkData.longUrl,
+        createdAt: linkData.createdAt,
+        expiresAt: linkData.expiresAt,
+        userId: linkData.userId,
+        clickCount: linkData.clickCount,
+        title: linkData.title || linkData.seo?.title,
+        description: linkData.description || linkData.seo?.description,
+        ogImage: linkData.seo?.ogImage,
+        twitterImage: linkData.seo?.twitterImage,
+        seo: linkData.seo,
+    };
 }
 
 /**
