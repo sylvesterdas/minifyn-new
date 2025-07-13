@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/context/auth-context';
 import { validateRequest } from '@/lib/auth';
-import { auth as clientAuth } from '@/lib/firebase'; // Import client auth
+import { ConsentManager } from '@/components/consent-manager';
 
 export const metadata: Metadata = {
   title: 'MiniFyn - Simple URL Shortener',
@@ -23,6 +23,7 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+        <ConsentManager />
       </head>
       <body className="font-body antialiased">
         <AuthProvider value={{ user }}>
