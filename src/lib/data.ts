@@ -20,44 +20,45 @@ export interface Link {
   seo: Metadata;
 }
 
-const RATE_LIMIT = 5; // 5 requests per day for unverified/anonymous users
+const ANON_RATE_LIMIT = 5; // 5 requests per day for unverified/anonymous users
+const API_RATE_LIMIT = 1000; // 1000 requests per day for API users
 
 /**
  * Checks if a user is within their daily usage limit.
  * @param userId The UID of the user (anonymous or registered).
- * @param isVerifiedUser A boolean indicating if the user is verified.
+ * @param isApiCall A boolean indicating if the check is for an API call.
  * @returns A promise that resolves to true if the user is allowed to proceed, false otherwise.
  */
-export const checkRateLimit = async (userId: string, isVerifiedUser: boolean): Promise<boolean> => {
-    // Verified users bypass this specific limit.
-    if (isVerifiedUser || userId === SUPER_USER_ID) {
+export const checkRateLimit = async (userId: string, isApiCall: boolean): Promise<boolean> => {
+    // Super users bypass all limits
+    if (userId === SUPER_USER_ID) {
         return true;
     }
     
     const today = format(new Date(), 'yyyy-MM-dd');
-    const path = `limits/${today}/users/${userId}`;
+    const limit = isApiCall ? API_RATE_LIMIT : ANON_RATE_LIMIT;
+    const path = isApiCall ? `limits/${today}/api/${userId}` : `limits/${today}/users/${userId}`;
     
     const snapshot = await db.ref(path).once('value');
     const currentCount = snapshot.val() || 0;
 
-    return currentCount < RATE_LIMIT;
+    return currentCount < limit;
 };
 
 /**
  * Increments the usage count for a given user for the current day.
  * @param userId The UID of the user to increment usage for.
+ * @param isApiCall A boolean indicating if the increment is for an API call.
  */
-export const incrementUsage = async (userId: string): Promise<void> => {
+export const incrementUsage = async (userId: string, isApiCall: boolean = false): Promise<void> => {
     const today = format(new Date(), 'yyyy-MM-dd');
-    const userPath = `limits/${today}/users/${userId}`;
-    const userRef = db.ref(userPath);
+    const path = isApiCall ? `limits/${today}/api/${userId}` : `limits/${today}/users/${userId}`;
+    const userRef = db.ref(path);
     
     try {
-        // Use a transaction to safely increment the counter.
         await userRef.transaction((currentValue) => (currentValue || 0) + 1);
     } catch (error) {
-        // Log the error but don't block the user's request if this fails.
-        console.error("Failed to increment usage counter:", error);
+        console.error(`Failed to increment usage counter for ${isApiCall ? 'API' : 'user'}:`, error);
     }
 };
 
@@ -79,7 +80,7 @@ export const isSlugTaken = async (slug: string): Promise<boolean> => {
 interface CreateShortLinkInput {
     longUrl: string;
     userId: string;
-    isVerifiedUser: boolean;
+    isVerifiedUser: boolean; // This can now refer to email verification or if it's an API user.
 }
 
 export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: CreateShortLinkInput): Promise<Link> => {
@@ -91,6 +92,7 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
     const now = Date.now();
     
     const isSuperUser = userId === SUPER_USER_ID;
+    // For API users (isVerifiedUser=true) and super users, links don't expire.
     const expiresAt = isVerifiedUser || isSuperUser ? -1 : now + 7 * 24 * 60 * 60 * 1000;
 
     let metadata: Metadata;
@@ -110,7 +112,6 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         expiresAt,
         userId: userId,
         clickCount: 0,
-        // For convenience, store top-level title and description
         title: metadata.title,
         description: metadata.description,
         seo: metadata,
@@ -130,15 +131,11 @@ export const getLinkBySlug = async (slug: string): Promise<Link | null> => {
 
     const linkData = snapshot.val();
     
-    // Check for expiration
     if (linkData.expiresAt !== -1 && Date.now() > linkData.expiresAt) {
-        // Asynchronously delete the expired link to clean up the database
         db.ref(`urls/${slug}`).remove().catch(err => console.error("Failed to delete expired link:", err));
         return null;
     }
     
-    // For backwards compatibility and ease of use in other components,
-    // flatten the structure for the return value.
     return {
         id: slug,
         longUrl: linkData.longUrl,
@@ -175,6 +172,7 @@ export const validateApiKey = async (apiKey: string): Promise<UserRecord | null>
 
         const user = await auth().getUser(uid);
         
+        // API key is only valid if the user's email is verified
         if (user.emailVerified) {
             return user;
         }

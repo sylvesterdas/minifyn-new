@@ -49,7 +49,7 @@ describe('POST /api/shorten', () => {
             shortUrl: 'https://mnfy.in/abcdef',
         });
         expect(mockCheckRateLimit).toHaveBeenCalledWith(mockUser.uid, true);
-        expect(mockIncrementUsage).toHaveBeenCalledWith(mockUser.uid);
+        expect(mockIncrementUsage).toHaveBeenCalledWith(mockUser.uid, true);
     });
 
     it('should return 401 Unauthorized if token is invalid', async () => {

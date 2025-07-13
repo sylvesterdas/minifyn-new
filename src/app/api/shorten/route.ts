@@ -11,19 +11,17 @@ export async function POST(request: NextRequest) {
     const token = authHeader.split(' ')[1];
 
     try {
-        // 1. Validate API Key and get user
         const user = await validateApiKey(token);
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // 2. Check rate limits for the user. API users are always considered verified.
-        const isAllowed = await checkRateLimit(user.uid, true);
+        // 2. Check API rate limits for the user.
+        const isAllowed = await checkRateLimit(user.uid, true); // true for API call
         if (!isAllowed) {
             return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
         }
 
-        // 3. Parse and validate request body
         const body = await request.json();
         const validatedFields = urlSchema.safeParse({ longUrl: body.url });
 
@@ -35,17 +33,16 @@ export async function POST(request: NextRequest) {
 
         const { longUrl } = validatedFields.data;
 
-        // 4. Create the short link
+        // Note: API users are always considered 'verified' for link creation purposes (e.g., no expiry)
         const newLink = await createShortLink({ 
             longUrl, 
             userId: user.uid, 
-            isVerifiedUser: true // API users must be verified
+            isVerifiedUser: true 
         });
 
-        // 5. Increment usage (can be conditional if API users have different limits)
-        await incrementUsage(user.uid);
+        // 5. Increment API usage count
+        await incrementUsage(user.uid, true); // true for API call
 
-        // 6. Return success response
         const host = 'mnfy.in';
         const shortUrl = `https://${host}/${newLink.id}`;
         
@@ -58,7 +55,6 @@ export async function POST(request: NextRequest) {
         if (error instanceof Error && (error.message.includes('invalid-credential') || error.message.includes('Unauthorized'))) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        // Only log unexpected errors
         console.error('API Error:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
