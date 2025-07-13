@@ -9,6 +9,7 @@ import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { UserNav } from '@/components/user-nav';
 import { useAuth } from '@/hooks/use-auth';
 import { SUPER_USER_ID } from '@/lib/config';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const baseNavItems = [
   { href: '/dashboard', label: 'Overview', icon: Home },
@@ -26,7 +27,18 @@ const settingsNavItems = [
 
 function NavLinks() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+       <div className="grid items-start px-2 text-sm font-medium lg:px-4 space-y-2">
+         {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-9 w-full rounded-lg" />
+         ))}
+       </div>
+    )
+  }
+
   const isSuperUser = user?.uid === SUPER_USER_ID;
 
   const navItems = [
