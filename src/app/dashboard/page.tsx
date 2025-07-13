@@ -4,6 +4,8 @@ import { getDashboardStats } from './actions';
 import { validateRequest } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
+export const revalidate = 3600; // Revalidate every hour
+
 export default async function DashboardPage() {
     const { user } = await validateRequest();
     if (!user) {

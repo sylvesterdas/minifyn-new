@@ -3,6 +3,8 @@ import { getAnalyticsSummary } from '../actions';
 import { ClicksChart } from './clicks-chart';
 import { AnalyticsDetailCard } from './analytics-detail-card';
 
+export const revalidate = 3600; // Revalidate every hour
+
 export default async function AnalyticsPage() {
     const summary = await getAnalyticsSummary();
 

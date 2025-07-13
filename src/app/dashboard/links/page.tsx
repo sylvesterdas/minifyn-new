@@ -4,6 +4,8 @@ import { columns } from './links-data-table-column-def';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
+export const revalidate = 3600; // Revalidate every hour
+
 export default async function LinksPage() {
   const links = await getUserLinks();
 
