@@ -48,21 +48,22 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
     };
 
     return (
-        <div className="relative">
-             <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-2 right-2 z-10 h-8 w-8 text-muted-foreground hover:text-foreground"
-                onClick={handleCopy}
-                aria-label="Copy code"
-            >
-                {copied ? <Check className="h-5 w-5 text-green-500" /> : <Clipboard className="h-5 w-5" />}
-            </Button>
-            <pre className="hljs !p-4 !pt-12 overflow-x-auto">
+        <div className="space-y-2">
+            <pre className="hljs !p-4 overflow-x-auto">
                 <code ref={codeRef} className={`language-${language}`}>
                     {code}
                 </code>
             </pre>
+            <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleCopy}
+                aria-label="Copy code"
+                className="w-full md:w-auto"
+            >
+                {copied ? <Check className="h-4 w-4 mr-2 text-green-500" /> : <Clipboard className="h-4 w-4 mr-2" />}
+                {copied ? 'Copied!' : 'Copy Code'}
+            </Button>
         </div>
     );
 }
