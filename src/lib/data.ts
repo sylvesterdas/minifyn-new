@@ -22,9 +22,10 @@ export interface Link {
 
 const ANON_RATE_LIMIT = 5; // 5 requests per day for unverified/anonymous users
 const API_RATE_LIMIT = 1000; // 1000 requests per day for API users
+const API_REQUEST_INTERVAL = 1000; // 1 second in milliseconds
 
 /**
- * Checks if a user is within their daily usage limit.
+ * Checks if a user is within their usage limits (both daily quota and time-based).
  * @param userId The UID of the user (anonymous or registered).
  * @param isApiCall A boolean indicating if the check is for an API call.
  * @returns A promise that resolves to true if the user is allowed to proceed, false otherwise.
@@ -36,17 +37,37 @@ export const checkRateLimit = async (userId: string, isApiCall: boolean): Promis
     }
     
     const today = format(new Date(), 'yyyy-MM-dd');
-    const limit = isApiCall ? API_RATE_LIMIT : ANON_RATE_LIMIT;
-    const path = isApiCall ? `limits/${today}/api/${userId}` : `limits/${today}/users/${userId}`;
     
-    const snapshot = await db.ref(path).once('value');
-    const currentCount = snapshot.val() || 0;
+    if (isApiCall) {
+        // Time-based throttling for API calls
+        const lastRequestRef = db.ref(`last_request_time/api/${userId}`);
+        const lastRequestSnapshot = await lastRequestRef.once('value');
+        const lastRequestTime = lastRequestSnapshot.val() || 0;
+        
+        if (Date.now() - lastRequestTime < API_REQUEST_INTERVAL) {
+            console.log(`User ${userId} rate-limited due to frequent requests.`);
+            return false; // Request is too soon
+        }
 
-    return currentCount < limit;
+        // Daily quota check for API calls
+        const limit = API_RATE_LIMIT;
+        const path = `limits/${today}/api/${userId}`;
+        const snapshot = await db.ref(path).once('value');
+        const currentCount = snapshot.val() || 0;
+        return currentCount < limit;
+
+    } else {
+        // Daily quota for non-API (anonymous/unverified web) users
+        const limit = ANON_RATE_LIMIT;
+        const path = `limits/${today}/users/${userId}`;
+        const snapshot = await db.ref(path).once('value');
+        const currentCount = snapshot.val() || 0;
+        return currentCount < limit;
+    }
 };
 
 /**
- * Increments the usage count for a given user for the current day.
+ * Increments the usage count and updates the last request time for a given user.
  * @param userId The UID of the user to increment usage for.
  * @param isApiCall A boolean indicating if the increment is for an API call.
  */
@@ -57,6 +78,13 @@ export const incrementUsage = async (userId: string, isApiCall: boolean = false)
     
     try {
         await userRef.transaction((currentValue) => (currentValue || 0) + 1);
+        
+        // Also update the last request time for API calls to enable throttling
+        if (isApiCall) {
+            const lastRequestRef = db.ref(`last_request_time/api/${userId}`);
+            await lastRequestRef.set(Date.now());
+        }
+
     } catch (error) {
         console.error(`Failed to increment usage counter for ${isApiCall ? 'API' : 'user'}:`, error);
     }
