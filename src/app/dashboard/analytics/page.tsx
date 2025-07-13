@@ -1,4 +1,3 @@
-'use server';
 
 import { validateRequest } from '@/lib/auth';
 import { getAnalyticsSummary } from '../actions';
