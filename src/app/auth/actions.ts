@@ -3,9 +3,8 @@
 import { auth } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
 import type { FormState } from './signin/page';
-import { redirect } from 'next/navigation';
 import { sendEmail } from '@/lib/email';
-import { DecodedIdToken } from 'firebase-admin/auth';
+import type { DecodedIdToken } from 'firebase-admin/auth';
 
 export async function login(
   idToken: string
@@ -151,21 +150,23 @@ export async function sendPasswordResetLink(
 }
 
 
-export async function logout(): Promise<{ error?: string }> {
+export async function logout(): Promise<{ success?: boolean, error?: string }> {
   const cookieObj = await cookies()
   const sessionCookie = cookieObj.get('session')?.value;
   if (!sessionCookie) {
-    redirect('/auth/signin');
+    // No session to clear, but we can consider this a success.
+    return { success: true };
   }
 
   try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie);
+    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
     await auth.revokeRefreshTokens(decodedClaims.sub);
     cookieObj.delete('session');
+    return { success: true };
   } catch (error) {
-    // Cookie is invalid. Just delete it.
+    // Cookie is invalid or expired. Just delete it.
+    console.warn("Could not revoke session cookie, it might be expired.", error);
     cookieObj.delete('session');
+    return { success: true };
   }
-  
-  redirect('/auth/signin');
 }

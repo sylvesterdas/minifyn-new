@@ -15,9 +15,9 @@ import {
 } from '@/components/ui/avatar';
 import { Button } from './ui/button';
 import { useAuth } from '@/hooks/use-auth';
-import { logout } from '@/app/auth/actions';
 import Link from 'next/link';
 import { LayoutDashboard, LogOut, Settings, Key, LifeBuoy } from 'lucide-react';
+import { LogoutButton } from './logout-button';
 
 export function UserNav() {
     const { user } = useAuth();
@@ -74,14 +74,7 @@ export function UserNav() {
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <form action={logout} className="w-full">
-                     <DropdownMenuItem asChild>
-                        <button type="submit" className="w-full text-left flex items-center cursor-pointer">
-                            <LogOut className="mr-2 h-4 w-4" />
-                            <span>Log out</span>
-                        </button>
-                    </DropdownMenuItem>
-                </form>
+                <LogoutButton />
             </DropdownMenuContent>
         </DropdownMenu>
     );
