@@ -1,7 +1,7 @@
 import { db } from './firebase-admin';
 import type { DataSnapshot } from 'firebase-admin/database';
 import { fetchMetadata, type Metadata } from './scraper';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { auth } from 'firebase-admin';
 import type { UserRecord } from 'firebase-admin/auth';
 import { SUPER_USER_ID } from './config';
@@ -21,16 +21,17 @@ export interface Link {
 }
 
 const ANON_RATE_LIMIT = 5; // 5 requests per day for unverified/anonymous users
-const API_RATE_LIMIT = 1000; // 1000 requests per day for API users
+const VERIFIED_USER_RATE_LIMIT = 20; // 20 requests per day for verified users (form or API)
 const API_REQUEST_INTERVAL = 1000; // 1 second in milliseconds
 
 /**
  * Checks if a user is within their usage limits (both daily quota and time-based).
  * @param userId The UID of the user (anonymous or registered).
- * @param isApiCall A boolean indicating if the check is for an API call.
+ * @param isVerified A boolean indicating if the user is verified.
+ * @param isApiCall A boolean indicating if the check is for an API call (for time-based throttling).
  * @returns A promise that resolves to true if the user is allowed to proceed, false otherwise.
  */
-export const checkRateLimit = async (userId: string, isApiCall: boolean): Promise<boolean> => {
+export const checkRateLimit = async (userId: string, isVerified: boolean, isApiCall: boolean = false): Promise<boolean> => {
     // Super users bypass all limits
     if (userId === SUPER_USER_ID) {
         return true;
@@ -38,8 +39,8 @@ export const checkRateLimit = async (userId: string, isApiCall: boolean): Promis
     
     const today = format(new Date(), 'yyyy-MM-dd');
     
+    // Time-based throttling for API calls is independent of the daily quota
     if (isApiCall) {
-        // Time-based throttling for API calls
         const lastRequestRef = db.ref(`last_request_time/api/${userId}`);
         const lastRequestSnapshot = await lastRequestRef.once('value');
         const lastRequestTime = lastRequestSnapshot.val() || 0;
@@ -48,22 +49,15 @@ export const checkRateLimit = async (userId: string, isApiCall: boolean): Promis
             console.log(`User ${userId} rate-limited due to frequent requests.`);
             return false; // Request is too soon
         }
-
-        // Daily quota check for API calls
-        const limit = API_RATE_LIMIT;
-        const path = `limits/${today}/api/${userId}`;
-        const snapshot = await db.ref(path).once('value');
-        const currentCount = snapshot.val() || 0;
-        return currentCount < limit;
-
-    } else {
-        // Daily quota for non-API (anonymous/unverified web) users
-        const limit = ANON_RATE_LIMIT;
-        const path = `limits/${today}/users/${userId}`;
-        const snapshot = await db.ref(path).once('value');
-        const currentCount = snapshot.val() || 0;
-        return currentCount < limit;
     }
+
+    // Daily quota check
+    const limit = isVerified ? VERIFIED_USER_RATE_LIMIT : ANON_RATE_LIMIT;
+    const path = `limits/${today}/${userId}`;
+    const snapshot = await db.ref(path).once('value');
+    const currentCount = snapshot.val() || 0;
+    
+    return currentCount < limit;
 };
 
 /**
@@ -73,7 +67,8 @@ export const checkRateLimit = async (userId: string, isApiCall: boolean): Promis
  */
 export const incrementUsage = async (userId: string, isApiCall: boolean = false): Promise<void> => {
     const today = format(new Date(), 'yyyy-MM-dd');
-    const path = isApiCall ? `limits/${today}/api/${userId}` : `limits/${today}/users/${userId}`;
+    // All users, verified or not, use the same path based on their UID.
+    const path = `limits/${today}/${userId}`;
     const userRef = db.ref(path);
     
     try {
@@ -86,7 +81,7 @@ export const incrementUsage = async (userId: string, isApiCall: boolean = false)
         }
 
     } catch (error) {
-        console.error(`Failed to increment usage counter for ${isApiCall ? 'API' : 'user'}:`, error);
+        console.error(`Failed to increment usage counter for user ${userId}:`, error);
     }
 };
 
@@ -108,7 +103,7 @@ export const isSlugTaken = async (slug: string): Promise<boolean> => {
 interface CreateShortLinkInput {
     longUrl: string;
     userId: string;
-    isVerifiedUser: boolean; // This can now refer to email verification or if it's an API user.
+    isVerifiedUser: boolean; 
 }
 
 export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: CreateShortLinkInput): Promise<Link> => {
@@ -119,9 +114,19 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
 
     const now = Date.now();
     
-    const isSuperUser = userId === SUPER_USER_ID;
-    // For API users (isVerifiedUser=true) and super users, links don't expire.
-    const expiresAt = isVerifiedUser || isSuperUser ? -1 : now + 7 * 24 * 60 * 60 * 1000;
+    // Super users have non-expiring links.
+    if (userId === SUPER_USER_ID) {
+        isVerifiedUser = true; // Ensure they get non-expiring link logic
+    }
+    
+    let expiresAt: number;
+    if (userId === SUPER_USER_ID) {
+        expiresAt = -1; // Never expires for super user
+    } else if (isVerifiedUser) {
+        expiresAt = addDays(now, 60).getTime(); // 60 days for verified users
+    } else {
+        expiresAt = addDays(now, 7).getTime(); // 7 days for anonymous users
+    }
 
     let metadata: Metadata;
     try {

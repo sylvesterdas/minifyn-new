@@ -15,11 +15,14 @@ export async function POST(request: NextRequest) {
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+        
+        // Since the user is validated via API key, they are considered verified.
+        const isVerifiedUser = true;
 
         // 2. Check API rate limits for the user.
-        const isAllowed = await checkRateLimit(user.uid, true); // true for API call
+        const isAllowed = await checkRateLimit(user.uid, isVerifiedUser, true); // true for isApiCall
         if (!isAllowed) {
-            return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+            return NextResponse.json({ error: 'Daily limit of 20 URLs reached. Please try again tomorrow.' }, { status: 429 });
         }
 
         const body = await request.json();
@@ -33,15 +36,15 @@ export async function POST(request: NextRequest) {
 
         const { longUrl } = validatedFields.data;
 
-        // Note: API users are always considered 'verified' for link creation purposes (e.g., no expiry)
+        // Create the short link
         const newLink = await createShortLink({ 
             longUrl, 
             userId: user.uid, 
-            isVerifiedUser: true 
+            isVerifiedUser: isVerifiedUser 
         });
 
         // 5. Increment API usage count
-        await incrementUsage(user.uid, true); // true for API call
+        await incrementUsage(user.uid, true); // true for isApiCall
 
         const host = 'mnfy.in';
         const shortUrl = `https://${host}/${newLink.id}`;

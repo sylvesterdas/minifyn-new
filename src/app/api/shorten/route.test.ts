@@ -48,7 +48,7 @@ describe('POST /api/shorten', () => {
             message: 'URL shortened successfully',
             shortUrl: 'https://mnfy.in/abcdef',
         });
-        expect(mockCheckRateLimit).toHaveBeenCalledWith(mockUser.uid, true);
+        expect(mockCheckRateLimit).toHaveBeenCalledWith(mockUser.uid, true, true);
         expect(mockIncrementUsage).toHaveBeenCalledWith(mockUser.uid, true);
     });
 
@@ -114,8 +114,8 @@ describe('POST /api/shorten', () => {
         const body = await response.json();
 
         expect(response.status).toBe(429);
-        expect(body).toEqual({ error: 'Rate limit exceeded' });
-        expect(mockCheckRateLimit).toHaveBeenCalledWith(mockUser.uid, true);
+        expect(body).toEqual({ error: 'Daily limit of 20 URLs reached. Please try again tomorrow.' });
+        expect(mockCheckRateLimit).toHaveBeenCalledWith(mockUser.uid, true, true);
         expect(mockCreateShortLink).not.toHaveBeenCalled();
     });
 

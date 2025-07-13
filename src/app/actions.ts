@@ -34,10 +34,13 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
         isVerifiedUser = false;
     }
 
-    // Check rate limit for users without a verified email (anonymous or unverified).
+    // Check rate limit.
     const isAllowed = await checkRateLimit(userId, isVerifiedUser);
     if (!isAllowed) {
-        return { success: false, message: 'Rate limit exceeded. Please try again tomorrow or sign up for a free account for higher limits.' };
+        const message = isVerifiedUser 
+            ? 'Daily limit of 20 URLs reached. Please try again tomorrow.' 
+            : 'Daily limit reached. Please sign up for a free account for higher limits.';
+        return { success: false, message };
     }
     
     const validatedFields = urlSchema.safeParse({
@@ -57,10 +60,8 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     try {
         const newLink = await createShortLink({ longUrl, userId, isVerifiedUser });
         
-        // Increment usage count only after successful link creation for unverified users
-        if (!isVerifiedUser) {
-            await incrementUsage(userId);
-        }
+        // Increment usage count for all users after successful link creation
+        await incrementUsage(userId);
 
         const host = 'mnfy.in';
         const shortUrl = `https://${host}/${newLink.id}`;
