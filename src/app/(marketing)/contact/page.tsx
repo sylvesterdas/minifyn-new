@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
+  // This is now a Server Component
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-3xl">
       <div className="text-center mb-12">
