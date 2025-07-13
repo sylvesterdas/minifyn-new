@@ -23,19 +23,13 @@ const RATE_LIMIT = 5; // 5 requests per day for unverified/anonymous users
 /**
  * Checks if a user is within their daily usage limit.
  * @param userId The UID of the user (anonymous or registered).
+ * @param isVerifiedUser A boolean indicating if the user is verified.
  * @returns A promise that resolves to true if the user is allowed to proceed, false otherwise.
  */
-export const checkRateLimit = async (userId: string): Promise<boolean> => {
-    // For this MVP, we will assume registered users have a higher or no limit.
-    // The check only applies to users who are not verified.
-    // We can fetch the user record to check their status (e.g., emailVerified).
-    try {
-        const user = await auth().getUser(userId);
-        if (user.emailVerified) {
-            return true; // Verified users bypass this specific limit.
-        }
-    } catch (error) {
-        // User not found or other error, proceed with limit check for anonymous users.
+export const checkRateLimit = async (userId: string, isVerifiedUser: boolean): Promise<boolean> => {
+    // Verified users bypass this specific limit.
+    if (isVerifiedUser) {
+        return true;
     }
     
     const today = format(new Date(), 'yyyy-MM-dd');

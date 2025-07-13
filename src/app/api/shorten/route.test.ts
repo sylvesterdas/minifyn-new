@@ -5,12 +5,16 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { UserRecord } from 'firebase-admin/auth';
 
 // Mock the data module completely to prevent Firebase Admin from initializing
-vi.mock('@/lib/data', () => ({
-    validateApiKey: vi.fn(),
-    checkRateLimit: vi.fn(),
-    createShortLink: vi.fn(),
-    incrementUsage: vi.fn(),
-}));
+vi.mock('@/lib/data', async (importOriginal) => {
+    const actual = await importOriginal<typeof data>();
+    return {
+        ...actual, // Keep actual implementations for non-mocked parts if any
+        validateApiKey: vi.fn(),
+        checkRateLimit: vi.fn(),
+        createShortLink: vi.fn(),
+        incrementUsage: vi.fn(),
+    };
+});
 
 const mockValidateApiKey = data.validateApiKey as vi.Mock;
 const mockCheckRateLimit = data.checkRateLimit as vi.Mock;
@@ -44,6 +48,7 @@ describe('POST /api/shorten', () => {
             message: 'URL shortened successfully',
             shortUrl: 'https://mnfy.in/abcdef',
         });
+        expect(mockCheckRateLimit).toHaveBeenCalledWith(mockUser.uid, true);
         expect(mockIncrementUsage).toHaveBeenCalledWith(mockUser.uid);
     });
 
@@ -96,6 +101,7 @@ describe('POST /api/shorten', () => {
 
     it('should return 429 Too Many Requests if rate limit is exceeded', async () => {
         mockValidateApiKey.mockResolvedValue(mockUser);
+        // Simulate rate limit being exceeded
         mockCheckRateLimit.mockResolvedValue(false);
 
         const request = new NextRequest('https://minifyn.com/api/shorten', {
@@ -109,6 +115,8 @@ describe('POST /api/shorten', () => {
 
         expect(response.status).toBe(429);
         expect(body).toEqual({ error: 'Rate limit exceeded' });
+        expect(mockCheckRateLimit).toHaveBeenCalledWith(mockUser.uid, true);
+        expect(mockCreateShortLink).not.toHaveBeenCalled();
     });
 
     it('should return 500 Internal Server Error on unexpected failure', async () => {

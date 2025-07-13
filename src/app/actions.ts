@@ -34,11 +34,9 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     }
 
     // Check rate limit for users without a verified email (anonymous or unverified).
-    if (!isVerifiedUser) {
-        const isAllowed = await checkRateLimit(userId);
-        if (!isAllowed) {
-            return { success: false, message: 'Rate limit exceeded. Please try again tomorrow or sign up for a free account for higher limits.' };
-        }
+    const isAllowed = await checkRateLimit(userId, isVerifiedUser);
+    if (!isAllowed) {
+        return { success: false, message: 'Rate limit exceeded. Please try again tomorrow or sign up for a free account for higher limits.' };
     }
     
     const validatedFields = urlSchema.safeParse({

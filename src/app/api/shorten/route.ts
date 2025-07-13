@@ -17,9 +17,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // 2. Check rate limits for the user
-        // Assuming API users are always verified and have higher limits, but we can check anyway
-        const isAllowed = await checkRateLimit(user.uid);
+        // 2. Check rate limits for the user. API users are always considered verified.
+        const isAllowed = await checkRateLimit(user.uid, true);
         if (!isAllowed) {
             return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
         }
@@ -43,7 +42,7 @@ export async function POST(request: NextRequest) {
             isVerifiedUser: true // API users must be verified
         });
 
-        // 5. Increment usage
+        // 5. Increment usage (can be conditional if API users have different limits)
         await incrementUsage(user.uid);
 
         // 6. Return success response
@@ -56,8 +55,8 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
-        if (error instanceof Error && error.message.includes('Unauthorized')) {
-             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        if (error instanceof Error && (error.message.includes('invalid-credential') || error.message.includes('Unauthorized'))) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
         // Only log unexpected errors
         console.error('API Error:', error);
