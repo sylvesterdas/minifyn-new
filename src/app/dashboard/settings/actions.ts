@@ -100,12 +100,16 @@ export async function updateUserProfile(prevState: any, formData: FormData): Pro
     }
 
     try {
+        // Update Firebase Auth record
         await auth.updateUser(user.uid, {
             displayName: name,
         });
         
-        // Revalidate the path to ensure data is fresh on next load.
-        // NOTE: This won't update the current page's auth context instantly without a refresh.
+        // Update Realtime Database record
+        await db.ref(`user_profiles/${user.uid}`).update({
+            name: name,
+        });
+        
         revalidatePath('/dashboard/settings', 'page');
 
         return { success: true, message: 'Profile updated successfully!' };

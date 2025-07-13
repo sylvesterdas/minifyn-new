@@ -92,10 +92,12 @@ export async function signup(
     const userRecord = await auth.createUser({
       email,
       password,
+      displayName: email, // Use email as initial display name
     });
     
-    // Store terms acceptance in the database
+    // Store terms acceptance and initial profile in the database
     await db.ref(`user_profiles/${userRecord.uid}`).set({
+      name: userRecord.displayName,
       email: userRecord.email,
       termsAcceptedAt: Date.now(),
       createdAt: userRecord.metadata.creationTime,
