@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { UrlShortenerForm } from '@/components/url-shortener-form';
 import { QrCodeGeneratorForm } from '@/components/qr-code-generator-form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -30,11 +33,35 @@ const features = [
 ];
 
 export default function Home() {
+  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      const { clientX, clientY, currentTarget } = event;
+      if (currentTarget instanceof Window) {
+        const x = (clientX / currentTarget.innerWidth) * 100;
+        const y = (clientY / currentTarget.innerHeight) * 100;
+        setMousePosition({ x, y });
+      }
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
+  const gradientStyle = {
+    backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
+  };
+
   return (
     <main className="flex-1">
       <section className="relative w-full py-20 md:py-32 lg:py-40 overflow-hidden">
          <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
-            <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_500px_at_50%_200px,#1e40af33,transparent)] animate-background-pan"></div>
+            <div 
+              className="absolute inset-0 -z-10 bg-[radial-gradient(circle_500px_at_50%_50%,#1e40af33,transparent)] transition-all duration-300 ease-out"
+              style={gradientStyle}
+            ></div>
          </div>
          <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center">
