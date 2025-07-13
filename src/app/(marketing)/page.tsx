@@ -4,7 +4,7 @@ import { useRef, useEffect } from 'react';
 import { UrlShortenerForm } from '@/components/url-shortener-form';
 import { QrCodeGeneratorForm } from '@/components/qr-code-generator-form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, Key, Zap, QrCode, Link as LinkIcon } from 'lucide-react';
+import { BarChart, Key, Zap, QrCode, Link as LinkIcon, ClipboardPaste, Wand, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -137,6 +137,55 @@ export default function Home() {
             <Button asChild size="lg">
                 <Link href="/auth/signup">Get started for free</Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+      <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <div className="space-y-2">
+              <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm">How It Works</div>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Get Started in 3 Simple Steps</h2>
+              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                Shortening your URLs with MiniFyn is quick, easy, and intuitive.
+              </p>
+            </div>
+          </div>
+          <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-3 md:gap-12 pt-16">
+            <div className="grid gap-2 text-center">
+              <div className="flex justify-center items-center mb-4">
+                <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/10 text-primary ring-8 ring-primary/5">
+                  <ClipboardPaste className="h-10 w-10" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold">1. Paste URL</h3>
+              <p className="text-muted-foreground">
+                Simply paste your long, cumbersome URL into the input field on our homepage.
+              </p>
+            </div>
+            <div className="grid gap-2 text-center">
+              <div className="flex justify-center items-center mb-4">
+                 <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/10 text-primary ring-8 ring-primary/5">
+                  <Wand className="h-10 w-10" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold">2. Create Link</h3>
+              <p className="text-muted-foreground">
+                Click the "Shorten URL" button and watch as we instantly generate a short, shareable link.
+              </p>
+            </div>
+            <div className="grid gap-2 text-center">
+              <div className="flex justify-center items-center mb-4">
+                 <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/10 text-primary ring-8 ring-primary/5">
+                  <BarChart3 className="h-10 w-10" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold">3. Track Clicks</h3>
+              <p className="text-muted-foreground">
+                Share your new link and monitor its performance with our detailed analytics dashboard.
+              </p>
+            </div>
           </div>
         </div>
       </section>
