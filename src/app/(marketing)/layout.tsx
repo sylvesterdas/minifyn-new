@@ -15,7 +15,6 @@ export default function MarketingLayout({
       <ConsentManager />
       <GoogleAnalytics />
       <Header />
-      <Breadcrumbs />
       <main className="flex-1">
         {children}
       </main>
