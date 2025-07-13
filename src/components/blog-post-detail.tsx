@@ -35,13 +35,11 @@ interface BlogPostDetailProps {
 export function BlogPostDetail({ post }: BlogPostDetailProps) {
     const authorName = post.author?.name || 'Sylvester Das';
     const contentRef = useRef<HTMLDivElement>(null);
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.minifyn.com';
-    const longPostUrl = `${siteUrl}/blog/${post.slug}`;
-    const [shareUrl, setShareUrl] = useState(longPostUrl);
+    const [shareUrl, setShareUrl] = useState(post.url);
 
     useEffect(() => {
         // Fetch the short URL for sharing
-        getOrCreateShortUrlForPost(longPostUrl).then(url => {
+        getOrCreateShortUrlForPost(post.url).then(url => {
             if (url) setShareUrl(url);
         });
 
@@ -51,7 +49,7 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
                 hljs.highlightElement(block as HTMLElement);
             });
         }
-    }, [post.content.html, longPostUrl]);
+    }, [post.content.html, post.url]);
 
     return (
         <article className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">

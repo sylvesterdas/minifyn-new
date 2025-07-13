@@ -7,6 +7,7 @@ export interface HashnodePost {
     id: string;
     slug: string;
     title: string;
+    url: string; // Canonical URL for the post
     brief: string;
     publishedAt: string;
     updatedAt: string;
@@ -38,7 +39,7 @@ interface HashnodePostsResponse {
     data: {
         publication: {
             posts: {
-                edges: { node: Omit<HashnodePost, 'content' | 'ogImage' | 'updatedAt'> }[];
+                edges: { node: Omit<HashnodePost, 'content' | 'ogImage' | 'updatedAt' | 'brief'> }[];
                 pageInfo: PageInfo;
             };
         }
@@ -84,6 +85,7 @@ const GET_POSTS_QUERY = `
             id
             slug
             title
+            url
             brief
             publishedAt
             readTimeInMinutes
@@ -126,6 +128,7 @@ const GET_POST_BY_SLUG_QUERY = `
         id
         slug
         title
+        url
         brief
         publishedAt
         updatedAt
