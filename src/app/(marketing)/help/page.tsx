@@ -1,4 +1,4 @@
-import { FileQuestion, LifeBuoy, ShieldAlert, BookOpen } from 'lucide-react';
+import { FileQuestion, LifeBuoy, ShieldAlert, BookOpen, Key } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -21,6 +21,12 @@ const helpSections = [
         icon: <BookOpen className="h-8 w-8 text-primary" />,
         title: 'Guides',
         description: 'Step-by-step tutorials on how to use our features.'
+    },
+    {
+        href: '/docs/api',
+        icon: <Key className="h-8 w-8 text-primary" />,
+        title: 'API Documentation',
+        description: 'Integrate our service with your own applications.'
     },
     {
         href: '/help/report-abuse',
