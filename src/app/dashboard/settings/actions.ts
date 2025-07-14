@@ -94,23 +94,42 @@ export async function updateUserProfile(prevState: any, formData: FormData): Pro
     }
 
     const name = formData.get('name') as string;
+    const role = formData.get('role') as string;
+    const timezone = formData.get('timezone') as string;
+    const company = formData.get('company') as string;
+    const isOnboarding = formData.get('isOnboarding') === 'true';
+
 
     if (!name || name.trim().length < 2) {
         return { error: 'Name must be at least 2 characters long.' };
     }
 
     try {
-        // Update Firebase Auth record
-        await auth.updateUser(user.uid, {
-            displayName: name,
-        });
+        const profileData: any = {
+            name,
+        };
+        
+        // Add onboarding fields if they exist
+        if (role) profileData.role = role;
+        if (timezone) profileData.timezone = timezone;
+        if (company) profileData.company = company;
+
+        // If this is from the onboarding flow, mark it as completed
+        if (isOnboarding) {
+            profileData.onboardingCompleted = true;
+        }
+
+        // Update Firebase Auth record (only displayName)
+        if (user.name !== name) {
+            await auth.updateUser(user.uid, {
+                displayName: name,
+            });
+        }
         
         // Update Realtime Database record
-        await db.ref(`user_profiles/${user.uid}`).update({
-            name: name,
-        });
+        await db.ref(`user_profiles/${user.uid}`).update(profileData);
         
-        revalidatePath('/dashboard/settings', 'page');
+        revalidatePath('/dashboard', 'layout');
 
         return { success: true, message: 'Profile updated successfully!' };
     } catch (error) {

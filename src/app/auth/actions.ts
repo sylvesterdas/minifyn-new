@@ -70,10 +70,14 @@ export async function signup(
     prevState: FormState,
     formData: FormData
   ): Promise<FormState> {
+  const name = formData.get('name');
   const email = formData.get('email');
   const password = formData.get('password');
   const termsAccepted = formData.get('terms-accepted');
 
+  if (typeof name !== 'string' || name.length < 2) {
+    return { error: 'Name must be at least 2 characters long.' };
+  }
   if (
     typeof email !== 'string' ||
     email.length < 3 ||
@@ -92,7 +96,7 @@ export async function signup(
     const userRecord = await auth.createUser({
       email,
       password,
-      displayName: email, // Use email as initial display name
+      displayName: name,
     });
     
     // Store terms acceptance and initial profile in the database
@@ -101,6 +105,7 @@ export async function signup(
       email: userRecord.email,
       termsAcceptedAt: Date.now(),
       createdAt: userRecord.metadata.creationTime,
+      onboardingCompleted: false, // Flag for the new onboarding flow
     });
     
     const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);

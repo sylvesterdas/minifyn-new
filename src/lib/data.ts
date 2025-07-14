@@ -237,3 +237,19 @@ export const recordClick = async (slug: string, clickData: ClickData): Promise<v
         console.error(`Failed to record click for slug ${slug}:`, error);
     }
 };
+
+/**
+ * Checks if a user has completed the onboarding process.
+ * @param uid The user ID to check.
+ * @returns A promise that resolves to true if onboarding is complete, false otherwise.
+ */
+export async function hasCompletedOnboarding(uid: string): Promise<boolean> {
+    try {
+        const snapshot = await db.ref(`user_profiles/${uid}/onboardingCompleted`).once('value');
+        return snapshot.val() === true;
+    } catch (error) {
+        console.error(`Failed to check onboarding status for user ${uid}:`, error);
+        // Fail open: if there's an error, assume they completed it to avoid blocking them.
+        return true;
+    }
+}

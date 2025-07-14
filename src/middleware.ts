@@ -1,26 +1,52 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { hasCompletedOnboarding } from './lib/data';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isAuthenticated = request.cookies.has('session');
-  const dashboardUrl = new URL('/dashboard', request.url);
-  const signinUrl = new URL('/auth/signin', request.url);
+  const sessionCookie = request.cookies.get('session');
+  const isAuthenticated = !!sessionCookie;
 
-  // If user is authenticated...
+  // Define URLs to avoid constructing them multiple times
+  const signinUrl = new URL('/auth/signin', request.url);
+  const dashboardUrl = new URL('/dashboard', request.url);
+  const onboardingUrl = new URL('/dashboard/onboarding', request.url);
+
+  // Allow all non-auth related static files and API routes to pass through
+  if (pathname.startsWith('/api') || pathname.startsWith('/_next') || pathname.includes('.')) {
+    return NextResponse.next();
+  }
+
+  // If user is authenticated
   if (isAuthenticated) {
-    // ...and they try to access sign-in or sign-up, redirect to dashboard
+    // If they are on an auth page (signin/signup), redirect to dashboard
     if (pathname.startsWith('/auth/signin') || pathname.startsWith('/auth/signup')) {
       return NextResponse.redirect(dashboardUrl);
     }
+    
+    // This is a placeholder for a real check
+    const uid = request.cookies.get('uid_placeholder')?.value;
+
+    // Check for onboarding completion for users trying to access the dashboard
+    if (uid && pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/onboarding')) {
+      const isOnboarded = await hasCompletedOnboarding(uid);
+      if (!isOnboarded) {
+        return NextResponse.redirect(onboardingUrl);
+      }
+    }
+    // If user is already on the onboarding page, let them stay.
+    if (pathname.startsWith('/dashboard/onboarding')) {
+       return NextResponse.next();
+    }
   } 
-  // If user is not authenticated...
+  // If user is NOT authenticated
   else {
-    // ...and they try to access the dashboard, redirect to sign-in
+    // And tries to access any dashboard page, redirect to sign-in
     if (pathname.startsWith('/dashboard')) {
       return NextResponse.redirect(signinUrl);
     }
   }
 
+  // For all other cases, allow the request to proceed
   return NextResponse.next();
 }
 
