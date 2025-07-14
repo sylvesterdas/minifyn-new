@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Twitter, Linkedin, Facebook, Link as LinkIcon, Send } from 'lucide-react'; // Using Send for Reddit
+import { Twitter, Linkedin, Facebook, Link as LinkIcon, Send, ExternalLink } from 'lucide-react'; // Using Send for Reddit
 
 interface SocialShareProps {
     url: string;
@@ -39,30 +39,23 @@ export function SocialShare({ url, title }: SocialShareProps) {
         });
     };
 
+    const renderShareButton = (href: string, label: string, Icon: React.ElementType) => (
+        <Button variant="outline" size="icon" asChild>
+            <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="relative group">
+                <Icon className="h-5 w-5" />
+                 <ExternalLink className="absolute -top-1 -right-1 h-3 w-3 bg-background text-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </a>
+        </Button>
+    );
+
     return (
         <div className="text-center">
             <h3 className="text-lg font-semibold text-foreground mb-4">Share this article</h3>
             <div className="flex justify-center items-center gap-2 flex-wrap">
-                <Button variant="outline" size="icon" asChild>
-                    <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter">
-                        <Twitter className="h-5 w-5" />
-                    </a>
-                </Button>
-                <Button variant="outline" size="icon" asChild>
-                    <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn">
-                        <Linkedin className="h-5 w-5" />
-                    </a>
-                </Button>
-                <Button variant="outline" size="icon" asChild>
-                    <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook">
-                        <Facebook className="h-5 w-5" />
-                    </a>
-                </Button>
-                 <Button variant="outline" size="icon" asChild>
-                    <a href={shareLinks.reddit} target="_blank" rel="noopener noreferrer" aria-label="Share on Reddit">
-                        <Send className="h-5 w-5" />
-                    </a>
-                </Button>
+                {renderShareButton(shareLinks.twitter, 'Share on Twitter', Twitter)}
+                {renderShareButton(shareLinks.linkedin, 'Share on LinkedIn', Linkedin)}
+                {renderShareButton(shareLinks.facebook, 'Share on Facebook', Facebook)}
+                {renderShareButton(shareLinks.reddit, 'Share on Reddit', Send)}
                 <Button variant="outline" size="icon" onClick={handleCopy} aria-label="Copy link">
                     <LinkIcon className={`h-5 w-5 ${copied ? 'text-green-500' : ''}`} />
                 </Button>

@@ -1,7 +1,7 @@
 'use client';
 
 import { type ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, ArrowUpDown } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -79,7 +79,7 @@ export const columns: ColumnDef<UserLink>[] = [
       const link = row.original;
       return (
         <div className="font-medium">
-            <a href={`https://mnfy.in/${link.id}`} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline text-primary">mnfy.in/{link.id}</a>
+            <a href={`https://mnfy.in/${link.id}`} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline text-primary inline-flex items-center gap-1">mnfy.in/{link.id} <ExternalLink className="h-3 w-3" /></a>
             <p className="text-sm text-muted-foreground truncate max-w-[200px] md:max-w-md">
             {link.longUrl}
             </p>

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Home, Settings, Link as LinkIcon, PanelLeft, Key, LineChart, BookText } from 'lucide-react';
+import { Home, Settings, Link as LinkIcon, PanelLeft, Key, LineChart, BookText, ExternalLink } from 'lucide-react';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { UserNav } from '@/components/user-nav';
 import { useAuth } from '@/hooks/use-auth';
@@ -24,7 +24,7 @@ const superUserNavItems = [
 
 const settingsNavItems = [
   { href: '/dashboard/settings/api-keys', label: 'API Keys', icon: Key },
-  { href: '/docs/api', label: 'API Docs', icon: BookText },
+  { href: '/docs/api', label: 'API Docs', icon: BookText, external: true },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -52,11 +52,12 @@ function NavLinks() {
 
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-      {navItems.map(({ href, label, icon: Icon }) => (
+      {navItems.map(({ href, label, icon: Icon, external }) => (
         <Link
           key={href}
           href={href}
-          target={href.startsWith('/docs') ? '_blank' : '_self'}
+          target={external ? '_blank' : '_self'}
+          rel={external ? 'noopener noreferrer' : undefined}
           className={cn(
             'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
             { 'bg-muted text-primary': pathname === href }
@@ -64,6 +65,7 @@ function NavLinks() {
         >
           <Icon className="h-4 w-4" />
           {label}
+          {external && <ExternalLink className="h-3 w-3 ml-auto" />}
         </Link>
       ))}
     </nav>

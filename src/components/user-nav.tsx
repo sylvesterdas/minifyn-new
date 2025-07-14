@@ -16,8 +16,9 @@ import {
 import { Button } from './ui/button';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
-import { LayoutDashboard, LogOut, Settings, Key, LifeBuoy } from 'lucide-react';
+import { LayoutDashboard, LogOut, Settings, Key, LifeBuoy, ExternalLink } from 'lucide-react';
 import { LogoutButton } from './logout-button';
+import { cn } from '@/lib/utils';
 
 export function UserNav() {
     const { user } = useAuth();
@@ -39,6 +40,8 @@ export function UserNav() {
         }
         return 'U';
     }
+
+    const menuItemClass = "flex items-center cursor-pointer";
 
     return (
         <DropdownMenu>
@@ -63,27 +66,28 @@ export function UserNav() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="flex items-center cursor-pointer">
+                    <Link href="/dashboard" className={menuItemClass}>
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         <span>Dashboard</span>
                     </Link>
                 </DropdownMenuItem>
                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/settings" className="flex items-center cursor-pointer">
+                    <Link href="/dashboard/settings" className={menuItemClass}>
                         <Settings className="mr-2 h-4 w-4" />
                         <span>Settings</span>
                     </Link>
                 </DropdownMenuItem>
                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/settings/api-keys" className="flex items-center cursor-pointer">
+                    <Link href="/dashboard/settings/api-keys" className={menuItemClass}>
                         <Key className="mr-2 h-4 w-4" />
                         <span>API Keys</span>
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                    <Link href="/help" target="_blank" rel="noopener noreferrer" className="flex items-center cursor-pointer">
+                    <Link href="/help" target="_blank" rel="noopener noreferrer" className={menuItemClass}>
                         <LifeBuoy className="mr-2 h-4 w-4" />
                         <span>Help</span>
+                        <ExternalLink className="ml-auto h-3 w-3" />
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

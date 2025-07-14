@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ExternalLink } from 'lucide-react';
 
 export const revalidate = 0;
 
@@ -19,7 +20,7 @@ export default function DmcaPage() {
             <h1 className="text-4xl font-bold">DMCA Takedown Policy</h1>
             <p className="text-muted-foreground">Last updated: {lastUpdated}</p>
 
-            <p>MiniFyn respects the intellectual property rights of others and expects its users to do the same. In accordance with the Digital Millennium Copyright Act of 1998, the text of which may be found on the U.S. Copyright Office website at <a href="http://www.copyright.gov/legislation/dmca.pdf" target="_blank" rel="noopener noreferrer">http://www.copyright.gov/legislation/dmca.pdf</a>, MiniFyn will respond expeditiously to claims of copyright infringement committed using the MiniFyn service that are reported to our Designated Copyright Agent.</p>
+            <p>MiniFyn respects the intellectual property rights of others and expects its users to do the same. In accordance with the Digital Millennium Copyright Act of 1998, the text of which may be found on the U.S. Copyright Office website at <a href="http://www.copyright.gov/legislation/dmca.pdf" target="_blank" rel="noopener noreferrer" className="inline-flex items-center">http://www.copyright.gov/legislation/dmca.pdf <ExternalLink className="ml-1 h-4 w-4" /></a>, MiniFyn will respond expeditiously to claims of copyright infringement committed using the MiniFyn service that are reported to our Designated Copyright Agent.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">1. Notice of Infringement</h2>
             <p>If you are a copyright owner, or are authorized to act on behalf of one, please report alleged copyright infringements by completing the following DMCA Notice of Alleged Infringement and delivering it to our Designated Copyright Agent. Upon receipt of the Notice as described below, we will take whatever action, in our sole discretion, we deem appropriate, including removal of the challenged material from the Service.</p>
