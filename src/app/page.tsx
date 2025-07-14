@@ -1,3 +1,4 @@
+
 import { UrlShortenerForm } from '@/components/url-shortener-form';
 import { QrCodeGeneratorForm } from '@/components/qr-code-generator-form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,6 +9,8 @@ import type { Metadata } from 'next';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
+  title: 'MiniFyn - Simple URL Shortener',
+  description: 'The simplest way to shorten, share, and track your links.',
   alternates: {
     canonical: 'https://www.minifyn.com/',
   },
