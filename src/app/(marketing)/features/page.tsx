@@ -1,5 +1,5 @@
 
-import { CheckCircle, QrCode, FileQuestion, LifeBuoy, Zap, Cpu, ShieldCheck } from 'lucide-react';
+import { CheckCircle, QrCode, FileQuestion, LifeBuoy, Zap, Cpu, ShieldCheck, LinkPreview } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -8,7 +8,7 @@ export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: 'Features | MiniFyn',
-  description: 'Discover the powerful features of MiniFyn URL Shortener, from AI-powered metadata to blazing-fast redirects.',
+  description: 'Discover the powerful features of MiniFyn URL Shortener, from automatic link previews to blazing-fast redirects.',
   alternates: {
     canonical: 'https://www.minifyn.com/features',
   },
@@ -16,8 +16,7 @@ export const metadata: Metadata = {
 
 const featuresList = [
     { name: "Detailed Analytics", description: "Track clicks, referrers, and geographic data for every link you create.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
-    { name: "Custom Branded Slugs", description: "Personalize your short links for better brand recognition and trust.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
-    { name: "AI-Powered SEO Metadata", description: "Automatically extracts titles and descriptions from your long URLs for better social sharing.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
+    { name: "Automatic Link Previews", description: "Automatically fetches page titles and descriptions from your long URLs for better social sharing.", icon: <LinkPreview className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
     { name: "QR Code Generation", description: "Instantly generate and download a custom-branded QR code for any link, completely free.", icon: <QrCode className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
     { name: "Developer API", description: "Integrate our powerful and simple link shortening service directly into your applications.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
     { name: "Link Expiration", description: "Set links to expire automatically after a certain time for time-sensitive campaigns.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
@@ -80,9 +79,9 @@ export default function FeaturesPage() {
                     <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-4">
                         <Cpu className="h-8 w-8"/>
                     </div>
-                    <h3 className="text-xl font-semibold">AI-Enhanced</h3>
+                    <h3 className="text-xl font-semibold">Intelligent & Insightful</h3>
                     <p className="text-muted-foreground mt-2">
-                        MiniFyn goes beyond shortening. Our AI automatically fetches SEO metadata, giving your shared links a professional edge on social media.
+                        MiniFyn automatically fetches metadata to give your links a professional edge on social media, while providing the analytics you need.
                     </p>
                 </div>
                  <div className="flex flex-col items-center">
