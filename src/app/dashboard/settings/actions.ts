@@ -1,9 +1,20 @@
+
 'use server';
 
 import { validateRequest } from '@/lib/auth';
 import { db, auth } from '@/lib/firebase-admin';
 import { revalidatePath } from 'next/cache';
 import crypto from 'crypto';
+
+export interface UserProfile {
+    name: string;
+    email: string;
+    role?: string;
+    timezone?: string;
+    company?: string;
+    onboardingCompleted: boolean;
+    createdAt: string;
+}
 
 /**
  * Retrieves the API key for a given user ID.
@@ -87,6 +98,24 @@ export async function revokeApiKey(): Promise<{ success: boolean } | { error: st
     }
 }
 
+export async function getUserProfile(): Promise<{ profile: UserProfile | null; error?: string }> {
+    const { user } = await validateRequest();
+    if (!user) {
+        return { profile: null, error: 'Unauthorized' };
+    }
+
+    try {
+        const profileSnapshot = await db.ref(`user_profiles/${user.uid}`).once('value');
+        if (!profileSnapshot.exists()) {
+            return { profile: null, error: 'Profile not found.' };
+        }
+        return { profile: profileSnapshot.val() as UserProfile };
+    } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+        return { profile: null, error: 'An unexpected error occurred.' };
+    }
+}
+
 export async function updateUserProfile(prevState: any, formData: FormData): Promise<{ success?: boolean; error?: string; message?: string }> {
     const { user } = await validateRequest();
     if (!user) {
@@ -112,7 +141,8 @@ export async function updateUserProfile(prevState: any, formData: FormData): Pro
         // Add onboarding fields if they exist
         if (role) profileData.role = role;
         if (timezone) profileData.timezone = timezone;
-        if (company) profileData.company = company;
+        if (company || company === '') profileData.company = company;
+
 
         // If this is from the onboarding flow, mark it as completed
         if (isOnboarding) {

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useActionState, useEffect } from 'react';
@@ -12,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { updateUserProfile } from '../settings/actions';
 import { useRouter } from 'next/navigation';
+import { timezones } from '@/lib/timezones';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -80,7 +82,16 @@ export default function OnboardingPage() {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="timezone">Timezone</Label>
-                        <Input id="timezone" name="timezone" placeholder="e.g., America/New_York" />
+                        <Select name="timezone">
+                            <SelectTrigger id="timezone">
+                                <SelectValue placeholder="Select your timezone" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {timezones.map(tz => (
+                                    <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                          <p className="text-sm text-muted-foreground">
                             This helps us show analytics in your local time.
                         </p>
@@ -92,9 +103,6 @@ export default function OnboardingPage() {
                 </CardContent>
                 <CardFooter className="flex-col gap-4">
                     <SubmitButton />
-                     <Button variant="link" asChild>
-                        <a href="/dashboard">Skip for now</a>
-                    </Button>
                 </CardFooter>
             </form>
         </Card>
