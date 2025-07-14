@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import type { Metadata } from 'next';
+import type { FAQPage, WithContext } from 'schema-dts';
 
 export const revalidate = 0;
 
@@ -48,22 +49,42 @@ const faqs = [
 ];
 
 export default function FaqPage() {
+
+    const jsonLd: WithContext<FAQPage> = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqs.map(faq => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: {
+                '@type': 'Answer',
+                text: faq.answer,
+            }
+        }))
+    };
+
   return (
-    <div className="container mx-auto px-4 py-12 md:py-24 max-w-3xl">
-        <div className="mb-12">
-            <h1 className="text-4xl font-bold">Frequently Asked Questions</h1>
-            <p className="mt-2 text-lg text-muted-foreground">Find answers to the most common questions about MiniFyn.</p>
-        </div>
-        <Accordion type="single" collapsible className="w-full">
-            {faqs.map((faq, index) => (
-                <AccordionItem value={`item-${index}`} key={index}>
-                    <AccordionTrigger className="text-lg text-left">{faq.question}</AccordionTrigger>
-                    <AccordionContent className="text-base text-muted-foreground">
-                        {faq.answer}
-                    </AccordionContent>
-                </AccordionItem>
-            ))}
-        </Accordion>
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="container mx-auto px-4 py-12 md:py-24 max-w-3xl">
+          <div className="mb-12">
+              <h1 className="text-4xl font-bold">Frequently Asked Questions</h1>
+              <p className="mt-2 text-lg text-muted-foreground">Find answers to the most common questions about MiniFyn.</p>
+          </div>
+          <Accordion type="single" collapsible className="w-full">
+              {faqs.map((faq, index) => (
+                  <AccordionItem value={`item-${index}`} key={index}>
+                      <AccordionTrigger className="text-lg text-left">{faq.question}</AccordionTrigger>
+                      <AccordionContent className="text-base text-muted-foreground">
+                          {faq.answer}
+                      </AccordionContent>
+                  </AccordionItem>
+              ))}
+          </Accordion>
+      </div>
+    </>
   );
 }
