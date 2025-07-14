@@ -5,9 +5,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
     title: 'API Documentation | MiniFyn',
     description: 'Integrate MiniFyn\'s powerful link shortening capabilities into your application with our simple and robust API.',
+    alternates: {
+        canonical: 'https://www.minifyn.com/docs/api',
+    },
 };
 
 const curlRequest = `curl -X POST https://minifyn.com/api/shorten \\

@@ -4,9 +4,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { Metadata } from 'next';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Contact Us | MiniFyn',
   description: 'Get in touch with the MiniFyn team.',
+  alternates: {
+    canonical: 'https://www.minifyn.com/contact',
+  },
 };
 
 export default function ContactPage() {

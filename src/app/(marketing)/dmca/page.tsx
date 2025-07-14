@@ -1,9 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'DMCA Policy | MiniFyn',
   description: 'Our policy for handling DMCA takedown notices.',
+  alternates: {
+    canonical: 'https://www.minifyn.com/dmca',
+  },
 };
 
 export default function DmcaPage() {

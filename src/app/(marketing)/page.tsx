@@ -3,6 +3,15 @@ import { QrCodeGeneratorForm } from '@/components/qr-code-generator-form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Key, Zap, QrCode, Link as LinkIcon, ClipboardPaste, Wand, BarChart3 } from 'lucide-react';
 import { DeveloperApiSection } from '@/components/developer-api-section';
+import type { Metadata } from 'next';
+
+export const revalidate = 0;
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: 'https://www.minifyn.com/',
+  },
+};
 
 const features = [
   {

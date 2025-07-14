@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         };
     }
     
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.minifyn.com';
+    const siteUrl = 'https://www.minifyn.com';
     const ogUrl = new URL(`${siteUrl}/blog/og`);
     ogUrl.searchParams.set('title', post.title);
     if(post.tags && post.tags.length > 0) {
@@ -62,7 +62,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
     }
     
     const authorName = post.author?.name || 'Sylvester Das';
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.minifyn.com';
+    const siteUrl = 'https://www.minifyn.com';
     const imageUrl = post.coverImage?.url || `${siteUrl}/logo.png`;
 
     const jsonLd: WithContext<Article> = {

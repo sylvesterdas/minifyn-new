@@ -1,8 +1,13 @@
 import type { Metadata } from 'next';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Terms of Service | MiniFyn',
   description: 'Read the Terms of Service for using MiniFyn.',
+  alternates: {
+    canonical: 'https://www.minifyn.com/terms',
+  },
 };
 
 export default function TermsPage() {

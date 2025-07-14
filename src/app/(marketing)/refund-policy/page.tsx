@@ -1,9 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Refund and Cancellation Policy | MiniFyn',
   description: 'Read our policy on refunds and cancellations.',
+  alternates: {
+    canonical: 'https://www.minifyn.com/refund-policy',
+  },
 };
 
 export default function RefundPolicyPage() {

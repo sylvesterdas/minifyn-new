@@ -4,9 +4,14 @@ import type { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Features | MiniFyn',
   description: 'Discover the powerful features of MiniFyn URL Shortener.',
+  alternates: {
+    canonical: 'https://www.minifyn.com/features',
+  },
 };
 
 const featuresList = [

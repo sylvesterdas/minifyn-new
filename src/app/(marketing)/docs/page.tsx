@@ -4,9 +4,14 @@ import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Documentation | MiniFyn',
   description: 'Explore our guides and API documentation to get the most out of MiniFyn.',
+  alternates: {
+    canonical: 'https://www.minifyn.com/docs',
+  },
 };
 
 const docSections = [

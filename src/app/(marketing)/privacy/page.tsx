@@ -1,8 +1,13 @@
 import type { Metadata } from 'next';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Privacy Policy | MiniFyn',
   description: 'Read the Privacy Policy for using MiniFyn.',
+  alternates: {
+    canonical: 'https://www.minifyn.com/privacy',
+  },
 };
 
 export default function PrivacyPage() {

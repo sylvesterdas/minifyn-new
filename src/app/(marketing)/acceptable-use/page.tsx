@@ -1,8 +1,13 @@
 import type { Metadata } from 'next';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Acceptable Use Policy | MiniFyn',
   description: 'Read our Acceptable Use Policy.',
+  alternates: {
+    canonical: 'https://www.minifyn.com/acceptable-use',
+  },
 };
 
 export default function AcceptableUsePage() {

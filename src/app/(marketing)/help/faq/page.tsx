@@ -6,9 +6,14 @@ import {
 } from '@/components/ui/accordion';
 import type { Metadata } from 'next';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'FAQ | MiniFyn Help Center',
   description: 'Find answers to frequently asked questions about MiniFyn.',
+  alternates: {
+    canonical: 'https://www.minifyn.com/help/faq',
+  },
 };
 
 const faqs = [

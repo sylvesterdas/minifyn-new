@@ -2,9 +2,14 @@ import { Link as LinkIcon, QrCode } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'How-to Guides | MiniFyn Help Center',
   description: 'Step-by-step guides for using MiniFyn features.',
+  alternates: {
+    canonical: 'https://www.minifyn.com/docs/guides',
+  },
 };
 
 export default function GuidesPage() {

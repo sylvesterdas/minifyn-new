@@ -4,9 +4,14 @@ import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Report Abuse | MiniFyn Help Center',
   description: 'How to report malicious or abusive links created with MiniFyn.',
+  alternates: {
+    canonical: 'https://www.minifyn.com/help/report-abuse',
+  },
 };
 
 export default function ReportAbusePage() {

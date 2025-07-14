@@ -4,9 +4,14 @@ import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Help Center | MiniFyn',
   description: 'Find answers, guides, and support for MiniFyn.',
+  alternates: {
+    canonical: 'https://www.minifyn.com/help',
+  },
 };
 
 const helpSections = [

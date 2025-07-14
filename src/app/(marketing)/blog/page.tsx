@@ -4,7 +4,7 @@ import { BlogPostList } from '@/components/blog-post-list';
 import type { Blog, WithContext } from 'schema-dts';
 
 export async function generateMetadata(): Promise<Metadata> {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.minifyn.com';
+    const siteUrl = 'https://www.minifyn.com';
     const title = 'Blog | MiniFyn';
     const description = 'Insights, tips, and updates from the MiniFyn team.';
 
@@ -50,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function BlogPage() {
   const { posts, pageInfo } = await getPosts(6);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.minifyn.com';
+  const siteUrl = 'https://www.minifyn.com';
   
   const jsonLd: WithContext<Blog> = {
     '@context': 'https://schema.org',
