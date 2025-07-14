@@ -14,6 +14,10 @@ export default async function DashboardPage() {
         redirect('/auth/signin');
     }
 
+    if (!user.onboardingCompleted) {
+        redirect('/dashboard/onboarding');
+    }
+
     // Fetch both stats and summary in parallel
     const [stats, summary] = await Promise.all([
         getDashboardStats(),
