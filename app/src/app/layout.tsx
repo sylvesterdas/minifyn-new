@@ -1,10 +1,9 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/context/auth-context';
 import { validateRequest } from '@/lib/auth';
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
 import { GoogleAnalytics } from '@/components/google-analytics';
 import { ConsentManager } from '@/components/consent-manager';
 import { CookieBanner } from '@/components/cookie-banner';
@@ -30,17 +29,11 @@ export default async function RootLayout({
       </head>
       <body className="font-body antialiased">
         <AuthProvider serverUser={user}>
-          <div className="flex flex-col min-h-screen">
-            <ConsentManager />
-            <GoogleAnalytics />
-            <Header />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
-            <CookieBanner />
-          </div>
+          <ConsentManager />
+          <GoogleAnalytics />
+          {children}
           <Toaster />
+          <CookieBanner />
         </AuthProvider>
       </body>
     </html>

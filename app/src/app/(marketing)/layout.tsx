@@ -1,9 +1,19 @@
-// This layout is now handled by the root layout at src/app/layout.tsx
-// This file can be removed, but we'll keep it to avoid breaking changes in the project structure.
+
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+
 export default function MarketingLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <>{children}</>;
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-1">
+        {children}
+      </main>
+      <Footer />
+    </div>
+  );
 }
