@@ -1,8 +1,8 @@
 
-import { CheckCircle, QrCode, FileQuestion, LifeBuoy, Zap, Cpu, ShieldCheck, LinkPreview } from 'lucide-react';
+import { CheckCircle, QrCode, FileQuestion, LifeBuoy, Zap, Cpu, ShieldCheck, Link } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import NextLink from 'next/link';
 
 export const revalidate = 0;
 
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 const featuresList = [
     { name: "Detailed Analytics", description: "Track clicks, referrers, and geographic data for every link you create.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
-    { name: "Automatic Link Previews", description: "Automatically fetches page titles and descriptions from your long URLs for better social sharing.", icon: <LinkPreview className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
+    { name: "Automatic Link Previews", description: "Automatically fetches page titles and descriptions from your long URLs for better social sharing.", icon: <Link className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
     { name: "QR Code Generation", description: "Instantly generate and download a custom-branded QR code for any link, completely free.", icon: <QrCode className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
     { name: "Developer API", description: "Integrate our powerful and simple link shortening service directly into your applications.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
     { name: "Link Expiration", description: "Set links to expire automatically after a certain time for time-sensitive campaigns.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
@@ -35,7 +35,7 @@ export default function FeaturesPage() {
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
               <Button asChild size="lg">
-                  <Link href="/auth/signup">Get started for free</Link>
+                  <NextLink href="/auth/signup">Get started for free</NextLink>
               </Button>
           </div>
         </div>
@@ -96,7 +96,7 @@ export default function FeaturesPage() {
             </div>
             <div className="mt-12 text-center">
                 <Button asChild size="lg">
-                    <Link href="/auth/signup">Experience the Difference</Link>
+                    <NextLink href="/auth/signup">Experience the Difference</NextLink>
                 </Button>
             </div>
         </div>
@@ -110,16 +110,16 @@ export default function FeaturesPage() {
           </p>
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button asChild variant="outline">
-              <Link href="/help/faq">
+              <NextLink href="/help/faq">
                 <FileQuestion className="mr-2 h-4 w-4" />
                 Read our FAQ
-              </Link>
+              </NextLink>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/contact">
+              <NextLink href="/contact">
                 <LifeBuoy className="mr-2 h-4 w-4" />
                 Contact Support
-              </Link>
+              </NextLink>
             </Button>
           </div>
         </div>
