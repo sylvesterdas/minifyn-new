@@ -21,7 +21,7 @@ export interface Link {
   seo: Metadata;
 }
 
-const ANON_RATE_LIMIT = 5; // 5 requests per day for unverified/anonymous users
+const ANON_RATE_LIMIT = 3; // 3 requests per day for unverified/anonymous users
 const VERIFIED_USER_RATE_LIMIT = 20; // 20 requests per day for verified users (form or API)
 const API_REQUEST_INTERVAL = 1000; // 1 second in milliseconds
 

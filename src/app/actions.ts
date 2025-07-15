@@ -54,7 +54,7 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     if (!isAllowed) {
         const message = isVerifiedUser 
             ? 'Daily limit of 20 URLs reached. Please try again tomorrow.' 
-            : 'Daily limit of 5 URLs reached. Please sign up for a free account for higher limits.';
+            : 'Daily limit of 3 URLs reached. Please sign up for a free account for higher limits.';
         return { success: false, message };
     }
     
