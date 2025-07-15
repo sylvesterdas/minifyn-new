@@ -8,7 +8,7 @@ export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: 'Features | MiniFyn',
-  description: 'Discover the powerful features of MiniFyn URL Shortener, from automatic link previews to blazing-fast redirects.',
+  description: 'Discover the powerful features of MiniFyn URL Shortener, from detailed analytics to blazing-fast redirects.',
   alternates: {
     canonical: 'https://www.minifyn.com/features',
   },
@@ -16,7 +16,6 @@ export const metadata: Metadata = {
 
 const featuresList = [
     { name: "Detailed Analytics", description: "Track clicks, referrers, and geographic data for every link you create.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
-    { name: "Automatic Link Previews", description: "Automatically fetches page titles and descriptions from your long URLs for better social sharing.", icon: <Link className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
     { name: "QR Code Generation", description: "Instantly generate and download a custom-branded QR code for any link, completely free.", icon: <QrCode className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
     { name: "Developer API", description: "Integrate our powerful and simple link shortening service directly into your applications.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
     { name: "Link Expiration", description: "Set links to expire automatically after a certain time for time-sensitive campaigns.", icon: <CheckCircle className="h-6 w-6 text-primary-foreground" aria-hidden="true" /> },
