@@ -15,13 +15,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     }
     
     const siteUrl = 'https://www.minifyn.com';
-    const ogUrl = new URL(`${siteUrl}/blog/og`);
-    ogUrl.searchParams.set('title', post.title);
-    if(post.tags && post.tags.length > 0) {
-      ogUrl.searchParams.set('tags', post.tags.map(t => t.name).join(','));
-    }
-
     const authorName = post.author?.name || 'Sylvester Das';
+    const ogImageUrl = post.ogImage?.url || post.coverImage?.url;
 
     return {
         title: `${post.title} | MiniFyn Blog`,
@@ -36,20 +31,20 @@ export async function generateMetadata({ params }: { params: { slug: string } })
             type: 'article',
             publishedTime: post.publishedAt,
             authors: [authorName],
-            images: [
+            images: ogImageUrl ? [
                 {
-                    url: ogUrl.toString(),
+                    url: ogImageUrl,
                     width: 1200,
                     height: 630,
                     alt: post.title,
                 },
-            ],
+            ] : undefined,
         },
         twitter: {
             card: 'summary_large_image',
             title: post.title,
             description: post.brief,
-            images: [ogUrl.toString()],
+            images: ogImageUrl ? [ogImageUrl] : undefined,
         }
     };
 }

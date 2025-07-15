@@ -8,16 +8,10 @@ export async function generateMetadata(): Promise<Metadata> {
     const title = 'Blog | MiniFyn';
     const description = 'Insights, tips, and updates from the MiniFyn team.';
 
-    const { posts } = await getPosts(1);
-    const latestPost = posts[0];
-
-    const ogUrl = new URL(`${siteUrl}/blog/og`);
-    ogUrl.searchParams.set('title', latestPost ? latestPost.title : title);
-    if (latestPost && latestPost.tags && latestPost.tags.length > 0) {
-        ogUrl.searchParams.set('tags', latestPost.tags.map(t => t.name).join(','));
-    } else {
-        ogUrl.searchParams.set('tags', 'URL Shortening,Tech,Tips');
-    }
+    // Use a static, generic OG image for the main blog page to reduce server load.
+    // The image can be created manually or using a simple, non-dynamic generator.
+    // For now, we point to a generic placeholder.
+    const ogImageUrl = 'https://placehold.co/1200x630.png';
 
     return {
         title,
@@ -32,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
             type: 'website',
             images: [
                 {
-                    url: ogUrl.toString(),
+                    url: ogImageUrl,
                     width: 1200,
                     height: 630,
                     alt: 'MiniFyn Blog',
@@ -43,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
             card: 'summary_large_image',
             title,
             description,
-            images: [ogUrl.toString()],
+            images: [ogImageUrl],
         },
     };
 }
