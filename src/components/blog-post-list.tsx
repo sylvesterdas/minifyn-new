@@ -138,13 +138,12 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
                         <Card key={post.slug} className="flex flex-col group overflow-hidden rounded-lg shadow-lg hover:shadow-primary/20 transition-all duration-300">
                              <Link href={`/blog/${post.slug}`} className="block overflow-hidden">
                                 <div className="aspect-[16/9] relative">
-                                    <Image
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
                                         src={post.coverImage?.url || 'https://placehold.co/600x400.png'}
                                         alt={post.title}
-                                        fill
-                                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                        priority={index < 3} // Prioritize loading for the first 3 images (above the fold)
+                                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                                        loading={index < 3 ? 'eager' : 'lazy'}
                                         data-ai-hint="blog post"
                                     />
                                 </div>

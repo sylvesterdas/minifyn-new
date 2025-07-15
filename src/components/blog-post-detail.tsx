@@ -2,7 +2,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { format } from 'date-fns';
 import { Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -60,12 +59,11 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
 
             {post.coverImage?.url && (
                 <div className="relative aspect-[16/9] mb-8">
-                    <Image
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
                         src={post.coverImage.url}
                         alt={post.title}
-                        fill
-                        className="rounded-lg object-cover"
-                        priority
+                        className="rounded-lg object-cover w-full h-full"
                     />
                 </div>
             )}
