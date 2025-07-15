@@ -4,18 +4,24 @@ import { logout } from "@/app/auth/actions";
 import { useTransition } from "react";
 import { DropdownMenuItem } from "./ui/dropdown-menu";
 import { LogOut, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 export function LogoutButton() {
     const [isPending, startTransition] = useTransition();
+    const router = useRouter();
+    const { toast } = useToast();
 
     const handleLogout = () => {
         startTransition(async () => {
             const result = await logout();
             if (result.success) {
-                // Force a hard navigation to clear all client-side state
-                window.location.assign('/auth/signin');
+                toast({ description: "You have been logged out." });
+                router.push('/auth/signin');
+                router.refresh(); // Ensures the server state is re-fetched
+            } else {
+                toast({ title: "Logout Failed", description: result.error, variant: 'destructive' });
             }
-            // If logout fails, we can optionally show an error, but for now we just won't redirect.
         });
     };
 
