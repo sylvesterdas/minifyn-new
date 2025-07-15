@@ -13,7 +13,6 @@ import { ArrowRight, Clipboard, Check, Loader2 } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signInAnonymously, type User } from 'firebase/auth';
 import Link from 'next/link';
-import { ToastAction } from './ui/toast';
 
 function SubmitButton({ pending, disabled }: { pending: boolean, disabled: boolean }) {
     return (
@@ -38,6 +37,7 @@ export function UrlShortenerForm() {
     const [copied, setCopied] = useState(false);
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [isAuthLoading, setIsAuthLoading] = useState(true);
+    const [showSignupPrompt, setShowSignupPrompt] = useState(false);
     const { toast } = useToast();
     const formRef = useRef<HTMLFormElement>(null);
 
@@ -68,16 +68,7 @@ export function UrlShortenerForm() {
     useEffect(() => {
         if (!state.success && state.message) {
             if (state.errorCode === 'ANON_LIMIT_REACHED') {
-                 toast({
-                    title: "Daily Limit Reached",
-                    description: "Sign up for a free account to create up to 20 links per day!",
-                    variant: "destructive",
-                    action: (
-                       <ToastAction altText="Sign Up" asChild>
-                         <Link href="/auth/signup">Sign Up</Link>
-                       </ToastAction>
-                    ),
-                });
+                 setShowSignupPrompt(true);
             } else {
                  toast({
                     title: "Oops!",
@@ -87,6 +78,7 @@ export function UrlShortenerForm() {
             }
         } else if (state.success && state.shortUrl) {
             setShortenedUrl(state.shortUrl);
+            setShowSignupPrompt(false); // Reset prompt on success
             formRef.current?.reset();
         }
     }, [state, toast]);
@@ -126,7 +118,17 @@ export function UrlShortenerForm() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">
-                    <SubmitButton pending={isPending} disabled={isAuthLoading} />
+                     {showSignupPrompt ? (
+                        <div className="w-full text-center space-y-3 animate-in fade-in duration-500">
+                             <p className="text-sm text-muted-foreground">Daily limit reached.</p>
+                             <Button asChild className="w-full font-semibold">
+                                <Link href="/auth/signup">Sign Up for More Links</Link>
+                             </Button>
+                        </div>
+                    ) : (
+                       <SubmitButton pending={isPending} disabled={isAuthLoading} />
+                    )}
+
                      {shortenedUrl && (
                         <div className="w-full p-3 rounded-md bg-accent/20 border border-accent flex items-center justify-between animate-in fade-in duration-500">
                             <a href={shortenedUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-accent-foreground truncate hover:underline">
