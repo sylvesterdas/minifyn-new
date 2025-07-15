@@ -1,19 +1,24 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
+import { generateOgImage } from '@/ai/flows/generate-og-image-flow';
 
-// This route no longer needs the Edge runtime.
-// The default Node.js runtime is more flexible for this task.
+export const revalidate = 3600; // Cache for 1 hour
 
-// Example: /blog/og?title=Hello%20World
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const title = searchParams.get('title');
+  const tags = searchParams.get('tags'); // comma-separated
 
   if (!title) {
     return new Response('Missing title parameter', { status: 400 });
   }
 
   try {
+    // 1. Generate the AI background image
+    // The AI flow returns a data URI (e.g., 'data:image/png;base64,...')
+    const { imageUrl: aiBackgroundUrl } = await generateOgImage({ title, tags: tags || '' });
+
+    // 2. Use the generated image in the ImageResponse
     return new ImageResponse(
       (
         <div
@@ -24,29 +29,46 @@ export async function GET(request: NextRequest) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: '#0f172a', // dark-grey
-            color: '#e2e8f0', // light-grey
+            color: 'white',
+            position: 'relative',
           }}
         >
-          <div style={{
+          {/* AI-generated background image */}
+          <img
+            src={aiBackgroundUrl}
+            alt=""
+            tw="absolute inset-0 w-full h-full object-cover"
+          />
+          {/* Dark overlay for text readability */}
+          <div tw="absolute inset-0 w-full h-full bg-black/60" />
+
+          {/* Centered content */}
+          <div
+            style={{
               display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
               textAlign: 'center',
               padding: '0 80px',
-          }}>
+              position: 'relative', // Ensure content is above overlay
+            }}
+          >
              <h1 style={{
                   fontSize: '64px',
                   fontWeight: 700,
                   lineHeight: 1.2,
-                  background: 'linear-gradient(to right, #3b82f6, #1e40af)',
-                  // Since we are not in Tailwind, we need vendor prefixes for broader browser support
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  color: 'transparent'
+                  textShadow: '2px 2px 8px rgba(0,0,0,0.7)',
              }}>
                {title}
              </h1>
           </div>
+          
+           {/* Logo at the bottom */}
+          <div tw="absolute bottom-10 left-10 flex items-center" style={{ position: 'absolute', left: 40, bottom: 40, display: 'flex', alignItems: 'center' }}>
+            <span style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>mnfy.in</span>
+          </div>
+
         </div>
       ),
       {
@@ -56,6 +78,30 @@ export async function GET(request: NextRequest) {
     );
   } catch (e: any) {
     console.error(`Failed to generate OG image: ${e.message}`);
-    return new Response('Failed to generate image', { status: 500 });
+    // Fallback to a simple image if AI fails
+     return new ImageResponse(
+      (
+        <div
+          style={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#0f172a',
+            color: '#e2e8f0',
+          }}
+        >
+          <div style={{ display: 'flex', textAlign: 'center', padding: '0 80px' }}>
+             <h1 style={{ fontSize: '64px', fontWeight: 700 }}>{title}</h1>
+          </div>
+        </div>
+      ),
+      {
+        width: 1200,
+        height: 630,
+      }
+    );
   }
 }
