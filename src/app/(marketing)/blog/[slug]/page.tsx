@@ -4,8 +4,6 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { Article, WithContext } from 'schema-dts';
 import { BlogPostDetail } from '@/components/blog-post-detail';
-import { getAiCoverImage, generateAndSaveCoverImage } from '../actions';
-import { db } from '@/lib/firebase-admin';
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -21,9 +19,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     const siteUrl = 'https://www.minifyn.com';
     const authorName = post.author?.name || 'Sylvester Das';
     
-    // Prioritize Hashnode's OG image, then our AI-generated one, then a fallback.
-    const aiImage = await getAiCoverImage(post.slug);
-    const ogImageUrl = post.ogImage?.url || post.coverImage?.url || aiImage || 'https://placehold.co/1200x630.png';
+    const ogImageUrl = post.ogImage?.url || post.coverImage?.url || 'https://placehold.co/1200x630.png';
 
     return {
         title: `${post.title} | MiniFyn Blog`,
@@ -65,22 +61,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
     
     const authorName = post.author?.name || 'Sylvester Das';
     const siteUrl = 'https://www.minifyn.com';
-
-    let finalCoverImage = post.coverImage?.url;
-    let isAiImage = false;
-
-    // If there's no cover image from Hashnode, check for our AI-generated one.
-    if (!finalCoverImage) {
-        const aiImage = await getAiCoverImage(post.slug);
-        if (aiImage) {
-            finalCoverImage = aiImage;
-            isAiImage = true;
-        } else {
-            // If no AI image exists yet, trigger generation in the background (fire-and-forget).
-            // We don't await this call, so the page renders immediately.
-            generateAndSaveCoverImage(post.slug, post.title);
-        }
-    }
+    const finalCoverImage = post.coverImage?.url;
 
     const jsonLd: WithContext<Article> = {
         '@context': 'https://schema.org',
@@ -110,11 +91,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
-            <BlogPostDetail 
-                post={post} 
-                coverImageOverride={finalCoverImage}
-                isAiCoverImage={isAiImage}
-            />
+            <BlogPostDetail post={post} />
         </>
     );
 }

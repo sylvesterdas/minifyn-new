@@ -2,7 +2,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { format } from 'date-fns';
 import { Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -31,16 +30,14 @@ hljs.registerLanguage('bash', bash);
 
 interface BlogPostDetailProps {
     post: HashnodePost;
-    coverImageOverride?: string | null;
-    isAiCoverImage?: boolean;
 }
 
-export function BlogPostDetail({ post, coverImageOverride, isAiCoverImage = false }: BlogPostDetailProps) {
+export function BlogPostDetail({ post }: BlogPostDetailProps) {
     const authorName = post.author?.name || 'Sylvester Das';
     const contentRef = useRef<HTMLDivElement>(null);
     const [shareUrl, setShareUrl] = useState(post.url);
 
-    const finalCoverImage = coverImageOverride || post.coverImage?.url;
+    const finalCoverImage = post.coverImage?.url;
 
     useEffect(() => {
         // Fetch the short URL for sharing
@@ -64,19 +61,12 @@ export function BlogPostDetail({ post, coverImageOverride, isAiCoverImage = fals
 
             {finalCoverImage && (
                 <div className="relative aspect-[16/9] mb-8 group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={finalCoverImage}
                         alt={post.title}
                         className="rounded-lg object-cover w-full h-full"
                     />
-                    {isAiCoverImage && (
-                         <div className="absolute inset-0 bg-black/30 flex items-end justify-start p-4 rounded-lg">
-                            <Link href="/" className="flex items-center gap-2 bg-black/50 text-white/80 px-3 py-1.5 rounded-full text-sm backdrop-blur-sm">
-                                <Image src="/logo.png" alt="MiniFyn Logo" width={20} height={20} />
-                                <span className="font-semibold">MiniFyn</span>
-                            </Link>
-                        </div>
-                    )}
                 </div>
             )}
             
