@@ -1,7 +1,23 @@
 import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
 export const runtime = 'edge';
+
+// Helper to read files from the project root
+const getAsset = async (...paths: string[]) => {
+  const assetPath = path.join(process.cwd(), ...paths);
+  try {
+    const asset = await fs.readFile(assetPath);
+    return asset;
+  } catch (e) {
+    // In a deployed environment, path might be different.
+    // Try resolving from /var/task/ which is common in Vercel Edge Functions
+    const deployedAssetPath = path.join('/var/task', ...paths);
+    return await fs.readFile(deployedAssetPath);
+  }
+}
 
 // Example: /blog/og?title=Hello%20World
 export async function GET(request: NextRequest) {
@@ -12,14 +28,12 @@ export async function GET(request: NextRequest) {
     return new Response('Missing title parameter', { status: 400 });
   }
 
-  // Fonts
-  const interRegular = await fetch(new URL('https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuOKfAZ9hjg.woff2')).then(res => res.arrayBuffer());
-  const interBold = await fetch(new URL('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.woff2')).then(res => res.arrayBuffer());
-  
-  // In a real app, this would be a public URL or a data URI.
-  // For this context, we will fetch it from the public folder.
-  const logoUrl = new URL('/logo.png', request.url).toString();
-  const logoData = await fetch(logoUrl).then(res => res.arrayBuffer());
+  // Fetch assets in parallel for performance
+  const [interRegular, interBold, logoData] = await Promise.all([
+    getAsset('public', 'fonts', 'Inter-Regular.ttf'),
+    getAsset('public', 'fonts', 'Inter-Bold.ttf'),
+    getAsset('public', 'logo.png')
+  ]);
 
   return new ImageResponse(
     (
