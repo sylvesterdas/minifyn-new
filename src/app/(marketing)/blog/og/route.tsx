@@ -1,12 +1,21 @@
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
 import { generateOgImage } from '@/ai/flows/generate-og-image-flow';
 
 export const revalidate = 3600; // Cache for 1 hour
 
+const OG_IMAGE_SECRET = process.env.OG_IMAGE_SECRET;
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+
+  // 1. Check for the secret token
+  const requestSecret = searchParams.get('secret');
+  if (OG_IMAGE_SECRET && requestSecret !== OG_IMAGE_SECRET) {
+    return new NextResponse('Unauthorized', { status: 401 });
+  }
+
   const title = searchParams.get('title');
   const tags = searchParams.get('tags'); // comma-separated
 
@@ -15,11 +24,11 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // 1. Generate the AI background image
+    // 2. Generate the AI background image
     const imageResult = await generateOgImage({ title, tags: tags || '' });
     const { imageUrl: aiBackgroundUrl } = imageResult;
 
-    // 2. Use the generated image in the ImageResponse
+    // 3. Use the generated image in the ImageResponse
     return new ImageResponse(
       (
         <div
