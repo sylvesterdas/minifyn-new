@@ -1,0 +1,21 @@
+diff --git a/node_modules/handlebars/lib/index.js b/node_modules/handlebars/lib/index.js
+index 035b804..8f9e28e 100644
+--- a/node_modules/handlebars/lib/index.js
++++ b/node_modules/handlebars/lib/index.js
+@@ -1,6 +1,3 @@
+-//- Attaches the runtime to context
+-var runtime = require('./handlebars.runtime');
+-
+ //- Compiler imports
+ var AST = require('./handlebars/compiler/ast');
+ var Parser = require('./handlebars/compiler/parser');
+@@ -10,6 +7,9 @@ var JavaScriptCompiler = require('./handlebars/compiler/javascript-compiler');
+ var Visitor = require('./handlebars/compiler/visitor');
+ var Tokenizer = require('./handlebars/compiler/tokenizer');
+ 
++//- Attaches the runtime to context
++var runtime = require('./handlebars.runtime');
++
+ var _create = runtime.create;
+ var create = function() {
+   var hb = _create.apply(this, arguments);
