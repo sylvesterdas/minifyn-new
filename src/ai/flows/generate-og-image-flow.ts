@@ -41,13 +41,12 @@ const generateOgImageFlow = ai.defineFlow(
       model: 'googleai/gemini-2.0-flash-preview-image-generation',
       
       // We create a more descriptive prompt for the model.
-      prompt: `Generate a visually appealing, abstract background image suitable for a social media share card (OG image).
-      The image should be conceptual and related to the title: "${input.title}".
-      Keywords for inspiration: ${input.tags || 'general, tech, modern'}.
-      The style should be modern, clean, and professional. 
-      IMPORTANTLY: Do not include any text, letters, numbers, logos, or recognizable figures in the image. It must be a pure background graphic.
+      prompt: `Generate an abstract background image suitable for a social media share card.
+      The image should be inspired by the concepts in the title: "${input.title}" and keywords: "${input.tags || 'modern, clean'}".
+      The style must be abstract, professional, and visually appealing.
+      CRITICAL: The generated image MUST be a pure background graphic. It MUST NOT contain any text, letters, numbers, logos, or identifiable figures.
       The image should work well with white text overlaid on top of it.
-      Aspect ratio should be 1.91:1 (widescreen).
+      The aspect ratio should be 1.91:1 (widescreen for social sharing).
       `,
       
       config: {
