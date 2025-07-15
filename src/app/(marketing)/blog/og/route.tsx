@@ -1,13 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
-import { promises as fs } from 'fs';
-import path from 'path';
 
-// Helper to read files from the project's public directory
-const getAsset = async (assetPath: string) => {
-  const fullPath = path.join(process.cwd(), 'public', assetPath);
-  return fs.readFile(fullPath);
-};
+// This route no longer needs the Edge runtime.
+// The default Node.js runtime is more flexible for this task.
 
 // Example: /blog/og?title=Hello%20World
 export async function GET(request: NextRequest) {
@@ -19,17 +14,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Fetch assets in parallel for performance
-    const [interRegular, interBold, logoData] = await Promise.all([
-      getAsset('/fonts/Inter-Regular.ttf'),
-      getAsset('/fonts/Inter-Bold.ttf'),
-      getAsset('/logo.png')
-    ]);
-
-    // Convert logo data to a data URI for embedding in the image
-    const logoBase64 = Buffer.from(logoData).toString('base64');
-    const logoSrc = `data:image/png;base64,${logoBase64}`;
-
     return new ImageResponse(
       (
         <div
@@ -42,20 +26,8 @@ export async function GET(request: NextRequest) {
             justifyContent: 'center',
             backgroundColor: '#0f172a', // dark-grey
             color: '#e2e8f0', // light-grey
-            fontFamily: '"Inter"',
           }}
         >
-          <div style={{
-              position: 'absolute',
-              top: '40px',
-              left: '60px',
-              display: 'flex',
-              alignItems: 'center',
-          }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img alt="MiniFyn Logo" src={logoSrc} width="48" height="48" />
-              <span style={{ marginLeft: '12px', fontSize: '32px', fontWeight: 600 }}>MiniFyn</span>
-          </div>
           <div style={{
               display: 'flex',
               textAlign: 'center',
@@ -66,8 +38,11 @@ export async function GET(request: NextRequest) {
                   fontWeight: 700,
                   lineHeight: 1.2,
                   background: 'linear-gradient(to right, #3b82f6, #1e40af)',
+                  // Since we are not in Tailwind, we need vendor prefixes for broader browser support
                   WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  color: 'transparent'
              }}>
                {title}
              </h1>
@@ -77,20 +52,6 @@ export async function GET(request: NextRequest) {
       {
         width: 1200,
         height: 630,
-        fonts: [
-          {
-            name: 'Inter',
-            data: interRegular,
-            style: 'normal',
-            weight: 400,
-          },
-          {
-            name: 'Inter',
-            data: interBold,
-            style: 'normal',
-            weight: 700,
-          },
-        ],
       }
     );
   } catch (e: any) {
