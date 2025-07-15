@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
 import { generateOgImage } from '@/ai/flows/generate-og-image-flow';
@@ -8,7 +9,7 @@ export const revalidate = 3600; // Cache for 1 hour
 
 // Helper to read files from the public directory
 const getAsset = async (assetPath: string) => {
-  const filePath = path.join(process.cwd(), 'public', assetPath);
+  const filePath = path.join(process.cwd(), assetPath);
   try {
     const asset = await fs.readFile(filePath);
     return asset;
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
     // 1. Generate the AI background image in parallel with fetching local assets
     const [imageResult, logoBuffer] = await Promise.all([
         generateOgImage({ title, tags: tags || '' }),
-        getAsset('logo.png')
+        getAsset('public/logo.png')
     ]);
 
     const { imageUrl: aiBackgroundUrl } = imageResult;
