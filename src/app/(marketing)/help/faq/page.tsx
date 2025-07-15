@@ -91,7 +91,9 @@ export default function FaqPage() {
               {faqs.map((faq, index) => (
                   <AccordionItem value={`item-${index}`} key={index}>
                       <AccordionTrigger className="text-lg text-left">{faq.question}</AccordionTrigger>
-                      <AccordionContent className="text-base text-muted-foreground prose prose-invert" dangerouslySetInnerHTML={{ __html: faq.answer }} />
+                      <AccordionContent className="text-base text-muted-foreground prose prose-invert">
+                        <div dangerouslySetInnerHTML={{ __html: faq.answer }} />
+                      </AccordionContent>
                   </AccordionItem>
               ))}
           </Accordion>
