@@ -8,6 +8,7 @@ const legalLinks = [
   { href: '/dmca', label: 'DMCA Policy' },
   { href: '/refund-policy', 'label': 'Refund Policy' },
   { href: '/docs/api', 'label': 'API Docs' },
+  { href: '/sitemap.xml', label: 'Sitemap' },
 ];
 
 export function Footer() {
