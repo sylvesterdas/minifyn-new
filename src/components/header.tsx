@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -39,7 +40,7 @@ export function Header() {
           </nav>
 
           <div className="hidden md:block">
-            {user ? (
+            {user && !user.isAnonymous ? (
                 <UserNav />
             ) : (
                 <Button asChild>
@@ -65,7 +66,7 @@ export function Header() {
                         </Link>
                     ))}
                     <div className="pt-4">
-                      {user ? (
+                      {user && !user.isAnonymous ? (
                         <UserNav />
                       ) : (
                         <Button asChild className="w-full">

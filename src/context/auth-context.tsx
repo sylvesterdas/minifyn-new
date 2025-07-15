@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { AuthUser } from '@/lib/auth';
@@ -6,7 +7,7 @@ import { auth as firebaseClientAuth } from '@/lib/firebase';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
-  user: AuthUser | null;
+  user: (AuthUser & { isAnonymous?: boolean }) | null;
   isLoading: boolean;
 }
 
@@ -22,7 +23,7 @@ export const AuthProvider = ({
   children: React.ReactNode;
   serverUser: AuthUser | null;
 }) => {
-  const [user, setUser] = useState<AuthUser | null>(serverUser);
+  const [user, setUser] = useState<(AuthUser & { isAnonymous?: boolean }) | null>(serverUser);
   const [isLoading, setIsLoading] = useState(serverUser === null); // Only true if server has no user
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export const AuthProvider = ({
       // If we have a server user, we don't need to listen for changes
       // on the client, as the session is managed by the cookie.
       // We set isLoading to false immediately.
+      setUser({ ...serverUser, isAnonymous: false });
       setIsLoading(false);
       return;
     }
@@ -44,7 +46,8 @@ export const AuthProvider = ({
                 ...firebaseUser.toJSON() as any, // Not a perfect mapping, but ok for anon
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,
-                email_verified: firebaseUser.emailVerified
+                email_verified: firebaseUser.emailVerified,
+                isAnonymous: firebaseUser.isAnonymous,
             });
         } else {
             setUser(null);
