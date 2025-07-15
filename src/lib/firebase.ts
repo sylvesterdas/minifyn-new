@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { initializeAuth, browserLocalPersistence } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -18,11 +18,15 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
+
+// Initialize Firebase Authentication with local persistence
+const auth = initializeAuth(app, {
+  persistence: browserLocalPersistence
+});
+
 const db = getDatabase(app);
 
-// Note: For Firebase Realtime Database, offline persistence is enabled by default on web clients.
-// There is no `enablePersistence` function to call like in Firestore.
+// NOTE: For Firebase Realtime Database, offline persistence is enabled by default on web clients.
 // The SDK automatically handles offline data caching and synchronization.
 
 export { app, auth, db };
