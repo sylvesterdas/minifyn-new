@@ -13,6 +13,7 @@ export interface FormState {
     success: boolean;
     message: string;
     shortUrl?: string;
+    errorCode?: 'ANON_LIMIT_REACHED';
 }
 
 export async function shortenUrl(prevState: FormState, formData: FormData): Promise<FormState> {
@@ -52,10 +53,15 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     // Check rate limit.
     const isAllowed = await checkRateLimit(userId, isVerifiedUser);
     if (!isAllowed) {
-        const message = isVerifiedUser 
-            ? 'Daily limit of 20 URLs reached. Please try again tomorrow.' 
-            : 'Daily limit of 3 URLs reached. Please sign up for a free account for higher limits.';
-        return { success: false, message };
+        if (isVerifiedUser) {
+            return { success: false, message: 'Daily limit of 20 URLs reached. Please try again tomorrow.' };
+        } else {
+             return { 
+                success: false, 
+                message: 'Daily limit of 3 URLs reached.',
+                errorCode: 'ANON_LIMIT_REACHED'
+            };
+        }
     }
     
     const validatedFields = urlSchema.safeParse({

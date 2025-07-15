@@ -1,9 +1,10 @@
+
 'use client';
 
 import { useActionState, useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
-import { shortenUrl } from '@/app/actions';
+import { shortenUrl, type FormState } from '@/app/actions';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -11,6 +12,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ArrowRight, Clipboard, Check, Loader2 } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signInAnonymously, type User } from 'firebase/auth';
+import Link from 'next/link';
+import { ToastAction } from './ui/toast';
 
 function SubmitButton({ pending, disabled }: { pending: boolean, disabled: boolean }) {
     return (
@@ -59,21 +62,32 @@ export function UrlShortenerForm() {
         return () => unsubscribe();
     }, []);
 
-    const initialState = { success: false, message: '', shortUrl: '' };
+    const initialState: FormState = { success: false, message: '' };
     const [state, formAction, isPending] = useActionState(shortenUrl, initialState);
 
     useEffect(() => {
-        if (state.message) {
-            if (state.success && state.shortUrl) {
-                setShortenedUrl(state.shortUrl);
-                formRef.current?.reset();
-            } else if (!state.success) {
-                toast({
+        if (!state.success && state.message) {
+            if (state.errorCode === 'ANON_LIMIT_REACHED') {
+                 toast({
+                    title: "Daily Limit Reached",
+                    description: "Sign up for a free account to create up to 20 links per day!",
+                    variant: "destructive",
+                    action: (
+                       <ToastAction altText="Sign Up" asChild>
+                         <Link href="/auth/signup">Sign Up</Link>
+                       </ToastAction>
+                    ),
+                });
+            } else {
+                 toast({
                     title: "Oops!",
                     description: state.message,
                     variant: "destructive",
                 });
             }
+        } else if (state.success && state.shortUrl) {
+            setShortenedUrl(state.shortUrl);
+            formRef.current?.reset();
         }
     }, [state, toast]);
     
