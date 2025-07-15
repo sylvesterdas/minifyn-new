@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { SUPER_USER_ID } from '@/lib/config';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
+import { useState } from 'react';
 
 const baseNavItems = [
   { href: '/dashboard', label: 'Overview', icon: Home },
@@ -28,7 +29,7 @@ const settingsNavItems = [
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
-function NavLinks() {
+function NavLinks({ onLinkClick }: { onLinkClick?: () => void }) {
   const pathname = usePathname();
   const { user, isLoading } = useAuth();
   
@@ -58,6 +59,7 @@ function NavLinks() {
           href={href}
           target={external ? '_blank' : '_self'}
           rel={external ? 'noopener noreferrer' : undefined}
+          onClick={onLinkClick}
           className={cn(
             'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
             { 'bg-muted text-primary': pathname === href }
@@ -74,6 +76,7 @@ function NavLinks() {
 
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -95,7 +98,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
       <div className="flex flex-col">
          <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 md:hidden">
-            <Sheet>
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button
                   variant="outline"
@@ -113,16 +116,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <span>MiniFyn</span>
                   </Link>
                 </div>
-                <NavLinks />
+                <NavLinks onLinkClick={() => setIsMobileMenuOpen(false)} />
                  <div className="mt-auto p-4 border-t">
-                    <UserNav />
+                    <div onClick={() => setIsMobileMenuOpen(false)}>
+                      <UserNav />
+                    </div>
                  </div>
               </SheetContent>
             </Sheet>
             <div className="w-full flex-1">
               {/* Mobile Header content can go here if needed */}
             </div>
-            {/* UserNav is now in the sheet for mobile */}
           </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto">
             {children}
