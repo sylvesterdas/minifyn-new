@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
                 display: 'flex',
                 alignItems: 'center',
                 fontSize: '24px',
-                fontWeight: 600,
+                fontWeight: 700,
                 color: 'rgba(255, 255, 255, 0.8)',
                 textShadow: '1px 1px 4px rgba(0,0,0,0.5)',
                 }}
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
                 display: 'flex',
                 alignItems: 'center',
                 fontSize: '24px',
-                fontWeight: 600,
+                fontWeight: 700,
                 color: 'rgba(255, 255, 255, 0.8)',
                 }}
             >
