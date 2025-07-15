@@ -141,8 +141,8 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         expiresAt,
         userId: userId,
         clickCount: 0,
-        title: metadata.title,
-        description: metadata.description,
+        title: metadata.title || "",
+        description: metadata.description || "",
         seo: metadata,
     };
 
