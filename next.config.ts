@@ -2,6 +2,7 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  swcMinify: true,
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -26,7 +27,7 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'i.ibb.co',
         port: '',
-        pathname: '/**',
+pathname: '/**',
       },
     ],
   },
