@@ -1,9 +1,9 @@
 import { Footer } from '@/components/footer';
 import { GoogleAnalytics } from '@/components/google-analytics';
 import { ConsentManager } from '@/components/consent-manager';
-import Image from 'next/image';
 import Link from 'next/link';
 import { CookieBanner } from '@/components/cookie-banner';
+import { Logo } from '@/components/logo';
 
 export default function AuthLayout({
   children,
@@ -16,7 +16,7 @@ export default function AuthLayout({
       <GoogleAnalytics />
       <header className="p-4 sm:p-6">
         <Link href="/" className="flex items-center gap-2 text-foreground/80 hover:text-foreground transition-colors">
-          <Image src="/logo.png" alt="MiniFyn Logo" width={32} height={32} />
+          <Logo />
           <span className="font-bold text-lg">MiniFyn</span>
         </Link>
       </header>

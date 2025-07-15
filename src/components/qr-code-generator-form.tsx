@@ -32,65 +32,10 @@ export function QrCodeGeneratorForm() {
             quietZone: 15,
             quietZoneColor: 'transparent',
             onRenderingEnd: (_: any, dataURL: any) => {
-                combineWithLogo(dataURL);
+                setQrImageDataUrl(dataURL);
             },
             tooltip: false
         });
-    }
-
-    const combineWithLogo = (qrDataUrl: string) => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        const logoImg = new window.Image();
-        logoImg.src = '/logo.png';
-        
-        logoImg.onload = () => {
-            const qrImg = new window.Image();
-            qrImg.src = qrDataUrl;
-            
-            qrImg.onload = () => {
-                // Define dimensions
-                const qrSize = qrImg.width;
-                const topMargin = 70; // Space for logo and text
-                const padding = 20;
-
-                canvas.width = qrSize;
-                canvas.height = qrSize + topMargin;
-
-                // White background
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // --- Branding ---
-                const logoSize = 32;
-                const spacing = 10;
-                ctx.font = 'bold 20px Inter';
-                const textMetrics = ctx.measureText('mnfy.in');
-                const textWidth = textMetrics.width;
-
-                const totalBrandingWidth = logoSize + spacing + textWidth;
-                const startX = (canvas.width - totalBrandingWidth) / 2;
-                
-                // Draw Logo
-                const logoY = (topMargin - logoSize - padding) / 2 + padding / 2;
-                ctx.drawImage(logoImg, startX, logoY, logoSize, logoSize);
-                
-                // Draw Text
-                ctx.fillStyle = '#000000';
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'middle';
-                const textX = startX + logoSize + spacing;
-                const textY = logoY + (logoSize / 2);
-                ctx.fillText('mnfy.in', textX, textY);
-
-                // Draw QR Code
-                ctx.drawImage(qrImg, 0, topMargin);
-                
-                setQrImageDataUrl(canvas.toDataURL('image/png'));
-            };
-        };
     }
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -139,7 +84,7 @@ export function QrCodeGeneratorForm() {
                         />
                     </div>
                       <div className="flex flex-col items-center justify-center pt-4">
-                            {qrImageDataUrl && <Image src={qrImageDataUrl} alt="Generated QR Code" width={280} height={350} className="rounded-lg shadow-md animate-in fade-in duration-500" />}
+                            {qrImageDataUrl && <Image src={qrImageDataUrl} alt="Generated QR Code" width={280} height={280} className="rounded-lg shadow-md animate-in fade-in duration-500" />}
                             {/* This div is used by easyqrcodejs to render the initial qr code, but it's hidden from the user */}
                             <div ref={qrcodeRef} style={{ display: 'none' }}></div>
                       </div>
