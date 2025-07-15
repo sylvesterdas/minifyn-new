@@ -131,7 +131,7 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
 
             {filteredPosts.length > 0 ? (
                  <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredPosts.map((post) => {
+                    {filteredPosts.map((post, index) => {
                         const authorName = post.author?.name || "Sylvester Das";
                         const authorImage = post.author?.profilePicture;
                         return (
@@ -143,6 +143,8 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
                                         alt={post.title}
                                         fill
                                         className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                        priority={index < 3} // Prioritize loading for the first 3 images (above the fold)
                                         data-ai-hint="blog post"
                                     />
                                 </div>
