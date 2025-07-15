@@ -129,10 +129,7 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         metadata = await fetchMetadata(longUrl);
     } catch (error) {
         console.error("Failed to fetch metadata:", error);
-        metadata = {
-            title: "Link via mnfy.in",
-            description: "A shortened link created with MiniFyn.",
-        }
+        metadata = {};
     }
 
     const newLinkData = {
@@ -141,9 +138,13 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         expiresAt,
         userId: userId,
         clickCount: 0,
-        title: metadata.title || "",
-        description: metadata.description || "",
-        seo: metadata,
+        title: metadata.title || "Link via mnfy.in",
+        description: metadata.description || "A shortened link created with MiniFyn.",
+        seo: {
+            ...metadata,
+            title: metadata.title || "Link via mnfy.in",
+            description: metadata.description || "A shortened link created with MiniFyn.",
+        },
     };
 
     await db.ref(`urls/${slug}`).set(newLinkData);
