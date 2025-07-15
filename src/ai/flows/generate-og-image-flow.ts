@@ -44,7 +44,8 @@ const generateOgImageFlow = ai.defineFlow(
       prompt: `Generate a visually appealing, abstract background image suitable for a social media share card (OG image).
       The image should be conceptual and related to the title: "${input.title}".
       Keywords for inspiration: ${input.tags || 'general, tech, modern'}.
-      The style should be modern, clean, and professional. Avoid any text, logos, or recognizable figures.
+      The style should be modern, clean, and professional. 
+      IMPORTANTLY: Do not include any text, letters, numbers, logos, or recognizable figures in the image. It must be a pure background graphic.
       The image should work well with white text overlaid on top of it.
       Aspect ratio should be 1.91:1 (widescreen).
       `,
