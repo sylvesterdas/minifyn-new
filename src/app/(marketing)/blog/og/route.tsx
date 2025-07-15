@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
-import { ImageResponse } from 'next/server';
-import Image from 'next/image';
+import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
 
@@ -17,8 +16,9 @@ export async function GET(request: NextRequest) {
   const interRegular = await fetch(new URL('https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuOKfAZ9hjg.woff2')).then(res => res.arrayBuffer());
   const interBold = await fetch(new URL('https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.woff2')).then(res => res.arrayBuffer());
   
-  // Logo
-  const logoUrl = new URL('/public/logo.png', request.url).toString();
+  // In a real app, this would be a public URL or a data URI.
+  // For this context, we will fetch it from the public folder.
+  const logoUrl = new URL('/logo.png', request.url).toString();
   const logoData = await fetch(logoUrl).then(res => res.arrayBuffer());
 
   return new ImageResponse(
