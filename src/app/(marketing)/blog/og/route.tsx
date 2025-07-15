@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
+import { promises as fs } from 'fs';
+import path from 'path';
 
-// Helper to fetch assets from the public folder in an Edge-compatible way
-const getAsset = async (req: NextRequest, path: string) => {
-  const url = new URL(path, req.nextUrl.origin);
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch asset: ${url}`);
-  }
-  return response.arrayBuffer();
+// Helper to read files from the project's public directory
+const getAsset = async (assetPath: string) => {
+  const fullPath = path.join(process.cwd(), 'public', assetPath);
+  return fs.readFile(fullPath);
 };
 
 // Example: /blog/og?title=Hello%20World
@@ -23,9 +21,9 @@ export async function GET(request: NextRequest) {
   try {
     // Fetch assets in parallel for performance
     const [interRegular, interBold, logoData] = await Promise.all([
-      getAsset(request, '/fonts/Inter-Regular.ttf'),
-      getAsset(request, '/fonts/Inter-Bold.ttf'),
-      getAsset(request, '/logo.png')
+      getAsset('/fonts/Inter-Regular.ttf'),
+      getAsset('/fonts/Inter-Bold.ttf'),
+      getAsset('/logo.png')
     ]);
 
     // Convert logo data to a data URI for embedding in the image
