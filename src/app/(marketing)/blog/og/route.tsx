@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+
+import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
 import { generateOgImage } from '@/ai/flows/generate-og-image-flow';
 
@@ -63,6 +64,24 @@ export async function GET(request: NextRequest) {
                {title}
              </h1>
           </div>
+
+          {/* Branding */}
+            <div
+                style={{
+                position: 'absolute',
+                bottom: '40px',
+                right: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: '24px',
+                fontWeight: 600,
+                color: 'rgba(255, 255, 255, 0.8)',
+                textShadow: '1px 1px 4px rgba(0,0,0,0.5)',
+                }}
+            >
+                <span>MiniFyn</span>
+            </div>
+
         </div>
       ),
       {
@@ -90,6 +109,20 @@ export async function GET(request: NextRequest) {
           <div style={{ display: 'flex', textAlign: 'center', padding: '0 80px' }}>
              <h1 style={{ fontSize: '64px', fontWeight: 700 }}>{title}</h1>
           </div>
+           <div
+                style={{
+                position: 'absolute',
+                bottom: '40px',
+                right: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: '24px',
+                fontWeight: 600,
+                color: 'rgba(255, 255, 255, 0.8)',
+                }}
+            >
+                <span>MiniFyn</span>
+            </div>
         </div>
       ),
       {
