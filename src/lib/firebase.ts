@@ -1,8 +1,7 @@
-
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getDatabase, enablePersistence } from "firebase/database";
+import { getDatabase } from "firebase/database";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -22,17 +21,8 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// Enable Realtime Database persistence if not in a server-side rendering context
-if (typeof window !== 'undefined') {
-  enablePersistence(db)
-    .catch((err) => {
-      if (err.code === 'failed-precondition') {
-        console.warn("Firebase persistence failed: Multiple tabs open.");
-      } else if (err.code === 'unimplemented') {
-        console.warn("Firebase persistence failed: Browser does not support it.");
-      }
-    });
-}
-
+// Note: For Firebase Realtime Database, offline persistence is enabled by default on web clients.
+// There is no `enablePersistence` function to call like in Firestore.
+// The SDK automatically handles offline data caching and synchronization.
 
 export { app, auth, db };
