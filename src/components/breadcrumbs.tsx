@@ -16,16 +16,19 @@ export function Breadcrumbs() {
   const pathname = usePathname();
   const segments = pathname.split('/').filter(Boolean);
 
-  // Don't show breadcrumbs on the homepage
-  if (pathname === '/') {
+  // Don't show breadcrumbs on the homepage or dashboard pages
+  if (pathname === '/' || pathname.startsWith('/dashboard')) {
     return null;
   }
 
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' ');
+  const capitalize = (s: string) => {
+    if (s === 'api') return 'API';
+    return s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' ');
+  }
 
   return (
-    <div className="border-b">
-      <div className="container mx-auto px-4 md:px-6">
+    <div className="border-b bg-muted/20">
+      <div className="container mx-auto px-4 sm:px-6">
         <Breadcrumb className="py-3">
           <BreadcrumbList>
             <BreadcrumbItem>
