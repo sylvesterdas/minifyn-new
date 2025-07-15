@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
 
-export const runtime = 'edge';
-
 // Helper to fetch assets from the public folder in an Edge-compatible way
 const getAsset = async (req: NextRequest, path: string) => {
   const url = new URL(path, req.nextUrl.origin);
