@@ -124,13 +124,31 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         expiresAt = addDays(now, 7).getTime(); // 7 days for anonymous users
     }
 
-    let metadata: Metadata;
+    let fetchedMetadata: Metadata;
     try {
-        metadata = await fetchMetadata(longUrl);
+        fetchedMetadata = await fetchMetadata(longUrl);
     } catch (error) {
         console.error("Failed to fetch metadata:", error);
-        metadata = {};
+        fetchedMetadata = {};
     }
+
+    const primaryTitle = fetchedMetadata.title || fetchedMetadata.ogTitle || fetchedMetadata.twitterTitle || "Link via mnfy.in";
+    const primaryDescription = fetchedMetadata.description || fetchedMetadata.ogDescription || fetchedMetadata.twitterDescription || "A shortened link created with MiniFyn.";
+
+    const seoData: Metadata = {
+        title: primaryTitle,
+        description: primaryDescription,
+        ogTitle: fetchedMetadata.ogTitle || '',
+        ogDescription: fetchedMetadata.ogDescription || '',
+        ogImage: fetchedMetadata.ogImage || '',
+        ogType: fetchedMetadata.ogType || '',
+        ogUrl: fetchedMetadata.ogUrl || '',
+        twitterCard: fetchedMetadata.twitterCard || '',
+        twitterTitle: fetchedMetadata.twitterTitle || '',
+        twitterDescription: fetchedMetadata.twitterDescription || '',
+        twitterImage: fetchedMetadata.twitterImage || '',
+        canonical: fetchedMetadata.canonical || '',
+    };
 
     const newLinkData = {
         longUrl,
@@ -138,13 +156,9 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         expiresAt,
         userId: userId,
         clickCount: 0,
-        title: metadata.title || "Link via mnfy.in",
-        description: metadata.description || "A shortened link created with MiniFyn.",
-        seo: {
-            ...metadata,
-            title: metadata.title || "Link via mnfy.in",
-            description: metadata.description || "A shortened link created with MiniFyn.",
-        },
+        title: primaryTitle,
+        description: primaryDescription,
+        seo: seoData,
     };
 
     await db.ref(`urls/${slug}`).set(newLinkData);
