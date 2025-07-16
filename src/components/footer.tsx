@@ -39,7 +39,7 @@ export function Footer() {
   return (
     <footer className="border-t bg-muted/40 py-12">
         <div className="container mx-auto px-4 md:px-6">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 {/* Logo and Social */}
                 <div className="col-span-2 md:col-span-1 flex flex-col items-start gap-4">
                      <Link href="/" className="flex items-center gap-2">
@@ -53,26 +53,24 @@ export function Footer() {
                 </div>
 
                 {/* Link Columns */}
-                <div className="grid grid-cols-2 md:grid-cols-3 col-span-2 md:col-span-4 gap-8">
-                    <div>
-                        <h4 className="font-semibold mb-4 text-foreground">Product</h4>
-                        <ul className="space-y-3 text-sm">
-                            {footerLinks.product.map(link => <FooterLink key={link.href} {...link} />)}
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold mb-4 text-foreground">Resources</h4>
-                        <ul className="space-y-3 text-sm">
-                            {footerLinks.resources.map(link => <FooterLink key={link.href} {...link} />)}
-                        </ul>
-                    </div>
-                     <div>
-                        <h4 className="font-semibold mb-4 text-foreground">Legal</h4>
-                        <ul className="space-y-3 text-sm">
-                            {footerLinks.company.map(link => <FooterLink key={link.href} {...link} />)}
-                            {footerLinks.legal.map(link => <FooterLink key={link.href} {...link} />)}
-                        </ul>
-                    </div>
+                <div>
+                    <h4 className="font-semibold mb-4 text-foreground">Product</h4>
+                    <ul className="space-y-3 text-sm">
+                        {footerLinks.product.map(link => <FooterLink key={link.href} {...link} />)}
+                    </ul>
+                </div>
+                <div>
+                    <h4 className="font-semibold mb-4 text-foreground">Resources</h4>
+                    <ul className="space-y-3 text-sm">
+                        {footerLinks.resources.map(link => <FooterLink key={link.href} {...link} />)}
+                    </ul>
+                </div>
+                <div>
+                    <h4 className="font-semibold mb-4 text-foreground">Legal & Help</h4>
+                    <ul className="space-y-3 text-sm">
+                        {footerLinks.company.map(link => <FooterLink key={link.href} {...link} />)}
+                        {footerLinks.legal.map(link => <FooterLink key={link.href} {...link} />)}
+                    </ul>
                 </div>
             </div>
             <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
