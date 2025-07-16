@@ -18,7 +18,7 @@ export default function ToolsLayout({
                 </div>
             </div>
             
-            <div className="py-12 md:py-16 bg-muted/20">
+            <div className="py-12 md:py-16">
                  <div className="container mx-auto px-4 max-w-4xl">
                     <RelatedTools />
                  </div>
