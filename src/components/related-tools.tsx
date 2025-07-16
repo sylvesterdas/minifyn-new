@@ -37,22 +37,26 @@ const allTools: ToolInfo[] = [
 
 export function RelatedTools() {
     const currentPath = usePathname();
-    const otherTools = allTools.filter(tool => tool.href !== currentPath);
 
-    // On the main /tools page, only show the URL shortener CTA.
+    // On the main /tools listing page, don't show this component at all.
     if (currentPath === '/tools') {
-        return <UrlShortenerCard />;
+        return null;
     }
+
+    const otherTools = allTools.filter(tool => tool.href !== currentPath);
 
     return (
         <div>
             <div className="text-center mb-10">
-                <h2 className="text-3xl font-bold tracking-tight">Explore Other Tools</h2>
+                <h2 className="text-3xl font-bold tracking-tight">Explore Our Tools</h2>
                 <p className="mt-2 text-muted-foreground">Boost your productivity with our suite of free utilities.</p>
             </div>
             
             <div className="grid gap-8 md:grid-cols-1">
-                {/* Show other available tools */}
+                 {/* Always show the main URL shortener tool card */}
+                 <UrlShortenerCard />
+
+                {/* Show other available developer tools */}
                 {otherTools.map((tool) => (
                     <Link href={tool.href} key={tool.title}>
                         <Card className="h-full hover:border-primary transition-colors group">
