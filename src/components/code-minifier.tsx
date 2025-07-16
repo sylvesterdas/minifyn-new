@@ -32,20 +32,28 @@ const minifyHtml = (htmlCode: string): string => {
 
 const detectLanguage = (code: string): Language | null => {
     const trimmedCode = code.trim();
-    if (trimmedCode.startsWith('<') && trimmedCode.endsWith('>')) return 'html';
-    // Simple regex for CSS rules
-    if (/[\.#]?[a-zA-Z0-9-]+\s*\{[^}]+\}/.test(trimmedCode)) return 'css';
-    // Look for common JS keywords or patterns
-    if (/(function|const|let|var|import|export|=>)/.test(trimmedCode)) return 'javascript';
+
+    // Most specific checks first
+    if (/^<!DOCTYPE html/i.test(trimmedCode) || /<html/i.test(trimmedCode) || (trimmedCode.startsWith('<') && trimmedCode.endsWith('>'))) {
+        return 'html';
+    }
+    // Check for CSS syntax (selectors and properties)
+    if (/([#.]?[\w-]+)\s*\{[^{}]*\}/.test(trimmedCode) || /@media|@keyframes/.test(trimmedCode)) {
+        return 'css';
+    }
+    // Check for common JS keywords and patterns
+    if (/(function|const|let|var|import|export|=>|document\.getElementById|console\.log)/.test(trimmedCode) || /^\s*['"]use client['"]/.test(trimmedCode)) {
+        return 'javascript';
+    }
     // Fallback checks
-    if (trimmedCode.includes('{') && trimmedCode.includes('}')) return 'css';
     if (trimmedCode.includes('</')) return 'html';
+    if (trimmedCode.includes('{') && trimmedCode.includes('}')) return 'css';
+    
     return null; // Could not detect
 };
 
 
-function BulkMinifier() {
-    const [mangleJs, setMangleJs] = useState(true);
+function BulkMinifier({ mangleJs, setMangleJs }: { mangleJs: boolean, setMangleJs: (val: boolean) => void}) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isZipping, startZipTransition] = useTransition();
     const { toast } = useToast();
@@ -70,19 +78,19 @@ function BulkMinifier() {
                 try {
                     if (extension === 'js') {
                         const result = await minify(content, { mangle: mangleJs, compress: true });
+                        if (result.error) throw result.error;
                         minifiedContent = result.code || '';
                     } else if (extension === 'css') {
                         minifiedContent = minifyCss(content);
                     } else { // html
                         minifiedContent = minifyHtml(content);
                     }
+                    const newFileName = file.name.replace(/\.(js|css|html)$/, `.min.${extension}`);
+                    zip.file(newFileName, minifiedContent);
                 } catch(e) {
-                     toast({ title: "Minification Error", description: `Could not minify '${file.name}'.`, variant: "destructive"});
+                     toast({ title: "Minification Error", description: `Skipping '${file.name}' due to invalid syntax or other error.`, variant: "destructive"});
                      return;
                 }
-
-                const newFileName = file.name.replace(/\.(js|css|html)$/, `.min.${extension}`);
-                zip.file(newFileName, minifiedContent);
             });
 
             await Promise.all(minificationPromises);
@@ -98,7 +106,7 @@ function BulkMinifier() {
                     URL.revokeObjectURL(link.href);
                 });
             } else {
-                 toast({ title: "No files minified", description: "Could not process any of the selected files."});
+                 toast({ title: "No files minified", description: "Could not process any of the selected files. Check if they have valid syntax."});
             }
         });
 
@@ -157,7 +165,7 @@ function BulkMinifier() {
                             />
                             <Label htmlFor="mangle-js" className="cursor-pointer">Mangle variable names in JS files</Label>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1 px-1">This applies to both bulk uploads and single-paste minification.</p>
+                        <p className="text-xs text-muted-foreground mt-1 px-1">Reduces file size by shortening variable names. Applies to both bulk and single paste.</p>
                     </CollapsibleContent>
                 </Collapsible>
             </CardContent>
@@ -166,7 +174,7 @@ function BulkMinifier() {
 }
 
 
-function SinglePasteMinifier() {
+function SinglePasteMinifier({ mangleJs }: { mangleJs: boolean }) {
     const [inputCode, setInputCode] = useState('');
     const [outputCode, setOutputCode] = useState('');
     const [isPending, startTransition] = useTransition();
@@ -195,9 +203,10 @@ function SinglePasteMinifier() {
             try {
                 if (detectedLang === 'javascript') {
                     const result = await minify(inputCode, {
-                        mangle: true,
+                        mangle: mangleJs,
                         compress: true,
                     });
+                    if (result.error) throw result.error;
                     setOutputCode(result.code || '');
                 } else if (detectedLang === 'css') {
                     setOutputCode(minifyCss(inputCode));
@@ -206,11 +215,11 @@ function SinglePasteMinifier() {
                 }
             } catch (error) {
                 console.error("Minification error:", error);
-                const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-                setOutputCode(`// Error during minification:\n// ${errorMessage}`);
+                setOutputCode('');
+                toast({ title: "Minification Error", description: "The code appears to have invalid syntax and could not be minified.", variant: 'destructive'});
             }
         });
-    }, [inputCode, toast]);
+    }, [inputCode, toast, mangleJs]);
     
     const handleCopy = () => {
         if (outputCode) {
@@ -330,10 +339,12 @@ function SinglePasteMinifier() {
 }
 
 export function CodeMinifier() {
+    const [mangleJs, setMangleJs] = useState(true);
+
     return (
         <div className="space-y-8">
-            <BulkMinifier />
-            <SinglePasteMinifier />
+            <BulkMinifier mangleJs={mangleJs} setMangleJs={setMangleJs} />
+            <SinglePasteMinifier mangleJs={mangleJs} />
         </div>
     );
 }
