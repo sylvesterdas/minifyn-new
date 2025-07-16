@@ -55,10 +55,6 @@ export default async function BlogPage() {
     publisher: {
       '@type': 'Organization',
       name: 'MiniFyn',
-      logo: {
-        '@type': 'ImageObject',
-        url: `${siteUrl}/logo.png`,
-      },
     },
   };
 

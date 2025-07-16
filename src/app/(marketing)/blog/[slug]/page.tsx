@@ -68,7 +68,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
         '@type': 'Article',
         headline: post.title,
         description: post.brief,
-        image: finalCoverImage || `${siteUrl}/logo.png`,
+        image: finalCoverImage,
         author: {
             '@type': 'Person',
             name: authorName,
@@ -76,10 +76,6 @@ export default async function PostPage({ params }: { params: { slug: string } })
         publisher: {
             '@type': 'Organization',
             name: 'MiniFyn',
-            logo: {
-                '@type': 'ImageObject',
-                url: `${siteUrl}/logo.png`,
-            }
         },
         datePublished: post.publishedAt,
         dateModified: post.updatedAt || post.publishedAt,

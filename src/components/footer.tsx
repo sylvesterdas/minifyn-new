@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { SocialLinks } from './social-links';
-import Image from 'next/image';
+import Logo from './logo';
 
 const footerLinks = {
     product: [
@@ -44,7 +44,7 @@ export function Footer() {
                 {/* Logo and Social */}
                 <div className="col-span-2 md:col-span-1 flex flex-col items-start gap-4">
                      <Link href="/" className="flex items-center gap-2">
-                        <Image src="/logo.png" alt="MiniFyn Logo" width={32} height={32} />
+                        <Logo />
                         <span className="font-bold text-lg">MiniFyn</span>
                     </Link>
                     <p className="text-sm text-muted-foreground">The simplest way to shorten, share, and track your links.</p>

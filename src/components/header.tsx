@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { UserNav } from './user-nav';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
-import Image from 'next/image';
+import Logo from './logo';
 import { useState } from 'react';
 
 const navLinks = [
@@ -27,7 +27,7 @@ export function Header() {
       <div className="container flex h-14 items-center mx-auto px-4 sm:px-6">
         <div className="mr-4 flex items-center">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="MiniFyn Logo" width={32} height={32} />
+            <Logo />
             <span className="font-bold">MiniFyn</span>
           </Link>
         </div>

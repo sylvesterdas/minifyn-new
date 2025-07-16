@@ -12,7 +12,7 @@ import { ArrowRight, Clipboard, Check, Loader2 } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signInAnonymously, type User } from 'firebase/auth';
 import Link from 'next/link';
-import Image from 'next/image';
+import Logo from './logo';
 
 function SubmitButton({ pending, disabled }: { pending: boolean, disabled: boolean }) {
     return (
@@ -96,7 +96,7 @@ export function UrlShortenerForm() {
         <Card className="w-full max-w-md bg-card/50 backdrop-blur-sm border-border/20 shadow-2xl shadow-black/20 rounded-t-none">
              <CardHeader>
                 <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
-                    <Image src="/logo.png" alt="MiniFyn Logo" width={32} height={32} />
+                    <Logo />
                     mnfy.in
                 </CardTitle>
                 <CardDescription className="text-center pt-2">

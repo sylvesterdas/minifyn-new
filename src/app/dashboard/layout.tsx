@@ -11,7 +11,7 @@ import { UserNav } from '@/components/user-nav';
 import { useAuth } from '@/hooks/use-auth';
 import { SUPER_USER_ID } from '@/lib/config';
 import { Skeleton } from '@/components/ui/skeleton';
-import Image from 'next/image';
+import Logo from '@/components/logo';
 import { useState } from 'react';
 
 const baseNavItems = [
@@ -84,7 +84,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
-              <Image src="/logo.png" alt="MiniFyn Logo" width={32} height={32} />
+              <Logo />
               <span className="">MiniFyn</span>
             </Link>
           </div>
@@ -112,7 +112,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <SheetContent side="left" className="flex flex-col">
                 <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
                   <Link href="/" className="flex items-center gap-2 font-semibold">
-                    <Image src="/logo.png" alt="MiniFyn Logo" width={32} height={32} />
+                    <Logo />
                     <span>MiniFyn</span>
                   </Link>
                 </div>
