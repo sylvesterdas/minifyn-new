@@ -130,7 +130,7 @@ export function CodeMinifier() {
                 let minifiedContent: string;
                 try {
                     if (extension === 'js') {
-                        const result = await minify(content, { mangle: true, compress: true });
+                        const result = await minify(content, { mangle: mangleJs, compress: true });
                         minifiedContent = result.code || '';
                     } else if (extension === 'css') {
                         minifiedContent = minifyCss(content);
