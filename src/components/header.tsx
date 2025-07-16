@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 const navLinks = [
+    { href: "/", label: "Home" },
     { href: "/features", label: "Features" },
     { href: "/tools", label: "Dev Tools" },
     { href: "/docs", label: "Docs" },
@@ -32,7 +33,7 @@ export function Header() {
           </Link>
         </div>
         
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex flex-1 items-center justify-end space-x-2 md:space-x-6">
           <nav className="hidden md:flex items-center space-x-6">
             {navLinks.map((link) => (
                 <Link key={link.href} href={link.href} className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
