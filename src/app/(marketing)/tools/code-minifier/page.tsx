@@ -1,5 +1,6 @@
 import { CodeMinifier } from '@/components/code-minifier';
 import type { Metadata } from 'next';
+import { CtaCard } from '@/components/cta-card';
 
 export const metadata: Metadata = {
     title: 'Code Minifier | MiniFyn Tools',
@@ -20,6 +21,10 @@ export default function CodeMinifierPage() {
             </div>
             
             <CodeMinifier />
+
+            <div className="mt-16 max-w-4xl mx-auto">
+                 <CtaCard />
+            </div>
         </div>
     );
 }
