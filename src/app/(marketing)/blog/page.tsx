@@ -3,15 +3,13 @@ import { getPosts } from '@/lib/hashnode';
 import { BlogPostList } from '@/components/blog-post-list';
 import type { Blog, WithContext } from 'schema-dts';
 
+const siteUrl = 'https://www.minifyn.com';
+
 export async function generateMetadata(): Promise<Metadata> {
-    const siteUrl = 'https://www.minifyn.com';
     const title = 'Blog | MiniFyn';
     const description = 'Insights, tips, and updates from the MiniFyn team.';
 
-    // Use a static, generic OG image for the main blog page to reduce server load.
-    // The image can be created manually or using a simple, non-dynamic generator.
-    // For now, we point to a generic placeholder.
-    const ogImageUrl = 'https://placehold.co/1200x630.png';
+    const ogImageUrl = `${siteUrl}/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}`;
 
     return {
         title,
@@ -44,7 +42,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function BlogPage() {
   const { posts, pageInfo } = await getPosts(6);
-  const siteUrl = 'https://www.minifyn.com';
   
   const jsonLd: WithContext<Blog> = {
     '@context': 'https://schema.org',

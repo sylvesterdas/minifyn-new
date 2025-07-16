@@ -10,23 +10,27 @@ import type { WebSite, WithContext } from 'schema-dts';
 
 export const revalidate = 0;
 
+const siteTitle = 'MiniFyn - Simple URL Shortener';
+const siteDescription = 'The simplest way to shorten, share, and track your links.';
+const siteUrl = 'https://www.minifyn.com';
+
 export const metadata: Metadata = {
-  title: 'MiniFyn - Simple URL Shortener',
-  description: 'The simplest way to shorten, share, and track your links.',
+  title: siteTitle,
+  description: siteDescription,
   alternates: {
-    canonical: 'https://www.minifyn.com/',
+    canonical: siteUrl,
   },
   openGraph: {
-    title: 'MiniFyn - Simple URL Shortener',
-    description: 'The simplest way to shorten, share, and track your links.',
-    url: 'https://www.minifyn.com/',
+    title: siteTitle,
+    description: siteDescription,
+    url: siteUrl,
     siteName: 'MiniFyn',
     images: [
       {
-        url: 'https://placehold.co/1200x630.png',
+        url: `${siteUrl}/og?title=MiniFyn&description=${encodeURIComponent(siteDescription)}`,
         width: 1200,
         height: 630,
-        alt: 'MiniFyn URL Shortener',
+        alt: siteTitle,
       },
     ],
     locale: 'en_US',
@@ -34,9 +38,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MiniFyn - Simple URL Shortener',
-    description: 'The simplest way to shorten, share, and track your links.',
-    images: ['https://placehold.co/1200x630.png'],
+    title: siteTitle,
+    description: siteDescription,
+    images: [`${siteUrl}/og?title=MiniFyn&description=${encodeURIComponent(siteDescription)}`],
   },
 };
 
