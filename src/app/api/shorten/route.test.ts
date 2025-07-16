@@ -1,6 +1,7 @@
 import { POST } from './route';
 import { NextRequest } from 'next/server';
 import * as data from '@/lib/data';
+import * as webRisk from '@/lib/webrisk';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { UserRecord } from 'firebase-admin/auth';
 
@@ -8,7 +9,7 @@ import type { UserRecord } from 'firebase-admin/auth';
 vi.mock('@/lib/data', async (importOriginal) => {
     const actual = await importOriginal<typeof data>();
     return {
-        ...actual, // Keep actual implementations for non-mocked parts if any
+        ...actual,
         validateApiKey: vi.fn(),
         checkRateLimit: vi.fn(),
         createShortLink: vi.fn(),
@@ -16,15 +17,23 @@ vi.mock('@/lib/data', async (importOriginal) => {
     };
 });
 
+// Mock the webrisk module
+vi.mock('@/lib/webrisk', () => ({
+    isUrlSafe: vi.fn(),
+}));
+
 const mockValidateApiKey = data.validateApiKey as vi.Mock;
 const mockCheckRateLimit = data.checkRateLimit as vi.Mock;
 const mockCreateShortLink = data.createShortLink as vi.Mock;
 const mockIncrementUsage = data.incrementUsage as vi.Mock;
+const mockIsUrlSafe = webRisk.isUrlSafe as vi.Mock;
 
 describe('POST /api/shorten', () => {
 
     beforeEach(() => {
         vi.resetAllMocks();
+        // Default to URL being safe for most tests
+        mockIsUrlSafe.mockResolvedValue(true);
     });
 
     const mockUser = { uid: 'test-user-id', emailVerified: true } as UserRecord;
@@ -48,8 +57,31 @@ describe('POST /api/shorten', () => {
             message: 'URL shortened successfully',
             shortUrl: 'https://mnfy.in/abcdef',
         });
+        expect(mockIsUrlSafe).toHaveBeenCalledWith('https://example.com');
         expect(mockCheckRateLimit).toHaveBeenCalledWith(mockUser.uid, true, true);
         expect(mockIncrementUsage).toHaveBeenCalledWith(mockUser.uid, true);
+    });
+
+    it('should return 400 Bad Request if URL is unsafe', async () => {
+        const unsafeUrl = 'http://malware.testing.google.test/testing/malware/';
+        mockValidateApiKey.mockResolvedValue(mockUser);
+        mockCheckRateLimit.mockResolvedValue(true);
+        // Simulate the URL being flagged as unsafe
+        mockIsUrlSafe.mockResolvedValue(false);
+
+        const request = new NextRequest('https://minifyn.com/api/shorten', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer valid-token' },
+            body: JSON.stringify({ url: unsafeUrl }),
+        });
+
+        const response = await POST(request);
+        const body = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(body).toEqual({ error: "This URL is considered unsafe and cannot be shortened." });
+        expect(mockIsUrlSafe).toHaveBeenCalledWith(unsafeUrl);
+        expect(mockCreateShortLink).not.toHaveBeenCalled();
     });
 
     it('should return 401 Unauthorized if token is invalid', async () => {

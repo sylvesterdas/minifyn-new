@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const validatedFields = urlSchema.safeParse({ longUrl: body.url });
+        const validatedFields = await urlSchema.safeParseAsync({ longUrl: body.url });
 
         if (!validatedFields.success) {
             const errors = validatedFields.error.flatten().fieldErrors;
