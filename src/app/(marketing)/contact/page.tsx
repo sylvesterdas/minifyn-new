@@ -3,6 +3,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { FileQuestion, LifeBuoy } from 'lucide-react';
 
 export const revalidate = 0;
 
@@ -17,6 +19,7 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   // This is now a Server Component
   return (
+    <>
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-3xl">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Contact Us</h1>
@@ -59,5 +62,23 @@ export default function ContactPage() {
         </div>
       </form>
     </div>
+    
+    <div className="container mx-auto px-4 pb-12 md:pb-24">
+      <div className="mt-16 text-center border-t pt-12 max-w-4xl mx-auto">
+        <h3 className="text-2xl font-semibold">Need a faster answer?</h3>
+        <p className="mt-2 text-muted-foreground">
+          Check our FAQ for answers to common questions.
+        </p>
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Button asChild variant="outline">
+            <Link href="/help/faq">
+              <FileQuestion className="mr-2 h-4 w-4" />
+              Read our FAQ
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+    </>
   );
 }
