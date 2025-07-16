@@ -12,8 +12,10 @@ export default async function MarketingLayout({
     <div className="flex flex-col min-h-screen">
       <Header />
       <Breadcrumbs />
-      <main className="flex-1">
-        {children}
+      <main className="flex-1 flex flex-col">
+        <div className="flex-1">
+            {children}
+        </div>
       </main>
       <Footer />
     </div>
