@@ -40,12 +40,6 @@ const helpSections = [
         title: 'Report Abuse',
         description: 'Learn how to report malicious or inappropriate links.'
     },
-    {
-        href: '/contact',
-        icon: <LifeBuoy className="h-8 w-8 text-primary" />,
-        title: 'Contact Support',
-        description: 'Can\'t find what you\'re looking for? Contact us directly.'
-    }
 ]
 
 export default function HelpPage() {
