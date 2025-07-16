@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from './ui/card';
-import { ArrowRight, Code, Wand2, Link as LinkIcon, Shield } from 'lucide-react';
+import { ArrowRight, Code, Wand2, Shield } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { UrlShortenerCard } from './url-shortener-card';
 
@@ -39,17 +39,19 @@ export function RelatedTools() {
     const currentPath = usePathname();
     const otherTools = allTools.filter(tool => tool.href !== currentPath);
 
+    // On the main /tools page, only show the URL shortener CTA.
+    if (currentPath === '/tools') {
+        return <UrlShortenerCard />;
+    }
+
     return (
         <div>
             <div className="text-center mb-10">
-                <h2 className="text-3xl font-bold tracking-tight">Explore Our Tools</h2>
+                <h2 className="text-3xl font-bold tracking-tight">Explore Other Tools</h2>
                 <p className="mt-2 text-muted-foreground">Boost your productivity with our suite of free utilities.</p>
             </div>
             
             <div className="grid gap-8 md:grid-cols-1">
-                {/* Always show the main URL shortener tool */}
-                <UrlShortenerCard />
-
                 {/* Show other available tools */}
                 {otherTools.map((tool) => (
                     <Link href={tool.href} key={tool.title}>

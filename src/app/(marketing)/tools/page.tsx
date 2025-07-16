@@ -8,7 +8,7 @@ export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: 'Developer Tools | MiniFyn',
-  description: 'A collection of free, fast, and secure developer tools that run entirely in your browser.',
+  description: 'A collection of free, fast, and secure developer tools that run entirely in your browser. Minify code, format JSON, debug JWTs, and more.',
   alternates: {
     canonical: 'https://www.minifyn.com/tools',
   },
