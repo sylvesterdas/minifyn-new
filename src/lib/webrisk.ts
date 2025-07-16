@@ -16,11 +16,11 @@ const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 export async function isUrlSafe(url: string): Promise<boolean> {
     console.log(`[WebRisk] Checking URL: ${url}`);
     
-    const cachedEntry = safeUrlCache.get(url);
-    if (cachedEntry && (Date.now() - cachedEntry.timestamp < CACHE_TTL)) {
-        console.log(`[WebRisk] Cache hit for URL: ${url}`);
-        return true;
-    }
+    // const cachedEntry = safeUrlCache.get(url);
+    // if (cachedEntry && (Date.now() - cachedEntry.timestamp < CACHE_TTL)) {
+    //     console.log(`[WebRisk] Cache hit for URL: ${url}`);
+    //     return true;
+    // }
 
     const apiKey = process.env.WEBRISK_API_KEY;
     if (!apiKey) {
@@ -31,8 +31,8 @@ export async function isUrlSafe(url: string): Promise<boolean> {
     const encodedUrl = encodeURIComponent(url);
     const encodedThreatTypes = THREAT_TYPES.map(t => `threatTypes=${t}`).join('&');
 
-    const apiUrl = `https://webrisk.googleapis.com/v1/uris:search?${encodedThreatTypes}&uri=${encodedUrl}&key=${apiKey}`;
-    
+    const apiUrl = `https://webrisk.googleapis.com/v1/uris:search?threatTypes=MALWARE&threatTypes=SOCIAL_ENGINEERING&threatTypes=UNWANTED_SOFTWARE&uri=${encodedUrl}&key=${apiKey}`;
+    console.log('apiUrl', apiUrl)
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',

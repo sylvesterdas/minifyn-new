@@ -57,13 +57,13 @@ describe('POST /api/shorten', () => {
             message: 'URL shortened successfully',
             shortUrl: 'https://mnfy.in/abcdef',
         });
-        expect(mockIsUrlSafe).toHaveBeenCalledWith('https://example.com');
         expect(mockCheckRateLimit).toHaveBeenCalledWith(mockUser.uid, true, true);
+        expect(mockIsUrlSafe).toHaveBeenCalledWith('https://example.com');
         expect(mockIncrementUsage).toHaveBeenCalledWith(mockUser.uid, true);
     });
 
     it('should return 400 Bad Request if URL is unsafe', async () => {
-        const unsafeUrl = 'http://malware.testing.google.test/testing/malware/';
+        const unsafeUrl = 'http://testsafebrowsing.appspot.com/s/malware.html';
         mockValidateApiKey.mockResolvedValue(mockUser);
         mockCheckRateLimit.mockResolvedValue(true);
         // Simulate the URL being flagged as unsafe

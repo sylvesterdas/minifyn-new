@@ -43,7 +43,10 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to fetch URL, status: ${response.status}`);
+            // Instead of throwing an error, we log it and return an empty object.
+            // This prevents the entire link creation process from failing if a page is temporarily down or returns a 404.
+            console.warn(`Could not fetch metadata for ${url}, status: ${response.status}`);
+            return {};
         }
 
         const html = await response.text();
@@ -73,6 +76,7 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
         return metadata;
     } catch (error) {
         console.error(`Error fetching metadata for ${url}:`, error);
+        // Return an empty object on any other error (e.g., network failure)
         return {};
     }
 }
