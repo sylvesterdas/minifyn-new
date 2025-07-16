@@ -48,7 +48,7 @@ export default function PrivacyPage() {
             </ul>
 
             <h2 className="mt-8 text-2xl font-semibold">4. Data from Client-Side Tools</h2>
-            <p>Some of our tools, such as the Code Minifier, operate entirely within your web browser ("client-side"). For these tools, we do not collect, process, or store any of the data or files you input. All processing happens on your own device.</p>
+            <p>Some of our tools, such as the Code Minifier, JSON Formatter, and JWT Debugger, operate entirely within your web browser ("client-side"). For these tools, we do not collect, process, or store any of the data or files you input. All processing happens on your own device, and your data is never sent to our servers.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">5. Data Security</h2>
             <p>We work hard to protect our users from unauthorized access to or unauthorized alteration, disclosure, or destruction of information we hold. We use a variety of security measures to maintain the safety of your personal information.</p>
