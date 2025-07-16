@@ -7,6 +7,8 @@ import { validateRequest } from '@/lib/auth';
 import { GoogleAnalytics } from '@/components/google-analytics';
 import { ConsentManager } from '@/components/consent-manager';
 import { CookieBanner } from '@/components/cookie-banner';
+import { PageLoader } from '@/components/page-loader';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'MiniFyn - Simple URL Shortener',
@@ -29,6 +31,9 @@ export default async function RootLayout({
       </head>
       <body className="font-body antialiased">
         <AuthProvider serverUser={user}>
+            <Suspense>
+              <PageLoader />
+            </Suspense>
             <ConsentManager />
             <GoogleAnalytics />
             {children}
