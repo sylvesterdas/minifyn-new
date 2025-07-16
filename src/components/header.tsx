@@ -12,6 +12,7 @@ import { useState } from 'react';
 
 const navLinks = [
     { href: "/features", label: "Features" },
+    { href: "/tools/code-minifier", label: "Tools" },
     { href: "/docs", label: "Docs" },
     { href: "/blog", label: "Blog" },
     { href: "/help", label: "Help" },
