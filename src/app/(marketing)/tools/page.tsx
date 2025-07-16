@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { UrlShortenerCard } from '@/components/url-shortener-card';
+import type { WithContext, ItemList } from 'schema-dts';
 
 export const revalidate = 0;
 
@@ -37,32 +38,61 @@ const toolSections = [
 ];
 
 export default function ToolsPage() {
-  return (
-    <div className="container mx-auto px-4 py-12 md:py-24">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Developer Tools</h1>
-        <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-          A collection of free, fast, and secure tools that run entirely in your browser. No data is ever sent to our servers.
-        </p>
-      </div>
+  const siteUrl = 'https://www.minifyn.com';
 
-      <div className="space-y-8 max-w-4xl mx-auto">
-        <UrlShortenerCard />
-        {toolSections.map((section) => (
-             <Link href={section.href} key={section.title}>
-                <Card className="h-full hover:border-primary transition-colors group">
-                    <CardHeader className="flex flex-row items-start gap-4">
-                        {section.icon}
-                        <div className="flex-1">
-                            <CardTitle className="text-xl">{section.title}</CardTitle>
-                            <CardDescription className="mt-2">{section.description}</CardDescription>
-                        </div>
-                         <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-                    </CardHeader>
-                </Card>
-            </Link>
-        ))}
+  const jsonLd: WithContext<ItemList> = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'MiniFyn Developer Tools',
+    description: 'A collection of free, fast, and secure developer tools that run entirely in your browser.',
+    itemListElement: toolSections.map((tool, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Service',
+        name: tool.title,
+        description: tool.description,
+        url: `${siteUrl}${tool.href}`,
+        provider: {
+          '@type': 'Organization',
+          name: 'MiniFyn'
+        }
+      }
+    })),
+  };
+
+  return (
+    <>
+       <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="container mx-auto px-4 py-12 md:py-24">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Developer Tools</h1>
+          <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
+            A collection of free, fast, and secure tools that run entirely in your browser. No data is ever sent to our servers.
+          </p>
+        </div>
+
+        <div className="space-y-8 max-w-4xl mx-auto">
+          <UrlShortenerCard />
+          {toolSections.map((section) => (
+              <Link href={section.href} key={section.title}>
+                  <Card className="h-full hover:border-primary transition-colors group">
+                      <CardHeader className="flex flex-row items-start gap-4">
+                          {section.icon}
+                          <div className="flex-1">
+                              <CardTitle className="text-xl">{section.title}</CardTitle>
+                              <CardDescription className="mt-2">{section.description}</CardDescription>
+                          </div>
+                          <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                      </CardHeader>
+                  </Card>
+              </Link>
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
