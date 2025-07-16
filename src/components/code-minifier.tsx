@@ -2,11 +2,10 @@
 'use client';
 
 import { useState, useTransition, useCallback, useRef } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileDown, Loader2, ArrowRight, Clipboard, Check, Trash2, FolderUp, Settings2 } from 'lucide-react';
+import { FileDown, Loader2, ArrowRight, Clipboard, Check, Trash2, FolderUp, Settings2, Code, FileCode } from 'lucide-react';
 import { minify } from 'terser';
 import JSZip from 'jszip';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +29,20 @@ const minifyHtml = (htmlCode: string): string => {
     minified = minified.replace(/> </g, '><'); // Remove space between tags
     return minified.trim();
 };
+
+const detectLanguage = (code: string): Language | null => {
+    const trimmedCode = code.trim();
+    if (trimmedCode.startsWith('<') && trimmedCode.endsWith('>')) return 'html';
+    // Simple regex for CSS rules
+    if (/[\.#]?[a-zA-Z0-9-]+\s*\{[^}]+\}/.test(trimmedCode)) return 'css';
+    // Look for common JS keywords or patterns
+    if (/(function|const|let|var|import|export|=>)/.test(trimmedCode)) return 'javascript';
+    // Fallback checks
+    if (trimmedCode.includes('{') && trimmedCode.includes('}')) return 'css';
+    if (trimmedCode.includes('</')) return 'html';
+    return null; // Could not detect
+};
+
 
 function BulkMinifier() {
     const [mangleJs, setMangleJs] = useState(true);
@@ -97,7 +110,7 @@ function BulkMinifier() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Bulk Minify</CardTitle>
+                <CardTitle className="flex items-center gap-2"><FileCode className="h-6 w-6 text-primary"/> Bulk Minify</CardTitle>
                 <CardDescription>Select multiple JS, CSS, or HTML files to minify and download them as a zip archive.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -154,11 +167,11 @@ function BulkMinifier() {
 
 
 function SinglePasteMinifier() {
-    const [language, setLanguage] = useState<Language>('javascript');
     const [inputCode, setInputCode] = useState('');
     const [outputCode, setOutputCode] = useState('');
     const [isPending, startTransition] = useTransition();
     const [copied, setCopied] = useState(false);
+    const { toast } = useToast();
     
     const inputSize = new Blob([inputCode]).size;
     const outputSize = new Blob([outputCode]).size;
@@ -169,17 +182,26 @@ function SinglePasteMinifier() {
             setOutputCode('');
             return;
         }
+
+        const detectedLang = detectLanguage(inputCode);
+        if (!detectedLang) {
+            toast({ title: "Detection Failed", description: "Could not automatically detect the language. Please check your code.", variant: "destructive"});
+            return;
+        }
+
+        toast({ title: "Language Detected", description: `Minifying as ${detectedLang.toUpperCase()}.`});
+
         startTransition(async () => {
             try {
-                if (language === 'javascript') {
+                if (detectedLang === 'javascript') {
                     const result = await minify(inputCode, {
-                        mangle: true, // Mangling is always on for single paste for simplicity
+                        mangle: true,
                         compress: true,
                     });
                     setOutputCode(result.code || '');
-                } else if (language === 'css') {
+                } else if (detectedLang === 'css') {
                     setOutputCode(minifyCss(inputCode));
-                } else if (language === 'html') {
+                } else if (detectedLang === 'html') {
                     setOutputCode(minifyHtml(inputCode));
                 }
             } catch (error) {
@@ -188,7 +210,7 @@ function SinglePasteMinifier() {
                 setOutputCode(`// Error during minification:\n// ${errorMessage}`);
             }
         });
-    }, [inputCode, language]);
+    }, [inputCode, toast]);
     
     const handleCopy = () => {
         if (outputCode) {
@@ -201,16 +223,19 @@ function SinglePasteMinifier() {
     
     const handleDownload = () => {
         if (outputCode) {
+            const detectedLang = detectLanguage(outputCode) || 'text';
             const mimeType = {
                 javascript: 'application/javascript',
                 css: 'text/css',
-                html: 'text/html'
-            }[language];
+                html: 'text/html',
+                text: 'text/plain'
+            }[detectedLang];
             const extension = {
                 javascript: 'js',
                 css: 'css',
-                html: 'html'
-            }[language];
+                html: 'html',
+                text: 'txt'
+            }[detectedLang];
             
             const blob = new Blob([outputCode], { type: mimeType });
             const url = URL.createObjectURL(blob);
@@ -232,15 +257,8 @@ function SinglePasteMinifier() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Single Paste</CardTitle>
-                <CardDescription>Paste code into the editor below to minify a single snippet.</CardDescription>
-                <Tabs defaultValue="javascript" onValueChange={(value) => setLanguage(value as Language)}>
-                    <TabsList className="grid w-full grid-cols-3 max-w-sm">
-                        <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-                        <TabsTrigger value="css">CSS</TabsTrigger>
-                        <TabsTrigger value="html">HTML</TabsTrigger>
-                    </TabsList>
-                </Tabs>
+                <CardTitle className="flex items-center gap-2"><Code className="h-6 w-6 text-primary"/> Single Paste</CardTitle>
+                <CardDescription>Paste any JS, CSS, or HTML code into the editor below. The language will be detected automatically.</CardDescription>
             </CardHeader>
             <CardContent>
                  <div className="grid md:grid-cols-2 gap-8 items-start">
@@ -254,7 +272,7 @@ function SinglePasteMinifier() {
                             </Button>
                         </div>
                         <Textarea
-                            placeholder={`Paste your ${language} code here...`}
+                            placeholder={`Paste your code here...`}
                             value={inputCode}
                             onChange={(e) => setInputCode(e.target.value)}
                             className="h-80 font-mono text-xs"
