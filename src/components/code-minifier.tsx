@@ -31,85 +31,11 @@ const minifyHtml = (htmlCode: string): string => {
     return minified.trim();
 };
 
-export function CodeMinifier() {
-    const [language, setLanguage] = useState<Language>('javascript');
-    const [inputCode, setInputCode] = useState('');
-    const [outputCode, setOutputCode] = useState('');
-    const [isPending, startTransition] = useTransition();
-    const [isZipping, startZipTransition] = useTransition();
-    const [copied, setCopied] = useState(false);
+function BulkMinifier() {
     const [mangleJs, setMangleJs] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isZipping, startZipTransition] = useTransition();
     const { toast } = useToast();
-    
-    const inputSize = new Blob([inputCode]).size;
-    const outputSize = new Blob([outputCode]).size;
-    const sizeReduction = inputSize > 0 ? ((inputSize - outputSize) / inputSize) * 100 : 0;
-
-    const handleMinify = useCallback(() => {
-        if (!inputCode) {
-            setOutputCode('');
-            return;
-        }
-        startTransition(async () => {
-            try {
-                if (language === 'javascript') {
-                    const result = await minify(inputCode, {
-                        mangle: mangleJs,
-                        compress: true,
-                    });
-                    setOutputCode(result.code || '');
-                } else if (language === 'css') {
-                    setOutputCode(minifyCss(inputCode));
-                } else if (language === 'html') {
-                    setOutputCode(minifyHtml(inputCode));
-                }
-            } catch (error) {
-                console.error("Minification error:", error);
-                const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-                setOutputCode(`// Error during minification:\n// ${errorMessage}`);
-            }
-        });
-    }, [inputCode, language, mangleJs]);
-    
-    const handleCopy = () => {
-        if (outputCode) {
-            navigator.clipboard.writeText(outputCode).then(() => {
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-            });
-        }
-    };
-    
-    const handleDownload = () => {
-        if (outputCode) {
-            const mimeType = {
-                javascript: 'application/javascript',
-                css: 'text/css',
-                html: 'text/html'
-            }[language];
-            const extension = {
-                javascript: 'js',
-                css: 'css',
-                html: 'html'
-            }[language];
-            
-            const blob = new Blob([outputCode], { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `minified.${extension}`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-    };
-    
-    const handleClear = () => {
-        setInputCode('');
-        setOutputCode('');
-    }
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -167,12 +93,149 @@ export function CodeMinifier() {
             fileInputRef.current.value = '';
         }
     };
+    
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Bulk Minify</CardTitle>
+                <CardDescription>Select multiple JS, CSS, or HTML files to minify and download them as a zip archive.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    multiple
+                    accept=".js,.css,.html"
+                    className="hidden"
+                />
+                <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    variant="secondary"
+                    size="lg"
+                    className="w-full"
+                    disabled={isZipping}
+                >
+                    {isZipping ? (
+                         <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Processing Files...
+                        </>
+                    ) : (
+                         <>
+                            <FolderUp className="mr-2 h-5 w-5" />
+                            Select Files & Download Zip
+                        </>
+                    )}
+                </Button>
+                <Collapsible>
+                    <CollapsibleTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-full text-xs">
+                            <Settings2 className="h-4 w-4 mr-2"/>
+                            JavaScript Options
+                        </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                        <div className="flex items-center space-x-2 p-4 border rounded-md mt-2">
+                            <Switch 
+                                id="mangle-js" 
+                                checked={mangleJs} 
+                                onCheckedChange={setMangleJs}
+                            />
+                            <Label htmlFor="mangle-js" className="cursor-pointer">Mangle variable names in JS files</Label>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1 px-1">This applies to both bulk uploads and single-paste minification.</p>
+                    </CollapsibleContent>
+                </Collapsible>
+            </CardContent>
+        </Card>
+    );
+}
+
+
+function SinglePasteMinifier() {
+    const [language, setLanguage] = useState<Language>('javascript');
+    const [inputCode, setInputCode] = useState('');
+    const [outputCode, setOutputCode] = useState('');
+    const [isPending, startTransition] = useTransition();
+    const [copied, setCopied] = useState(false);
+    
+    const inputSize = new Blob([inputCode]).size;
+    const outputSize = new Blob([outputCode]).size;
+    const sizeReduction = inputSize > 0 ? ((inputSize - outputSize) / inputSize) * 100 : 0;
+
+    const handleMinify = useCallback(() => {
+        if (!inputCode) {
+            setOutputCode('');
+            return;
+        }
+        startTransition(async () => {
+            try {
+                if (language === 'javascript') {
+                    const result = await minify(inputCode, {
+                        mangle: true, // Mangling is always on for single paste for simplicity
+                        compress: true,
+                    });
+                    setOutputCode(result.code || '');
+                } else if (language === 'css') {
+                    setOutputCode(minifyCss(inputCode));
+                } else if (language === 'html') {
+                    setOutputCode(minifyHtml(inputCode));
+                }
+            } catch (error) {
+                console.error("Minification error:", error);
+                const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+                setOutputCode(`// Error during minification:\n// ${errorMessage}`);
+            }
+        });
+    }, [inputCode, language]);
+    
+    const handleCopy = () => {
+        if (outputCode) {
+            navigator.clipboard.writeText(outputCode).then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            });
+        }
+    };
+    
+    const handleDownload = () => {
+        if (outputCode) {
+            const mimeType = {
+                javascript: 'application/javascript',
+                css: 'text/css',
+                html: 'text/html'
+            }[language];
+            const extension = {
+                javascript: 'js',
+                css: 'css',
+                html: 'html'
+            }[language];
+            
+            const blob = new Blob([outputCode], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `minified.${extension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    };
+    
+    const handleClear = () => {
+        setInputCode('');
+        setOutputCode('');
+    }
 
     return (
-        <Card className="w-full">
+        <Card>
             <CardHeader>
+                <CardTitle>Single Paste</CardTitle>
+                <CardDescription>Paste code into the editor below to minify a single snippet.</CardDescription>
                 <Tabs defaultValue="javascript" onValueChange={(value) => setLanguage(value as Language)}>
-                    <TabsList className="grid w-full grid-cols-3 max-w-sm mx-auto">
+                    <TabsList className="grid w-full grid-cols-3 max-w-sm">
                         <TabsTrigger value="javascript">JavaScript</TabsTrigger>
                         <TabsTrigger value="css">CSS</TabsTrigger>
                         <TabsTrigger value="html">HTML</TabsTrigger>
@@ -180,37 +243,7 @@ export function CodeMinifier() {
                 </Tabs>
             </CardHeader>
             <CardContent>
-                <div className="text-center mb-8">
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleFileSelect}
-                        multiple
-                        accept=".js,.css,.html"
-                        className="hidden"
-                    />
-                    <Button
-                        onClick={() => fileInputRef.current?.click()}
-                        variant="secondary"
-                        disabled={isZipping}
-                        size="lg"
-                    >
-                        {isZipping ? (
-                             <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Processing Files...
-                            </>
-                        ) : (
-                             <>
-                                <FolderUp className="mr-2 h-5 w-5" />
-                                Minify Files & Download Zip
-                            </>
-                        )}
-                    </Button>
-                    <p className="text-xs text-muted-foreground mt-2">Or paste single file content below</p>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-8 items-start">
+                 <div className="grid md:grid-cols-2 gap-8 items-start">
                     {/* Input Section */}
                     <div className="space-y-4">
                         <div className="flex justify-between items-center">
@@ -227,27 +260,6 @@ export function CodeMinifier() {
                             className="h-80 font-mono text-xs"
                             aria-label="Code Input"
                         />
-                         {language === 'javascript' && (
-                             <Collapsible>
-                                <CollapsibleTrigger asChild>
-                                    <Button variant="outline" size="sm" className="w-full">
-                                        <Settings2 className="h-4 w-4 mr-2"/>
-                                        Advanced Options
-                                    </Button>
-                                </CollapsibleTrigger>
-                                <CollapsibleContent>
-                                    <div className="flex items-center space-x-2 p-4 border rounded-md mt-2">
-                                        <Switch 
-                                            id="mangle-js" 
-                                            checked={mangleJs} 
-                                            onCheckedChange={setMangleJs}
-                                        />
-                                        <Label htmlFor="mangle-js">Mangle variable names</Label>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mt-1 px-1">Shortens variable names to save space. Can make code harder to debug.</p>
-                                </CollapsibleContent>
-                            </Collapsible>
-                        )}
                         <Button onClick={handleMinify} disabled={isPending || !inputCode} className="w-full">
                             {isPending ? (
                                 <>
@@ -296,5 +308,14 @@ export function CodeMinifier() {
                 </div>
             </CardContent>
         </Card>
+    );
+}
+
+export function CodeMinifier() {
+    return (
+        <div className="space-y-8">
+            <BulkMinifier />
+            <SinglePasteMinifier />
+        </div>
     );
 }
