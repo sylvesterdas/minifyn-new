@@ -54,7 +54,7 @@ export function PageLoader() {
         handleStop();
         observer.disconnect();
         history.pushState = originalPushState;
-        history.replaceState = originalReplaceeState;
+        history.replaceState = originalReplaceState;
         window.removeEventListener('popstate', handleStart);
     };
   }, []);
