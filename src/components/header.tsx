@@ -12,11 +12,10 @@ import { useState } from 'react';
 
 const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/features", label: "Features" },
-    { href: "/tools", label: "Dev Tools" },
-    { href: "/docs", label: "Docs" },
     { href: "/blog", label: "Blog" },
-    { href: "/help", label: "Help" },
+    { href: "/features", label: "Features" },
+    { href: "/docs", label: "Docs" },
+    { href: "/tools", label: "Dev Tools" },
 ];
 
 export function Header() {
