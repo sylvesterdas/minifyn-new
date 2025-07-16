@@ -1,13 +1,15 @@
 
 'use client';
 
-import { useState, useTransition, useCallback } from 'react';
+import { useState, useTransition, useCallback, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileDown, Loader2, ArrowRight, Clipboard, Check, Trash2 } from 'lucide-react';
+import { FileDown, Loader2, ArrowRight, Clipboard, Check, Trash2, FolderUp } from 'lucide-react';
 import { minify } from 'terser';
+import JSZip from 'jszip';
+import { useToast } from '@/hooks/use-toast';
 
 type Language = 'javascript' | 'css';
 
@@ -25,7 +27,10 @@ export function CodeMinifier() {
     const [inputCode, setInputCode] = useState('');
     const [outputCode, setOutputCode] = useState('');
     const [isPending, startTransition] = useTransition();
+    const [isZipping, startZipTransition] = useTransition();
     const [copied, setCopied] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const { toast } = useToast();
     
     const inputSize = new Blob([inputCode]).size;
     const outputSize = new Blob([outputCode]).size;
@@ -84,6 +89,60 @@ export function CodeMinifier() {
         setOutputCode('');
     }
 
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
+
+        startZipTransition(async () => {
+            const zip = new JSZip();
+            const minificationPromises = Array.from(files).map(async (file) => {
+                const extension = file.name.split('.').pop()?.toLowerCase();
+                if (extension !== 'js' && extension !== 'css') {
+                    toast({ title: "Skipped File", description: `Cannot minify '${file.name}'. Only .js and .css files are supported.`, variant: "destructive"});
+                    return;
+                }
+
+                const content = await file.text();
+                let minifiedContent: string;
+                try {
+                    if (extension === 'js') {
+                        const result = await minify(content);
+                        minifiedContent = result.code || '';
+                    } else { // css
+                        minifiedContent = minifyCss(content);
+                    }
+                } catch(e) {
+                     toast({ title: "Minification Error", description: `Could not minify '${file.name}'.`, variant: "destructive"});
+                     return;
+                }
+
+                const newFileName = file.name.replace(/\.(js|css)$/, `.min.${extension}`);
+                zip.file(newFileName, minifiedContent);
+            });
+
+            await Promise.all(minificationPromises);
+            
+            if (Object.keys(zip.files).length > 0) {
+                 zip.generateAsync({ type: 'blob' }).then((content) => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(content);
+                    link.download = 'minified-files.zip';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                });
+            } else {
+                 toast({ title: "No files minified", description: "Could not process any of the selected files."});
+            }
+        });
+
+        // Reset file input value to allow selecting the same files again
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
     return (
         <Card className="w-full">
             <CardHeader>
@@ -95,6 +154,36 @@ export function CodeMinifier() {
                 </Tabs>
             </CardHeader>
             <CardContent>
+                <div className="text-center mb-8">
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileSelect}
+                        multiple
+                        accept=".js,.css"
+                        className="hidden"
+                    />
+                    <Button
+                        onClick={() => fileInputRef.current?.click()}
+                        variant="secondary"
+                        disabled={isZipping}
+                        size="lg"
+                    >
+                        {isZipping ? (
+                             <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Processing Files...
+                            </>
+                        ) : (
+                             <>
+                                <FolderUp className="mr-2 h-5 w-5" />
+                                Minify Files & Download Zip
+                            </>
+                        )}
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-2">Or paste single file content below</p>
+                </div>
+
                 <div className="grid md:grid-cols-2 gap-8 items-start">
                     {/* Input Section */}
                     <div className="space-y-4">
