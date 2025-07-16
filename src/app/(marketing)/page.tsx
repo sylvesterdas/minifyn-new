@@ -16,6 +16,28 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://www.minifyn.com/',
   },
+  openGraph: {
+    title: 'MiniFyn - Simple URL Shortener',
+    description: 'The simplest way to shorten, share, and track your links.',
+    url: 'https://www.minifyn.com/',
+    siteName: 'MiniFyn',
+    images: [
+      {
+        url: 'https://placehold.co/1200x630.png',
+        width: 1200,
+        height: 630,
+        alt: 'MiniFyn URL Shortener',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'MiniFyn - Simple URL Shortener',
+    description: 'The simplest way to shorten, share, and track your links.',
+    images: ['https://placehold.co/1200x630.png'],
+  },
 };
 
 const features = [
