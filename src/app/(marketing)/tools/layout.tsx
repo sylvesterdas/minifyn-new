@@ -1,5 +1,4 @@
 
-import { CtaCard } from '@/components/cta-card';
 import { RelatedTools } from '@/components/related-tools';
 import Link from 'next/link';
 
@@ -19,12 +18,9 @@ export default function ToolsLayout({
                 </div>
             </div>
             
-            <div className="py-12 md:py-16">
+            <div className="py-12 md:py-16 bg-muted/20">
                  <div className="container mx-auto px-4 max-w-4xl">
-                     <div className="space-y-12">
-                        <CtaCard />
-                        <RelatedTools />
-                    </div>
+                    <RelatedTools />
                  </div>
             </div>
         </>
