@@ -1,4 +1,3 @@
-'use server';
 
 import { z } from 'zod';
 import { isUrlSafe } from './webrisk';
