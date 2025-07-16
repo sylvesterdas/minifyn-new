@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Key, Zap, QrCode, Link as LinkIcon, ClipboardPaste, Wand, BarChart3 } from 'lucide-react';
 import { DeveloperApiSection } from '@/components/developer-api-section';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const revalidate = 0;
 
@@ -72,6 +73,9 @@ export default function Home() {
                     <QrCodeGeneratorForm />
                   </TabsContent>
                 </Tabs>
+                <p className="text-xs text-muted-foreground mt-4 px-2">
+                  By using our tools, you agree to our <Link href="/terms" className="underline hover:text-foreground">Terms of Service</Link> and <Link href="/acceptable-use" className="underline hover:text-foreground">Acceptable Use Policy</Link>.
+                </p>
             </div>
           </div>
         </div>
