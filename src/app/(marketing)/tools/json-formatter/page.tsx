@@ -1,5 +1,6 @@
 
 import { JsonFormatter } from '@/components/json-formatter';
+import { RelatedTools } from '@/components/related-tools';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -12,15 +13,22 @@ export const metadata: Metadata = {
 
 export default function JsonFormatterPage() {
     return (
-        <div className="container mx-auto px-4 py-12 md:py-24">
-            <div className="text-center mb-12">
-                <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">JSON Formatter & Validator</h1>
-                <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-                    Paste your JSON below to format it beautifully and check for any syntax errors. All processing is done securely in your browser.
-                </p>
+        <>
+            <div className="container mx-auto px-4 py-12 md:py-24">
+                <div className="text-center mb-12">
+                    <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">JSON Formatter & Validator</h1>
+                    <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
+                        Paste your JSON below to format it beautifully and check for any syntax errors. All processing is done securely in your browser.
+                    </p>
+                </div>
+                
+                <JsonFormatter />
             </div>
-            
-            <JsonFormatter />
-        </div>
+             <div className="py-12 md:py-16">
+                <div className="container mx-auto px-4 max-w-4xl">
+                    <RelatedTools />
+                </div>
+            </div>
+        </>
     );
 }
