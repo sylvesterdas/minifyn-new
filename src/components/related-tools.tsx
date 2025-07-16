@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from './ui/card';
-import { ArrowRight, Code, Wand2, Link as LinkIcon } from 'lucide-react';
+import { ArrowRight, Code, Wand2, Link as LinkIcon, Shield } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { UrlShortenerCard } from './url-shortener-card';
 
@@ -26,6 +26,12 @@ const allTools: ToolInfo[] = [
         icon: <Wand2 className="h-8 w-8 text-primary" />,
         title: 'JSON Formatter',
         description: 'Format, prettify, and validate your JSON data instantly.',
+    },
+    {
+        href: '/tools/jwt-debugger',
+        icon: <Shield className="h-8 w-8 text-primary" />,
+        title: 'JWT Debugger',
+        description: 'Decode and inspect JSON Web Tokens safely in your browser.'
     },
 ];
 

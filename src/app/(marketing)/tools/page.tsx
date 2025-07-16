@@ -1,5 +1,5 @@
 
-import { Code, Wand2, ArrowRight } from 'lucide-react';
+import { Code, Wand2, ArrowRight, Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -26,6 +26,12 @@ const toolSections = [
         icon: <Wand2 className="h-8 w-8 text-primary" />,
         title: 'JSON Formatter',
         description: 'Format, prettify, and validate your JSON data instantly.'
+    },
+    {
+        href: '/tools/jwt-debugger',
+        icon: <Shield className="h-8 w-8 text-primary" />,
+        title: 'JWT Debugger',
+        description: 'Decode and inspect JSON Web Tokens safely in your browser.'
     },
 ];
 
