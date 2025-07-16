@@ -73,6 +73,7 @@
     "@tailwindcss/typography": "^0.5.13",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^16.0.0",
+    "@types/highlight.js": "^10.1.0",
     "@types/jszip": "^3.4.1",
     "@types/node": "^20",
     "@types/nodemailer": "^6.4.15",

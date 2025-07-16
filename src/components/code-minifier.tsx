@@ -12,6 +12,15 @@ import { useToast } from '@/hooks/use-toast';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+import css from 'highlight.js/lib/languages/css';
+import xml from 'highlight.js/lib/languages/xml'; // For HTML
+
+// Register languages for highlight.js
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('css', css);
+hljs.registerLanguage('xml', xml); // highlight.js uses 'xml' for HTML
 
 type Language = 'javascript' | 'css' | 'html';
 
@@ -31,25 +40,19 @@ const minifyHtml = (htmlCode: string): string => {
 };
 
 const detectLanguage = (code: string): Language | null => {
-    const trimmedCode = code.trim();
+    // Use highlight.js to auto-detect the language
+    const result = hljs.highlightAuto(code, ['javascript', 'css', 'xml']);
+    const language = result.language;
 
-    // Most specific checks first
-    if (/^<!DOCTYPE html/i.test(trimmedCode) || /<html/i.test(trimmedCode) || (trimmedCode.startsWith('<') && trimmedCode.endsWith('>'))) {
-        return 'html';
-    }
-    // Check for CSS syntax (selectors and properties)
-    if (/([#.]?[\w-]+)\s*\{[^{}]*\}/.test(trimmedCode) || /@media|@keyframes/.test(trimmedCode)) {
-        return 'css';
-    }
-    // Check for common JS keywords and patterns
-    if (/(function|const|let|var|import|export|=>|document\.getElementById|console\.log)/.test(trimmedCode) || /^\s*['"]use client['"]/.test(trimmedCode)) {
-        return 'javascript';
-    }
-    // Fallback checks
-    if (trimmedCode.includes('</')) return 'html';
-    if (trimmedCode.includes('{') && trimmedCode.includes('}')) return 'css';
-    
-    return null; // Could not detect
+    if (language === 'javascript') return 'javascript';
+    if (language === 'css') return 'css';
+    if (language === 'xml') return 'html'; // Treat XML as HTML for our purposes
+
+    // Fallback for simple cases if highlight.js is unsure (low relevance)
+    const trimmedCode = code.trim();
+    if (trimmedCode.startsWith('<') && trimmedCode.endsWith('>')) return 'html';
+
+    return null;
 };
 
 
