@@ -14,6 +14,8 @@ const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
  * @returns A promise that resolves to true if the URL is safe, false otherwise.
  */
 export async function isUrlSafe(url: string): Promise<boolean> {
+    console.log(`[WebRisk] Checking URL: ${url}`);
+    
     const cachedEntry = safeUrlCache.get(url);
     if (cachedEntry && (Date.now() - cachedEntry.timestamp < CACHE_TTL)) {
         console.log(`[WebRisk] Cache hit for URL: ${url}`);
@@ -22,7 +24,7 @@ export async function isUrlSafe(url: string): Promise<boolean> {
 
     const apiKey = process.env.WEBRISK_API_KEY;
     if (!apiKey) {
-        console.error("WEBRISK_API_KEY is not configured. Cannot use Web Risk API. Failing open.");
+        console.error("[WebRisk] WEBRISK_API_KEY is not configured. Cannot use Web Risk API. Failing open.");
         return true; // Fail open if the service is misconfigured.
     }
     
@@ -36,17 +38,17 @@ export async function isUrlSafe(url: string): Promise<boolean> {
             method: 'GET',
         });
         
+        const result = await response.json();
+        console.log('[WebRisk] API Response:', JSON.stringify(result, null, 2));
+
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`[WebRisk] API error: ${response.statusText}`, errorText);
+            console.error(`[WebRisk] API error: ${response.statusText}`, result);
             return true; // Fail open on API error
         }
-
-        const result = await response.json();
         
         // If the threat property exists in the response, the URL is unsafe.
         if (result.threat) {
-            console.warn(`[WebRisk] Unsafe URL detected: ${url}`, JSON.stringify(result.threat));
+            console.warn(`[WebRisk] Unsafe URL detected: ${url}`);
             return false;
         }
 

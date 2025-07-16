@@ -9,6 +9,7 @@ export const urlSchema = z.object({
 }).superRefine(async (data, ctx) => {
     // Because this is an async refinement, this code runs *after* the initial sync checks.
     const isSafe = await isUrlSafe(data.longUrl);
+    console.log(`[Schema] Safety check for ${data.longUrl} returned: ${isSafe}`);
     if (!isSafe) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
