@@ -6,19 +6,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileDown, Loader2, ArrowRight, Clipboard, Check, Trash2, FolderUp } from 'lucide-react';
+import { FileDown, Loader2, ArrowRight, Clipboard, Check, Trash2, FolderUp, Settings2 } from 'lucide-react';
 import { minify } from 'terser';
 import JSZip from 'jszip';
 import { useToast } from '@/hooks/use-toast';
+import { Label } from './ui/label';
+import { Switch } from './ui/switch';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 
-type Language = 'javascript' | 'css';
+type Language = 'javascript' | 'css' | 'html';
 
 const minifyCss = (cssCode: string): string => {
-    // Basic CSS minification: remove comments, extra whitespace, and newlines.
-    let minified = cssCode.replace(/\/\*[\s\S]*?\*\//g, ''); // remove comments
-    minified = minified.replace(/\s*([,>+~{}\s])\s*/g, '$1'); // remove whitespace around selectors and braces
-    minified = minified.replace(/;}/g, '}'); // remove last semicolon in a block
-    minified = minified.replace(/\s\s+/g, ' '); // collapse multiple spaces
+    let minified = cssCode.replace(/\/\*[\s\S]*?\*\//g, ''); 
+    minified = minified.replace(/\s*([,>+~{}\s])\s*/g, '$1'); 
+    minified = minified.replace(/;}/g, '}');
+    minified = minified.replace(/\s\s+/g, ' '); 
+    return minified.trim();
+};
+
+const minifyHtml = (htmlCode: string): string => {
+    let minified = htmlCode.replace(/<!--[\s\S]*?-->/g, ''); // Remove comments
+    minified = minified.replace(/\s+/g, ' '); // Collapse whitespace
+    minified = minified.replace(/> </g, '><'); // Remove space between tags
     return minified.trim();
 };
 
@@ -29,6 +38,7 @@ export function CodeMinifier() {
     const [isPending, startTransition] = useTransition();
     const [isZipping, startZipTransition] = useTransition();
     const [copied, setCopied] = useState(false);
+    const [mangleJs, setMangleJs] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
     
@@ -45,13 +55,14 @@ export function CodeMinifier() {
             try {
                 if (language === 'javascript') {
                     const result = await minify(inputCode, {
-                        mangle: true,
+                        mangle: mangleJs,
                         compress: true,
                     });
                     setOutputCode(result.code || '');
                 } else if (language === 'css') {
-                    const result = minifyCss(inputCode);
-                    setOutputCode(result);
+                    setOutputCode(minifyCss(inputCode));
+                } else if (language === 'html') {
+                    setOutputCode(minifyHtml(inputCode));
                 }
             } catch (error) {
                 console.error("Minification error:", error);
@@ -59,7 +70,7 @@ export function CodeMinifier() {
                 setOutputCode(`// Error during minification:\n// ${errorMessage}`);
             }
         });
-    }, [inputCode, language]);
+    }, [inputCode, language, mangleJs]);
     
     const handleCopy = () => {
         if (outputCode) {
@@ -72,11 +83,22 @@ export function CodeMinifier() {
     
     const handleDownload = () => {
         if (outputCode) {
-            const blob = new Blob([outputCode], { type: language === 'javascript' ? 'application/javascript' : 'text/css' });
+            const mimeType = {
+                javascript: 'application/javascript',
+                css: 'text/css',
+                html: 'text/html'
+            }[language];
+            const extension = {
+                javascript: 'js',
+                css: 'css',
+                html: 'html'
+            }[language];
+            
+            const blob = new Blob([outputCode], { type: mimeType });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `minified.${language === 'javascript' ? 'js' : 'css'}`;
+            a.download = `minified.${extension}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -97,8 +119,10 @@ export function CodeMinifier() {
             const zip = new JSZip();
             const minificationPromises = Array.from(files).map(async (file) => {
                 const extension = file.name.split('.').pop()?.toLowerCase();
-                if (extension !== 'js' && extension !== 'css') {
-                    toast({ title: "Skipped File", description: `Cannot minify '${file.name}'. Only .js and .css files are supported.`, variant: "destructive"});
+                const validExtensions = ['js', 'css', 'html'];
+
+                if (!extension || !validExtensions.includes(extension)) {
+                    toast({ title: "Skipped File", description: `Cannot minify '${file.name}'. Only .js, .css, and .html files are supported.`, variant: "destructive"});
                     return;
                 }
 
@@ -106,17 +130,19 @@ export function CodeMinifier() {
                 let minifiedContent: string;
                 try {
                     if (extension === 'js') {
-                        const result = await minify(content);
+                        const result = await minify(content, { mangle: true, compress: true });
                         minifiedContent = result.code || '';
-                    } else { // css
+                    } else if (extension === 'css') {
                         minifiedContent = minifyCss(content);
+                    } else { // html
+                        minifiedContent = minifyHtml(content);
                     }
                 } catch(e) {
                      toast({ title: "Minification Error", description: `Could not minify '${file.name}'.`, variant: "destructive"});
                      return;
                 }
 
-                const newFileName = file.name.replace(/\.(js|css)$/, `.min.${extension}`);
+                const newFileName = file.name.replace(/\.(js|css|html)$/, `.min.${extension}`);
                 zip.file(newFileName, minifiedContent);
             });
 
@@ -137,7 +163,6 @@ export function CodeMinifier() {
             }
         });
 
-        // Reset file input value to allow selecting the same files again
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -147,9 +172,10 @@ export function CodeMinifier() {
         <Card className="w-full">
             <CardHeader>
                 <Tabs defaultValue="javascript" onValueChange={(value) => setLanguage(value as Language)}>
-                    <TabsList className="grid w-full grid-cols-2 max-w-sm mx-auto">
+                    <TabsList className="grid w-full grid-cols-3 max-w-sm mx-auto">
                         <TabsTrigger value="javascript">JavaScript</TabsTrigger>
                         <TabsTrigger value="css">CSS</TabsTrigger>
+                        <TabsTrigger value="html">HTML</TabsTrigger>
                     </TabsList>
                 </Tabs>
             </CardHeader>
@@ -160,7 +186,7 @@ export function CodeMinifier() {
                         ref={fileInputRef}
                         onChange={handleFileSelect}
                         multiple
-                        accept=".js,.css"
+                        accept=".js,.css,.html"
                         className="hidden"
                     />
                     <Button
@@ -195,12 +221,33 @@ export function CodeMinifier() {
                             </Button>
                         </div>
                         <Textarea
-                            placeholder={`Paste your ${language === 'javascript' ? 'JS' : 'CSS'} code here...`}
+                            placeholder={`Paste your ${language} code here...`}
                             value={inputCode}
                             onChange={(e) => setInputCode(e.target.value)}
                             className="h-80 font-mono text-xs"
                             aria-label="Code Input"
                         />
+                         {language === 'javascript' && (
+                             <Collapsible>
+                                <CollapsibleTrigger asChild>
+                                    <Button variant="outline" size="sm" className="w-full">
+                                        <Settings2 className="h-4 w-4 mr-2"/>
+                                        Advanced Options
+                                    </Button>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent>
+                                    <div className="flex items-center space-x-2 p-4 border rounded-md mt-2">
+                                        <Switch 
+                                            id="mangle-js" 
+                                            checked={mangleJs} 
+                                            onCheckedChange={setMangleJs}
+                                        />
+                                        <Label htmlFor="mangle-js">Mangle variable names</Label>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground mt-1 px-1">Shortens variable names to save space. Can make code harder to debug.</p>
+                                </CollapsibleContent>
+                            </Collapsible>
+                        )}
                         <Button onClick={handleMinify} disabled={isPending || !inputCode} className="w-full">
                             {isPending ? (
                                 <>
