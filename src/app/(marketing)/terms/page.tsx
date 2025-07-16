@@ -24,7 +24,7 @@ export default function TermsPage() {
             <p>By accessing or using the Service, you agree to be bound by these Terms. If you disagree with any part of the terms, then you may not access the Service. This agreement applies to all visitors, users, and others who access or use the Service.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">2. Description of Service</h2>
-            <p>MiniFyn provides users with the ability to shorten URLs, track link analytics, and manage links (the "Service"). The Service is available through our website and may include an API for programmatic access.</p>
+            <p>MiniFyn provides users with a variety of tools and services, including but not limited to the ability to shorten URLs, generate QR codes, and minify code (the "Service"). The Service is available through our website and may include an API for programmatic access.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">3. User Accounts</h2>
             <p>When you create an account with us, you must provide information that is accurate, complete, and current at all times. Failure to do so constitutes a breach of the Terms, which may result in immediate termination of your account on our Service.</p>
@@ -39,8 +39,9 @@ export default function TermsPage() {
             <p>We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">7. Disclaimer of Warranties</h2>
-            <p>The Service is provided on an "AS IS" and "AS AVAILABLE" basis. Your use of the Service is at your sole risk. The Service is provided without warranties of any kind, whether express or implied, including, but not to, implied warranties of merchantability, fitness for a particular purpose, non-infringement or course of performance.</p>
-            
+            <p>The Service is provided on an "AS IS" and "AS AVAILABLE" basis. Your use of the Service is at your sole risk. The Service is provided without warranties of any kind, whether express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, non-infringement or course of performance.</p>
+            <p>Specifically for our free developer tools (like the Code Minifier), while we strive for accuracy, we are not liable for any errors, data loss, or damages resulting from their use. You assume full responsibility for testing and verifying the output of these tools before use in a production environment.</p>
+
             <h2 className="mt-8 text-2xl font-semibold">8. Limitation of Liability</h2>
             <p>In no event shall MiniFyn, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.</p>
 
