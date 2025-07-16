@@ -15,13 +15,15 @@ import hljs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
 import css from 'highlight.js/lib/languages/css';
 import xml from 'highlight.js/lib/languages/xml'; // For HTML
+import json from 'highlight.js/lib/languages/json';
 
 // Register languages for highlight.js
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('css', css);
 hljs.registerLanguage('xml', xml); // highlight.js uses 'xml' for HTML
+hljs.registerLanguage('json', json);
 
-type Language = 'javascript' | 'css' | 'html';
+type Language = 'javascript' | 'css' | 'html' | 'json';
 
 const minifyCss = (cssCode: string): string => {
     let minified = cssCode.replace(/\/\*[\s\S]*?\*\//g, ''); 
@@ -38,17 +40,23 @@ const minifyHtml = (htmlCode: string): string => {
     return minified.trim();
 };
 
+const minifyJson = (jsonCode: string): string => {
+    return JSON.stringify(JSON.parse(jsonCode));
+}
+
 const detectLanguage = (code: string): Language | null => {
     // Use highlight.js to auto-detect the language
-    const result = hljs.highlightAuto(code, ['javascript', 'css', 'xml']);
+    const result = hljs.highlightAuto(code, ['javascript', 'css', 'xml', 'json']);
     const language = result.language;
 
     if (language === 'javascript') return 'javascript';
     if (language === 'css') return 'css';
     if (language === 'xml') return 'html'; // Treat XML as HTML for our purposes
+    if (language === 'json') return 'json';
 
     // Fallback for simple cases if highlight.js is unsure (low relevance)
     const trimmedCode = code.trim();
+    if (trimmedCode.startsWith('{') && trimmedCode.endsWith('}')) return 'json';
     if (trimmedCode.startsWith('<') && trimmedCode.endsWith('>')) return 'html';
 
     return null;
@@ -92,10 +100,10 @@ function BulkMinifier({ mangleJs }: { mangleJs: boolean }) {
             const zip = new JSZip();
             const minificationPromises = Array.from(files).map(async (file) => {
                 const extension = file.name.split('.').pop()?.toLowerCase();
-                const validExtensions = ['js', 'css', 'html'];
+                const validExtensions = ['js', 'css', 'html', 'json'];
 
                 if (!extension || !validExtensions.includes(extension)) {
-                    toast({ title: "Skipped File", description: `Cannot minify '${file.name}'. Only .js, .css, and .html files are supported.`, variant: "destructive"});
+                    toast({ title: "Skipped File", description: `Cannot minify '${file.name}'. Only .js, .css, .html, and .json files are supported.`, variant: "destructive"});
                     return;
                 }
 
@@ -108,10 +116,12 @@ function BulkMinifier({ mangleJs }: { mangleJs: boolean }) {
                         minifiedContent = result.code || '';
                     } else if (extension === 'css') {
                         minifiedContent = minifyCss(content);
-                    } else { // html
+                    } else if (extension === 'html') {
                         minifiedContent = minifyHtml(content);
+                    } else { // json
+                        minifiedContent = minifyJson(content);
                     }
-                    const newFileName = file.name.replace(/\.(js|css|html)$/, `.min.${extension}`);
+                    const newFileName = file.name.replace(/\.(js|css|html|json)$/, `.min.${extension}`);
                     zip.file(newFileName, minifiedContent);
                 } catch(e) {
                      toast({ title: "Minification Error", description: `Skipping '${file.name}' due to invalid syntax or other error.`, variant: "destructive"});
@@ -145,7 +155,7 @@ function BulkMinifier({ mangleJs }: { mangleJs: boolean }) {
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><FileCode className="h-6 w-6 text-primary"/> Bulk Minify</CardTitle>
-                <CardDescription>Select multiple JS, CSS, or HTML files to minify and download them as a zip archive.</CardDescription>
+                <CardDescription>Select multiple JS, CSS, HTML, or JSON files to minify and download them as a zip archive.</CardDescription>
             </CardHeader>
             <CardContent>
                  <input
@@ -153,7 +163,7 @@ function BulkMinifier({ mangleJs }: { mangleJs: boolean }) {
                     ref={fileInputRef}
                     onChange={handleFileSelect}
                     multiple
-                    accept=".js,.css,.html"
+                    accept=".js,.css,.html,.json"
                     className="hidden"
                 />
                 <Button
@@ -218,6 +228,8 @@ function SinglePasteMinifier({ mangleJs }: { mangleJs: boolean }) {
                     setOutputCode(minifyCss(inputCode));
                 } else if (detectedLang === 'html') {
                     setOutputCode(minifyHtml(inputCode));
+                } else if (detectedLang === 'json') {
+                    setOutputCode(minifyJson(inputCode));
                 }
             } catch (error) {
                 console.error("Minification error:", error);
@@ -243,12 +255,14 @@ function SinglePasteMinifier({ mangleJs }: { mangleJs: boolean }) {
                 javascript: 'application/javascript',
                 css: 'text/css',
                 html: 'text/html',
+                json: 'application/json',
                 text: 'text/plain'
             }[detectedLang];
             const extension = {
                 javascript: 'js',
                 css: 'css',
                 html: 'html',
+                json: 'json',
                 text: 'txt'
             }[detectedLang];
             
@@ -273,7 +287,7 @@ function SinglePasteMinifier({ mangleJs }: { mangleJs: boolean }) {
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Code className="h-6 w-6 text-primary"/> Single Paste</CardTitle>
-                <CardDescription>Paste any JS, CSS, or HTML code into the editor below. The language will be detected automatically.</CardDescription>
+                <CardDescription>Paste any JS, CSS, HTML, or JSON code into the editor below. The language will be detected automatically.</CardDescription>
             </CardHeader>
             <CardContent>
                  <div className="grid md:grid-cols-2 gap-8 items-start">

@@ -18,7 +18,7 @@ const toolSections = [
         href: '/tools/code-minifier',
         icon: <Code className="h-8 w-8 text-primary" />,
         title: 'Code Minifier',
-        description: 'Minify JS, CSS, and HTML files to reduce size and improve performance.'
+        description: 'Minify JS, CSS, HTML, and JSON files to reduce size.'
     },
     {
         href: '/tools/json-formatter',
