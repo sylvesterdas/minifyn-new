@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -38,13 +39,19 @@ export function PageLoader() {
     // This is not perfect but can help in some cases.
     const originalPushState = history.pushState;
     history.pushState = function(...args) {
-        handleStart();
+        // Only start progress if the URL is actually changing
+        if (args[2] !== window.location.pathname) {
+            handleStart();
+        }
         originalPushState.apply(history, args);
     };
 
     const originalReplaceState = history.replaceState;
     history.replaceState = function(...args) {
-        handleStart();
+         // Only start progress if the URL is actually changing
+        if (args[2] !== window.location.pathname) {
+            handleStart();
+        }
         originalReplaceState.apply(history, args);
     };
 
