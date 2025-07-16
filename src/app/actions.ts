@@ -28,7 +28,7 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     
     // Super user bypasses all checks
     if (userId === SUPER_USER_ID) {
-        const validatedFields = urlSchema.safeParse({ longUrl: formData.get('longUrl') });
+        const validatedFields = await urlSchema.safeParseAsync({ longUrl: formData.get('longUrl') });
          if (!validatedFields.success) {
             return { success: false, message: 'Invalid URL for Super User.' };
         }
@@ -64,7 +64,7 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
         }
     }
     
-    const validatedFields = urlSchema.safeParse({
+    const validatedFields = await urlSchema.safeParseAsync({
         longUrl: formData.get('longUrl'),
     });
 
