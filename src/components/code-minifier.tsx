@@ -11,7 +11,6 @@ import JSZip from 'jszip';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import hljs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
 import css from 'highlight.js/lib/languages/css';
@@ -55,8 +54,32 @@ const detectLanguage = (code: string): Language | null => {
     return null;
 };
 
+function JavascriptOptions({ mangleJs, setMangleJs }: { mangleJs: boolean, setMangleJs: (val: boolean) => void }) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg"><Settings2 className="h-5 w-5 text-primary" /> JavaScript Options</CardTitle>
+                 <CardDescription>These settings apply to both bulk and single file minification.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="flex items-center space-x-3 p-4 border rounded-md">
+                    <Switch
+                        id="mangle-js"
+                        checked={mangleJs}
+                        onCheckedChange={setMangleJs}
+                        aria-label="Mangle variable names"
+                    />
+                    <div>
+                        <Label htmlFor="mangle-js" className="cursor-pointer">Mangle variable names</Label>
+                        <p className="text-xs text-muted-foreground">Reduces file size by shortening variable names.</p>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
 
-function BulkMinifier({ mangleJs, setMangleJs }: { mangleJs: boolean, setMangleJs: (val: boolean) => void}) {
+function BulkMinifier({ mangleJs }: { mangleJs: boolean }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isZipping, startZipTransition] = useTransition();
     const { toast } = useToast();
@@ -124,7 +147,7 @@ function BulkMinifier({ mangleJs, setMangleJs }: { mangleJs: boolean, setMangleJ
                 <CardTitle className="flex items-center gap-2"><FileCode className="h-6 w-6 text-primary"/> Bulk Minify</CardTitle>
                 <CardDescription>Select multiple JS, CSS, or HTML files to minify and download them as a zip archive.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
                  <input
                     type="file"
                     ref={fileInputRef}
@@ -152,30 +175,10 @@ function BulkMinifier({ mangleJs, setMangleJs }: { mangleJs: boolean, setMangleJ
                         </>
                     )}
                 </Button>
-                <Collapsible>
-                    <CollapsibleTrigger asChild>
-                        <Button variant="outline" size="sm" className="w-full text-xs">
-                            <Settings2 className="h-4 w-4 mr-2"/>
-                            JavaScript Options
-                        </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                        <div className="flex items-center space-x-2 p-4 border rounded-md mt-2">
-                            <Switch 
-                                id="mangle-js" 
-                                checked={mangleJs} 
-                                onCheckedChange={setMangleJs}
-                            />
-                            <Label htmlFor="mangle-js" className="cursor-pointer">Mangle variable names in JS files</Label>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1 px-1">Reduces file size by shortening variable names. Applies to both bulk and single paste.</p>
-                    </CollapsibleContent>
-                </Collapsible>
             </CardContent>
         </Card>
     );
 }
-
 
 function SinglePasteMinifier({ mangleJs }: { mangleJs: boolean }) {
     const [inputCode, setInputCode] = useState('');
@@ -342,11 +345,12 @@ function SinglePasteMinifier({ mangleJs }: { mangleJs: boolean }) {
 }
 
 export function CodeMinifier() {
-    const [mangleJs, setMangleJs] = useState(true);
+    const [mangleJs, setMangleJs] = useState(false);
 
     return (
         <div className="space-y-8">
-            <BulkMinifier mangleJs={mangleJs} setMangleJs={setMangleJs} />
+            <JavascriptOptions mangleJs={mangleJs} setMangleJs={setMangleJs} />
+            <BulkMinifier mangleJs={mangleJs} />
             <SinglePasteMinifier mangleJs={mangleJs} />
         </div>
     );
