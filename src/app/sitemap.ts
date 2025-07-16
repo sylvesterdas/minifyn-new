@@ -3,33 +3,31 @@ import type { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = 'https://www.minifyn.com';
+  const lastModifiedStatic = new Date('2024-01-01').toISOString();
 
   // 1. Static pages
-  const staticRoutes = [
-    '/',
-    '/features',
-    '/contact',
-    '/acceptable-use',
-    '/cookie-policy',
-    '/dmca',
-    '/privacy',
-    '/refund-policy',
-    '/terms',
-    '/tools',
-    '/tools/code-minifier',
-    '/tools/json-formatter',
-    '/tools/jwt-debugger',
-    '/docs',
-    '/docs/api',
-    '/docs/guides',
-    '/help',
-    '/help/faq',
-    '/help/report-abuse',
-    '/blog',
-  ].map((route) => ({
-    url: `${siteUrl}${route}`,
-    lastModified: new Date().toISOString(),
-  }));
+  const staticRoutes: MetadataRoute.Sitemap = [
+    { url: `${siteUrl}/`, lastModified: new Date().toISOString(), changeFrequency: 'weekly', priority: 1.0 },
+    { url: `${siteUrl}/features`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${siteUrl}/contact`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${siteUrl}/acceptable-use`, lastModified: lastModifiedStatic, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${siteUrl}/cookie-policy`, lastModified: lastModifiedStatic, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${siteUrl}/dmca`, lastModified: lastModifiedStatic, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${siteUrl}/privacy`, lastModified: lastModifiedStatic, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${siteUrl}/refund-policy`, lastModified: lastModifiedStatic, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${siteUrl}/terms`, lastModified: lastModifiedStatic, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${siteUrl}/tools`, lastModified: new Date().toISOString(), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${siteUrl}/tools/code-minifier`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${siteUrl}/tools/json-formatter`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${siteUrl}/tools/jwt-debugger`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${siteUrl}/docs`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${siteUrl}/docs/api`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${siteUrl}/docs/guides`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${siteUrl}/help`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${siteUrl}/help/faq`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${siteUrl}/help/report-abuse`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${siteUrl}/blog`, lastModified: new Date().toISOString(), changeFrequency: 'weekly', priority: 0.9 },
+  ];
 
   // 2. Dynamic blog post pages
   let allPosts: { slug: string, publishedAt: string }[] = [];
@@ -49,9 +47,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  const blogPostRoutes = allPosts.map(post => ({
+  const blogPostRoutes: MetadataRoute.Sitemap = allPosts.map(post => ({
     url: `${siteUrl}/blog/${post.slug}`,
     lastModified: new Date(post.publishedAt).toISOString(),
+    changeFrequency: 'yearly',
+    priority: 0.8,
   }));
 
   return [...staticRoutes, ...blogPostRoutes];
