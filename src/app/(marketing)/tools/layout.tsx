@@ -13,7 +13,7 @@ export default function ToolsLayout({
             <div className="container mx-auto px-4">
                  <div className="mt-8 max-w-4xl mx-auto text-center">
                     <p className="text-xs text-muted-foreground">
-                        This tool operates entirely in your browser. We do not upload or store any of your code or files. While we strive for accuracy, MiniFyn is not liable for any errors, data loss, or damages resulting from its use. By using this tool, you agree to our <Link href="/terms" className="underline hover:text-foreground">Terms of Service</Link>.
+                        Your privacy is important. This tool processes everything in your browser, so your code never leaves your computer. While we do our best to ensure accuracy, please review the output before using it. Use of this tool is subject to our <Link href="/terms" className="underline hover:text-foreground">Terms of Service</Link>.
                     </p>
                 </div>
             </div>
