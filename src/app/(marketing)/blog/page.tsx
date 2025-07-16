@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const title = 'Blog | MiniFyn';
     const description = 'Insights, tips, and updates from the MiniFyn team.';
 
-    const ogImageUrl = `${siteUrl}/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}`;
+    const ogImageUrl = `${siteUrl}/og.png`;
 
     return {
         title,

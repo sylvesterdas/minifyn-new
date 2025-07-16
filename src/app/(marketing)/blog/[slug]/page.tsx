@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     const siteUrl = 'https://www.minifyn.com';
     const authorName = post.author?.name || 'Sylvester Das';
     
-    const ogImageUrl = post.ogImage?.url || post.coverImage?.url || 'https://placehold.co/1200x630.png';
+    const ogImageUrl = post.ogImage?.url || post.coverImage?.url || `${siteUrl}/og.png`;
 
     return {
         title: `${post.title} | MiniFyn Blog`,

@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     siteName: 'MiniFyn',
     images: [
       {
-        url: 'https://placehold.co/1200x630.png',
+        url: `${siteUrl}/og.png`,
         width: 1200,
         height: 630,
         alt: siteTitle,
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: siteTitle,
     description: siteDescription,
-    images: ['https://placehold.co/1200x630.png'],
+    images: [`${siteUrl}/og.png`],
   },
 };
 
