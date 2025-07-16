@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
+        
+        // Use safeParseAsync to handle the async Web Risk check
         const validatedFields = await urlSchema.safeParseAsync({ longUrl: body.url });
 
         if (!validatedFields.success) {
