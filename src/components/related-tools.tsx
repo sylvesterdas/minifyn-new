@@ -37,12 +37,6 @@ const allTools: ToolInfo[] = [
 
 export function RelatedTools() {
     const currentPath = usePathname();
-
-    // On the main /tools listing page, don't show this component at all.
-    if (currentPath === '/tools') {
-        return null;
-    }
-
     const otherTools = allTools.filter(tool => tool.href !== currentPath);
 
     return (
@@ -52,7 +46,7 @@ export function RelatedTools() {
                 <p className="mt-2 text-muted-foreground">Boost your productivity with our suite of free utilities.</p>
             </div>
             
-            <div className="grid gap-8 md:grid-cols-1">
+            <div className="space-y-8">
                  {/* Always show the main URL shortener tool card */}
                  <UrlShortenerCard />
 
@@ -64,6 +58,7 @@ export function RelatedTools() {
                                 {tool.icon}
                                 <div className="flex-1">
                                     <CardTitle className="text-xl">{tool.title}</CardTitle>
+
                                     <CardDescription className="mt-2">{tool.description}</CardDescription>
                                 </div>
                                 <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />

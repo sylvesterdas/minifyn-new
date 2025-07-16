@@ -3,6 +3,7 @@ import { Code, Wand2, ArrowRight, Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { UrlShortenerCard } from '@/components/url-shortener-card';
 
 export const revalidate = 0;
 
@@ -45,7 +46,8 @@ export default function ToolsPage() {
         </p>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
+      <div className="space-y-8 max-w-4xl mx-auto">
+        <UrlShortenerCard />
         {toolSections.map((section) => (
              <Link href={section.href} key={section.title}>
                 <Card className="h-full hover:border-primary transition-colors group">
