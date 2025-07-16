@@ -6,6 +6,7 @@ const footerLinks = {
     product: [
         { href: '/features', label: 'Features' },
         { href: '/tools/code-minifier', label: 'Code Minifier' },
+        { href: '/tools/json-formatter', label: 'JSON Formatter' },
         { href: '/blog', label: 'Blog' },
     ],
     resources: [
