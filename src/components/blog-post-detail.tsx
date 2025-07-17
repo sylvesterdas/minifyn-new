@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { HashnodePost } from '@/lib/hashnode';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import hljs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
 import typescript from 'highlight.js/lib/languages/typescript';
@@ -19,6 +19,7 @@ import { CtaCard } from './cta-card';
 import { SocialLinks } from './social-links';
 import { getOrCreateShortUrlForPost } from '@/app/(marketing)/blog/actions';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/lib/gtag';
 
 // Register languages we expect to use
 hljs.registerLanguage('javascript', javascript);
@@ -36,8 +37,10 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
     const authorName = post.author?.name || 'Sylvester Das';
     const contentRef = useRef<HTMLDivElement>(null);
     const [shareUrl, setShareUrl] = useState(post.url);
-
     const finalCoverImage = post.coverImage?.url;
+    
+    // For scroll tracking
+    const trackedScrollPercentages = useRef<Set<number>>(new Set());
 
     useEffect(() => {
         // Fetch the short URL for sharing
@@ -52,6 +55,39 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
             });
         }
     }, [post.content.html, post.url]);
+    
+    const handleScroll = useCallback(() => {
+        if (!contentRef.current) return;
+
+        const { top, height } = contentRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        
+        // Calculate how much of the article is visible, from 0 to 1
+        const scrollAmount = Math.max(0, Math.min(height, viewportHeight - top));
+        const scrollPercentage = (scrollAmount / height) * 100;
+        
+        const scrollThresholds = [25, 50, 75, 90];
+        
+        for (const threshold of scrollThresholds) {
+            if (scrollPercentage >= threshold && !trackedScrollPercentages.current.has(threshold)) {
+                trackedScrollPercentages.current.add(threshold);
+                trackEvent({
+                    action: 'scroll_depth',
+                    category: 'blog_engagement',
+                    label: `Article: ${post.slug} - Scrolled ${threshold}%`,
+                    value: threshold
+                });
+            }
+        }
+
+    }, [post.slug]);
+
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, [handleScroll]);
 
     return (
         <article className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
@@ -70,7 +106,7 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
                 </div>
             )}
             
-             <div className={cn("prose prose-invert mx-auto prose-lg", "blog-content")}>
+             <div className={cn("prose prose-invert mx-auto prose-lg", "blog-content")} ref={contentRef}>
                 <header className="mb-8">
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
                         <p>By {authorName}</p>
@@ -98,7 +134,7 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
                     )}
                 </header>
                 
-                <div ref={contentRef} dangerouslySetInnerHTML={{ __html: post.content.html }}></div>
+                <div dangerouslySetInnerHTML={{ __html: post.content.html }}></div>
             </div>
 
             <div className="max-w-2xl mx-auto mt-12">
