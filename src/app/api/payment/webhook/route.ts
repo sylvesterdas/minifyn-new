@@ -16,25 +16,30 @@ async function handleSubscriptionEvent(subscription: any, eventType: string) {
         console.log(`Processing '${eventType}' for user ${userId}, subscription ${subscriptionId}.`);
         const userProfileRef = db.ref(`user_profiles/${userId}`);
         
-        // The plan is already set to 'pro' during the initial creation.
-        // The webhook's job is to record the final subscription status from Razorpay.
-        await userProfileRef.update({
-            subscription: {
-                id: subscriptionId,
-                status: subscription.status,
-                planId: subscription.plan_id,
-                current_start: subscription.current_start,
-                current_end: subscription.current_end,
-                ended_at: subscription.ended_at || null,
-            },
+        // Upgrade plan to 'pro' on activation or successful charge
+        if (eventType === 'subscription.activated' || eventType === 'subscription.charged') {
+            await userProfileRef.update({ plan: 'pro' });
+            await auth.setCustomUserClaims(userId, { plan: 'pro' });
+            console.log(`User ${userId} successfully upgraded to Pro plan.`);
+        }
+        
+        // Update subscription details in the user's profile
+        await userProfileRef.child('subscription').update({
+            id: subscriptionId,
+            status: subscription.status,
+            planId: subscription.plan_id,
+            current_start: subscription.current_start,
+            current_end: subscription.current_end,
+            ended_at: subscription.ended_at || null,
         });
         
-        console.log(`Successfully updated subscription details for user ${userId}.`);
+        // Revoke tokens to force re-login with new claims if the user is currently active.
+        // This helps ensure their session reflects the new 'pro' status quickly.
+        await auth.revokeRefreshTokens(userId);
+        console.log(`Tokens revoked for user ${userId} to apply new claims.`);
 
     } catch (error) {
         console.error(`Failed to update subscription details for user ${userId} on ${eventType}:`, error);
-        // Even on failure, we don't throw, to ensure Razorpay gets a 200 OK.
-        // This error should be logged and monitored for manual intervention.
     }
 }
 
@@ -78,3 +83,5 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Webhook processing error' }, { status: 500 });
     }
 }
+
+    

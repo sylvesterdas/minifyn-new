@@ -81,13 +81,6 @@ export async function createRazorpaySubscription(
     }
     
     try {
-        // --- IMMEDIATE PLAN UPGRADE ---
-        // Upgrade the user's plan to 'pro' before creating the subscription.
-        // This ensures they have access immediately after payment.
-        console.log(`Upgrading user ${userData.uid} to 'pro' plan.`);
-        await db.ref(`user_profiles/${userData.uid}`).update({ plan: 'pro' });
-        await adminAuth.setCustomUserClaims(userData.uid, { plan: 'pro' });
-
         const options = {
             plan_id: planId,
             customer_notify: 1,
@@ -107,7 +100,9 @@ export async function createRazorpaySubscription(
             currency: planDetails.item.currency,
         };
     } catch (error) {
-        console.error('Error creating Razorpay subscription or upgrading user:', error);
+        console.error('Error creating Razorpay subscription:', error);
         return { error: 'Could not create a subscription. Please try again.' };
     }
 }
+
+    

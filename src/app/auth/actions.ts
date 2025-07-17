@@ -7,6 +7,7 @@ import type { FormState } from './signin/page';
 import { sendEmail } from '@/lib/email';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import { randomInt } from 'crypto';
+import type { UserPlan } from '@/lib/data';
 
 function encodeEmail(email: string): string {
   // Replace characters that are invalid in RTDB paths.
@@ -129,7 +130,7 @@ export async function verifyOtpAndCreateUser(prevState: any, formData: FormData)
             termsAcceptedAt: Date.now(),
             createdAt: userRecord.metadata.creationTime,
             onboardingCompleted: true, // Skip multi-step onboarding
-            plan: 'free', // Start as free, payment action will upgrade to pro
+            plan: 'free', // Start as free, webhook will upgrade to pro
         });
         
         // Clean up the used OTP
@@ -142,6 +143,21 @@ export async function verifyOtpAndCreateUser(prevState: any, formData: FormData)
     } catch (error) {
         console.error("Error in verifyOtpAndCreateUser:", error);
         return { success: false, error: 'Failed to create account. Please try again.' };
+    }
+}
+
+export async function checkUserPlanStatus(idToken: string): Promise<{ plan: UserPlan, error?: string }> {
+    try {
+        const decodedToken = await auth.verifyIdToken(idToken);
+        const profileSnapshot = await db.ref(`user_profiles/${decodedToken.uid}`).once('value');
+        
+        if (profileSnapshot.exists()) {
+            const plan = profileSnapshot.val().plan || 'free';
+            return { plan };
+        }
+        return { plan: 'free' };
+    } catch (e) {
+        return { plan: 'free', error: 'Failed to check status.' };
     }
 }
 
@@ -303,3 +319,5 @@ export async function logout(): Promise<{ success?: boolean, error?: string }> {
     return { success: true };
   }
 }
+
+    

@@ -4,13 +4,13 @@
 import Link from 'next/link';
 import { useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { signup } from '@/app/auth/actions';
+import { signup, checkUserPlanStatus } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ExternalLink, MailCheck } from 'lucide-react';
+import { Loader2, ExternalLink, MailCheck, ShieldCheck } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { trackEvent } from '@/lib/gtag';
 import { PlanSelector, type Plan } from '@/components/plan-selector';
@@ -57,7 +57,7 @@ export default function SignUpPage() {
     const [termsAccepted, setTermsAccepted] = useState(false);
     
     // UI state
-    const [showVerificationMessage, setShowVerificationMessage] = useState(false);
+    const [view, setView] = useState<'form' | 'email_verification' | 'payment_processing'>('form');
     const [showOtpDialog, setShowOtpDialog] = useState(false);
     const [isPaymentLoading, setIsPaymentLoading] = useState(false);
 
@@ -69,7 +69,7 @@ export default function SignUpPage() {
         if (freePlanState.success) {
             toast({ title: 'Account Created!', description: freePlanState.message });
             trackEvent({ action: 'sign_up', category: 'conversion', label: 'email_password_signup_free' });
-            setShowVerificationMessage(true);
+            setView('email_verification');
         }
     }, [freePlanState, toast]);
 
@@ -78,78 +78,78 @@ export default function SignUpPage() {
         if (selectedPlan === 'free') {
             freePlanFormAction(formData);
         } else {
-            // For Pro plan, we open the OTP dialog instead of submitting the form directly
             setShowOtpDialog(true);
         }
     };
     
-    // Logic for triggering Razorpay checkout
-    const triggerPayment = async (customToken: string, userName: string, userEmail: string) => {
-        if (isPaymentLoading) return; // Prevent re-triggering
-        
+    // Logic for triggering Razorpay checkout and polling for status
+    const triggerPayment = async (customToken: string) => {
+        if (isPaymentLoading) return;
         setIsPaymentLoading(true);
-        setShowOtpDialog(false); // Close OTP dialog before showing payment
+        setShowOtpDialog(false);
 
         try {
-            // Step 1: Sign in with the custom token to get an ID token
             const userCredential = await signInWithCustomToken(firebaseClientAuth, customToken);
-            const user = userCredential.user;
-            const idToken = await user.getIdToken();
+            const idToken = await userCredential.user.getIdToken();
 
-            // Step 2: Pass the ID token to the server action for secure verification and immediate plan upgrade
             const subscriptionResult = await createRazorpaySubscription('monthly', idToken);
             if ('error' in subscriptionResult) throw new Error(subscriptionResult.error);
-
-            const options = {
+            
+            const rzp = new window.Razorpay({
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
                 subscription_id: subscriptionResult.subscriptionId,
                 name: "MiniFyn Pro",
                 description: "Monthly Subscription",
-                handler: async function (response: any) {
-                    try {
-                        toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
-                        
-                        // Step 3: Create a server-side session cookie using the already-valid ID token.
-                        // This will create a fresh session with the 'pro' claim.
-                        const loginResult = await login(idToken);
+                handler: async (response: any) => {
+                    setView('payment_processing');
+                    toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
 
-                        if (!loginResult.success) {
-                            throw new Error(loginResult.error || 'Failed to create session.');
+                    let pollCount = 0;
+                    const maxPolls = 10;
+                    const pollInterval = 2000; // 2 seconds
+
+                    const pollStatus = async () => {
+                        pollCount++;
+                        const freshIdToken = await userCredential.user.getIdToken(true); // Force refresh
+                        const { plan } = await checkUserPlanStatus(freshIdToken);
+                        
+                        if (plan === 'pro') {
+                            const loginResult = await login(freshIdToken);
+                            if (loginResult.success) {
+                                trackEvent({ action: 'purchase', category: 'conversion', label: 'pro_plan_signup', value: 89 });
+                                window.location.assign('/dashboard');
+                            } else {
+                                throw new Error(loginResult.error || 'Failed to create session after upgrade.');
+                            }
+                        } else if (pollCount < maxPolls) {
+                            setTimeout(pollStatus, pollInterval);
+                        } else {
+                            throw new Error('Could not confirm subscription status. Please try logging in again shortly.');
                         }
-                        
-                        trackEvent({ action: 'purchase', category: 'conversion', label: 'pro_plan_signup', value: 89 });
-                        window.location.assign('/dashboard');
-
-                    } catch (e) {
-                         toast({ title: 'Authentication Error', description: 'Your payment was successful, but we failed to log you in. Please try signing in manually.', variant: 'destructive' });
-                         window.location.assign('/auth/signin');
-                    } finally {
-                        setIsPaymentLoading(false);
-                    }
+                    };
+                    
+                    pollStatus();
                 },
-                modal: {
-                    ondismiss: function() {
-                        setIsPaymentLoading(false); // Re-enable the form if the user closes the payment modal
-                    }
-                },
-                prefill: { name: userName, email: userEmail },
+                modal: { ondismiss: () => setIsPaymentLoading(false) },
+                prefill: { name, email },
                 theme: { color: "#1e40af" }
-            };
-            
-            const rzp = new window.Razorpay(options);
+            });
+
             rzp.on('payment.failed', (response: any) => {
                 toast({ title: 'Payment Failed', description: response.error.description, variant: 'destructive' });
                 setIsPaymentLoading(false);
             });
+
             rzp.open();
 
         } catch(error) {
-             toast({ title: 'Error', description: error instanceof Error ? error.message : 'Could not initiate payment.', variant: 'destructive' });
+             const message = error instanceof Error ? error.message : 'Could not initiate payment.';
+             toast({ title: 'Error', description: message, variant: 'destructive' });
              setIsPaymentLoading(false);
         }
     };
 
-    if (showVerificationMessage) {
+    if (view === 'email_verification') {
         return (
              <Card className="mx-auto max-w-sm text-center">
                 <CardHeader>
@@ -166,6 +166,22 @@ export default function SignUpPage() {
                         <Link href="/auth/signin">Proceed to Sign In</Link>
                     </Button>
                 </CardFooter>
+            </Card>
+        )
+    }
+
+     if (view === 'payment_processing') {
+        return (
+             <Card className="mx-auto max-w-sm text-center">
+                <CardHeader>
+                    <div className="mx-auto p-3 rounded-full w-fit">
+                        <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                    </div>
+                    <CardTitle className="text-2xl pt-4">Processing Subscription</CardTitle>
+                    <CardDescription>
+                       Your payment was successful. We're upgrading your account to Pro now. Please wait...
+                    </CardDescription>
+                </CardHeader>
             </Card>
         )
     }
@@ -236,3 +252,5 @@ export default function SignUpPage() {
         </>
     );
 }
+
+    
