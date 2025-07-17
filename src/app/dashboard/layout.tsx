@@ -13,21 +13,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Logo from '@/components/logo';
 import { useState } from 'react';
 
-const baseNavItems = [
+const navItems = [
   { href: '/dashboard', label: 'Overview', icon: Home, plans: ['free', 'pro', 'admin'] },
   { href: '/dashboard/links', label: 'Links', icon: LinkIcon, plans: ['free', 'pro', 'admin'] },
-];
-
-const proNavItems = [
   { href: '/dashboard/analytics', label: 'Analytics', icon: LineChart, plans: ['pro', 'admin'] },
-  { href: '/dashboard/billing', label: 'Billing', icon: CreditCard, plans: ['pro', 'admin'] },
-]
-
-const settingsNavItems = [
-  { href: '/dashboard/settings/api-keys', label: 'API Keys', icon: Key, plans: ['free', 'pro', 'admin'] },
-  { href: '/docs/api', label: 'API Docs', icon: BookText, external: true, plans: ['free', 'pro', 'admin'] },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings, plans: ['free', 'pro', 'admin'] },
 ];
+
+const externalLinks = [
+    { href: '/docs/api', label: 'API Docs', icon: BookText, external: true, plans: ['free', 'pro', 'admin'] },
+]
 
 function NavLinks({ onLinkClick }: { onLinkClick?: () => void }) {
   const pathname = usePathname();
@@ -36,7 +31,7 @@ function NavLinks({ onLinkClick }: { onLinkClick?: () => void }) {
   if (isLoading) {
     return (
        <div className="grid items-start px-2 text-sm font-medium lg:px-4 space-y-2">
-         {[...Array(6)].map((_, i) => (
+         {[...Array(4)].map((_, i) => (
             <Skeleton key={i} className="h-9 w-full rounded-lg" />
          ))}
        </div>
@@ -44,8 +39,9 @@ function NavLinks({ onLinkClick }: { onLinkClick?: () => void }) {
   }
 
   const userPlan = user?.plan || 'anonymous';
-  const allNavItems = [...baseNavItems, ...proNavItems, ...settingsNavItems];
-  const visibleNavItems = allNavItems.filter(item => item.plans.includes(userPlan));
+  const visibleNavItems = navItems.filter(item => item.plans.includes(userPlan));
+  const visibleExternalLinks = externalLinks.filter(item => item.plans.includes(userPlan));
+
 
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
@@ -53,18 +49,33 @@ function NavLinks({ onLinkClick }: { onLinkClick?: () => void }) {
         <Link
           key={href}
           href={href}
-          target={external ? '_blank' : '_self'}
-          rel={external ? 'noopener noreferrer' : undefined}
           onClick={onLinkClick}
           className={cn(
             'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-            { 'bg-muted text-primary': pathname === href }
+            // Check if the current path starts with the href for active state
+            { 'bg-muted text-primary': pathname.startsWith(href) }
           )}
         >
           <Icon className="h-4 w-4" />
           {label}
-          {external && <ExternalLink className="h-3 w-3 ml-auto" />}
         </Link>
+      ))}
+      <div className="my-2 border-t border-border" />
+      {visibleExternalLinks.map(({ href, label, icon: Icon, external }) => (
+          <Link
+            key={href}
+            href={href}
+            target={external ? '_blank' : '_self'}
+            rel={external ? 'noopener noreferrer' : undefined}
+            onClick={onLinkClick}
+            className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary'
+            )}
+            >
+            <Icon className="h-4 w-4" />
+            {label}
+            {external && <ExternalLink className="h-3 w-3 ml-auto" />}
+            </Link>
       ))}
     </nav>
   );
