@@ -29,14 +29,6 @@ export async function login(
       maxAge: expiresIn,
       path: '/',
     });
-    
-    // Set a simple cookie for the middleware to check onboarding status
-    cookieObj.set('uid_placeholder', decodedToken.uid, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: expiresIn,
-        path: '/',
-    });
 
     return { success: true };
   } catch (error: any) {

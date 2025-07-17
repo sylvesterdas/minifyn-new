@@ -7,12 +7,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
-import { createRazorpayOrder } from '@/app/payments/actions';
+import { createRazorpaySubscription } from '@/app/payments/actions';
 import { useToast } from '@/hooks/use-toast';
 import Script from 'next/script';
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
 
 const freeFeatures = [
     { text: '20 Links / Day', included: true },
@@ -60,6 +62,7 @@ export function PricingPageClient() {
     const { user, isLoading: isAuthLoading } = useAuth();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
+    const [planType, setPlanType] = useState<'monthly' | 'yearly'>('monthly');
     const router = useRouter();
 
     const handleUpgrade = async () => {
@@ -72,18 +75,16 @@ export function PricingPageClient() {
         }
 
         try {
-            const orderResult = await createRazorpayOrder();
-            if ('error' in orderResult) {
-                throw new Error(orderResult.error);
+            const subscriptionResult = await createRazorpaySubscription(planType);
+            if ('error' in subscriptionResult) {
+                throw new Error(subscriptionResult.error);
             }
 
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                amount: orderResult.amount,
-                currency: orderResult.currency,
+                subscription_id: subscriptionResult.subscriptionId,
                 name: "MiniFyn Pro",
-                description: "Monthly Subscription",
-                order_id: orderResult.id,
+                description: planType === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
                 handler: function (response: any) {
                     toast({ title: 'Payment Successful!', description: 'Your plan has been upgraded to Pro.' });
                     window.location.href = '/dashboard';
@@ -93,7 +94,7 @@ export function PricingPageClient() {
                     email: user.email,
                 },
                 theme: {
-                    color: "#3b82f6" // Accent color
+                    color: "#3b82f6"
                 }
             };
 
@@ -131,6 +132,18 @@ export function PricingPageClient() {
                 id="razorpay-checkout-js"
                 src="https://checkout.razorpay.com/v1/checkout.js"
             />
+            <div className="flex justify-center items-center gap-4 mb-8">
+                <Label htmlFor="plan-toggle" className={cn(planType === 'monthly' ? 'text-foreground' : 'text-muted-foreground')}>Monthly</Label>
+                <Switch
+                    id="plan-toggle"
+                    checked={planType === 'yearly'}
+                    onCheckedChange={(checked) => setPlanType(checked ? 'yearly' : 'monthly')}
+                    aria-label="Toggle between monthly and yearly billing"
+                />
+                <Label htmlFor="plan-toggle" className={cn(planType === 'yearly' ? 'text-foreground' : 'text-muted-foreground')}>
+                    Yearly <span className="text-primary font-semibold">(Save 15%)</span>
+                </Label>
+            </div>
             <div className="grid md:grid-cols-2 gap-8 items-stretch">
                 {/* Free Plan */}
                 <Card className="flex flex-col">
@@ -138,7 +151,7 @@ export function PricingPageClient() {
                         <CardTitle className="text-2xl">Free</CardTitle>
                         <CardDescription>Perfect for personal use and getting started with our platform.</CardDescription>
                         <div className="pt-4">
-                            <span className="text-4xl font-bold">$0</span>
+                            <span className="text-4xl font-bold">₹0</span>
                             <span className="text-muted-foreground">/month</span>
                         </div>
                     </CardHeader>
@@ -163,9 +176,18 @@ export function PricingPageClient() {
                     <CardHeader>
                         <CardTitle className="text-2xl">Pro</CardTitle>
                         <CardDescription>For power users and businesses who need more links and advanced analytics.</CardDescription>
-                        <div className="pt-4">
-                            <span className="text-4xl font-bold">₹89</span>
-                            <span className="text-muted-foreground">/month</span>
+                        <div className="pt-4 transition-all duration-300">
+                             {planType === 'monthly' ? (
+                                <>
+                                    <span className="text-4xl font-bold">₹89</span>
+                                    <span className="text-muted-foreground">/month</span>
+                                </>
+                             ) : (
+                                <>
+                                    <span className="text-4xl font-bold">₹899</span>
+                                    <span className="text-muted-foreground">/year</span>
+                                </>
+                             )}
                         </div>
                     </CardHeader>
                     <CardContent className="flex-grow">

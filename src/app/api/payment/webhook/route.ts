@@ -1,7 +1,46 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { db } from '@/lib/firebase-admin';
+import { db, auth } from '@/lib/firebase-admin';
+
+async function handleSubscriptionEvent(subscription: any, eventType: string) {
+    const userId = subscription.notes?.userId;
+    const subscriptionId = subscription.id;
+    
+    if (!userId) {
+        console.error(`User ID not found in ${eventType} notes for subscription:`, subscriptionId);
+        return;
+    }
+
+    try {
+        console.log(`Processing '${eventType}' for user ${userId}, subscription ${subscriptionId}.`);
+        const userProfileRef = db.ref(`user_profiles/${userId}`);
+        
+        // Update user's plan to 'pro' and store their subscription details
+        await userProfileRef.update({
+            plan: 'pro',
+            subscription: {
+                id: subscriptionId,
+                status: subscription.status,
+                planId: subscription.plan_id,
+                current_start: subscription.current_start,
+                current_end: subscription.current_end,
+                ended_at: subscription.ended_at || null,
+            },
+        });
+        
+        // Set a custom claim on the user's auth token
+        await auth.setCustomUserClaims(userId, { plan: 'pro' });
+
+        console.log(`Successfully updated plan to 'pro' for user ${userId}.`);
+
+    } catch (error) {
+        console.error(`Failed to update plan for user ${userId} on ${eventType}:`, error);
+        // Even on failure, we don't throw, to ensure Razorpay gets a 200 OK.
+        // This error should be logged and monitored for manual intervention.
+    }
+}
+
 
 export async function POST(req: NextRequest) {
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -17,42 +56,28 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Signature missing' }, { status: 400 });
     }
 
-    // 1. Verify the webhook signature
-    const shasum = crypto.createHmac('sha256', webhookSecret);
-    shasum.update(body);
-    const digest = shasum.digest('hex');
+    try {
+        const shasum = crypto.createHmac('sha256', webhookSecret);
+        shasum.update(body);
+        const digest = shasum.digest('hex');
 
-    if (digest !== signature) {
-        console.warn("Invalid Razorpay webhook signature received.");
-        return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
-    }
-    
-    // 2. Process the event
-    const event = JSON.parse(body);
-
-    if (event.event === 'payment.captured') {
-        const payment = event.payload.payment.entity;
-        const userId = payment.notes?.userId;
+        if (digest !== signature) {
+            console.warn("Invalid Razorpay webhook signature received.");
+            return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
+        }
         
-        if (!userId) {
-            console.error("User ID not found in payment notes for payment:", payment.id);
-            // Return 200 to acknowledge receipt, but log the error
-            return NextResponse.json({ status: 'ok' });
+        const event = JSON.parse(body);
+        const eventType = event.event;
+        
+        // Handle subscription activation and successful charges
+        if (eventType === 'subscription.activated' || eventType === 'subscription.charged') {
+            await handleSubscriptionEvent(event.payload.subscription.entity, eventType);
         }
+        
+        return NextResponse.json({ status: 'ok' });
 
-        try {
-            console.log(`Upgrading user ${userId} to pro plan.`);
-            // Update user's plan in Firebase Realtime Database
-            const userProfileRef = db.ref(`user_profiles/${userId}`);
-            await userProfileRef.update({ plan: 'pro' });
-
-        } catch (error) {
-            console.error(`Failed to update plan for user ${userId}:`, error);
-            // Even if DB update fails, return 200 to Razorpay to prevent retries
-            // Log this for manual intervention.
-            return NextResponse.json({ status: 'error', message: 'Failed to update user plan' }, { status: 500 });
-        }
+    } catch (error) {
+        console.error("Error processing Razorpay webhook:", error);
+        return NextResponse.json({ error: 'Webhook processing error' }, { status: 500 });
     }
-    
-    return NextResponse.json({ status: 'ok' });
 }

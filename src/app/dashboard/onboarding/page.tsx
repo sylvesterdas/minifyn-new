@@ -49,7 +49,8 @@ export default function OnboardingPage() {
                 title: 'Welcome!',
                 description: 'Your profile has been updated.',
             });
-            router.push('/dashboard');
+            // Perform a hard refresh to ensure middleware re-evaluates auth state
+            window.location.assign('/dashboard');
         }
     }, [state, toast, router]);
 
@@ -103,6 +104,9 @@ export default function OnboardingPage() {
                 </CardContent>
                 <CardFooter className="flex-col gap-4">
                     <SubmitButton />
+                    <Button variant="link" asChild>
+                        <a href="/dashboard">Skip for now</a>
+                    </Button>
                 </CardFooter>
             </form>
         </Card>

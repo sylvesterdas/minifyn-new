@@ -9,7 +9,7 @@ import type { UserPlan } from './data';
 import type { UserProfile } from '@/app/dashboard/settings/actions';
 
 export interface AuthUser extends DecodedIdToken {
-    onboardingCompleted?: boolean;
+    onboardingCompleted: boolean;
     plan: UserPlan;
 }
 
@@ -20,15 +20,15 @@ async function getUserProfileData(uid: string): Promise<{ plan: UserPlan, onboar
             const profile = snapshot.val() as UserProfile;
             return {
                 plan: profile.plan || 'free',
-                onboardingCompleted: profile.onboardingCompleted || false,
+                onboardingCompleted: profile.onboardingCompleted === true,
             };
         }
         // Default values if no profile exists
         return { plan: 'free', onboardingCompleted: false };
     } catch (error) {
         console.error(`Failed to fetch profile data for user ${uid}:`, error);
-        // Fail open: if there's an error, assume they are on the free plan to avoid blocking them.
-        return { plan: 'free', onboardingCompleted: true };
+        // Fail safe: if there's an error, assume they are on the free plan and haven't onboarded.
+        return { plan: 'free', onboardingCompleted: false };
     }
 }
 

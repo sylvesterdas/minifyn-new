@@ -64,7 +64,7 @@ export async function generateApiKey(): Promise<{ key: string } | { error: strin
 
         await db.ref().update(updates);
         
-        revalidatePath('/dashboard/settings');
+        revalidatePath('/dashboard/settings/api-keys');
         return { key: newKey };
     } catch (error) {
         console.error("Failed to generate API key:", error);
@@ -92,7 +92,7 @@ export async function revokeApiKey(): Promise<{ success: boolean } | { error: st
 
         await db.ref().update(updates);
 
-        revalidatePath('/dashboard/settings');
+        revalidatePath('/dashboard/settings/api-keys');
         return { success: true };
     } catch (error) {
         console.error("Failed to revoke API key:", error);
@@ -140,7 +140,6 @@ export async function updateUserProfile(prevState: any, formData: FormData): Pro
             name,
         };
         
-        // Add onboarding fields if they exist
         if (role) profileData.role = role;
         if (timezone) profileData.timezone = timezone;
         if (company || company === '') profileData.company = company;
@@ -169,5 +168,3 @@ export async function updateUserProfile(prevState: any, formData: FormData): Pro
         return { error: 'An unexpected error occurred while updating your profile.' };
     }
 }
-
-    
