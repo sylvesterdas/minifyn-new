@@ -80,10 +80,7 @@ type Language = keyof typeof snippets;
 
 export function DeveloperApiSection() {
     return (
-        <section id="for-developers" className="relative w-full py-12 md:py-24 lg:py-32">
-            <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
-                <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_500px_at_50%_50%,hsl(var(--primary)/0.05),transparent)]"></div>
-            </div>
+        <section id="for-developers" className="relative w-full py-12 md:py-24 lg:py-32 bg-card/50">
             <div className="container mx-auto px-4 md:px-6 relative">
                 <div className="flex flex-col items-center justify-center space-y-4 text-center">
                     <div className="space-y-2">
