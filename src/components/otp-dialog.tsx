@@ -25,13 +25,13 @@ interface OtpDialogProps {
   email: string;
   name: string;
   password: string;
-  onVerified: (customToken: string, name: string, email: string) => Promise<void>;
+  onVerified: (customToken: string, name: string, email: string) => void;
+  isPaymentLoading: boolean;
 }
 
-export function OtpDialog({ open, onOpenChange, email, name, password, onVerified }: OtpDialogProps) {
+export function OtpDialog({ open, onOpenChange, email, name, password, onVerified, isPaymentLoading }: OtpDialogProps) {
     const { toast } = useToast();
     const [otp, setOtp] = useState('');
-    const [isSubmitting, startSubmitTransition] = useTransition();
     
     const [sendState, sendFormAction, isSendingOtp] = useActionState(sendVerificationOtp, { success: false });
     const [verifyState, verifyFormAction, isVerifying] = useActionState(verifyOtpAndCreateUser, { success: false });
@@ -64,9 +64,7 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
         }
         if (verifyState.success && verifyState.customToken) {
             toast({ description: "Email verified! Proceeding to payment..." });
-            startSubmitTransition(async () => {
-                await onVerified(verifyState.customToken!, name, email);
-            });
+            onVerified(verifyState.customToken!, name, email);
         }
     }, [verifyState, toast, onVerified, name, email]);
 
@@ -91,11 +89,18 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
         verifyFormAction(formData);
     };
 
-    const isLoading = isSendingOtp || isVerifying || isSubmitting;
+    const isLoading = isSendingOtp || isVerifying || isPaymentLoading;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+            <DialogContent 
+                className="sm:max-w-md"
+                onInteractOutside={(e) => {
+                    if (isLoading) {
+                        e.preventDefault();
+                    }
+                }}
+            >
                 <DialogHeader>
                     <DialogTitle>Verify Your Email for Pro</DialogTitle>
                     <DialogDescription>

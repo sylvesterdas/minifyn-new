@@ -85,7 +85,11 @@ export default function SignUpPage() {
     
     // Logic for triggering Razorpay checkout
     const triggerPayment = async (customToken: string, userName: string, userEmail: string) => {
+        if (isPaymentLoading) return; // Prevent re-triggering
+        
         setIsPaymentLoading(true);
+        setShowOtpDialog(false); // Close OTP dialog before showing payment
+
         try {
             // Step 1: Sign in with the custom token to get an ID token
             const userCredential = await signInWithCustomToken(firebaseClientAuth, customToken);
@@ -118,12 +122,13 @@ export default function SignUpPage() {
                     } catch (e) {
                          toast({ title: 'Authentication Error', description: 'Your payment was successful, but we failed to log you in. Please try signing in manually.', variant: 'destructive' });
                          window.location.assign('/auth/signin');
+                    } finally {
+                        setIsPaymentLoading(false);
                     }
                 },
                 modal: {
                     ondismiss: function() {
                         setIsPaymentLoading(false); // Re-enable the form if the user closes the payment modal
-                        setShowOtpDialog(false); // also close the otp dialog wrapper
                     }
                 },
                 prefill: { name: userName, email: userEmail },
@@ -174,6 +179,7 @@ export default function SignUpPage() {
                 password={password}
                 name={name}
                 onVerified={triggerPayment}
+                isPaymentLoading={isPaymentLoading}
             />
             <Card className="mx-auto max-w-md">
                 <CardHeader>
