@@ -2,7 +2,6 @@
 'use client';
 
 import { CheckCircle, XCircle } from 'lucide-react';
-import type { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
@@ -13,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import Script from 'next/script';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const freeFeatures = [
     { text: '20 Links / Day', included: true },
@@ -56,15 +56,17 @@ function FeatureList({ features }: { features: { text: string; included: boolean
     );
 }
 
-export default function PricingPage() {
-    const { user } = useAuth();
+function PricingPageContent() {
+    const { user, isLoading: isAuthLoading } = useAuth();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
 
     const handleUpgrade = async () => {
         setIsLoading(true);
         if (!user) {
-            toast({ title: 'Please sign in', description: 'You need to be signed in to upgrade your plan.', variant: 'destructive' });
+            toast({ title: 'Please sign in', description: 'You need to sign up or sign in to upgrade your plan.', variant: 'destructive' });
+            router.push('/auth/signup');
             setIsLoading(false);
             return;
         }
@@ -111,63 +113,93 @@ export default function PricingPage() {
             setIsLoading(false);
         }
     };
+    
+    if (isAuthLoading) {
+        return (
+             <div className="grid md:grid-cols-2 gap-8 items-stretch">
+                <Card className="flex flex-col"><CardHeader><Skeleton className="h-8 w-1/4" /><Skeleton className="h-4 w-3/4 mt-2" /></CardHeader><CardContent className="flex-grow space-y-4">{[...Array(6)].map((_, i) => (<Skeleton key={i} className="h-6 w-full" />))}</CardContent><CardFooter><Skeleton className="h-11 w-full" /></CardFooter></Card>
+                <Card className="flex flex-col"><CardHeader><Skeleton className="h-8 w-1/4" /><Skeleton className="h-4 w-3/4 mt-2" /></CardHeader><CardContent className="flex-grow space-y-4">{[...Array(5)].map((_, i) => (<Skeleton key={i} className="h-6 w-full" />))}</CardContent><CardFooter><Skeleton className="h-11 w-full" /></CardFooter></Card>
+            </div>
+        )
+    }
 
+    const userPlan = user?.plan;
+
+    return (
+        <div className="grid md:grid-cols-2 gap-8 items-stretch">
+            {/* Free Plan */}
+            <Card className="flex flex-col">
+                <CardHeader>
+                    <CardTitle className="text-2xl">Free</CardTitle>
+                    <CardDescription>Perfect for personal use and getting started with our platform.</CardDescription>
+                    <div className="pt-4">
+                        <span className="text-4xl font-bold">$0</span>
+                        <span className="text-muted-foreground">/month</span>
+                    </div>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                    <FeatureList features={freeFeatures} />
+                </CardContent>
+                <CardFooter>
+                     {userPlan === 'free' ? (
+                        <Button size="lg" className="w-full" disabled>Your Current Plan</Button>
+                    ) : userPlan === 'pro' ? (
+                         <Button size="lg" className="w-full" disabled variant="outline">Downgrade not supported</Button>
+                    ) : (
+                         <Button asChild size="lg" className="w-full">
+                            <Link href="/auth/signup">Get Started for Free</Link>
+                        </Button>
+                    )}
+                </CardFooter>
+            </Card>
+
+            {/* Pro Plan */}
+            <Card className="flex flex-col border-primary shadow-lg shadow-primary/10">
+                <CardHeader>
+                     <CardTitle className="text-2xl">Pro</CardTitle>
+                    <CardDescription>For power users and businesses who need more links and advanced analytics.</CardDescription>
+                    <div className="pt-4">
+                        <span className="text-4xl font-bold">₹89</span>
+                        <span className="text-muted-foreground">/month</span>
+                    </div>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                     <FeatureList features={proFeatures} />
+                </CardContent>
+                <CardFooter>
+                    {userPlan === 'pro' ? (
+                         <Button size="lg" className="w-full" disabled>Your Current Plan</Button>
+                    ) : (
+                         <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={isLoading}>
+                            {isLoading ? <Loader2 className="animate-spin" /> : (user ? 'Upgrade to Pro' : 'Get Pro')}
+                        </Button>
+                    )}
+                </CardFooter>
+            </Card>
+        </div>
+    );
+}
+
+
+import { useRouter } from 'next/navigation';
+
+export default function PricingPage() {
   return (
     <>
-    <Script
-        id="razorpay-checkout-js"
-        src="https://checkout.razorpay.com/v1/checkout.js"
-    />
-    <div className="container mx-auto px-4 py-12 md:py-24 max-w-5xl">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">Find Your Plan</h1>
-        <p className="mt-6 text-lg leading-8 text-muted-foreground">
-          Whether you're just starting out or scaling up, we have a plan that fits your needs.
-        </p>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-8 items-stretch">
-        {/* Free Plan */}
-        <Card className="flex flex-col">
-            <CardHeader>
-                <CardTitle className="text-2xl">Free</CardTitle>
-                <CardDescription>Perfect for personal use and getting started with our platform.</CardDescription>
-                <div className="pt-4">
-                    <span className="text-4xl font-bold">$0</span>
-                    <span className="text-muted-foreground">/month</span>
-                </div>
-            </CardHeader>
-            <CardContent className="flex-grow">
-                <FeatureList features={freeFeatures} />
-            </CardContent>
-            <CardFooter>
-                <Button asChild size="lg" className="w-full">
-                    <Link href="/auth/signup">Get Started for Free</Link>
-                </Button>
-            </CardFooter>
-        </Card>
-
-        {/* Pro Plan */}
-        <Card className="flex flex-col border-primary shadow-lg shadow-primary/10">
-            <CardHeader>
-                 <CardTitle className="text-2xl">Pro</CardTitle>
-                <CardDescription>For power users and businesses who need more links and advanced analytics.</CardDescription>
-                <div className="pt-4">
-                    <span className="text-4xl font-bold">₹89</span>
-                    <span className="text-muted-foreground">/month</span>
-                </div>
-            </CardHeader>
-            <CardContent className="flex-grow">
-                 <FeatureList features={proFeatures} />
-            </CardContent>
-            <CardFooter>
-                <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={isLoading}>
-                    {isLoading ? <Loader2 className="animate-spin" /> : 'Upgrade to Pro'}
-                </Button>
-            </CardFooter>
-        </Card>
-      </div>
-    </div>
+        <Script
+            id="razorpay-checkout-js"
+            src="https://checkout.razorpay.com/v1/checkout.js"
+        />
+        <div className="container mx-auto px-4 py-12 md:py-24 max-w-5xl">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">Find Your Plan</h1>
+            <p className="mt-6 text-lg leading-8 text-muted-foreground">
+              Whether you're just starting out or scaling up, we have a plan that fits your needs.
+            </p>
+          </div>
+          <PricingPageContent />
+        </div>
     </>
   );
 }
+
