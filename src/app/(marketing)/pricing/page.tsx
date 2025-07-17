@@ -21,7 +21,7 @@ const freeFeatures = [
     { text: 'Links Expire in 60 Days', included: true },
     { text: 'Dashboard & Analytics', included: true },
     { text: 'QR Code Generation', included: true },
-    { text: 'Developer API Access', included: false },
+    { text: 'Developer API Access', included: true },
     { text: 'Links Never Expire', included: false },
 ];
 
