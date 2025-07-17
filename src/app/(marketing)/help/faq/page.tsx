@@ -33,31 +33,31 @@ const faqs = [
     },
     {
         question: "Do I need an account to use the service?",
-        answer: "You can create short links and QR codes without an account. However, <a href='/auth/signup' class='text-primary underline'>signing up</a> for a free account allows you to manage your links, view detailed analytics, and access more features like a higher daily link limit."
+        answer: "You can create a limited number of short links and QR codes without an account. However, <a href='/auth/signup' class='text-primary underline'>signing up</a> for a free account gives you higher limits and allows you to manage your links and view analytics."
     },
     {
         question: "How long do my links last?",
-        answer: "For anonymous users, links expire after 7 days. For registered users with a verified email, links last for 60 days. This extended period allows for longer campaigns and usage."
+        answer: "On the <strong>Free</strong> plan, links expire after <strong>60 days</strong>. If you upgrade to our <strong>Pro</strong> plan, your links will <strong>never expire</strong>."
     },
     {
         question: "What is the daily limit for creating links?",
-        answer: "Anonymous users can create up to 3 links per day. Registered, verified users can create up to 20 links per day. The same limits apply to API usage."
+        answer: "Anonymous users can create up to 3 links per day. Users on the <strong>Free</strong> plan can create up to <strong>20 links</strong> per day. <strong>Pro</strong> plan users can create up to <strong>100 links</strong> per day. The same limits apply to API usage."
     },
     {
         question: "How do I view analytics for my links?",
-        answer: "If you are a registered user, you can view click analytics by navigating to the <a href='/dashboard/analytics' class='text-primary underline'>Analytics</a> section in your dashboard. This includes data on click counts, referrers, and geographic location."
+        answer: "Basic click analytics are available to all registered users in their dashboard. The <strong>Pro</strong> plan unlocks advanced analytics, including referrers, geographic data, and a longer data retention period."
     },
     {
         question: "Is there a developer API?",
-        answer: "Yes! Registered users can generate API keys from the 'Settings' page in their dashboard. Our <a href='/docs/api' class='text-primary underline'>API documentation</a> has everything you need to get started integrating MiniFyn into your own applications."
+        answer: "Yes! All registered users can generate an API key from the 'API Keys' section in their dashboard. Our <a href='/docs/api' class='text-primary underline'>API documentation</a> has everything you need to get started integrating MiniFyn into your applications."
+    },
+     {
+        question: "What happens if I cancel my Pro subscription?",
+        answer: "You can cancel your subscription at any time. You will retain Pro features until the end of your current billing period. Afterwards, your account will be downgraded to the Free plan. Your existing Pro links will remain active and will not expire, but any new links you create will be subject to the Free plan's limits."
     },
     {
         question: "What happens if I shorten a malicious link?",
         answer: "We have a domain blocklist to prevent the shortening of known malicious URLs. Additionally, users can report abusive links. Violating our <a href='/acceptable-use' class='text-primary underline'>Acceptable Use Policy</a> can result in the link being disabled and the user being banned."
-    },
-    {
-        question: "Can I use my own custom domain?",
-        answer: "Custom domain support is a planned feature for a future premium tier. Stay tuned for updates!"
     }
 ];
 

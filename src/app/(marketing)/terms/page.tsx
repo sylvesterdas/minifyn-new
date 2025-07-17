@@ -1,4 +1,6 @@
+
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const revalidate = 0;
 
@@ -24,29 +26,31 @@ export default function TermsPage() {
             <p>By accessing or using the Service, you agree to be bound by these Terms. If you disagree with any part of the terms, then you may not access the Service. This agreement applies to all visitors, users, and others who access or use the Service.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">2. Description of Service</h2>
-            <p>MiniFyn provides users with a variety of tools and services, including but not limited to the ability to shorten URLs, generate QR codes, and a suite of free developer tools (the "Service"). The Service is available through our website and may include an API for programmatic access.</p>
+            <p>MiniFyn provides a variety of tools, including a URL shortener and QR code generator. We offer different tiers of service ("Plans"), including a free plan and paid subscription plans (e.g., "Pro Plan"). Each plan has different features and limitations, which are outlined on our <Link href="/pricing">Pricing page</Link>.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">3. User Accounts</h2>
-            <p>When you create an account with us, you must provide information that is accurate, complete, and current at all times. Failure to do so constitutes a breach of the Terms, which may result in immediate termination of your account on our Service.</p>
+            <p>While some features are available anonymously, full access to features like link management and higher usage limits requires you to create an account. When you create an account, you must provide information that is accurate and complete. You are responsible for safeguarding your password and for any activities or actions under your account. Failure to comply constitutes a breach of the Terms, which may result in immediate termination of your account.</p>
 
-            <h2 className="mt-8 text-2xl font-semibold">4. Acceptable Use</h2>
-            <p>You agree not to use the Service for any unlawful purpose or to violate any laws in your jurisdiction. To protect the integrity of our service and our users, we actively scan submitted URLs for malicious content using automated systems, which may include third-party services such as the Google Web Risk API. You must not use the Service to shorten URLs that point to content that is unlawful, harmful, or otherwise objectionable. Please see our Acceptable Use Policy for more details.</p>
+            <h2 className="mt-8 text-2xl font-semibold">4. Subscriptions and Payments</h2>
+            <p>For paid plans, you agree to pay the subscription fees specified on our Pricing page. Payments are handled by our third-party payment processor, Razorpay. By providing payment information, you authorize us to charge the fees on a recurring basis. All payments are non-refundable. Please see our <Link href="/refund-policy">Refund and Cancellation Policy</Link> for details on cancelling your subscription.</p>
 
-            <h2 className="mt-8 text-2xl font-semibold">5. Intellectual Property</h2>
-            <p>The Service and its original content, features, and functionality are and will remain the exclusive property of MiniFyn and its licensors. The Service is protected by copyright, trademark, and other laws of both the United States and foreign countries.</p>
+            <h2 className="mt-8 text-2xl font-semibold">5. Acceptable Use</h2>
+            <p>You agree not to use the Service for any unlawful purpose. To protect the integrity of our service, we scan submitted URLs for malicious content. You must not use the Service to shorten URLs that point to content that is unlawful, harmful, or otherwise objectionable. Please see our <Link href="/acceptable-use">Acceptable Use Policy</Link> for full details.</p>
 
-            <h2 className="mt-8 text-2xl font-semibold">6. Termination</h2>
-            <p>We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms.</p>
+            <h2 className="mt-8 text-2xl font-semibold">6. Intellectual Property</h2>
+            <p>The Service and its original content, features, and functionality are and will remain the exclusive property of MiniFyn and its licensors.</p>
 
-            <h2 className="mt-8 text-2xl font-semibold">7. Disclaimer of Warranties</h2>
-            <p>The Service is provided on an "AS IS" and "AS AVAILABLE" basis. Your use of the Service is at your sole risk. The Service is provided without warranties of any kind, whether express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, non-infringement or course of performance.</p>
-            <p>Specifically for our free developer tools (like the Code Minifier, JSON Formatter, and JWT Debugger), while we strive for accuracy, we are not liable for any errors, data loss, or damages resulting from their use. You assume full responsibility for testing and verifying the output of these tools before use in a production environment.</p>
+            <h2 className="mt-8 text-2xl font-semibold">7. Termination</h2>
+            <p>We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including if you breach the Terms. If you wish to terminate your account, you may do so by discontinuing use of the Service. For paid plans, you must cancel your subscription according to our Refund and Cancellation Policy to avoid future charges.</p>
 
-            <h2 className="mt-8 text-2xl font-semibold">8. Limitation of Liability</h2>
-            <p>In no event shall MiniFyn, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.</p>
+            <h2 className="mt-8 text-2xl font-semibold">8. Disclaimer of Warranties</h2>
+            <p>The Service is provided on an "AS IS" and "AS AVAILABLE" basis. Your use of the Service is at your sole risk. The Service is provided without warranties of any kind, whether express or implied.</p>
 
-            <h2 className="mt-8 text-2xl font-semibold">9. Changes to Terms</h2>
-            <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. We will provide at least 30 days' notice prior to any new terms taking effect. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms.</p>
+            <h2 className="mt-8 text-2xl font-semibold">9. Limitation of Liability</h2>
+            <p>In no event shall MiniFyn be liable for any indirect, incidental, special, consequential or punitive damages resulting from your access to or use of the Service.</p>
+
+            <h2 className="mt-8 text-2xl font-semibold">10. Changes to Terms</h2>
+            <p>We reserve the right to modify or replace these Terms at any time. We will provide notice of significant changes. By continuing to access or use our Service after revisions become effective, you agree to be bound by the revised terms.</p>
         </div>
     </div>
   );

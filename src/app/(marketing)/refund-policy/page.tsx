@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -5,7 +6,7 @@ export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: 'Refund and Cancellation Policy | MiniFyn',
-  description: 'Read our policy on refunds and cancellations.',
+  description: 'Read our policy on refunds and cancellations for the MiniFyn Pro plan.',
   alternates: {
     canonical: 'https://www.minifyn.com/refund-policy',
   },
@@ -19,22 +20,22 @@ export default function RefundPolicyPage() {
             <h1 className="text-4xl font-bold">Refund and Cancellation Policy</h1>
             <p className="text-muted-foreground">Last updated: {lastUpdated}</p>
 
-            <p>This policy outlines the terms for refunds and cancellations for any paid services offered by MiniFyn.</p>
+            <p>This policy outlines the terms for refunds and cancellations for the MiniFyn Pro subscription service.</p>
 
-            <h2 className="mt-8 text-2xl font-semibold">1. General Policy</h2>
-            <p>Our services are provided on a subscription basis. We offer a free tier of service with certain limitations. For paid tiers, payments are billed in advance on a monthly or annual basis and are non-refundable.</p>
+            <h2 className="mt-8 text-2xl font-semibold">1. Subscription and Billing</h2>
+            <p>Our Pro plan is provided on a subscription basis. We offer a free tier of service with certain limitations so you can evaluate MiniFyn before purchasing. For the Pro plan, payments are billed in advance on a recurring basis (e.g., monthly) and are non-refundable.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">2. No Refunds</h2>
-            <p>We do not provide refunds or credits for any partial subscription periods or unused services. Once a payment is made, it is final. We encourage users to make use of our free tier to evaluate the service before upgrading to a paid plan.</p>
+            <p>We do not provide refunds or credits for any partial subscription periods, unused services, or downgrades. Once a payment for a subscription period is made, it is final. We strongly encourage users to make full use of our free tier to ensure MiniFyn meets their needs before upgrading to the Pro plan.</p>
 
-            <h2 className="mt-8 text-2xl font-semibold">3. Cancellation</h2>
-            <p>You can cancel your subscription at any time from your account dashboard. The cancellation will take effect at the end of your current billing cycle. You will continue to have access to the paid features until the end of the billing period. After the billing period ends, your account will be downgraded to the free tier.</p>
+            <h2 className="mt-8 text-2xl font-semibold">3. Cancellation Policy</h2>
+            <p>You can cancel your Pro subscription at any time from your account's "Billing" page in the dashboard. The cancellation will take effect at the end of your current billing cycle. You will continue to have access to Pro features until the end of that billing period. After the billing period ends, your account will be automatically downgraded to the Free plan, and you will not be charged again unless you choose to re-subscribe.</p>
             
             <h2 className="mt-8 text-2xl font-semibold">4. Exceptions</h2>
-            <p>In rare cases, we may consider refunds on a case-by-case basis at our sole discretion, such as in the event of a billing error on our part. To request a refund, please <Link href="/contact">contact our support team</Link>.</p>
+            <p>We may consider refunds on a case-by-case basis only in the event of a significant billing error on our part. To request consideration for such a case, please <Link href="/contact">contact our support team</Link> with detailed information about the issue.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">5. Policy Changes</h2>
-            <p>We reserve the right to modify this Refund and Cancellation Policy at any time. Any changes will be effective immediately upon posting the updated policy on our website.</p>
+            <p>We reserve the right to modify this Refund and Cancellation Policy at any time. Any changes will be effective immediately upon posting the updated policy on our website. Your continued use of the paid service after a change constitutes your acceptance of the new policy.</p>
         </div>
     </div>
   );
