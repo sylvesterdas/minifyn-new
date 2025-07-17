@@ -35,10 +35,9 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
     const { toast } = useToast();
     const [otp, setOtp] = useState('');
     const [isSubmitting, startSubmitTransition] = useTransition();
-    const [isSendingOtp, startSendOtpTransition] = useTransition();
-
+    
     // Action for sending OTP
-    const [sendState, sendFormAction] = useActionState(sendVerificationOtp, { success: false });
+    const [sendState, sendFormAction, isSendingOtp] = useActionState(sendVerificationOtp, { success: false });
 
     // Action for verifying OTP and creating user
     const [verifyState, verifyFormAction, isVerifying] = useActionState(verifyOtpAndCreateUser, { success: false });
@@ -48,14 +47,12 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
     // Effect to send OTP when dialog opens
     useEffect(() => {
         if (open) {
-            startSendOtpTransition(() => {
-                const formData = new FormData();
-                formData.append('email', email);
-                sendFormAction(formData);
-            });
+            const formData = new FormData();
+            formData.append('email', email);
+            sendFormAction(formData);
             setResendCooldown(30);
         }
-    }, [open, email, sendFormAction, startSendOtpTransition]);
+    }, [open, email, sendFormAction]);
     
     // Effect to handle cooldown timer
     useEffect(() => {
@@ -87,11 +84,9 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
 
     const handleResend = () => {
         if (resendCooldown === 0) {
-            startSendOtpTransition(() => {
-                const formData = new FormData();
-                formData.append('email', email);
-                sendFormAction(formData);
-            });
+            const formData = new FormData();
+            formData.append('email', email);
+            sendFormAction(formData);
             setResendCooldown(30);
         }
     };
@@ -109,7 +104,7 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Verify Your Email</DialogTitle>
           <DialogDescription>
