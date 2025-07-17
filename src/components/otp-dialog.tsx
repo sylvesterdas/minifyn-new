@@ -55,7 +55,7 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
             });
             setResendCooldown(30);
         }
-    }, [open, email, sendFormAction]);
+    }, [open, email, sendFormAction, startSendOtpTransition]);
     
     // Effect to handle cooldown timer
     useEffect(() => {
@@ -70,9 +70,8 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
         if (sendState.message) toast({ description: sendState.message });
         if (sendState.error) {
             toast({ description: sendState.error, variant: 'destructive' });
-            onOpenChange(false); // Close dialog on send error
         }
-    }, [sendState, toast, onOpenChange]);
+    }, [sendState, toast]);
 
     useEffect(() => {
         if (verifyState.error) {
