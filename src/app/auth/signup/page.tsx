@@ -10,13 +10,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ExternalLink, MailCheck, ShieldCheck, Star } from 'lucide-react';
+import { Loader2, ExternalLink, MailCheck } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { trackEvent } from '@/lib/gtag';
 import { PlanSelector, type Plan } from '@/components/plan-selector';
 import { OtpDialog } from '@/components/otp-dialog';
 import { createRazorpaySubscription } from '@/app/payments/actions';
 import Script from 'next/script';
+import { signInWithCustomToken } from 'firebase/auth';
+import { auth as firebaseClientAuth } from '@/lib/firebase';
+import { login } from '@/app/auth/actions';
+
 
 export interface FormState {
     error?: string;
@@ -79,15 +83,8 @@ export default function SignUpPage() {
         }
     };
     
-    // Logic for handling successful payment
-    const handleSuccessfulPayment = () => {
-        toast({ title: 'Payment Successful!', description: 'Your plan has been upgraded to Pro.' });
-        trackEvent({ action: 'purchase', category: 'conversion', label: 'pro_plan_signup', value: 89 });
-        window.location.assign('/dashboard');
-    }
-    
     // Logic for triggering Razorpay checkout
-    const triggerPayment = async (userId: string, userName: string, userEmail: string) => {
+    const triggerPayment = async (customToken: string, userName: string, userEmail: string) => {
         setIsPaymentLoading(true);
         try {
             const subscriptionResult = await createRazorpaySubscription('monthly'); // Default to monthly for now
@@ -98,7 +95,35 @@ export default function SignUpPage() {
                 subscription_id: subscriptionResult.subscriptionId,
                 name: "MiniFyn Pro",
                 description: "Monthly Subscription",
-                handler: handleSuccessfulPayment,
+                handler: async function (response: any) {
+                    try {
+                        toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
+                        
+                        // Sign in with the custom token after successful payment
+                        const userCredential = await signInWithCustomToken(firebaseClientAuth, customToken);
+                        const user = userCredential.user;
+                        
+                        // Create a server-side session cookie
+                        const idToken = await user.getIdToken();
+                        const loginResult = await login(idToken);
+
+                        if (!loginResult.success) {
+                            throw new Error(loginResult.error || 'Failed to create session.');
+                        }
+                        
+                        trackEvent({ action: 'purchase', category: 'conversion', label: 'pro_plan_signup', value: 89 });
+                        window.location.assign('/dashboard');
+
+                    } catch (e) {
+                         toast({ title: 'Authentication Error', description: 'Your payment was successful, but we failed to log you in. Please try signing in manually.', variant: 'destructive' });
+                         window.location.assign('/auth/signin');
+                    }
+                },
+                modal: {
+                    ondismiss: function() {
+                        setIsPaymentLoading(false); // Re-enable the form if the user closes the payment modal
+                    }
+                },
                 prefill: { name: userName, email: userEmail },
                 theme: { color: "#1e40af" }
             };
@@ -106,15 +131,15 @@ export default function SignUpPage() {
             const rzp = new window.Razorpay(options);
             rzp.on('payment.failed', (response: any) => {
                 toast({ title: 'Payment Failed', description: response.error.description, variant: 'destructive' });
+                setIsPaymentLoading(false);
             });
             rzp.open();
 
         } catch(error) {
              toast({ title: 'Error', description: error instanceof Error ? error.message : 'Could not initiate payment.', variant: 'destructive' });
-        } finally {
-            setIsPaymentLoading(false);
-            setShowOtpDialog(false);
+             setIsPaymentLoading(false);
         }
+        setShowOtpDialog(false);
     };
 
     if (showVerificationMessage) {
@@ -203,4 +228,3 @@ export default function SignUpPage() {
         </>
     );
 }
-

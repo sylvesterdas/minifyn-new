@@ -28,7 +28,7 @@ interface OtpDialogProps {
   email: string;
   name: string;
   password: string;
-  onVerified: (userId: string, name: string, email: string) => void;
+  onVerified: (userId: string, name: string, email: string) => Promise<void>;
 }
 
 export function OtpDialog({ open, onOpenChange, email, name, password, onVerified }: OtpDialogProps) {
@@ -76,25 +76,13 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
             toast({ description: verifyState.error, variant: 'destructive' });
         }
         if (verifyState.success && verifyState.idToken) {
-            toast({ description: "Email verified and account created!" });
+            toast({ description: "Email verified! Proceeding to payment..." });
             startSubmitTransition(async () => {
                 try {
-                    // Sign in with the custom token
-                    const userCredential = await signInWithCustomToken(firebaseClientAuth, verifyState.idToken!);
-                    const user = userCredential.user;
-                    
-                    // Create a server-side session cookie
-                    const idToken = await user.getIdToken();
-                    const loginResult = await login(idToken);
-
-                    if (!loginResult.success) {
-                        throw new Error(loginResult.error || 'Failed to create session.');
-                    }
-                    
-                    // Trigger the payment flow
-                    onVerified(user.uid, name, email);
+                    // Trigger the payment flow. The onVerified function now handles sign-in and redirect.
+                    await onVerified(verifyState.idToken!, name, email);
                 } catch (error) {
-                    toast({ description: "Failed to log in after verification.", variant: 'destructive' });
+                    toast({ description: "Failed to initiate payment.", variant: 'destructive' });
                 }
             });
         }

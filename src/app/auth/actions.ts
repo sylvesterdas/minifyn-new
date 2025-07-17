@@ -127,7 +127,7 @@ export async function verifyOtpAndCreateUser(prevState: any, formData: FormData)
         // Clean up the used OTP
         await otpRef.remove();
         
-        // Create a custom token to sign in the user on the client
+        // Create a custom token to allow client-side sign-in AFTER payment
         const customToken = await auth.createCustomToken(userRecord.uid);
 
         return { success: true, idToken: customToken };
