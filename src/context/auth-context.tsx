@@ -2,9 +2,10 @@
 'use client';
 
 import type { AuthUser } from '@/lib/auth';
-import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
+import { onIdTokenChanged, type User as FirebaseUser } from 'firebase/auth';
 import { auth as firebaseClientAuth } from '@/lib/firebase';
 import { createContext, useContext, useEffect, useState } from 'react';
+import { validateRequest } from '@/lib/auth';
 
 interface AuthContextType {
   user: (AuthUser & { isAnonymous?: boolean }) | null;
@@ -18,45 +19,40 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider = ({
   children,
-  serverUser,
 }: {
   children: React.ReactNode;
-  serverUser: AuthUser | null;
 }) => {
-  const [user, setUser] = useState<(AuthUser & { isAnonymous?: boolean }) | null>(serverUser);
-  const [isLoading, setIsLoading] = useState(serverUser === null); // Only true if server has no user
+  const [user, setUser] = useState<(AuthUser & { isAnonymous?: boolean }) | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (serverUser) {
-      // If we have a server user, we don't need to listen for changes
-      // on the client, as the session is managed by the cookie.
-      // We set isLoading to false immediately.
-      setUser({ ...serverUser, isAnonymous: false });
-      setIsLoading(false);
-      return;
-    }
-
-    // If there's no server user, we listen for client-side auth changes
-    // (e.g., anonymous sign-in).
-    const unsubscribe = onAuthStateChanged(firebaseClientAuth, (firebaseUser: FirebaseUser | null) => {
+    // This listener handles all auth state changes, including sign-in, sign-out,
+    // and token refreshes.
+    const unsubscribe = onIdTokenChanged(firebaseClientAuth, async (firebaseUser: FirebaseUser | null) => {
         if (firebaseUser) {
-             // This logic is primarily for anonymous users on the client.
-             // For full users, the serverUser should be present.
+            // When a user is detected on the client, we still trust the server's
+            // view of the user for custom claims and other sensitive data.
+            // We re-validate the request to get the server-side user object.
+            const { user: serverUser } = await validateRequest();
             setUser({
-                ...firebaseUser.toJSON() as any, // Not a perfect mapping, but ok for anon
+                ...serverUser, // This will have plan, onboarding status, etc.
+                // We add the client-side properties that are useful.
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,
+                name: firebaseUser.displayName,
+                picture: firebaseUser.photoURL,
                 email_verified: firebaseUser.emailVerified,
                 isAnonymous: firebaseUser.isAnonymous,
-            });
+            } as AuthUser);
         } else {
+            // User is signed out
             setUser(null);
         }
         setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [serverUser]);
+  }, []);
 
   const value = { user, isLoading };
 

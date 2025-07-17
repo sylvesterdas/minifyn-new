@@ -25,7 +25,7 @@ export async function login(
     const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
     const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
     
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     cookieStore.set('session', sessionCookie, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -268,7 +268,7 @@ export async function sendPasswordResetLink(
 
 
 export async function logout(): Promise<{ success?: boolean, error?: string }> {
-  const cookieObj = cookies();
+  const cookieObj = await cookies();
   const sessionCookie = cookieObj.get('session')?.value;
   if (!sessionCookie) {
     return { success: true };
