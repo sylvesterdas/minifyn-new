@@ -68,8 +68,6 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
         longUrl: formData.get('longUrl'),
     });
     
-    console.log('[Action] Validated fields result:', JSON.stringify(validatedFields, null, 2));
-
     if (!validatedFields.success) {
         const errors = validatedFields.error.flatten().fieldErrors;
         return {
