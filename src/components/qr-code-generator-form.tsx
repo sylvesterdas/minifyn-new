@@ -48,11 +48,11 @@ export function QrCodeGeneratorForm() {
             ]).then(() => {
                  // Draw header (centered)
                 ctx.fillStyle = '#0f172a'; // Dark blue, matching theme
-                ctx.font = 'bold 22px Inter, sans-serif';
+                ctx.font = 'bold 28px Inter, sans-serif';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
 
-                const brandText = 'minifyn.com';
+                const brandText = 'MiniFyn.com';
                 const textMetrics = ctx.measureText(brandText);
                 const spaceBetween = 10;
                 const totalBrandingWidth = logoSize + spaceBetween + textMetrics.width;
