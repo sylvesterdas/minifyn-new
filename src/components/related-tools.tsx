@@ -48,24 +48,27 @@ export function RelatedTools() {
             
             <div className="space-y-8">
                  {/* Always show the main URL shortener tool card */}
-                 <UrlShortenerCard />
-
+                 <div className="mb-8">
+                    <UrlShortenerCard />
+                 </div>
+                 
                 {/* Show other available developer tools */}
-                {otherTools.map((tool) => (
-                    <Link href={tool.href} key={tool.title}>
-                        <Card className="h-full hover:border-primary transition-colors group">
-                            <CardHeader className="flex flex-row items-start gap-4 p-6">
-                                {tool.icon}
-                                <div className="flex-1">
-                                    <CardTitle className="text-xl">{tool.title}</CardTitle>
-
-                                    <CardDescription className="mt-2">{tool.description}</CardDescription>
-                                </div>
-                                <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform shrink-0" />
-                            </CardHeader>
-                        </Card>
-                    </Link>
-                ))}
+                <div className="space-y-4">
+                    {otherTools.map((tool) => (
+                        <Link href={tool.href} key={tool.title}>
+                            <Card className="h-full hover:border-primary transition-colors group">
+                                <CardHeader className="flex flex-row items-start gap-4 p-6">
+                                    {tool.icon}
+                                    <div className="flex-1">
+                                        <CardTitle className="text-xl">{tool.title}</CardTitle>
+                                        <CardDescription className="mt-2">{tool.description}</CardDescription>
+                                    </div>
+                                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform shrink-0" />
+                                </CardHeader>
+                            </Card>
+                        </Link>
+                    ))}
+                </div>
             </div>
         </div>
     );
