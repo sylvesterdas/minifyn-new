@@ -3,7 +3,7 @@
 
 import { validateRequest } from '@/lib/auth';
 import Razorpay from 'razorpay';
-import { auth as adminAuth } from '@/lib/firebase-admin';
+import { auth as adminAuth, db } from '@/lib/firebase-admin';
 
 // Determine which set of keys and plans to use based on the environment
 const isProduction = process.env.NODE_ENV === 'production';
@@ -80,19 +80,25 @@ export async function createRazorpaySubscription(
         return { error: 'The selected plan is currently unavailable.' };
     }
     
-    const options = {
-        plan_id: planId,
-        customer_notify: 1,
-        total_count: planType === 'monthly' ? 12 : 1, // 12 monthly payments or 1 yearly
-        notes: {
-            userId: userData.uid,
-            email: userData.email || '',
-        },
-    };
-
     try {
+        // --- IMMEDIATE PLAN UPGRADE ---
+        // Upgrade the user's plan to 'pro' before creating the subscription.
+        // This ensures they have access immediately after payment.
+        console.log(`Upgrading user ${userData.uid} to 'pro' plan.`);
+        await db.ref(`user_profiles/${userData.uid}`).update({ plan: 'pro' });
+        await adminAuth.setCustomUserClaims(userData.uid, { plan: 'pro' });
+
+        const options = {
+            plan_id: planId,
+            customer_notify: 1,
+            total_count: planType === 'monthly' ? 12 : 1, // 12 monthly payments or 1 yearly
+            notes: {
+                userId: userData.uid,
+                email: userData.email || '',
+            },
+        };
+
         const subscription = await razorpay.subscriptions.create(options);
-        
         const planDetails = await razorpay.plans.fetch(planId);
 
         return {
@@ -101,7 +107,7 @@ export async function createRazorpaySubscription(
             currency: planDetails.item.currency,
         };
     } catch (error) {
-        console.error('Error creating Razorpay subscription:', error);
+        console.error('Error creating Razorpay subscription or upgrading user:', error);
         return { error: 'Could not create a subscription. Please try again.' };
     }
 }

@@ -96,7 +96,7 @@ export default function SignUpPage() {
             const user = userCredential.user;
             const idToken = await user.getIdToken();
 
-            // Step 2: Pass the ID token to the server action for secure verification
+            // Step 2: Pass the ID token to the server action for secure verification and immediate plan upgrade
             const subscriptionResult = await createRazorpaySubscription('monthly', idToken);
             if ('error' in subscriptionResult) throw new Error(subscriptionResult.error);
 
@@ -109,7 +109,8 @@ export default function SignUpPage() {
                     try {
                         toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
                         
-                        // Step 3: Create a server-side session cookie using the already-valid ID token
+                        // Step 3: Create a server-side session cookie using the already-valid ID token.
+                        // This will create a fresh session with the 'pro' claim.
                         const loginResult = await login(idToken);
 
                         if (!loginResult.success) {

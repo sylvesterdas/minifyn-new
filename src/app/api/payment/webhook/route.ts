@@ -16,9 +16,9 @@ async function handleSubscriptionEvent(subscription: any, eventType: string) {
         console.log(`Processing '${eventType}' for user ${userId}, subscription ${subscriptionId}.`);
         const userProfileRef = db.ref(`user_profiles/${userId}`);
         
-        // Update user's plan to 'pro' and store their subscription details
+        // The plan is already set to 'pro' during the initial creation.
+        // The webhook's job is to record the final subscription status from Razorpay.
         await userProfileRef.update({
-            plan: 'pro',
             subscription: {
                 id: subscriptionId,
                 status: subscription.status,
@@ -29,18 +29,10 @@ async function handleSubscriptionEvent(subscription: any, eventType: string) {
             },
         });
         
-        // Set a custom claim on the user's auth token
-        await auth.setCustomUserClaims(userId, { plan: 'pro' });
-
-        // Force sign-out the user to ensure they get a new token with the 'pro' claim on next login.
-        // This is crucial to prevent the race condition where the user lands on the dashboard
-        // before the webhook has updated their plan.
-        await auth.revokeRefreshTokens(userId);
-
-        console.log(`Successfully updated plan to 'pro' for user ${userId} and revoked tokens.`);
+        console.log(`Successfully updated subscription details for user ${userId}.`);
 
     } catch (error) {
-        console.error(`Failed to update plan for user ${userId} on ${eventType}:`, error);
+        console.error(`Failed to update subscription details for user ${userId} on ${eventType}:`, error);
         // Even on failure, we don't throw, to ensure Razorpay gets a 200 OK.
         // This error should be logged and monitored for manual intervention.
     }
@@ -86,4 +78,3 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Webhook processing error' }, { status: 500 });
     }
 }
-

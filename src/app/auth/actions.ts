@@ -26,6 +26,9 @@ export async function login(
     const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
     const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
     
+    // Revoke any existing tokens to ensure the new session with the correct claims is used.
+    await auth.revokeRefreshTokens(decodedToken.sub);
+
     const cookieStore = cookies();
     cookieStore.set('session', sessionCookie, {
       httpOnly: true,
@@ -126,7 +129,7 @@ export async function verifyOtpAndCreateUser(prevState: any, formData: FormData)
             termsAcceptedAt: Date.now(),
             createdAt: userRecord.metadata.creationTime,
             onboardingCompleted: true, // Skip multi-step onboarding
-            plan: 'free', // Start as free, webhook will upgrade to pro
+            plan: 'free', // Start as free, payment action will upgrade to pro
         });
         
         // Clean up the used OTP
