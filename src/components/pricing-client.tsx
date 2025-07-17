@@ -77,10 +77,10 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
         const eventLabel = context === 'onboarding' ? 'upgrade_from_onboarding' : 'upgrade_from_pricing_page';
         trackEvent({ action: 'click_upgrade', category: 'conversion', label: eventLabel, value: planType === 'monthly' ? 89 : 899 });
 
-        if (!user) {
-            toast({ title: 'Please sign in', description: 'You need to sign up or sign in to upgrade your plan.', variant: 'destructive' });
+        if (!user || user.isAnonymous) {
+            // If the user is not logged in, redirect them to sign up.
             router.push('/auth/signup');
-            setIsLoading(false);
+            // No need to set isLoading to false, as we are navigating away.
             return;
         }
 
@@ -91,10 +91,12 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
             }
             
             // Mark onboarding as complete as part of the upgrade process
-            const formData = new FormData();
-            formData.append('name', user.name || '');
-            formData.append('isOnboarding', 'true');
-            await updateUserProfile(null, formData);
+            if (context === 'onboarding') {
+                const formData = new FormData();
+                formData.append('name', user.name || '');
+                formData.append('isOnboarding', 'true');
+                await updateUserProfile(null, formData);
+            }
 
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -258,8 +260,8 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
                         {userPlan === 'pro' ? (
                             <Button size="lg" className="w-full" disabled>Your Current Plan</Button>
                         ) : (
-                            <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={isLoading}>
-                                {isLoading ? <Loader2 className="animate-spin" /> : (user && !user.isAnonymous ? 'Upgrade to Pro' : 'Get Pro')}
+                            <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={isLoading || isAuthLoading}>
+                                {isLoading || isAuthLoading ? <Loader2 className="animate-spin" /> : (user && !user.isAnonymous ? 'Upgrade to Pro' : 'Get Pro')}
                             </Button>
                         )}
                     </CardFooter>
