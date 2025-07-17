@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { QrCode, Download } from 'lucide-react';
-import logoSrc from '@/components/assets/logo.png';
 
 export function QrCodeGeneratorForm() {
     const [inputValue, setInputValue] = useState('');
@@ -33,11 +32,6 @@ export function QrCodeGeneratorForm() {
             correctLevel: EasyQRCodeJS.CorrectLevel.H,
             quietZone: 15,
             quietZoneColor: 'transparent',
-            logo: logoSrc.src, // Add the logo here
-            logoWidth: 50,
-            logoHeight: 50,
-            logoBackgroundColor: '#ffffff',
-            logoBackgroundTransparent: false,
             onRenderingEnd: (_: any, dataURL: any) => {
                 setQrImageDataUrl(dataURL);
             },
