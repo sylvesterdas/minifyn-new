@@ -46,20 +46,27 @@ export function QrCodeGeneratorForm() {
                 new Promise(res => logoImg.onload = res),
                 new Promise(res => qrImg.onload = res)
             ]).then(() => {
-                 // Draw header
-                const logoX = padding;
-                const logoY = (headerHeight - logoSize) / 2;
-                ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
-                
+                 // Draw header (centered)
                 ctx.fillStyle = '#0f172a'; // Dark blue, matching theme
                 ctx.font = 'bold 18px Inter, sans-serif';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('minifyn.com', logoX + logoSize + 10, headerHeight / 2);
+
+                const brandText = 'minifyn.com';
+                const textMetrics = ctx.measureText(brandText);
+                const spaceBetween = 10;
+                const totalBrandingWidth = logoSize + spaceBetween + textMetrics.width;
+                const startX = (canvas.width - totalBrandingWidth) / 2;
+                
+                const logoX = startX;
+                const logoY = (headerHeight - logoSize) / 2 + padding / 2;
+                ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+                
+                ctx.fillText(brandText, logoX + logoSize + spaceBetween, headerHeight / 2 + padding / 2);
 
                 // Draw QR Code
                 const qrX = padding;
-                const qrY = headerHeight;
+                const qrY = headerHeight + padding;
                 ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
 
                 resolve(canvas.toDataURL('image/png'));
@@ -137,7 +144,7 @@ export function QrCodeGeneratorForm() {
                         />
                     </div>
                       <div className="flex flex-col items-center justify-center pt-4">
-                            {brandedQrImageDataUrl && <Image src={brandedQrImageDataUrl} alt="Generated QR Code" width={286} height={321} className="rounded-lg shadow-md animate-in fade-in duration-500" />}
+                            {brandedQrImageDataUrl && <Image src={brandedQrImageDataUrl} alt="Generated QR Code" width={286} height={336} className="rounded-lg shadow-md animate-in fade-in duration-500" />}
                             {/* This div is used by easyqrcodejs to render the initial qr code, but it's hidden from the user */}
                             <div ref={qrcodeRef} style={{ display: 'none' }}></div>
                       </div>
