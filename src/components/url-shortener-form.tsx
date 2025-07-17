@@ -100,7 +100,7 @@ export function UrlShortenerForm() {
                     mnfy.in
                 </CardTitle>
                 <CardDescription className="text-center pt-2">
-                    The simplest way to shorten and share your links.
+                    Got a ridiculously long URL? Let's give it a short, snappy alias.
                 </CardDescription>
             </CardHeader>
             <form ref={formRef} action={formAction}>
