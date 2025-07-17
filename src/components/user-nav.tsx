@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -16,7 +17,7 @@ import {
 import { Button } from './ui/button';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
-import { LayoutDashboard, LogOut, Settings, Key, LifeBuoy, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, LogOut, Settings, Key, LifeBuoy, ExternalLink, CreditCard } from 'lucide-react';
 import { LogoutButton } from './logout-button';
 import { cn } from '@/lib/utils';
 
@@ -72,15 +73,9 @@ export function UserNav() {
                     </Link>
                 </DropdownMenuItem>
                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/settings" className={menuItemClass}>
+                    <Link href="/dashboard/settings/profile" className={menuItemClass}>
                         <Settings className="mr-2 h-4 w-4" />
                         <span>Settings</span>
-                    </Link>
-                </DropdownMenuItem>
-                 <DropdownMenuItem asChild>
-                    <Link href="/dashboard/settings/api-keys" className={menuItemClass}>
-                        <Key className="mr-2 h-4 w-4" />
-                        <span>API Keys</span>
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

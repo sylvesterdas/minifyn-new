@@ -14,7 +14,7 @@ import Logo from '@/components/logo';
 import { useState } from 'react';
 
 const navItems = [
-  { href: '/dashboard', label: 'Overview', icon: Home, plans: ['free', 'pro', 'admin'] },
+  { href: '/dashboard', label: 'Overview', icon: Home, plans: ['free', 'pro', 'admin'], exact: true },
   { href: '/dashboard/links', label: 'Links', icon: LinkIcon, plans: ['free', 'pro', 'admin'] },
   { href: '/dashboard/analytics', label: 'Analytics', icon: LineChart, plans: ['pro', 'admin'] },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings, plans: ['free', 'pro', 'admin'] },
@@ -45,21 +45,24 @@ function NavLinks({ onLinkClick }: { onLinkClick?: () => void }) {
 
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-      {visibleNavItems.map(({ href, label, icon: Icon, external }) => (
-        <Link
-          key={href}
-          href={href}
-          onClick={onLinkClick}
-          className={cn(
-            'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-            // Check if the current path starts with the href for active state
-            { 'bg-muted text-primary': pathname.startsWith(href) }
-          )}
-        >
-          <Icon className="h-4 w-4" />
-          {label}
-        </Link>
-      ))}
+      {visibleNavItems.map(({ href, label, icon: Icon, exact }) => {
+        const isActive = exact ? pathname === href : pathname.startsWith(href);
+        const linkHref = href === '/dashboard/settings' ? '/dashboard/settings/profile' : href;
+        return (
+          <Link
+            key={href}
+            href={linkHref}
+            onClick={onLinkClick}
+            className={cn(
+              'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+              { 'bg-muted text-primary': isActive }
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            {label}
+          </Link>
+        )
+      })}
       <div className="my-2 border-t border-border" />
       {visibleExternalLinks.map(({ href, label, icon: Icon, external }) => (
           <Link
@@ -116,7 +119,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <span className="sr-only">Toggle navigation menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="flex flex-col">
+              <SheetContent side="left" className="flex flex-col p-0">
                 <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
                   <Link href="/" className="flex items-center gap-2 font-semibold">
                     <Logo />

@@ -10,8 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, User } from 'lucide-react';
-import { updateUserProfile, getUserProfile, type UserProfile } from './actions';
+import { Loader2 } from 'lucide-react';
+import { updateUserProfile, getUserProfile, type UserProfile } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { timezones } from '@/lib/timezones';
 
@@ -29,7 +29,7 @@ function SubmitButton() {
     );
 }
 
-function ProfileCardSkeleton() {
+function ProfilePageSkeleton() {
     return (
         <Card>
             <CardHeader>
@@ -61,7 +61,7 @@ function ProfileCardSkeleton() {
     );
 }
 
-export function ProfileCard() {
+export default function ProfilePage() {
     const { user, isLoading: isAuthLoading } = useAuth();
     const { toast } = useToast();
     const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -100,7 +100,7 @@ export function ProfileCard() {
     }, [state, toast]);
 
     if (isAuthLoading || isLoading) {
-        return <ProfileCardSkeleton />;
+        return <ProfilePageSkeleton />;
     }
     
     if (!user || !profile) {

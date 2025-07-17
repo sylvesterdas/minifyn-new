@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
-export function BillingCard() {
+export default function BillingPage() {
     const { user } = useAuth();
 
     return (
