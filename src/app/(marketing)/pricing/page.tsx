@@ -13,6 +13,7 @@ import Script from 'next/script';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRouter } from 'next/navigation';
 
 const freeFeatures = [
     { text: '20 Links / Day', included: true },
@@ -181,8 +182,6 @@ function PricingPageContent() {
 }
 
 
-import { useRouter } from 'next/navigation';
-
 export default function PricingPage() {
   return (
     <>
@@ -202,4 +201,3 @@ export default function PricingPage() {
     </>
   );
 }
-
