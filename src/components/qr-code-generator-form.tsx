@@ -9,11 +9,63 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { QrCode, Download } from 'lucide-react';
+import logo from './assets/logo.png'; // Import the logo
 
 export function QrCodeGeneratorForm() {
     const [inputValue, setInputValue] = useState('');
-    const [qrImageDataUrl, setQrImageDataUrl] = useState<string | null>(null);
+    const [brandedQrImageDataUrl, setBrandedQrImageDataUrl] = useState<string | null>(null);
     const qrcodeRef = useRef<HTMLDivElement>(null);
+
+    const createBrandedQrCode = (qrCodeDataUrl: string): Promise<string> => {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            const qrSize = 256;
+            const headerHeight = 50;
+            const padding = 15;
+            const logoSize = 32;
+
+            canvas.width = qrSize + 2 * padding;
+            canvas.height = qrSize + headerHeight + 2 * padding;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            // White background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Load logo and QR code images
+            const logoImg = new window.Image();
+            logoImg.src = logo.src;
+            
+            const qrImg = new window.Image();
+            qrImg.src = qrCodeDataUrl;
+
+            // Wait for both images to load
+            Promise.all([
+                new Promise(res => logoImg.onload = res),
+                new Promise(res => qrImg.onload = res)
+            ]).then(() => {
+                 // Draw header
+                const logoX = padding;
+                const logoY = (headerHeight - logoSize) / 2;
+                ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+                
+                ctx.fillStyle = '#0f172a'; // Dark blue, matching theme
+                ctx.font = 'bold 18px Inter, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('minifyn.com', logoX + logoSize + 10, headerHeight / 2);
+
+                // Draw QR Code
+                const qrX = padding;
+                const qrY = headerHeight;
+                ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+
+                resolve(canvas.toDataURL('image/png'));
+            });
+        });
+    }
 
     const generateQrCode = (text: string) => {
         if (!qrcodeRef.current) return;
@@ -21,19 +73,19 @@ export function QrCodeGeneratorForm() {
         // Hide the container and clear previous QR code before generating new one
         qrcodeRef.current.style.display = 'none';
         qrcodeRef.current.innerHTML = '';
-        setQrImageDataUrl(null);
+        setBrandedQrImageDataUrl(null);
 
-        const qrCodeInstance = new EasyQRCodeJS(qrcodeRef.current, {
+        new EasyQRCodeJS(qrcodeRef.current, {
             text: text,
             width: 256,
             height: 256,
             colorDark: "#000000",
             colorLight: "#ffffff",
             correctLevel: EasyQRCodeJS.CorrectLevel.H,
-            quietZone: 15,
-            quietZoneColor: 'transparent',
-            onRenderingEnd: (_: any, dataURL: any) => {
-                setQrImageDataUrl(dataURL);
+            quietZone: 0, // No quiet zone from the library, we add our own padding
+            onRenderingEnd: async (_: any, dataURL: any) => {
+                const brandedUrl = await createBrandedQrCode(dataURL);
+                setBrandedQrImageDataUrl(brandedUrl);
             },
             tooltip: false
         });
@@ -42,16 +94,16 @@ export function QrCodeGeneratorForm() {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!inputValue.trim()) {
-            setQrImageDataUrl(null);
+            setBrandedQrImageDataUrl(null);
             return;
         }
         generateQrCode(inputValue);
     };
     
     const handleDownload = () => {
-       if (qrImageDataUrl) {
+       if (brandedQrImageDataUrl) {
            const link = document.createElement('a');
-           link.href = qrImageDataUrl;
+           link.href = brandedQrImageDataUrl;
            link.download = 'minifyn-qrcode.png';
            document.body.appendChild(link);
            link.click();
@@ -85,11 +137,11 @@ export function QrCodeGeneratorForm() {
                         />
                     </div>
                       <div className="flex flex-col items-center justify-center pt-4">
-                            {qrImageDataUrl && <Image src={qrImageDataUrl} alt="Generated QR Code" width={280} height={280} className="rounded-lg shadow-md animate-in fade-in duration-500" />}
+                            {brandedQrImageDataUrl && <Image src={brandedQrImageDataUrl} alt="Generated QR Code" width={286} height={321} className="rounded-lg shadow-md animate-in fade-in duration-500" />}
                             {/* This div is used by easyqrcodejs to render the initial qr code, but it's hidden from the user */}
                             <div ref={qrcodeRef} style={{ display: 'none' }}></div>
                       </div>
-                     {qrImageDataUrl && (
+                     {brandedQrImageDataUrl && (
                         <div className="flex flex-col items-center justify-center gap-4 animate-in fade-in duration-500 pt-4">
                             <Button type="button" onClick={handleDownload} variant="secondary">
                                 <Download className="mr-2 h-4 w-4" />
