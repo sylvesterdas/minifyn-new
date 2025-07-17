@@ -129,7 +129,9 @@ export default function Home() {
         </section>
 
         <section id="how-it-works" className="relative w-full py-12 md:py-24 lg:py-32">
-          <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-5"></div>
+          <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
+            <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_500px_at_50%_50%,hsl(var(--primary)/0.1),transparent)]"></div>
+          </div>
           <div className="container mx-auto px-4 md:px-6 relative">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
@@ -179,7 +181,9 @@ export default function Home() {
         </section>
 
         <section id="features" className="relative w-full py-12 md:py-24 lg:py-32 bg-card/50">
-          <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-5"></div>
+          <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
+            <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_500px_at_50%_50%,hsl(var(--primary)/0.05),transparent)]"></div>
+          </div>
           <div className="container mx-auto px-4 md:px-6 relative">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
