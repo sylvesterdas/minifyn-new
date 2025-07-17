@@ -3,23 +3,48 @@
 
 import nodemailer from 'nodemailer';
 
-const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = process.env;
+const { 
+    SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM,
+    MAILTRAP_HOST, MAILTRAP_PORT, MAILTRAP_USER, MAILTRAP_PASS
+} = process.env;
 
-const isEmailConfigured = SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS && SMTP_FROM;
+const isProduction = process.env.NODE_ENV === 'production';
 
-if (!isEmailConfigured && process.env.NODE_ENV === 'production') {
-  console.error("CRITICAL: SMTP service is not configured in a production environment. Emails will not be sent.");
+const isProdEmailConfigured = SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS && SMTP_FROM;
+const isDevEmailConfigured = MAILTRAP_HOST && MAILTRAP_PORT && MAILTRAP_USER && MAILTRAP_PASS;
+
+let transporter: nodemailer.Transporter | null = null;
+
+if (isProduction) {
+    if (isProdEmailConfigured) {
+        transporter = nodemailer.createTransport({
+            host: SMTP_HOST,
+            port: parseInt(SMTP_PORT!, 10),
+            secure: parseInt(SMTP_PORT!, 10) === 465,
+            auth: {
+                user: SMTP_USER,
+                pass: SMTP_PASS,
+            },
+        });
+    } else {
+        console.error("CRITICAL: SMTP service is not configured in a production environment. Emails will not be sent.");
+    }
+} else { // Development environment
+    if (isDevEmailConfigured) {
+         transporter = nodemailer.createTransport({
+            host: MAILTRAP_HOST,
+            port: parseInt(MAILTRAP_PORT!, 10),
+            auth: {
+                user: MAILTRAP_USER,
+                pass: MAILTRAP_PASS,
+            },
+        });
+        console.log("Using Mailtrap for development email sending.");
+    } else {
+        console.log("Mailtrap not configured. Email sending will be logged to the console.");
+    }
 }
 
-const transporter = isEmailConfigured ? nodemailer.createTransport({
-  host: SMTP_HOST,
-  port: parseInt(SMTP_PORT!, 10),
-  secure: parseInt(SMTP_PORT!, 10) === 465,
-  auth: {
-    user: SMTP_USER,
-    pass: SMTP_PASS,
-  },
-}) : null;
 
 interface EmailOptions {
   to: string;
@@ -28,39 +53,39 @@ interface EmailOptions {
 }
 
 export async function sendEmail({ to, subject, html }: EmailOptions): Promise<{ success: true } | { success: false, error: string }> {
-  // --- DEVELOPMENT ONLY ---
-  // In development, log the email to the console instead of sending it.
-  if (process.env.NODE_ENV === 'development') {
-    console.log('--- DEVELOPMENT EMAIL ---');
+  // --- DEVELOPMENT CONSOLE FALLBACK ---
+  // If in development and no transporter is configured (i.e., Mailtrap vars are missing),
+  // log the email to the console instead of sending it.
+  if (!isProduction && !transporter) {
+    console.log('--- DEVELOPMENT EMAIL (CONSOLE FALLBACK) ---');
     console.log(`To: ${to}`);
     console.log(`Subject: ${subject}`);
-    console.log('--- HTML Body ---');
-    // A simple regex to extract the OTP from the HTML for easy access in the console.
     const otpMatch = html.match(/<h2.*?>(.*?)<\/h2>/);
     if (otpMatch) {
         console.log(`OTP: ${otpMatch[1]}`);
     } else {
+        console.log('--- HTML Body ---');
         console.log(html);
     }
-    console.log('-----------------------');
+    console.log('------------------------------------------');
     return { success: true };
   }
-  // --- END DEVELOPMENT ONLY ---
+  // --- END DEVELOPMENT ONLY FALLBACK ---
 
   if (!transporter) {
-    const errorMsg = "Email service is not configured for production.";
+    const errorMsg = "Email service is not configured.";
     console.error(`Email not sent: ${errorMsg}`);
     return { success: false, error: errorMsg };
   }
 
   try {
     const info = await transporter.sendMail({
-      from: SMTP_FROM,
+      from: isProduction ? SMTP_FROM : '"MiniFyn Dev" <dev@minifyn.com>',
       to,
       subject,
       html,
     });
-    console.log("Message sent: %s", info.messageId);
+    console.log("Message sent via %s: %s", transporter.options.host, info.messageId);
     return { success: true };
 
   } catch (error: any) {
