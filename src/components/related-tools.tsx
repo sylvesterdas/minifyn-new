@@ -53,7 +53,7 @@ export function RelatedTools() {
                  </div>
                  
                 {/* Show other available developer tools */}
-                <div className="space-y-4">
+                <div className="flex flex-col gap-8">
                     {otherTools.map((tool) => (
                         <Link href={tool.href} key={tool.title}>
                             <Card className="h-full hover:border-primary transition-colors group">

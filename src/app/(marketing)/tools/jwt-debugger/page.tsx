@@ -1,5 +1,6 @@
 
 import { JwtDebugger } from '@/components/jwt-debugger';
+import { Disclaimer } from '@/components/disclaimer';
 import { RelatedTools } from '@/components/related-tools';
 import type { Metadata } from 'next';
 
@@ -24,6 +25,11 @@ export default function JwtDebuggerPage() {
                 
                 <JwtDebugger />
             </div>
+
+            <div className="container mx-auto px-4">
+                <Disclaimer />
+            </div>
+
              <div className="py-12 md:py-16">
                 <div className="container mx-auto px-4 max-w-4xl">
                     <RelatedTools />

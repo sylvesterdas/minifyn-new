@@ -1,5 +1,6 @@
 
 import { CodeMinifier } from '@/components/code-minifier';
+import { Disclaimer } from '@/components/disclaimer';
 import { RelatedTools } from '@/components/related-tools';
 import type { Metadata } from 'next';
 
@@ -24,6 +25,11 @@ export default function CodeMinifierPage() {
                 
                 <CodeMinifier />
             </div>
+
+            <div className="container mx-auto px-4">
+                <Disclaimer />
+            </div>
+
              <div className="py-12 md:py-16">
                 <div className="container mx-auto px-4 max-w-4xl">
                     <RelatedTools />
