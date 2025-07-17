@@ -35,9 +35,10 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
     const { toast } = useToast();
     const [otp, setOtp] = useState('');
     const [isSubmitting, startSubmitTransition] = useTransition();
+    const [isSendingOtp, startSendOtpTransition] = useTransition();
 
     // Action for sending OTP
-    const [sendState, sendFormAction, isSending] = useActionState(sendVerificationOtp, { success: false });
+    const [sendState, sendFormAction] = useActionState(sendVerificationOtp, { success: false });
 
     // Action for verifying OTP and creating user
     const [verifyState, verifyFormAction, isVerifying] = useActionState(verifyOtpAndCreateUser, { success: false });
@@ -47,9 +48,11 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
     // Effect to send OTP when dialog opens
     useEffect(() => {
         if (open) {
-            const formData = new FormData();
-            formData.append('email', email);
-            sendFormAction(formData);
+            startSendOtpTransition(() => {
+                const formData = new FormData();
+                formData.append('email', email);
+                sendFormAction(formData);
+            });
             setResendCooldown(30);
         }
     }, [open, email, sendFormAction]);
@@ -85,9 +88,11 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
 
     const handleResend = () => {
         if (resendCooldown === 0) {
-            const formData = new FormData();
-            formData.append('email', email);
-            sendFormAction(formData);
+            startSendOtpTransition(() => {
+                const formData = new FormData();
+                formData.append('email', email);
+                sendFormAction(formData);
+            });
             setResendCooldown(30);
         }
     };
@@ -101,7 +106,7 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
         verifyFormAction(formData);
     };
 
-    const isLoading = isSending || isVerifying || isSubmitting;
+    const isLoading = isSendingOtp || isVerifying || isSubmitting;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
