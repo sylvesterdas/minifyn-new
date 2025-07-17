@@ -2,10 +2,48 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { syncRazorpaySubscription } from '@/app/payments/actions';
+import { useTransition } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, RefreshCw } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
+function RestorePurchaseButton() {
+    const [isPending, startTransition] = useTransition();
+    const { toast } = useToast();
+    const router = useRouter();
+
+    const handleRestore = () => {
+        startTransition(async () => {
+            const result = await syncRazorpaySubscription();
+            if (result.success) {
+                toast({
+                    title: 'Success!',
+                    description: result.message,
+                });
+                // Refresh the entire page to reflect new auth claims and UI changes
+                router.refresh();
+            } else {
+                 toast({
+                    title: 'No Active Subscription Found',
+                    description: result.error,
+                    variant: 'destructive'
+                });
+            }
+        });
+    }
+    
+    return (
+        <Button onClick={handleRestore} variant="secondary" disabled={isPending}>
+            {isPending ? <Loader2 className="mr-2 animate-spin" /> : <RefreshCw className="mr-2" />}
+            Restore Purchase
+        </Button>
+    )
+}
 
 export default function BillingPage() {
     const { user } = useAuth();
@@ -44,6 +82,15 @@ export default function BillingPage() {
                     </Button>
                 )}
             </CardContent>
+            <CardFooter className="border-t pt-6 flex-col items-start gap-4">
+                <div>
+                     <h3 className="font-semibold">Missing your Pro features?</h3>
+                     <p className="text-sm text-muted-foreground">
+                        If you've paid but don't see your Pro features, click here to sync your latest subscription status.
+                     </p>
+                </div>
+                <RestorePurchaseButton />
+            </CardFooter>
         </Card>
     );
 }

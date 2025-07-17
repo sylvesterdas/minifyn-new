@@ -319,5 +319,3 @@ export async function logout(): Promise<{ success?: boolean, error?: string }> {
     return { success: true };
   }
 }
-
-    

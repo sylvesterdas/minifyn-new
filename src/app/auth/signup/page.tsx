@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ExternalLink, MailCheck, ShieldCheck } from 'lucide-react';
+import { Loader2, ExternalLink, MailCheck, ShieldCheck, HelpCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { trackEvent } from '@/lib/gtag';
 import { PlanSelector, type Plan } from '@/components/plan-selector';
@@ -57,7 +57,7 @@ export default function SignUpPage() {
     const [termsAccepted, setTermsAccepted] = useState(false);
     
     // UI state
-    const [view, setView] = useState<'form' | 'email_verification' | 'payment_processing'>('form');
+    const [view, setView] = useState<'form' | 'email_verification' | 'payment_processing' | 'payment_stalled'>('form');
     const [showOtpDialog, setShowOtpDialog] = useState(false);
     const [isPaymentLoading, setIsPaymentLoading] = useState(false);
 
@@ -105,8 +105,8 @@ export default function SignUpPage() {
                     toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
 
                     let pollCount = 0;
-                    const maxPolls = 10;
-                    const pollInterval = 2000; // 2 seconds
+                    const maxPolls = 12; // 12 polls * 5 seconds = 60 seconds total
+                    const pollInterval = 5000; // 5 seconds
 
                     const pollStatus = async () => {
                         pollCount++;
@@ -124,7 +124,8 @@ export default function SignUpPage() {
                         } else if (pollCount < maxPolls) {
                             setTimeout(pollStatus, pollInterval);
                         } else {
-                            throw new Error('Could not confirm subscription status. Please try logging in again shortly.');
+                            // Polling timed out
+                            setView('payment_stalled');
                         }
                     };
                     
@@ -185,6 +186,28 @@ export default function SignUpPage() {
             </Card>
         )
     }
+    
+    if (view === 'payment_stalled') {
+        return (
+             <Card className="mx-auto max-w-sm text-center">
+                <CardHeader>
+                     <div className="mx-auto bg-yellow-500/10 p-3 rounded-full w-fit">
+                        <HelpCircle className="h-12 w-12 text-yellow-400" />
+                    </div>
+                    <CardTitle className="text-2xl pt-4">Activation is Taking Longer Than Usual</CardTitle>
+                    <CardDescription>
+                       Your payment was successful, but we're still waiting for final confirmation from the payment provider. You can now safely close this window. Please try logging in again in a few minutes. If you still don't have access, use the "Restore Purchase" button on the billing page.
+                    </CardDescription>
+                </CardHeader>
+                 <CardFooter className="flex flex-col gap-2">
+                     <Button asChild className="w-full">
+                        <Link href="/auth/signin">Go to Sign In</Link>
+                    </Button>
+                 </CardFooter>
+            </Card>
+        )
+    }
+
 
     return (
         <>
@@ -193,8 +216,8 @@ export default function SignUpPage() {
                 open={showOtpDialog}
                 onOpenChange={setShowOtpDialog}
                 email={email}
-                password={password}
                 name={name}
+                password={password}
                 onVerified={triggerPayment}
                 isPaymentLoading={isPaymentLoading}
             />
