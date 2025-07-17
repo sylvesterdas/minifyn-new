@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 const freeFeatures = [
-    { text: '20 Links / Month', included: true },
+    { text: '20 Links / Day', included: true },
     { text: 'Links Expire in 60 Days', included: true },
     { text: 'Dashboard & Analytics', included: true },
     { text: 'QR Code Generation', included: true },
@@ -26,7 +26,7 @@ const freeFeatures = [
 ];
 
 const proFeatures = [
-    { text: '500 Links / Month', included: true },
+    { text: '100 Links / Day', included: true },
     { text: 'Links Never Expire', included: true },
     { text: 'Dashboard & Analytics', included: true },
     { text: 'QR Code Generation', included: true },
@@ -98,7 +98,7 @@ export default function PricingPage() {
             </CardContent>
             <CardFooter>
                 <Button size="lg" className="w-full" disabled>
-                    Upgrade to Pro
+                    Contact Us
                 </Button>
             </CardFooter>
         </Card>

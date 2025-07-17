@@ -1,3 +1,4 @@
+
 import { POST } from './route';
 import { NextRequest } from 'next/server';
 import * as data from '@/lib/data';
@@ -57,7 +58,7 @@ describe('POST /api/shorten', () => {
             message: 'URL shortened successfully',
             shortUrl: 'https://mnfy.in/abcdef',
         });
-        expect(mockCheckRateLimit).toHaveBeenCalledWith(mockUser.uid, true, true);
+        expect(mockCheckRateLimit).toHaveBeenCalledWith(mockUser.uid, true);
         expect(mockIsUrlSafe).toHaveBeenCalledWith('https://example.com');
         expect(mockIncrementUsage).toHaveBeenCalledWith(mockUser.uid, true);
     });
@@ -146,8 +147,8 @@ describe('POST /api/shorten', () => {
         const body = await response.json();
 
         expect(response.status).toBe(429);
-        expect(body).toEqual({ error: 'Daily limit of 20 URLs reached. Please try again tomorrow.' });
-        expect(mockCheckRateLimit).toHaveBeenCalledWith(mockUser.uid, true, true);
+        expect(body).toEqual({ error: 'Your daily API usage limit has been reached.' });
+        expect(mockCheckRateLimit).toHaveBeenCalledWith(mockUser.uid, true);
         expect(mockCreateShortLink).not.toHaveBeenCalled();
     });
 

@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
         
         const isAllowed = await checkRateLimit(user.uid, true);
         if (!isAllowed) {
-            return NextResponse.json({ error: 'Your monthly API usage limit has been reached.' }, { status: 429 });
+            return NextResponse.json({ error: 'Your daily API usage limit has been reached.' }, { status: 429 });
         }
 
         const body = await request.json();
@@ -58,5 +58,3 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
-
-    

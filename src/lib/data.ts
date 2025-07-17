@@ -2,7 +2,7 @@
 import { db } from './firebase-admin';
 import type { DataSnapshot } from 'firebase-admin/database';
 import { fetchMetadata, type Metadata } from './scraper';
-import { format, addDays, getMonth, getYear } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { auth } from 'firebase-admin';
 import type { UserRecord } from 'firebase-admin/auth';
 import { SUPER_USER_ID } from './config';
@@ -25,9 +25,9 @@ export interface Link {
   plan: UserPlan;
 }
 
-const ANON_RATE_LIMIT = 3; // 3 requests per day for anonymous users
-const FREE_USER_MONTHLY_LIMIT = 20;
-const PRO_USER_MONTHLY_LIMIT = 500;
+const ANON_DAILY_LIMIT = 3;
+const FREE_USER_DAILY_LIMIT = 20;
+const PRO_USER_DAILY_LIMIT = 100;
 const API_REQUEST_INTERVAL = 1000; // 1 second in milliseconds
 
 async function getUserPlan(userId: string): Promise<UserPlan> {
@@ -74,20 +74,25 @@ export const checkRateLimit = async (userId: string, isApiCall: boolean = false)
         return true;
     }
     
-    if (plan === 'anonymous') {
-        const today = format(new Date(), 'yyyy-MM-dd');
-        const path = `daily_limits/${today}/${userId}`;
-        const snapshot = await db.ref(path).once('value');
-        const currentCount = snapshot.val() || 0;
-        return currentCount < ANON_RATE_LIMIT;
-    }
-
-    // Monthly quota check for free/pro users
-    const month = format(new Date(), 'yyyy-MM');
-    const limit = plan === 'pro' ? PRO_USER_MONTHLY_LIMIT : FREE_USER_MONTHLY_LIMIT;
-    const path = `monthly_limits/${month}/${userId}`;
+    // Daily quota check for all non-admin plans
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const path = `daily_limits/${today}/${userId}`;
     const snapshot = await db.ref(path).once('value');
     const currentCount = snapshot.val() || 0;
+    
+    let limit;
+    switch (plan) {
+        case 'pro':
+            limit = PRO_USER_DAILY_LIMIT;
+            break;
+        case 'free':
+            limit = FREE_USER_DAILY_LIMIT;
+            break;
+        case 'anonymous':
+        default:
+            limit = ANON_DAILY_LIMIT;
+            break;
+    }
 
     return currentCount < limit;
 };
@@ -99,18 +104,14 @@ export const checkRateLimit = async (userId: string, isApiCall: boolean = false)
  */
 export const incrementUsage = async (userId: string, isApiCall: boolean = false): Promise<void> => {
     const plan = await getUserPlan(userId);
-    let usageRef;
-
-    if (plan === 'anonymous') {
-        const today = format(new Date(), 'yyyy-MM-dd');
-        usageRef = db.ref(`daily_limits/${today}/${userId}`);
-    } else if (plan === 'free' || plan === 'pro') {
-        const month = format(new Date(), 'yyyy-MM');
-        usageRef = db.ref(`monthly_limits/${month}/${userId}`);
-    } else {
+    
+    if (plan === 'admin') {
         // Admin plan has no limits to increment
         return;
     }
+    
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const usageRef = db.ref(`daily_limits/${today}/${userId}`);
     
     try {
         await usageRef.transaction((currentValue) => (currentValue || 0) + 1);
@@ -307,5 +308,3 @@ export async function hasCompletedOnboarding(uid: string): Promise<boolean> {
         return true;
     }
 }
-
-    

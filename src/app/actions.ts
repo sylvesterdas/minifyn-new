@@ -44,7 +44,7 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     if (!isAllowed) {
         const plan = await getUserPlan(userId);
         if (plan === 'free' || plan === 'pro') {
-             return { success: false, message: 'Your monthly link creation limit has been reached.' };
+             return { success: false, message: 'Your daily link creation limit has been reached.' };
         }
         if (plan === 'anonymous') {
              return { 
@@ -93,5 +93,3 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
         };
     }
 }
-
-    
