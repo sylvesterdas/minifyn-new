@@ -85,9 +85,9 @@ export function DeveloperApiSection() {
                 <div className="flex flex-col items-center justify-center space-y-4 text-center">
                     <div className="space-y-2">
                         <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm">For Developers</div>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Integrate with Ease</h2>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Talk Nerdy To Us</h2>
                         <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                            Use our simple and powerful API to integrate link shortening into your own applications.
+                            For when your fingers are tired of all that copying and pasting. Let your code do the work with our simple, powerful API.
                         </p>
                     </div>
                 </div>
