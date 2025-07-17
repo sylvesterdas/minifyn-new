@@ -48,7 +48,7 @@ export function QrCodeGeneratorForm() {
             ]).then(() => {
                  // Draw header (centered)
                 ctx.fillStyle = '#0f172a'; // Dark blue, matching theme
-                ctx.font = 'bold 18px Inter, sans-serif';
+                ctx.font = 'bold 22px Inter, sans-serif';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
 
