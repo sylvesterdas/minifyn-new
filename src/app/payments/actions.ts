@@ -3,6 +3,7 @@
 
 import { validateRequest } from '@/lib/auth';
 import Razorpay from 'razorpay';
+import crypto from 'crypto';
 
 interface RazorpayOrder {
     id: string;
@@ -33,7 +34,8 @@ export async function createRazorpayOrder(): Promise<{ error: string } | Razorpa
     const options = {
         amount: amountInPaise,
         currency: 'INR',
-        receipt: `receipt_user_${user.uid}_${Date.now()}`,
+        // Generate a shorter, unique receipt ID
+        receipt: `rcpt_${crypto.randomBytes(8).toString('hex')}`,
         notes: {
             userId: user.uid,
             email: user.email || '',
