@@ -5,19 +5,30 @@ import { cookies } from 'next/headers';
 import { cache } from 'react';
 import { auth as adminAuth, db } from './firebase-admin';
 import type { DecodedIdToken } from 'firebase-admin/auth';
+import type { UserPlan } from './data';
+import type { UserProfile } from '@/app/dashboard/settings/actions';
 
 export interface AuthUser extends DecodedIdToken {
     onboardingCompleted?: boolean;
+    plan: UserPlan;
 }
 
-async function getOnboardingStatus(uid: string): Promise<boolean> {
+async function getUserProfileData(uid: string): Promise<{ plan: UserPlan, onboardingCompleted: boolean }> {
     try {
-        const snapshot = await db.ref(`user_profiles/${uid}/onboardingCompleted`).once('value');
-        return snapshot.val() === true;
+        const snapshot = await db.ref(`user_profiles/${uid}`).once('value');
+        if (snapshot.exists()) {
+            const profile = snapshot.val() as UserProfile;
+            return {
+                plan: profile.plan || 'free',
+                onboardingCompleted: profile.onboardingCompleted || false,
+            };
+        }
+        // Default values if no profile exists
+        return { plan: 'free', onboardingCompleted: false };
     } catch (error) {
-        console.error(`Failed to check onboarding status for user ${uid}:`, error);
-        // Fail open: if there's an error, assume they completed it to avoid blocking them.
-        return true;
+        console.error(`Failed to fetch profile data for user ${uid}:`, error);
+        // Fail open: if there's an error, assume they are on the free plan to avoid blocking them.
+        return { plan: 'free', onboardingCompleted: true };
     }
 }
 
@@ -36,8 +47,8 @@ export const validateRequest = cache(
         true // Check for revocation
       );
       
-      const onboardingCompleted = await getOnboardingStatus(decodedClaims.uid);
-      const user: AuthUser = { ...decodedClaims, onboardingCompleted };
+      const { plan, onboardingCompleted } = await getUserProfileData(decodedClaims.uid);
+      const user: AuthUser = { ...decodedClaims, plan, onboardingCompleted };
 
       return { user };
     } catch (error: any) {

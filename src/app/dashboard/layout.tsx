@@ -5,28 +5,28 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Home, Settings, Link as LinkIcon, PanelLeft, Key, LineChart, BookText, ExternalLink } from 'lucide-react';
+import { Home, Settings, Link as LinkIcon, PanelLeft, Key, LineChart, BookText, ExternalLink, CreditCard } from 'lucide-react';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { UserNav } from '@/components/user-nav';
 import { useAuth } from '@/hooks/use-auth';
-import { SUPER_USER_ID } from '@/lib/config';
 import { Skeleton } from '@/components/ui/skeleton';
 import Logo from '@/components/logo';
 import { useState } from 'react';
 
 const baseNavItems = [
-  { href: '/dashboard', label: 'Overview', icon: Home },
-  { href: '/dashboard/links', label: 'Links', icon: LinkIcon },
+  { href: '/dashboard', label: 'Overview', icon: Home, plans: ['free', 'pro', 'admin'] },
+  { href: '/dashboard/links', label: 'Links', icon: LinkIcon, plans: ['free', 'pro', 'admin'] },
 ];
 
-const superUserNavItems = [
-  { href: '/dashboard/analytics', label: 'Analytics', icon: LineChart },
+const proNavItems = [
+  { href: '/dashboard/analytics', label: 'Analytics', icon: LineChart, plans: ['pro', 'admin'] },
+  { href: '/dashboard/billing', label: 'Billing', icon: CreditCard, plans: ['pro', 'admin'] },
 ]
 
 const settingsNavItems = [
-  { href: '/dashboard/settings/api-keys', label: 'API Keys', icon: Key },
-  { href: '/docs/api', label: 'API Docs', icon: BookText, external: true },
-  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+  { href: '/dashboard/settings/api-keys', label: 'API Keys', icon: Key, plans: ['free', 'pro', 'admin'] },
+  { href: '/docs/api', label: 'API Docs', icon: BookText, external: true, plans: ['free', 'pro', 'admin'] },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings, plans: ['free', 'pro', 'admin'] },
 ];
 
 function NavLinks({ onLinkClick }: { onLinkClick?: () => void }) {
@@ -43,17 +43,13 @@ function NavLinks({ onLinkClick }: { onLinkClick?: () => void }) {
     )
   }
 
-  const isSuperUser = user?.uid === SUPER_USER_ID;
-
-  const navItems = [
-    ...baseNavItems,
-    ...(isSuperUser ? superUserNavItems : []),
-    ...settingsNavItems
-  ];
+  const userPlan = user?.plan || 'anonymous';
+  const allNavItems = [...baseNavItems, ...proNavItems, ...settingsNavItems];
+  const visibleNavItems = allNavItems.filter(item => item.plans.includes(userPlan));
 
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-      {navItems.map(({ href, label, icon: Icon, external }) => (
+      {visibleNavItems.map(({ href, label, icon: Icon, external }) => (
         <Link
           key={href}
           href={href}
