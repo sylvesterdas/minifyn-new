@@ -3,19 +3,31 @@
 
 import { validateRequest } from '@/lib/auth';
 import Razorpay from 'razorpay';
-import crypto from 'crypto';
 
-const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } = process.env;
+// Determine which set of keys and plans to use based on the environment
+const isProduction = process.env.NODE_ENV === 'production';
+
+const RAZORPAY_KEY_ID = isProduction 
+    ? process.env.RAZORPAY_KEY_ID 
+    : process.env.RAZORPAY_TEST_KEY_ID;
+
+const RAZORPAY_KEY_SECRET = isProduction 
+    ? process.env.RAZORPAY_KEY_SECRET 
+    : process.env.RAZORPAY_TEST_KEY_SECRET;
 
 const razorpay = new Razorpay({
     key_id: RAZORPAY_KEY_ID!,
     key_secret: RAZORPAY_KEY_SECRET!,
 });
 
-// These IDs would be created on the Razorpay Dashboard
+// These IDs would be created on the Razorpay Dashboard for both test and live modes
 const PLAN_IDS = {
-    monthly: process.env.RAZORPAY_MONTHLY_PLAN_ID || 'plan_monthly_placeholder',
-    yearly: process.env.RAZORPAY_YEARLY_PLAN_ID || 'plan_yearly_placeholder',
+    monthly: isProduction 
+        ? process.env.RAZORPAY_MONTHLY_PLAN_ID 
+        : process.env.RAZORPAY_TEST_MONTHLY_PLAN_ID,
+    yearly: isProduction 
+        ? process.env.RAZORPAY_YEARLY_PLAN_ID 
+        : process.env.RAZORPAY_TEST_YEARLY_PLAN_ID,
 };
 
 interface CreateSubscriptionResponse {
@@ -33,7 +45,7 @@ export async function createRazorpaySubscription(
     }
 
     if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
-        console.error("Razorpay keys are not configured.");
+        console.error("Razorpay keys are not configured for the current environment.");
         return { error: 'Payment service is currently unavailable.' };
     }
     
@@ -42,11 +54,15 @@ export async function createRazorpaySubscription(
     }
 
     const planId = PLAN_IDS[planType];
+    if (!planId) {
+        console.error(`Razorpay plan ID for '${planType}' is not configured for the current environment.`);
+        return { error: 'The selected plan is currently unavailable.' };
+    }
     
     const options = {
         plan_id: planId,
-        customer_notify: 1, // Send notifications to customer
-        total_count: 12, // For yearly plan, 12 renewals. For monthly, also 12 renewals (1 year)
+        customer_notify: 1,
+        total_count: 12,
         notes: {
             userId: user.uid,
             email: user.email || '',
@@ -56,7 +72,6 @@ export async function createRazorpaySubscription(
     try {
         const subscription = await razorpay.subscriptions.create(options);
         
-        // Fetch plan details to get the amount, since subscription doesn't return it
         const planDetails = await razorpay.plans.fetch(planId);
 
         return {
