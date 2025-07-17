@@ -18,7 +18,6 @@ export async function login(
   try {
     const decodedToken: DecodedIdToken = await auth.verifyIdToken(idToken, true);
 
-    // This check can be removed if OTP flow is used for Pro, but good to keep for standard logins
     if (!decodedToken.email_verified) {
       return { error: 'Email not verified. Please check your inbox for a verification link.' };
     }
@@ -52,7 +51,6 @@ export async function sendVerificationOtp(prevState: any, formData: FormData): P
     }
 
     try {
-        // Check if email is already in use
         await auth.getUserByEmail(email);
         return { success: false, error: 'This email address is already in use.' };
     } catch (error: any) {

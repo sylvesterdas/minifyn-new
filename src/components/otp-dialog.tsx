@@ -65,8 +65,11 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
     // Effect to show toasts based on action states
     useEffect(() => {
         if (sendState.message) toast({ description: sendState.message });
-        if (sendState.error) toast({ description: sendState.error, variant: 'destructive' });
-    }, [sendState, toast]);
+        if (sendState.error) {
+            toast({ description: sendState.error, variant: 'destructive' });
+            onOpenChange(false); // Close dialog on send error
+        }
+    }, [sendState, toast, onOpenChange]);
 
     useEffect(() => {
         if (verifyState.error) {
@@ -82,7 +85,11 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
                     
                     // Create a server-side session cookie
                     const idToken = await user.getIdToken();
-                    await login(idToken);
+                    const loginResult = await login(idToken);
+
+                    if (!loginResult.success) {
+                        throw new Error(loginResult.error || 'Failed to create session.');
+                    }
                     
                     // Trigger the payment flow
                     onVerified(user.uid, name, email);
