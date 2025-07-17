@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { urlSchema } from '@/lib/schema';
 import { createShortLink, validateApiKey, checkRateLimit, incrementUsage } from '@/lib/data';
@@ -16,11 +17,9 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
         
-        const isVerifiedUser = true;
-
-        const isAllowed = await checkRateLimit(user.uid, isVerifiedUser, true);
+        const isAllowed = await checkRateLimit(user.uid, true);
         if (!isAllowed) {
-            return NextResponse.json({ error: 'Daily limit of 20 URLs reached. Please try again tomorrow.' }, { status: 429 });
+            return NextResponse.json({ error: 'Your monthly API usage limit has been reached.' }, { status: 429 });
         }
 
         const body = await request.json();
@@ -39,7 +38,6 @@ export async function POST(request: NextRequest) {
         const newLink = await createShortLink({ 
             longUrl, 
             userId: user.uid, 
-            isVerifiedUser: isVerifiedUser 
         });
 
         await incrementUsage(user.uid, true);
@@ -60,3 +58,5 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
+    

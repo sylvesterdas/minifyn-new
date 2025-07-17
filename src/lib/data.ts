@@ -2,10 +2,13 @@
 import { db } from './firebase-admin';
 import type { DataSnapshot } from 'firebase-admin/database';
 import { fetchMetadata, type Metadata } from './scraper';
-import { format, addDays } from 'date-fns';
+import { format, addDays, getMonth, getYear } from 'date-fns';
 import { auth } from 'firebase-admin';
 import type { UserRecord } from 'firebase-admin/auth';
 import { SUPER_USER_ID } from './config';
+import type { UserProfile } from '@/app/dashboard/settings/actions';
+
+export type UserPlan = 'pro' | 'free' | 'admin' | 'anonymous';
 
 export interface Link {
   id: string;
@@ -19,28 +22,43 @@ export interface Link {
   ogImage?: string;
   twitterImage?: string;
   seo: Metadata;
+  plan: UserPlan;
 }
 
-const ANON_RATE_LIMIT = 3; // 3 requests per day for unverified/anonymous users
-const VERIFIED_USER_RATE_LIMIT = 20; // 20 requests per day for verified users (form or API)
+const ANON_RATE_LIMIT = 3; // 3 requests per day for anonymous users
+const FREE_USER_MONTHLY_LIMIT = 20;
+const PRO_USER_MONTHLY_LIMIT = 500;
 const API_REQUEST_INTERVAL = 1000; // 1 second in milliseconds
 
+async function getUserPlan(userId: string): Promise<UserPlan> {
+    if (userId === SUPER_USER_ID) return 'admin';
+    try {
+        const user = await auth().getUser(userId);
+        if (!user.emailVerified) return 'anonymous'; // Treat unverified as anonymous for limits
+        
+        const profileSnapshot = await db.ref(`user_profiles/${userId}`).once('value');
+        if (profileSnapshot.exists()) {
+            const profile = profileSnapshot.val() as UserProfile;
+            return profile.plan || 'free';
+        }
+        return 'free'; // Default to free if no profile
+    } catch (error) {
+        // User is likely anonymous
+        return 'anonymous';
+    }
+}
+
+
 /**
- * Checks if a user is within their usage limits (both daily quota and time-based).
- * @param userId The UID of the user (anonymous or registered).
- * @param isVerified A boolean indicating if the user is verified.
- * @param isApiCall A boolean indicating if the check is for an API call (for time-based throttling).
+ * Checks if a user is within their usage limits.
+ * @param userId The UID of the user.
+ * @param isApiCall A boolean indicating if the check is for an API call.
  * @returns A promise that resolves to true if the user is allowed to proceed, false otherwise.
  */
-export const checkRateLimit = async (userId: string, isVerified: boolean, isApiCall: boolean = false): Promise<boolean> => {
-    // Super users bypass all limits
-    if (userId === SUPER_USER_ID) {
-        return true;
-    }
-    
-    const today = format(new Date(), 'yyyy-MM-dd');
-    
-    // Time-based throttling for API calls is independent of the daily quota
+export const checkRateLimit = async (userId: string, isApiCall: boolean = false): Promise<boolean> => {
+    const plan = await getUserPlan(userId);
+
+    // Time-based throttling for API calls
     if (isApiCall) {
         const lastRequestRef = db.ref(`last_request_time/api/${userId}`);
         const lastRequestSnapshot = await lastRequestRef.once('value');
@@ -48,39 +66,57 @@ export const checkRateLimit = async (userId: string, isVerified: boolean, isApiC
         
         if (Date.now() - lastRequestTime < API_REQUEST_INTERVAL) {
             console.log(`User ${userId} rate-limited due to frequent requests.`);
-            return false; // Request is too soon
+            return false;
         }
     }
 
-    // Daily quota check
-    const limit = isVerified ? VERIFIED_USER_RATE_LIMIT : ANON_RATE_LIMIT;
-    const path = `limits/${today}/${userId}`;
+    if (plan === 'admin') {
+        return true;
+    }
+    
+    if (plan === 'anonymous') {
+        const today = format(new Date(), 'yyyy-MM-dd');
+        const path = `daily_limits/${today}/${userId}`;
+        const snapshot = await db.ref(path).once('value');
+        const currentCount = snapshot.val() || 0;
+        return currentCount < ANON_RATE_LIMIT;
+    }
+
+    // Monthly quota check for free/pro users
+    const month = format(new Date(), 'yyyy-MM');
+    const limit = plan === 'pro' ? PRO_USER_MONTHLY_LIMIT : FREE_USER_MONTHLY_LIMIT;
+    const path = `monthly_limits/${month}/${userId}`;
     const snapshot = await db.ref(path).once('value');
     const currentCount = snapshot.val() || 0;
-    
+
     return currentCount < limit;
 };
 
 /**
- * Increments the usage count and updates the last request time for a given user.
+ * Increments the usage count for a given user.
  * @param userId The UID of the user to increment usage for.
  * @param isApiCall A boolean indicating if the increment is for an API call.
  */
 export const incrementUsage = async (userId: string, isApiCall: boolean = false): Promise<void> => {
-    const today = format(new Date(), 'yyyy-MM-dd');
-    // All users, verified or not, use the same path based on their UID.
-    const path = `limits/${today}/${userId}`;
-    const userRef = db.ref(path);
+    const plan = await getUserPlan(userId);
+    let usageRef;
+
+    if (plan === 'anonymous') {
+        const today = format(new Date(), 'yyyy-MM-dd');
+        usageRef = db.ref(`daily_limits/${today}/${userId}`);
+    } else if (plan === 'free' || plan === 'pro') {
+        const month = format(new Date(), 'yyyy-MM');
+        usageRef = db.ref(`monthly_limits/${month}/${userId}`);
+    } else {
+        // Admin plan has no limits to increment
+        return;
+    }
     
     try {
-        await userRef.transaction((currentValue) => (currentValue || 0) + 1);
-        
-        // Also update the last request time for API calls to enable throttling
+        await usageRef.transaction((currentValue) => (currentValue || 0) + 1);
         if (isApiCall) {
-            const lastRequestRef = db.ref(`last_request_time/api/${userId}`);
-            await lastRequestRef.set(Date.now());
+            await db.ref(`last_request_time/api/${userId}`).set(Date.now());
         }
-
     } catch (error) {
         console.error(`Failed to increment usage counter for user ${userId}:`, error);
     }
@@ -104,23 +140,23 @@ export const isSlugTaken = async (slug: string): Promise<boolean> => {
 interface CreateShortLinkInput {
     longUrl: string;
     userId: string;
-    isVerifiedUser: boolean; 
 }
 
-export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: CreateShortLinkInput): Promise<Link> => {
+export const createShortLink = async ({ longUrl, userId }: CreateShortLinkInput): Promise<Link> => {
     let slug;
     do {
         slug = generateShortCode();
     } while (await isSlugTaken(slug));
 
     const now = Date.now();
+    const plan = await getUserPlan(userId);
     
     let expiresAt: number;
-    if (userId === SUPER_USER_ID) {
-        expiresAt = -1; // Never expires for super user
-    } else if (isVerifiedUser) {
-        expiresAt = addDays(now, 60).getTime(); // 60 days for verified users
-    } else {
+    if (plan === 'pro' || plan === 'admin') {
+        expiresAt = -1; // Never expires
+    } else if (plan === 'free') {
+        expiresAt = addDays(now, 60).getTime(); // 60 days for free users
+    } else { // anonymous
         expiresAt = addDays(now, 7).getTime(); // 7 days for anonymous users
     }
 
@@ -159,6 +195,7 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         title: primaryTitle,
         description: primaryDescription,
         seo: seoData,
+        plan: plan,
     };
 
     await db.ref(`urls/${slug}`).set(newLinkData);
@@ -192,6 +229,7 @@ export const getLinkBySlug = async (slug: string): Promise<Link | null> => {
         ogImage: linkData.seo?.ogImage,
         twitterImage: linkData.seo?.twitterImage,
         seo: linkData.seo,
+        plan: linkData.plan || 'free',
     };
 }
 
@@ -269,3 +307,5 @@ export async function hasCompletedOnboarding(uid: string): Promise<boolean> {
         return true;
     }
 }
+
+    

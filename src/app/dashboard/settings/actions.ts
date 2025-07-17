@@ -5,6 +5,7 @@ import { validateRequest } from '@/lib/auth';
 import { db, auth } from '@/lib/firebase-admin';
 import { revalidatePath } from 'next/cache';
 import crypto from 'crypto';
+import type { UserPlan } from '@/lib/data';
 
 export interface UserProfile {
     name: string;
@@ -14,6 +15,7 @@ export interface UserProfile {
     company?: string;
     onboardingCompleted: boolean;
     createdAt: string;
+    plan: UserPlan;
 }
 
 /**
@@ -167,3 +169,5 @@ export async function updateUserProfile(prevState: any, formData: FormData): Pro
         return { error: 'An unexpected error occurred while updating your profile.' };
     }
 }
+
+    

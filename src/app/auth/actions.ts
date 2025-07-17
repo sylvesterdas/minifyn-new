@@ -1,3 +1,4 @@
+
 'use server';
 
 import { auth, db } from '@/lib/firebase-admin';
@@ -114,6 +115,7 @@ export async function signup(
       termsAcceptedAt: Date.now(),
       createdAt: userRecord.metadata.creationTime,
       onboardingCompleted: false, // Flag for the new onboarding flow
+      plan: 'free', // Set default plan on signup
     });
     
     const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
@@ -196,3 +198,5 @@ export async function logout(): Promise<{ success?: boolean, error?: string }> {
     return { success: true };
   }
 }
+
+    

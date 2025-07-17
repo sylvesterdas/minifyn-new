@@ -2,7 +2,7 @@
 'use server';
 
 import { urlSchema } from '@/lib/schema';
-import { checkRateLimit, createShortLink, incrementUsage } from '@/lib/data';
+import { checkRateLimit, createShortLink, incrementUsage, type UserPlan } from '@/lib/data';
 import { auth } from 'firebase-admin';
 import type { UserRecord } from 'firebase-admin/auth';
 import { triggerMaintenance } from '@/lib/maintenance';
@@ -16,6 +16,19 @@ export interface FormState {
     errorCode?: 'ANON_LIMIT_REACHED';
 }
 
+async function getUserPlan(userId: string): Promise<UserPlan> {
+    if (userId === SUPER_USER_ID) return 'admin';
+    try {
+        const user = await auth().getUser(userId);
+        if (!user.emailVerified) return 'anonymous';
+        // You might have a 'plan' field in your user's custom claims or DB profile
+        // For now, we'll assume verified users are on the 'free' plan.
+        return 'free'; 
+    } catch (error) {
+        return 'anonymous';
+    }
+}
+
 export async function shortenUrl(prevState: FormState, formData: FormData): Promise<FormState> {
     // Trigger maintenance task in the background (fire and forget)
     triggerMaintenance();
@@ -26,42 +39,21 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
         return { success: false, message: 'Authentication context is missing. Please refresh the page.' };
     }
     
-    // Super user bypasses all checks
-    if (userId === SUPER_USER_ID) {
-        const validatedFields = await urlSchema.safeParseAsync({ longUrl: formData.get('longUrl') });
-         if (!validatedFields.success) {
-            return { success: false, message: 'Invalid URL for Super User.' };
-        }
-        const newLink = await createShortLink({ longUrl: validatedFields.data.longUrl, userId, isVerifiedUser: true });
-        const host = process.env.NEXT_PUBLIC_SHORT_DOMAIN || 'mnfy.in';
-        const shortUrl = `https://${host}/${newLink.id}`;
-        revalidatePath('/dashboard/links');
-        return { success: true, message: 'URL shortened successfully!', shortUrl };
-    }
-
-    let userRecord: UserRecord | null = null;
-    let isVerifiedUser = false;
-    try {
-        // Check if the user is a registered user (not anonymous)
-        userRecord = await auth().getUser(userId);
-        isVerifiedUser = userRecord.emailVerified;
-    } catch (error) {
-        // This error means the user is likely anonymous, which is expected.
-        isVerifiedUser = false;
-    }
-
-    // Check rate limit.
-    const isAllowed = await checkRateLimit(userId, isVerifiedUser);
+    // Check rate limit first
+    const isAllowed = await checkRateLimit(userId);
     if (!isAllowed) {
-        if (isVerifiedUser) {
-            return { success: false, message: 'Daily limit of 20 URLs reached. Please try again tomorrow.' };
-        } else {
+        const plan = await getUserPlan(userId);
+        if (plan === 'free' || plan === 'pro') {
+             return { success: false, message: 'Your monthly link creation limit has been reached.' };
+        }
+        if (plan === 'anonymous') {
              return { 
                 success: false, 
-                message: 'Daily limit of 3 URLs reached.',
+                message: 'Daily limit of 3 URLs reached for guests.',
                 errorCode: 'ANON_LIMIT_REACHED'
             };
         }
+        return { success: false, message: 'Rate limit exceeded.' };
     }
     
     const validatedFields = await urlSchema.safeParseAsync({
@@ -79,9 +71,8 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
     const { longUrl } = validatedFields.data;
 
     try {
-        const newLink = await createShortLink({ longUrl, userId, isVerifiedUser });
+        const newLink = await createShortLink({ longUrl, userId });
         
-        // Increment usage count for all users after successful link creation
         await incrementUsage(userId);
 
         const host = process.env.NEXT_PUBLIC_SHORT_DOMAIN || 'mnfy.in';
@@ -102,3 +93,5 @@ export async function shortenUrl(prevState: FormState, formData: FormData): Prom
         };
     }
 }
+
+    
