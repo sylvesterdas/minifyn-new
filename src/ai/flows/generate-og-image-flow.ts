@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Generates a background image for an OG Image.
@@ -36,18 +37,37 @@ const generateOgImageFlow = ai.defineFlow(
   async (input) => {
     console.log(`Generating OG background for: ${input.title}`);
     
+    // Step 1: Generate a high-quality prompt for the image model.
+    // This uses an AI to write a prompt for another AI.
+    const promptGenerationResponse = await ai.generate({
+      prompt: `You are an expert prompt engineer for a generative image model. Your task is to create a detailed, effective prompt that will generate an abstract background image.
+
+      The user has provided the following topic for a blog post:
+      - Title: "${input.title}"
+      - Keywords: "${input.tags || 'modern, clean'}"
+
+      Based on this topic, create a new prompt for an image generator. The prompt MUST adhere to the following rules:
+      1.  The prompt must describe an abstract, visually appealing background graphic.
+      2.  It must explicitly and strongly forbid the inclusion of any text, letters, numbers, logos, or identifiable figures. Use phrases like "text-free", "no writing", "purely graphical background".
+      3.  The style should be professional, clean, and suitable for a tech blog.
+      4.  The desired aspect ratio is 1.91:1 (widescreen).
+      5.  The prompt should suggest colors and concepts related to the blog post topic.
+      
+      Your output should be ONLY the generated prompt, with no additional explanation or preamble.`,
+      model: 'googleai/gemini-2.0-flash', // Use a fast text model for this step.
+      config: { temperature: 0.5 },
+    });
+
+    const imagePrompt = promptGenerationResponse.text;
+    console.log(`Generated image prompt: ${imagePrompt}`);
+
+    // Step 2: Use the generated prompt to create the image.
     const {media} = await ai.generate({
       // IMPORTANT: ONLY this model can generate images.
       model: 'googleai/gemini-2.0-flash-preview-image-generation',
       
-      // We create a more descriptive prompt for the model.
-      prompt: `Generate an abstract background image suitable for a social media share card.
-      The image should be inspired by the concepts in the title: "${input.title}" and keywords: "${input.tags || 'modern, clean'}".
-      The style must be abstract, professional, and visually appealing.
-      CRITICAL: The generated image MUST be a pure background graphic. It MUST NOT contain any text, letters, numbers, logos, or identifiable figures.
-      The image should work well with white text overlaid on top of it.
-      The aspect ratio should be 1.91:1 (widescreen for social sharing).
-      `,
+      // We use the AI-generated prompt from Step 1.
+      prompt: imagePrompt,
       
       config: {
         // We must request both TEXT and IMAGE for this model to work.
