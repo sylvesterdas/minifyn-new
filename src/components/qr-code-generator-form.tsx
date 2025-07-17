@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef } from 'react';
@@ -63,10 +64,10 @@ export function QrCodeGeneratorForm() {
             <CardHeader>
                 <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
                     <QrCode className="text-primary" />
-                    QR Code Generator
+                    Instant QR Codes
                 </CardTitle>
                 <CardDescription className="text-center pt-2">
-                    Enter a URL or text to generate a QR code.
+                    Turn any link or text into a scannable QR code. It’s like magic, but for your phone.
                 </CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit}>
