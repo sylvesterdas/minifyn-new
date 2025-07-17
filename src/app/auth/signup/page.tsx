@@ -87,9 +87,14 @@ export default function SignUpPage() {
     const triggerPayment = async (customToken: string, userName: string, userEmail: string) => {
         setIsPaymentLoading(true);
         try {
-            // Pass the custom token to the server action for secure verification
-            const subscriptionResult = await createRazorpaySubscription('monthly', customToken);
-             if ('error' in subscriptionResult) throw new Error(subscriptionResult.error);
+            // Step 1: Sign in with the custom token to get an ID token
+            const userCredential = await signInWithCustomToken(firebaseClientAuth, customToken);
+            const user = userCredential.user;
+            const idToken = await user.getIdToken();
+
+            // Step 2: Pass the ID token to the server action for secure verification
+            const subscriptionResult = await createRazorpaySubscription('monthly', idToken);
+            if ('error' in subscriptionResult) throw new Error(subscriptionResult.error);
 
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -100,12 +105,7 @@ export default function SignUpPage() {
                     try {
                         toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
                         
-                        // Sign in with the custom token after successful payment
-                        const userCredential = await signInWithCustomToken(firebaseClientAuth, customToken);
-                        const user = userCredential.user;
-                        
-                        // Create a server-side session cookie
-                        const idToken = await user.getIdToken();
+                        // Step 3: Create a server-side session cookie using the already-valid ID token
                         const loginResult = await login(idToken);
 
                         if (!loginResult.success) {

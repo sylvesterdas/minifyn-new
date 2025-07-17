@@ -37,32 +37,23 @@ interface CreateSubscriptionResponse {
     currency: string;
 }
 
-async function getUserFromToken(token: string): Promise<{ uid: string, email: string | undefined } | null> {
-    try {
-        const decodedToken = await adminAuth.verifyIdToken(token);
-        return { uid: decodedToken.uid, email: decodedToken.email };
-    } catch (error) {
-        console.error("Error verifying custom token:", error);
-        return null;
-    }
-}
-
-
 export async function createRazorpaySubscription(
     planType: 'monthly' | 'yearly',
-    customToken?: string
+    idToken?: string
 ): Promise<{ error: string } | CreateSubscriptionResponse> {
     let userData: { uid: string, email?: string } | null = null;
 
-    if (customToken) {
+    if (idToken) {
         try {
-            const decodedToken = await adminAuth.verifyIdToken(customToken);
+            // Verify the ID token passed from the client
+            const decodedToken = await adminAuth.verifyIdToken(idToken);
             userData = { uid: decodedToken.uid, email: decodedToken.email };
         } catch(e) {
-            console.error("Failed to verify custom token during subscription:", e);
+            console.error("Failed to verify ID token during subscription:", e);
             return { error: 'Invalid authentication token provided.' };
         }
     } else {
+        // Fallback to session cookie if no token is provided (for existing users upgrading)
         const { user } = await validateRequest();
         if (!user) {
             return { error: 'You must be logged in to subscribe.' };
