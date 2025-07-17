@@ -19,18 +19,17 @@ export const metadata: Metadata = {
 const freeFeatures = [
     { text: '20 Links / Day', included: true },
     { text: 'Links Expire in 60 Days', included: true },
-    { text: 'Dashboard & Analytics', included: true },
-    { text: 'QR Code Generation', included: true },
-    { text: 'Developer API Access', included: true },
+    { text: 'Basic Clicks (7-day history)', included: true },
+    { text: 'Standard API Rate Limit', included: true },
+    { text: 'Advanced Analytics', included: false },
     { text: 'Links Never Expire', included: false },
 ];
 
 const proFeatures = [
     { text: '100 Links / Day', included: true },
     { text: 'Links Never Expire', included: true },
-    { text: 'Dashboard & Analytics', included: true },
-    { text: 'QR Code Generation', included: true },
-    { text: 'Developer API Access', included: true },
+    { text: 'Advanced (Geo & Referrers, 1-year history)', included: true },
+    { text: 'Standard API Rate Limit', included: true },
     { text: 'Custom Slugs (Coming Soon)', included: true },
 ];
 
@@ -88,9 +87,10 @@ export default function PricingPage() {
         <Card className="flex flex-col border-primary shadow-lg shadow-primary/10">
             <CardHeader>
                  <CardTitle className="text-2xl">Pro</CardTitle>
-                <CardDescription>For power users who need more links, longer-lasting links, and API access.</CardDescription>
+                <CardDescription>For power users and businesses who need more links and advanced analytics.</CardDescription>
                 <div className="pt-4">
-                    <span className="text-4xl font-bold">Coming Soon</span>
+                    <span className="text-4xl font-bold">₹89</span>
+                    <span className="text-muted-foreground">/month</span>
                 </div>
             </CardHeader>
             <CardContent className="flex-grow">
@@ -98,7 +98,7 @@ export default function PricingPage() {
             </CardContent>
             <CardFooter>
                 <Button size="lg" className="w-full" disabled>
-                    Contact Us
+                    Coming Soon
                 </Button>
             </CardFooter>
         </Card>
