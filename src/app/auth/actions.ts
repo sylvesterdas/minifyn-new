@@ -8,6 +8,10 @@ import { sendEmail } from '@/lib/email';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import { randomInt } from 'crypto';
 
+function encodeEmail(email: string): string {
+  return Buffer.from(email).toString('base64');
+}
+
 export async function login(
   idToken: string
 ): Promise<{error?: string, success?: boolean}> {
@@ -62,7 +66,7 @@ export async function sendVerificationOtp(prevState: any, formData: FormData): P
 
     try {
         // Store OTP in the database
-        await db.ref(`otp_verifications/${encodeURIComponent(email)}`).set({ otp, expiresAt });
+        await db.ref(`otp_verifications/${encodeEmail(email)}`).set({ otp, expiresAt });
         
         // Send OTP via email
         await sendEmail({
@@ -96,7 +100,7 @@ export async function verifyOtpAndCreateUser(prevState: any, formData: FormData)
     }
 
     try {
-        const otpRef = db.ref(`otp_verifications/${encodeURIComponent(email)}`);
+        const otpRef = db.ref(`otp_verifications/${encodeEmail(email)}`);
         const snapshot = await otpRef.once('value');
         const otpData = snapshot.val();
 
