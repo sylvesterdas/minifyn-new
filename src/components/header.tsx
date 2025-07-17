@@ -42,13 +42,18 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center space-x-2">
             {user && !user.isAnonymous ? (
                 <UserNav />
             ) : (
-                <Button asChild>
-                <Link href="/auth/signin">Sign In</Link>
-                </Button>
+                <>
+                    <Button asChild variant="ghost">
+                        <Link href="/auth/signin">Sign In</Link>
+                    </Button>
+                    <Button asChild>
+                        <Link href="/auth/signup">Sign Up</Link>
+                    </Button>
+                </>
             )}
           </div>
 
@@ -79,11 +84,18 @@ export function Header() {
                           <UserNav />
                         </div>
                       ) : (
-                        <Button asChild className="w-full">
-                          <Link href="/auth/signin" onClick={() => setIsMobileMenuOpen(false)}>
-                            Sign In
-                          </Link>
-                        </Button>
+                        <div className="flex flex-col space-y-2">
+                            <Button asChild variant="outline" className="w-full">
+                                <Link href="/auth/signin" onClick={() => setIsMobileMenuOpen(false)}>
+                                    Sign In
+                                </Link>
+                            </Button>
+                            <Button asChild className="w-full">
+                                <Link href="/auth/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                                    Sign Up
+                                </Link>
+                            </Button>
+                        </div>
                       )}
                     </div>
                   </nav>
