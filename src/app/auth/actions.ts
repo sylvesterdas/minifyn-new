@@ -9,6 +9,7 @@ import type { DecodedIdToken } from 'firebase-admin/auth';
 import { randomInt } from 'crypto';
 
 function encodeEmail(email: string): string {
+  // Replace characters that are invalid in RTDB paths.
   return Buffer.from(email).toString('base64');
 }
 
@@ -68,7 +69,7 @@ export async function sendVerificationOtp(prevState: any, formData: FormData): P
         await db.ref(`otp_verifications/${encodeEmail(email)}`).set({ otp, expiresAt });
         
         // Send OTP via email
-        await sendEmail({
+        const emailResult = await sendEmail({
             to: email,
             subject: `Your MiniFyn Verification Code: ${otp}`,
             html: `
@@ -78,6 +79,10 @@ export async function sendVerificationOtp(prevState: any, formData: FormData): P
                 <p>This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
             `,
         });
+
+        if (!emailResult.success) {
+            return { success: false, error: emailResult.error };
+        }
 
         return { success: true, message: 'An OTP has been sent to your email.' };
 
@@ -129,10 +134,8 @@ export async function verifyOtpAndCreateUser(prevState: any, formData: FormData)
         
         // Create a custom token to allow client-side sign-in AFTER payment
         const customToken = await auth.createCustomToken(userRecord.uid);
-        const idToken = await adminAuth.createCustomToken(userRecord.uid);
-        await adminAuth.verifyIdToken(idToken); // This is required for subscription creation custom token verification
-
-        return { success: true, customToken: idToken };
+        
+        return { success: true, customToken: customToken };
     } catch (error) {
         console.error("Error in verifyOtpAndCreateUser:", error);
         return { success: false, error: 'Failed to create account. Please try again.' };
@@ -150,7 +153,7 @@ export async function resendVerificationLink(prevState: any, formData: FormData)
         const userRecord = await auth.getUserByEmail(email);
         const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
         
-        await sendEmail({
+        const emailResult = await sendEmail({
             to: email,
             subject: 'Verify Your Email Address for MiniFyn',
             html: `
@@ -160,6 +163,10 @@ export async function resendVerificationLink(prevState: any, formData: FormData)
                 <p>This link will expire in 1 hour.</p>
             `,
         });
+
+        if (!emailResult.success) {
+            return { error: emailResult.error };
+        }
         return { success: true, message: 'A new verification link has been sent to your email.' };
     } catch (error: any) {
         console.error('Resend verification link error:', error);
@@ -211,7 +218,7 @@ export async function signup(
     
     const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
 
-    await sendEmail({
+    const emailResult = await sendEmail({
         to: email,
         subject: 'Welcome to MiniFyn! Please Verify Your Email',
         html: `
@@ -222,6 +229,10 @@ export async function signup(
         `,
     });
 
+    if (!emailResult.success) {
+        // Even if email fails, account is created. User can resend from signin page.
+        return { success: true, message: `Your account was created, but we failed to send a verification email. Please try signing in to resend the link.` };
+    }
 
     return { success: true, message: `A verification link has been sent to ${email}.` };
 
@@ -260,8 +271,10 @@ export async function sendPasswordResetLink(
 
     } catch (error: any) {
         if (error.code === 'auth/user-not-found') {
+            // Do not reveal if a user exists or not for security reasons.
         } else {
             console.error('Password reset error:', error);
+            // Also, do not reveal the error to the user.
         }
     }
     
