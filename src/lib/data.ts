@@ -34,16 +34,20 @@ async function getUserPlan(userId: string): Promise<UserPlan> {
     if (userId === SUPER_USER_ID) return 'admin';
     try {
         const user = await auth().getUser(userId);
-        if (!user.emailVerified) return 'anonymous'; // Treat unverified as anonymous for limits
         
         const profileSnapshot = await db.ref(`user_profiles/${userId}`).once('value');
         if (profileSnapshot.exists()) {
             const profile = profileSnapshot.val() as UserProfile;
+            // The profile plan is the source of truth.
             return profile.plan || 'free';
         }
-        return 'free'; // Default to free if no profile
+        
+        // Fallback for users that might not have a profile yet, but have a verified email.
+        if (!user.emailVerified) return 'anonymous';
+
+        return 'free'; // Default to free if no profile but email is verified
     } catch (error) {
-        // User is likely anonymous
+        // User is likely anonymous if getUser fails
         return 'anonymous';
     }
 }

@@ -1,4 +1,5 @@
-
+// This file is no longer used by the primary user flow.
+// It can be safely deleted.
 import Logo from '@/components/logo';
 import Link from 'next/link';
 import { Toaster } from '@/components/ui/toaster';

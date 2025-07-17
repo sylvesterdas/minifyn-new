@@ -14,6 +14,7 @@ import { Loader2 } from 'lucide-react';
 import { updateUserProfile, getUserProfile, type UserProfile } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { timezones } from '@/lib/timezones';
+import { useRouter } from 'next/navigation';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -64,6 +65,7 @@ function ProfilePageSkeleton() {
 export default function ProfilePage() {
     const { user, isLoading: isAuthLoading } = useAuth();
     const { toast } = useToast();
+    const router = useRouter();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     
@@ -95,9 +97,10 @@ export default function ProfilePage() {
                 title: 'Success!',
                 description: state.message,
             });
-             setTimeout(() => window.location.reload(), 1000);
+            // Refresh the page to get latest user info in the layout
+             router.refresh();
         }
-    }, [state, toast]);
+    }, [state, toast, router]);
 
     if (isAuthLoading || isLoading) {
         return <ProfilePageSkeleton />;

@@ -6,6 +6,7 @@ import { cookies } from 'next/headers';
 import type { FormState } from './signin/page';
 import { sendEmail } from '@/lib/email';
 import type { DecodedIdToken } from 'firebase-admin/auth';
+import { randomInt } from 'crypto';
 
 export async function login(
   idToken: string
@@ -13,17 +14,15 @@ export async function login(
   try {
     const decodedToken: DecodedIdToken = await auth.verifyIdToken(idToken, true);
 
+    // This check can be removed if OTP flow is used for Pro, but good to keep for standard logins
     if (!decodedToken.email_verified) {
       return { error: 'Email not verified. Please check your inbox for a verification link.' };
     }
 
-    // Session cookie will be valid for 5 days.
-    const expiresIn = 60 * 60 * 24 * 5 * 1000;
+    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
     const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
     
-    const cookieObj = await cookies()
-
-    cookieObj.set('session', sessionCookie, {
+    cookies().set('session', sessionCookie, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: expiresIn,
@@ -39,6 +38,102 @@ export async function login(
     return { error: 'An unknown error occurred during login.' };
   }
 }
+
+export async function sendVerificationOtp(prevState: any, formData: FormData): Promise<{ success: boolean; error?: string, message?: string }> {
+    const email = formData.get('email') as string;
+
+    if (!email || !email.includes('@')) {
+        return { success: false, error: 'Please enter a valid email address.' };
+    }
+
+    try {
+        // Check if email is already in use
+        await auth.getUserByEmail(email);
+        return { success: false, error: 'This email address is already in use.' };
+    } catch (error: any) {
+        if (error.code !== 'auth/user-not-found') {
+            return { success: false, error: 'An unexpected error occurred. Please try again.' };
+        }
+    }
+
+    // Generate a 6-digit OTP
+    const otp = randomInt(100000, 999999).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
+
+    try {
+        // Store OTP in the database
+        await db.ref(`otp_verifications/${encodeURIComponent(email)}`).set({ otp, expiresAt });
+        
+        // Send OTP via email
+        await sendEmail({
+            to: email,
+            subject: `Your MiniFyn Verification Code: ${otp}`,
+            html: `
+                <h1>Your MiniFyn Verification Code</h1>
+                <p>Enter the following code to verify your email address and continue:</p>
+                <h2 style="font-size: 24px; letter-spacing: 4px; text-align: center;">${otp}</h2>
+                <p>This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
+            `,
+        });
+
+        return { success: true, message: 'An OTP has been sent to your email.' };
+
+    } catch (err) {
+        console.error("Error in sendVerificationOtp:", err);
+        return { success: false, error: 'Failed to send OTP. Please try again.' };
+    }
+}
+
+
+export async function verifyOtpAndCreateUser(prevState: any, formData: FormData): Promise<{ success: boolean; idToken?: string; error?: string }> {
+    const email = formData.get('email') as string;
+    const otp = formData.get('otp') as string;
+    const name = formData.get('name') as string;
+    const password = formData.get('password') as string;
+
+    if (!email || !otp || !name || !password) {
+        return { success: false, error: 'Missing required fields.' };
+    }
+
+    try {
+        const otpRef = db.ref(`otp_verifications/${encodeURIComponent(email)}`);
+        const snapshot = await otpRef.once('value');
+        const otpData = snapshot.val();
+
+        if (!otpData || otpData.otp !== otp || Date.now() > otpData.expiresAt) {
+            return { success: false, error: 'Invalid or expired OTP. Please try again.' };
+        }
+
+        // OTP is valid, create the user
+        const userRecord = await auth.createUser({
+            email,
+            password,
+            displayName: name,
+            emailVerified: true, // Mark as verified since OTP was successful
+        });
+
+        await db.ref(`user_profiles/${userRecord.uid}`).set({
+            name: userRecord.displayName,
+            email: userRecord.email,
+            termsAcceptedAt: Date.now(),
+            createdAt: userRecord.metadata.creationTime,
+            onboardingCompleted: true, // Skip multi-step onboarding
+            plan: 'free', // Start as free, webhook will upgrade to pro
+        });
+        
+        // Clean up the used OTP
+        await otpRef.remove();
+        
+        // Create a custom token to sign in the user on the client
+        const customToken = await auth.createCustomToken(userRecord.uid);
+
+        return { success: true, idToken: customToken };
+    } catch (error) {
+        console.error("Error in verifyOtpAndCreateUser:", error);
+        return { success: false, error: 'Failed to create account. Please try again.' };
+    }
+}
+
 
 export async function resendVerificationLink(prevState: any, formData: FormData): Promise<{ success?: boolean; message?: string; error?: string }> {
     const email = formData.get('email');
@@ -100,14 +195,13 @@ export async function signup(
       displayName: name,
     });
     
-    // Store terms acceptance and initial profile in the database
     await db.ref(`user_profiles/${userRecord.uid}`).set({
       name: userRecord.displayName,
       email: userRecord.email,
       termsAcceptedAt: Date.now(),
       createdAt: userRecord.metadata.creationTime,
-      onboardingCompleted: false, // Flag for the new onboarding flow
-      plan: 'free', // Set default plan on signup
+      onboardingCompleted: true, // Skip multi-step onboarding now
+      plan: 'free',
     });
     
     const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
@@ -174,7 +268,6 @@ export async function logout(): Promise<{ success?: boolean, error?: string }> {
   const cookieObj = await cookies()
   const sessionCookie = cookieObj.get('session')?.value;
   if (!sessionCookie) {
-    // No session to clear, but we can consider this a success.
     return { success: true };
   }
 
@@ -184,11 +277,8 @@ export async function logout(): Promise<{ success?: boolean, error?: string }> {
     cookieObj.delete('session');
     return { success: true };
   } catch (error) {
-    // Cookie is invalid or expired. Just delete it.
     console.warn("Could not revoke session cookie, it might be expired.", error);
     cookieObj.delete('session');
     return { success: true };
   }
 }
-
-    

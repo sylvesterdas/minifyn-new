@@ -15,7 +15,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { updateUserProfile } from '@/app/dashboard/settings/actions';
 import { trackEvent } from '@/lib/gtag';
 
 const freeFeatures = [
@@ -78,9 +77,7 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
         trackEvent({ action: 'click_upgrade', category: 'conversion', label: eventLabel, value: planType === 'monthly' ? 89 : 899 });
 
         if (!user || user.isAnonymous) {
-            // If the user is not logged in, redirect them to sign up.
             router.push('/auth/signup');
-            // No need to set isLoading to false, as we are navigating away.
             return;
         }
 
@@ -90,14 +87,6 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
                 throw new Error(subscriptionResult.error);
             }
             
-            // Mark onboarding as complete as part of the upgrade process
-            if (context === 'onboarding') {
-                const formData = new FormData();
-                formData.append('name', user.name || '');
-                formData.append('isOnboarding', 'true');
-                await updateUserProfile(null, formData);
-            }
-
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
                 subscription_id: subscriptionResult.subscriptionId,
@@ -106,14 +95,14 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
                 handler: function (response: any) {
                     toast({ title: 'Payment Successful!', description: 'Your plan has been upgraded to Pro.' });
                     trackEvent({ action: 'purchase', category: 'conversion', label: 'pro_plan', value: planType === 'monthly' ? 89 : 899 });
-                    window.location.href = '/dashboard';
+                    window.location.assign('/dashboard');
                 },
                 prefill: {
                     name: user.name,
                     email: user.email,
                 },
                 theme: {
-                    color: "#3b82f6"
+                    color: "#1e40af"
                 }
             };
 
@@ -145,7 +134,6 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
 
     const userPlan = user?.plan;
     
-    // Onboarding context has a different layout, we only show the Pro part.
     if (context === 'onboarding') {
         return (
              <>
@@ -208,7 +196,6 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
                 </Label>
             </div>
             <div className="grid md:grid-cols-2 gap-8 items-stretch">
-                {/* Free Plan */}
                 <Card className="flex flex-col">
                     <CardHeader>
                         <CardTitle className="text-2xl">Free</CardTitle>
@@ -234,7 +221,6 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
                     </CardFooter>
                 </Card>
 
-                {/* Pro Plan */}
                 <Card className="flex flex-col border-primary shadow-lg shadow-primary/10">
                     <CardHeader>
                         <CardTitle className="text-2xl">Pro</CardTitle>
@@ -270,3 +256,4 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
         </>
     );
 }
+

@@ -128,8 +128,6 @@ export async function updateUserProfile(prevState: any, formData: FormData): Pro
     const role = formData.get('role') as string;
     const timezone = formData.get('timezone') as string;
     const company = formData.get('company') as string;
-    const isOnboarding = formData.get('isOnboarding') === 'true';
-
 
     if (!name || name.trim().length < 2) {
         return { error: 'Name must be at least 2 characters long.' };
@@ -138,17 +136,12 @@ export async function updateUserProfile(prevState: any, formData: FormData): Pro
     try {
         const profileData: any = {
             name,
+            onboardingCompleted: true, // Always set to true when profile is updated
         };
         
         if (role) profileData.role = role;
         if (timezone) profileData.timezone = timezone;
         if (company || company === '') profileData.company = company;
-
-
-        // If this is from the onboarding flow, mark it as completed
-        if (isOnboarding) {
-            profileData.onboardingCompleted = true;
-        }
 
         // Update Firebase Auth record (only displayName)
         if (user.name !== name) {
