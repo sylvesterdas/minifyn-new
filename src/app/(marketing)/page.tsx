@@ -52,8 +52,8 @@ const features = [
   },
   {
     icon: <BarChart className="h-8 w-8 text-primary" />,
-    title: 'Powerful Analytics',
-    description: 'Track every click and gain insights into your audience with detailed analytics.',
+    title: 'Click Analytics',
+    description: 'Track every click to gain insights. Upgrade to Pro for detailed geo and referrer data.',
   },
   {
     icon: <Key className="h-8 w-8 text-primary" />,
@@ -63,7 +63,7 @@ const features = [
   {
     icon: <QrCode className="h-8 w-8 text-primary" />,
     title: 'QR Code Generation',
-    description: 'Instantly generate a QR code for any shortened link, completely free.',
+    description: 'Instantly generate a branded QR code for any link or text, completely free.',
   },
 ];
 
