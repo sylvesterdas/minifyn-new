@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -12,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Checkbox } from '@/components/ui/checkbox';
+import { trackEvent } from '@/lib/gtag';
 
 export interface FormState {
     error?: string;
@@ -46,6 +48,11 @@ export default function SignUpPage() {
             toast({
                 title: 'Account Created!',
                 description: state.message || "Please check your email to verify your account.",
+            });
+            trackEvent({
+                action: 'sign_up',
+                category: 'conversion',
+                label: 'email_password_signup',
             });
             // After successful signup and toast, redirect to signin page
             router.push('/auth/signin');

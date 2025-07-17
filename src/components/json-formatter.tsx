@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { FileDown, Loader2, ArrowRight, Clipboard, Check, Trash2, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from './ui/badge';
+import { trackEvent } from '@/lib/gtag';
 
 export function JsonFormatter() {
     const [inputJson, setInputJson] = useState('');
@@ -33,6 +34,7 @@ export function JsonFormatter() {
                 setOutputJson(formattedJson);
                 setStatus('success');
                 setErrorMessage('');
+                trackEvent({ action: 'format_json_success', category: 'dev_tools', label: 'json_formatter' });
             } catch (error: any) {
                 setOutputJson('');
                 setStatus('error');
@@ -61,7 +63,7 @@ export function JsonFormatter() {
             a.href = url;
             a.download = 'formatted.json';
             document.body.appendChild(a);
-a.click();
+            a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }

@@ -16,6 +16,7 @@ import javascript from 'highlight.js/lib/languages/javascript';
 import css from 'highlight.js/lib/languages/css';
 import xml from 'highlight.js/lib/languages/xml'; // For HTML
 import json from 'highlight.js/lib/languages/json';
+import { trackEvent } from '@/lib/gtag';
 
 // Register languages for highlight.js
 hljs.registerLanguage('javascript', javascript);
@@ -140,6 +141,13 @@ function BulkMinifier({ mangleJs }: { mangleJs: boolean }) {
                     link.click();
                     document.body.removeChild(link);
                     URL.revokeObjectURL(link.href);
+
+                    trackEvent({
+                        action: 'minify_bulk',
+                        category: 'dev_tools',
+                        label: 'code_minifier',
+                        value: Object.keys(zip.files).length
+                    });
                 });
             } else {
                  toast({ title: "No files minified", description: "Could not process any of the selected files. Check if they have valid syntax."});
@@ -231,6 +239,13 @@ function SinglePasteMinifier({ mangleJs }: { mangleJs: boolean }) {
                 } else if (detectedLang === 'json') {
                     setOutputCode(minifyJson(inputCode));
                 }
+
+                trackEvent({
+                    action: 'minify_single',
+                    category: 'dev_tools',
+                    label: `code_minifier_${detectedLang}`
+                });
+
             } catch (error) {
                 console.error("Minification error:", error);
                 setOutputCode('');

@@ -1,13 +1,14 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { jwtDecode, type JwtPayload } from 'jwt-decode';
 import { format } from 'date-fns';
 import { AlertCircle, CheckCircle, Shield } from 'lucide-react';
+import { trackEvent } from '@/lib/gtag';
 
 function DecodedSection({ title, data }: { title: string; data: object | null }) {
     return (
@@ -38,6 +39,16 @@ export function JwtDebugger() {
         }
     }, [token]);
     
+    useEffect(() => {
+        if (decodedPayload && !error) {
+            trackEvent({
+                action: 'decode_jwt_success',
+                category: 'dev_tools',
+                label: 'jwt_debugger',
+            });
+        }
+    }, [decodedPayload, error]);
+
     const isExpired = useMemo(() => {
         if (!decodedPayload?.exp) return null;
         return decodedPayload.exp * 1000 < Date.now();
