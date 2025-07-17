@@ -44,6 +44,7 @@ export default function PrivacyPage() {
             <ul>
                 <li><strong>With your consent:</strong> We will share personal information with companies, organizations or individuals outside of MiniFyn when we have your consent to do so.</li>
                 <li><strong>For external processing:</strong> We provide personal information to our affiliates or other trusted businesses or persons to process it for us, based on our instructions and in compliance with our Privacy Policy and any other appropriate confidentiality and security measures.</li>
+                <li><strong>For security screening:</strong> To protect our users and prevent the spread of malicious content, we use Google's Web Risk service. When you shorten a URL, that URL is sent to Google for security analysis. This process is governed by Google's Privacy Policy.</li>
                 <li><strong>For legal reasons:</strong> We will share personal information if we have a good-faith belief that access, use, preservation or disclosure of the information is reasonably necessary to meet any applicable law, regulation, legal process or enforceable governmental request.</li>
             </ul>
 

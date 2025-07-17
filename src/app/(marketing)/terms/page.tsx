@@ -30,7 +30,7 @@ export default function TermsPage() {
             <p>When you create an account with us, you must provide information that is accurate, complete, and current at all times. Failure to do so constitutes a breach of the Terms, which may result in immediate termination of your account on our Service.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">4. Acceptable Use</h2>
-            <p>You agree not to use the Service for any unlawful purpose or to violate any laws in your jurisdiction. You must not use the Service to shorten URLs that point to content that is unlawful, harmful, or otherwise objectionable. Please see our Acceptable Use Policy for more details.</p>
+            <p>You agree not to use the Service for any unlawful purpose or to violate any laws in your jurisdiction. To protect the integrity of our service and our users, we actively scan submitted URLs for malicious content using automated systems, which may include third-party services such as the Google Web Risk API. You must not use the Service to shorten URLs that point to content that is unlawful, harmful, or otherwise objectionable. Please see our Acceptable Use Policy for more details.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">5. Intellectual Property</h2>
             <p>The Service and its original content, features, and functionality are and will remain the exclusive property of MiniFyn and its licensors. The Service is protected by copyright, trademark, and other laws of both the United States and foreign countries.</p>
