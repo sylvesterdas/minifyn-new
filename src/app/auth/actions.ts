@@ -25,7 +25,7 @@ export async function login(
     const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
     const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
     
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
     cookieStore.set('session', sessionCookie, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -88,7 +88,7 @@ export async function sendVerificationOtp(prevState: any, formData: FormData): P
 }
 
 
-export async function verifyOtpAndCreateUser(prevState: any, formData: FormData): Promise<{ success: boolean; idToken?: string; error?: string }> {
+export async function verifyOtpAndCreateUser(prevState: any, formData: FormData): Promise<{ success: boolean; customToken?: string; error?: string }> {
     const email = formData.get('email') as string;
     const otp = formData.get('otp') as string;
     const name = formData.get('name') as string;
@@ -129,8 +129,10 @@ export async function verifyOtpAndCreateUser(prevState: any, formData: FormData)
         
         // Create a custom token to allow client-side sign-in AFTER payment
         const customToken = await auth.createCustomToken(userRecord.uid);
+        const idToken = await adminAuth.createCustomToken(userRecord.uid);
+        await adminAuth.verifyIdToken(idToken); // This is required for subscription creation custom token verification
 
-        return { success: true, idToken: customToken };
+        return { success: true, customToken: idToken };
     } catch (error) {
         console.error("Error in verifyOtpAndCreateUser:", error);
         return { success: false, error: 'Failed to create account. Please try again.' };
@@ -268,7 +270,7 @@ export async function sendPasswordResetLink(
 
 
 export async function logout(): Promise<{ success?: boolean, error?: string }> {
-  const cookieObj = await cookies();
+  const cookieObj = cookies();
   const sessionCookie = cookieObj.get('session')?.value;
   if (!sessionCookie) {
     return { success: true };

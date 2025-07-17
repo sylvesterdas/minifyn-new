@@ -3,6 +3,7 @@
 
 import { validateRequest } from '@/lib/auth';
 import Razorpay from 'razorpay';
+import { auth as adminAuth } from '@/lib/firebase-admin';
 
 // Determine which set of keys and plans to use based on the environment
 const isProduction = process.env.NODE_ENV === 'production';
@@ -36,14 +37,43 @@ interface CreateSubscriptionResponse {
     currency: string;
 }
 
+async function getUserFromToken(token: string): Promise<{ uid: string, email: string | undefined } | null> {
+    try {
+        const decodedToken = await adminAuth.verifyIdToken(token);
+        return { uid: decodedToken.uid, email: decodedToken.email };
+    } catch (error) {
+        console.error("Error verifying custom token:", error);
+        return null;
+    }
+}
+
+
 export async function createRazorpaySubscription(
-    planType: 'monthly' | 'yearly'
+    planType: 'monthly' | 'yearly',
+    customToken?: string
 ): Promise<{ error: string } | CreateSubscriptionResponse> {
-    const { user } = await validateRequest();
-    if (!user) {
-        return { error: 'You must be logged in to subscribe.' };
+    let userData: { uid: string, email?: string } | null = null;
+
+    if (customToken) {
+        try {
+            const decodedToken = await adminAuth.verifyIdToken(customToken);
+            userData = { uid: decodedToken.uid, email: decodedToken.email };
+        } catch(e) {
+            console.error("Failed to verify custom token during subscription:", e);
+            return { error: 'Invalid authentication token provided.' };
+        }
+    } else {
+        const { user } = await validateRequest();
+        if (!user) {
+            return { error: 'You must be logged in to subscribe.' };
+        }
+        userData = { uid: user.uid, email: user.email };
     }
 
+    if (!userData) {
+        return { error: 'Authentication failed.' };
+    }
+    
     if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
         console.error("Razorpay keys are not configured for the current environment.");
         return { error: 'Payment service is currently unavailable.' };
@@ -62,10 +92,10 @@ export async function createRazorpaySubscription(
     const options = {
         plan_id: planId,
         customer_notify: 1,
-        total_count: 12,
+        total_count: planType === 'monthly' ? 12 : 1, // 12 monthly payments or 1 yearly
         notes: {
-            userId: user.uid,
-            email: user.email || '',
+            userId: userData.uid,
+            email: userData.email || '',
         },
     };
 

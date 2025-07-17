@@ -87,7 +87,8 @@ export default function SignUpPage() {
     const triggerPayment = async (customToken: string, userName: string, userEmail: string) => {
         setIsPaymentLoading(true);
         try {
-            const subscriptionResult = await createRazorpaySubscription('monthly'); // Default to monthly for now
+            // Pass the custom token to the server action for secure verification
+            const subscriptionResult = await createRazorpaySubscription('monthly', customToken);
              if ('error' in subscriptionResult) throw new Error(subscriptionResult.error);
 
             const options = {
@@ -122,6 +123,7 @@ export default function SignUpPage() {
                 modal: {
                     ondismiss: function() {
                         setIsPaymentLoading(false); // Re-enable the form if the user closes the payment modal
+                        setShowOtpDialog(false); // also close the otp dialog wrapper
                     }
                 },
                 prefill: { name: userName, email: userEmail },
@@ -139,7 +141,6 @@ export default function SignUpPage() {
              toast({ title: 'Error', description: error instanceof Error ? error.message : 'Could not initiate payment.', variant: 'destructive' });
              setIsPaymentLoading(false);
         }
-        setShowOtpDialog(false);
     };
 
     if (showVerificationMessage) {

@@ -28,7 +28,7 @@ interface OtpDialogProps {
   email: string;
   name: string;
   password: string;
-  onVerified: (userId: string, name: string, email: string) => Promise<void>;
+  onVerified: (customToken: string, name: string, email: string) => Promise<void>;
 }
 
 export function OtpDialog({ open, onOpenChange, email, name, password, onVerified }: OtpDialogProps) {
@@ -75,15 +75,10 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
         if (verifyState.error) {
             toast({ description: verifyState.error, variant: 'destructive' });
         }
-        if (verifyState.success && verifyState.idToken) {
+        if (verifyState.success && verifyState.customToken) {
             toast({ description: "Email verified! Proceeding to payment..." });
             startSubmitTransition(async () => {
-                try {
-                    // Trigger the payment flow. The onVerified function now handles sign-in and redirect.
-                    await onVerified(verifyState.idToken!, name, email);
-                } catch (error) {
-                    toast({ description: "Failed to initiate payment.", variant: 'destructive' });
-                }
+                await onVerified(verifyState.customToken!, name, email);
             });
         }
     }, [verifyState, toast, onVerified, name, email]);
