@@ -14,6 +14,46 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
+import type { Metadata } from 'next';
+import type { OfferCatalog, WithContext } from 'schema-dts';
+
+// This function now needs to be defined outside the component for metadata generation
+const siteUrl = 'https://www.minifyn.com';
+
+export async function generateMetadata(): Promise<Metadata> {
+    const title = 'Pricing Plans | MiniFyn';
+    const description = 'Choose the perfect plan for your needs. Start for free or upgrade to Pro for advanced features like unlimited link expiration and higher usage limits.';
+    const ogImageUrl = `${siteUrl}/og.png`;
+
+    return {
+        title,
+        description,
+        alternates: {
+            canonical: `${siteUrl}/pricing`,
+        },
+        openGraph: {
+            title,
+            description,
+            url: `${siteUrl}/pricing`,
+            type: 'website',
+            images: [
+                {
+                    url: ogImageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: 'MiniFyn Pricing Plans',
+                },
+            ],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            images: [ogImageUrl],
+        },
+    };
+}
+
 
 const freeFeatures = [
     { text: '20 Links / Day', included: true },
@@ -183,8 +223,34 @@ function PricingPageContent() {
 
 
 export default function PricingPage() {
+  const jsonLd: WithContext<OfferCatalog> = {
+    '@context': 'https://schema.org',
+    '@type': 'OfferCatalog',
+    name: 'MiniFyn Subscription Plans',
+    itemListElement: [
+        {
+            '@type': 'Offer',
+            name: 'Free Plan',
+            price: '0.00',
+            priceCurrency: 'INR',
+            description: 'Perfect for personal use and getting started with our platform.',
+        },
+        {
+            '@type': 'Offer',
+            name: 'Pro Plan',
+            price: '89.00',
+            priceCurrency: 'INR',
+            description: 'For power users and businesses who need more links and advanced analytics.',
+        }
+    ]
+  };
+  
   return (
     <>
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Script
             id="razorpay-checkout-js"
             src="https://checkout.razorpay.com/v1/checkout.js"
