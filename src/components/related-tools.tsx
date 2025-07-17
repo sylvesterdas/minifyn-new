@@ -54,14 +54,14 @@ export function RelatedTools() {
                 {otherTools.map((tool) => (
                     <Link href={tool.href} key={tool.title}>
                         <Card className="h-full hover:border-primary transition-colors group">
-                            <CardHeader className="flex flex-row items-start gap-4">
+                            <CardHeader className="flex flex-row items-start gap-4 p-6">
                                 {tool.icon}
                                 <div className="flex-1">
                                     <CardTitle className="text-xl">{tool.title}</CardTitle>
 
                                     <CardDescription className="mt-2">{tool.description}</CardDescription>
                                 </div>
-                                <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                                <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform shrink-0" />
                             </CardHeader>
                         </Card>
                     </Link>
