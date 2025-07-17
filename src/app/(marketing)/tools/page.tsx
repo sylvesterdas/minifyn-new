@@ -75,22 +75,24 @@ export default function ToolsPage() {
           </p>
         </div>
 
-        <div className="space-y-8 max-w-4xl mx-auto">
-          <UrlShortenerCard />
-          {toolSections.map((section) => (
-              <Link href={section.href} key={section.title}>
-                  <Card className="h-full hover:border-primary transition-colors group">
-                      <CardHeader className="flex flex-row items-start gap-4">
-                          {section.icon}
-                          <div className="flex-1">
-                              <CardTitle className="text-xl">{section.title}</CardTitle>
-                              <CardDescription className="mt-2">{section.description}</CardDescription>
-                          </div>
-                          <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-                      </CardHeader>
-                  </Card>
-              </Link>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="md:col-span-2">
+                <UrlShortenerCard />
+            </div>
+            {toolSections.map((section) => (
+                <Link href={section.href} key={section.title}>
+                    <Card className="h-full hover:border-primary transition-colors group">
+                        <CardHeader className="flex flex-row items-start gap-4 p-6">
+                            {section.icon}
+                            <div className="flex-1">
+                                <CardTitle className="text-xl">{section.title}</CardTitle>
+                                <CardDescription className="mt-2">{section.description}</CardDescription>
+                            </div>
+                            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform shrink-0" />
+                        </CardHeader>
+                    </Card>
+                </Link>
+            ))}
         </div>
       </div>
     </>

@@ -16,7 +16,7 @@ export function UrlShortenerCard() {
                         </CardTitle>
                         <CardDescription className="mt-2">Our core feature. Create short, powerful, and trackable links. It's fast, free, and easy to use.</CardDescription>
                     </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform shrink-0" />
                 </CardHeader>
             </Card>
         </Link>
