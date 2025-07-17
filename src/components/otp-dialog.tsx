@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useActionState, useEffect, useState, useTransition } from 'react';
 import { sendVerificationOtp, verifyOtpAndCreateUser } from '@/app/auth/actions';
-import { useToast } from './hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { auth as firebaseClientAuth } from '@/lib/firebase';
 import { signInWithCustomToken } from 'firebase/auth';
@@ -152,4 +152,3 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
     </Dialog>
   );
 }
-
