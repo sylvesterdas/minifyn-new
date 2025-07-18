@@ -104,18 +104,23 @@ export default function SignUpPage() {
                 description: "Monthly Subscription",
                 handler: async (response: any) => {
                     toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
-
-                    // Use the new server action to finalize the upgrade.
-                    const syncResult = await syncRazorpaySubscription();
+                    
+                    const idTokenAfterPayment = await userCredential.user.getIdToken(true);
+                    const syncResult = await syncRazorpaySubscription(idTokenAfterPayment);
 
                     if (syncResult.success) {
                         trackEvent({ action: 'purchase', category: 'conversion', label: 'pro_plan_signup', value: 89 });
-                        toast({ title: "Upgrade Complete!", description: "Redirecting to your dashboard." });
-                        // We use window.location.assign to ensure a full page refresh
-                        // which loads the new session cookie and auth claims.
-                        window.location.assign('/dashboard');
+                        
+                        const finalIdToken = await userCredential.user.getIdToken(true);
+                        const loginResult = await login(finalIdToken);
+                        
+                        if (loginResult.success) {
+                           toast({ title: "Upgrade Complete!", description: "Redirecting to your dashboard." });
+                           window.location.assign('/dashboard');
+                        } else {
+                           throw new Error(loginResult.error || "Failed to log in after purchase.");
+                        }
                     } else {
-                        // This case handles if the sync fails for some reason
                          toast({ title: "Activation Pending", description: syncResult.error, variant: 'destructive' });
                          setView('payment_stalled');
                     }
@@ -272,5 +277,3 @@ export default function SignUpPage() {
         </>
     );
 }
-
-    

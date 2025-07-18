@@ -113,13 +113,29 @@ export async function createRazorpaySubscription(
 }
 
 
-export async function syncRazorpaySubscription(): Promise<{ success: boolean; message: string } | { success: false; error: string }> {
-    const { user } = await validateRequest();
-    if (!user || !user.email) {
-        return { success: false, error: 'You must be logged in to perform this action.' };
+export async function syncRazorpaySubscription(idToken?: string): Promise<{ success: boolean; message: string } | { success: false; error: string }> {
+    let userData: { uid: string, email?: string } | null = null;
+    
+    if (idToken) {
+        try {
+            const decodedToken = await adminAuth.verifyIdToken(idToken);
+            userData = { uid: decodedToken.uid, email: decodedToken.email };
+        } catch (e) {
+            return { success: false, error: 'Invalid authentication token.' };
+        }
+    } else {
+        const { user } = await validateRequest();
+        if (!user) {
+            return { success: false, error: 'You must be logged in.' };
+        }
+        userData = { uid: user.uid, email: user.email };
+    }
+
+    if (!userData || !userData.email) {
+        return { success: false, error: 'User email not found.' };
     }
     
-    console.log(`[syncRazorpay] Starting subscription sync for user: ${user.uid} (email: ${user.email})`);
+    console.log(`[syncRazorpay] Starting subscription sync for user: ${userData.uid} (email: ${userData.email})`);
 
     try {
         let userSubscription = null;
@@ -132,11 +148,11 @@ export async function syncRazorpaySubscription(): Promise<{ success: boolean; me
             const subscriptions = await razorpay.subscriptions.all({ count, skip });
             
             // Find subscription by email in the notes
-            const found = subscriptions.items.find(sub => sub.notes?.email === user.email && sub.status === 'active');
+            const found = subscriptions.items.find(sub => sub.notes?.email === userData?.email && sub.status === 'active');
 
             if (found) {
                 userSubscription = found;
-                console.log(`[syncRazorpay] Found active subscription ${userSubscription.id} for user with email ${user.email}.`);
+                console.log(`[syncRazorpay] Found active subscription ${userSubscription.id} for user with email ${userData?.email}.`);
                 break; // Exit loop once found
             }
 
@@ -148,21 +164,21 @@ export async function syncRazorpaySubscription(): Promise<{ success: boolean; me
         }
 
         if (userSubscription) {
-            const userProfileRef = db.ref(`user_profiles/${user.uid}`);
+            const userProfileRef = db.ref(`user_profiles/${userData.uid}`);
             
-            await userProfileRef.update({ plan: 'pro' });
-            await adminAuth.setCustomUserClaims(user.uid, { plan: 'pro' });
-            await adminAuth.revokeRefreshTokens(user.uid);
+            await userProfileRef.update({ plan: 'pro', onboardingCompleted: true });
+            await adminAuth.setCustomUserClaims(userData.uid, { plan: 'pro', onboardingCompleted: true });
+            await adminAuth.revokeRefreshTokens(userData.uid);
 
-            console.log(`[syncRazorpay] User ${user.uid} plan restored to Pro via manual sync.`);
+            console.log(`[syncRazorpay] User ${userData.uid} plan restored to Pro via manual sync.`);
             return { success: true, message: 'Your Pro plan has been successfully restored!' };
         } else {
-             console.log(`[syncRazorpay] No active subscription found for user ${user.uid} (email: ${user.email}) after checking all records.`);
+             console.log(`[syncRazorpay] No active subscription found for user ${userData.uid} (email: ${userData.email}) after checking all records.`);
             return { success: false, error: 'We could not find an active Pro subscription associated with your account.' };
         }
 
     } catch (error) {
-        console.error(`Error during manual subscription sync for user ${user.uid}:`, error);
+        console.error(`Error during manual subscription sync for user ${userData.uid}:`, error);
         return { success: false, error: 'An unexpected error occurred while checking your subscription status.' };
     }
 }
