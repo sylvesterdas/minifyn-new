@@ -235,7 +235,7 @@ export default function BillingPage() {
                         </div>
                     </CardContent>
                 </Card>
-
+                
                 {isFreePlan && (
                     <Card>
                         <CardHeader>
