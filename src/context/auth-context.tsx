@@ -29,11 +29,14 @@ export const AuthProvider = ({
     // This listener handles all auth state changes, including sign-in, sign-out,
     // and token refreshes.
     const unsubscribe = onIdTokenChanged(firebaseClientAuth, async (firebaseUser: FirebaseUser | null) => {
+        // Always start with loading true when auth state might be changing
+        setIsLoading(true);
         if (firebaseUser) {
             // When a user is detected on the client, we still trust the server's
             // view of the user for custom claims and other sensitive data.
             // We re-validate the request to get the server-side user object.
             const { user: serverUser } = await validateRequest();
+            
             setUser({
                 ...serverUser, // This will have plan, onboarding status, etc.
                 // We add the client-side properties that are useful.

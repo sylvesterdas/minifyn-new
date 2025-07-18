@@ -88,9 +88,12 @@ export default function SignInPage() {
                     title: 'Success',
                     description: 'Logged in successfully! Redirecting...',
                 });
-                router.push('/dashboard');
+                // Use window.location.assign for a hard refresh to ensure all server components
+                // and context providers are re-evaluated with the new session cookie.
+                window.location.assign('/dashboard');
             } else {
                 setError(result.error || 'An unknown server error occurred.');
+                setIsLoading(false);
             }
 
         } catch (authError: any) {
@@ -103,7 +106,10 @@ export default function SignInPage() {
                 console.error('Firebase Auth Error:', authError);
             }
         } finally {
-            setIsLoading(false);
+            // Don't set loading to false on success, as the page will redirect.
+            if (!isLoading) {
+                 setIsLoading(false);
+            }
         }
     };
     
