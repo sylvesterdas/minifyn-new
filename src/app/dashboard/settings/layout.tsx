@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const settingsNavItems = [
     { href: '/dashboard/settings/profile', label: 'Profile' },
     { href: '/dashboard/settings/api-keys', label: 'API Keys' },
-    { href: '/dashboard/settings/billing', label: 'Billing', plans: ['pro', 'admin'] },
+    { href: '/dashboard/settings/billing', label: 'Billing', plans: ['free', 'pro', 'admin'] },
 ];
 
 function SettingsNav() {
