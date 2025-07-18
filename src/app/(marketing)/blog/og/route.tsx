@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
 import { generateOgImage } from '@/ai/flows/generate-og-image-flow';
+import sharp from 'sharp';
 
 export const revalidate = 3600; // Cache for 1 hour
 
@@ -28,8 +29,8 @@ export async function GET(request: NextRequest) {
     const imageResult = await generateOgImage({ title, tags: tags || '' });
     const { imageUrl: aiBackgroundUrl } = imageResult;
 
-    // 3. Use the generated image in the final ImageResponse with text overlay.
-    return new ImageResponse(
+    // 3. Use ImageResponse to composite the text and background
+    const imageResponse = new ImageResponse(
       (
         <div
           style={{
@@ -96,11 +97,23 @@ export async function GET(request: NextRequest) {
       {
         width: 1200,
         height: 630,
-        // Output the final image as a compressed WebP
-        format: 'webp',
-        quality: 40,
       }
     );
+
+    // 4. Compress the generated image with sharp
+    const imageBuffer = await imageResponse.arrayBuffer();
+    const compressedImageBuffer = await sharp(imageBuffer)
+        .webp({ quality: 75 }) // Compress to WebP with 75% quality
+        .toBuffer();
+
+    // 5. Return the compressed image
+    return new NextResponse(compressedImageBuffer, {
+        headers: {
+            'Content-Type': 'image/webp',
+            'Content-Length': String(compressedImageBuffer.length),
+        },
+    });
+
   } catch (e: any) {
     console.error(`Failed to generate OG image: ${e.message}`);
     // Fallback to a simple image if AI fails
