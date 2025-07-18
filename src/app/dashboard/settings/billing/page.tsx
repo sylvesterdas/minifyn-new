@@ -33,7 +33,8 @@ function RestorePurchaseButton() {
         startTransition(async () => {
             const result = await syncRazorpaySubscription();
 
-            if (result.success) {
+            if (result.success && result.sessionCookie) {
+                await setSessionCookie(result.sessionCookie);
                 toast({
                     title: 'Success!',
                     description: 'Your Pro plan has been successfully synced!',
@@ -124,8 +125,8 @@ export default function BillingPage() {
                         window.location.assign('/dashboard');
                     } else {
                         toast({ title: "Activation Pending", description: "Your payment was successful, but activation is taking a moment. Please try restoring your purchase or refresh the page in a few minutes.", variant: 'destructive' });
+                        setIsLoading(false);
                     }
-                    setIsLoading(false);
                 },
                 modal: {
                     ondismiss: () => setIsLoading(false) // Reset loading state if modal is closed

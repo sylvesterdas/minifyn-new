@@ -179,10 +179,11 @@ export async function syncRazorpaySubscription(
             
             await userProfileRef.update({ plan: 'pro', onboardingCompleted: true });
             await adminAuth.setCustomUserClaims(uid, { plan: 'pro' });
-
-            const finalIdToken = idToken || await adminAuth.createCustomToken(uid);
+            
+            // To get the latest claims, we must create a new custom token and then a session cookie from it.
+            const newCustomToken = await adminAuth.createCustomToken(uid);
             const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-            const sessionCookie = await adminAuth.createSessionCookie(finalIdToken, { expiresIn });
+            const sessionCookie = await adminAuth.createSessionCookie(newCustomToken, { expiresIn });
             
             console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. New session cookie created.`);
 
