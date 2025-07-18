@@ -6,12 +6,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { useAuth } from '@/hooks/use-auth';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { syncRazorpaySubscription } from '@/app/payments/actions';
-import { useTransition } from 'react';
+import { syncRazorpaySubscription, createRazorpaySubscription } from '@/app/payments/actions';
+import { useState, useTransition } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
+import Script from 'next/script';
+import { trackEvent } from '@/lib/gtag';
+
+declare global {
+    interface Window {
+        Razorpay: any;
+    }
+}
+
 
 function RestorePurchaseButton() {
     const [isPending, startTransition] = useTransition();
@@ -19,14 +31,7 @@ function RestorePurchaseButton() {
 
     const handleRestore = () => {
         startTransition(async () => {
-            const user = auth.currentUser;
-            if (!user) {
-                toast({ title: 'Authentication Error', description: 'Please sign in again to restore your purchase.', variant: 'destructive' });
-                return;
-            }
-            
-            const idToken = await user.getIdToken(true);
-            const result = await syncRazorpaySubscription(idToken);
+            const result = await syncRazorpaySubscription();
 
             if (result.success) {
                 toast({
@@ -38,7 +43,7 @@ function RestorePurchaseButton() {
                  toast({
                     title: 'No Active Subscription Found',
                     description: result.error,
-                    variant: 'default' // Changed from 'destructive'
+                    variant: 'default'
                 });
             }
         });
@@ -69,7 +74,7 @@ function getPlanDetails(plan: string | undefined) {
         default:
             return {
                 name: 'Free',
-                description: 'Upgrade to unlock advanced features.',
+                description: 'You are on the Free plan.',
                 badgeVariant: 'secondary'
             };
     }
@@ -77,51 +82,143 @@ function getPlanDetails(plan: string | undefined) {
 
 
 export default function BillingPage() {
-    const { user } = useAuth();
+    const { user, isLoading: isAuthLoading } = useAuth();
+    const [isLoading, setIsLoading] = useState(false);
+    const [planType, setPlanType] = useState<'monthly' | 'yearly'>('monthly');
+    const { toast } = useToast();
+    const router = useRouter();
+
     const planDetails = getPlanDetails(user?.plan);
+    const isFreePlan = user?.plan === 'free';
+
+    const handleUpgrade = async () => {
+        if (!user || user.isAnonymous) {
+            toast({ title: 'Please sign in to upgrade.', variant: 'destructive' });
+            return;
+        }
+
+        setIsLoading(true);
+        trackEvent({ action: 'click_upgrade', category: 'conversion', label: 'upgrade_from_billing_page', value: planType === 'monthly' ? 89 : 899 });
+
+        try {
+            const subscriptionResult = await createRazorpaySubscription(planType);
+            if ('error' in subscriptionResult) {
+                throw new Error(subscriptionResult.error);
+            }
+            
+            const options = {
+                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                subscription_id: subscriptionResult.subscriptionId,
+                name: "MiniFyn Pro",
+                description: planType === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
+                handler: function (response: any) {
+                    toast({ title: 'Payment Successful!', description: 'Your plan has been upgraded to Pro.' });
+                    trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_upgrade_${planType}`, value: planType === 'monthly' ? 89 : 899 });
+                    // Use window.location.assign for a hard refresh to ensure user claims are updated.
+                    window.location.assign('/dashboard');
+                },
+                modal: {
+                    ondismiss: () => setIsLoading(false) // Reset loading state if modal is closed
+                },
+                prefill: {
+                    name: user.name,
+                    email: user.email,
+                },
+                theme: {
+                    color: "#1e40af"
+                }
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', function (response: any) {
+                toast({ title: 'Payment Failed', description: response.error.description, variant: 'destructive' });
+                setIsLoading(false);
+            });
+            rzp.open();
+
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: error instanceof Error ? error.message : 'Could not initiate payment.',
+                variant: 'destructive',
+            });
+            setIsLoading(false);
+        }
+    };
+
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Your Plan</CardTitle>
-                <CardDescription>
-                    Manage your subscription and billing details.
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
-                    <div>
-                        <h3 className="text-lg font-semibold">
-                            MiniFyn {planDetails.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
+        <>
+            <Script id="razorpay-checkout-js" src="https://checkout.razorpay.com/v1/checkout.js" />
+            <div className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Your Plan</CardTitle>
+                        <CardDescription>
                             {planDetails.description}
-                        </p>
-                    </div>
-                    <Badge variant={planDetails.badgeVariant as any} className="capitalize">
-                        {user?.plan}
-                    </Badge>
-                </div>
-                {(user?.plan === 'free' || !user?.plan) && (
-                    <Button asChild>
-                        <Link href="/pricing">Upgrade to Pro</Link>
-                    </Button>
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+                            <div>
+                                <h3 className="text-lg font-semibold">
+                                    MiniFyn {planDetails.name}
+                                </h3>
+                            </div>
+                            <Badge variant={planDetails.badgeVariant as any} className="capitalize">
+                                {user?.plan}
+                            </Badge>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {isFreePlan && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Upgrade to Pro</CardTitle>
+                            <CardDescription>
+                                Choose a billing cycle and unlock all premium features.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                             <div className="flex justify-center items-center gap-4">
+                                <Label htmlFor="plan-toggle" className={cn(planType === 'monthly' ? 'text-foreground' : 'text-muted-foreground')}>Monthly</Label>
+                                <Switch
+                                    id="plan-toggle"
+                                    checked={planType === 'yearly'}
+                                    onCheckedChange={(checked) => setPlanType(checked ? 'yearly' : 'monthly')}
+                                    aria-label="Toggle between monthly and yearly billing"
+                                />
+                                <Label htmlFor="plan-toggle" className={cn(planType === 'yearly' ? 'text-foreground' : 'text-muted-foreground')}>
+                                    Yearly <span className="text-primary font-semibold">(Save 15%)</span>
+                                </Label>
+                            </div>
+                            <div className="text-center pt-2 transition-all duration-300 text-4xl font-bold">
+                                {planType === 'monthly' ? (
+                                    <span>₹89 <span className="text-base font-normal text-muted-foreground">/month</span></span>
+                                ) : (
+                                    <span>₹899 <span className="text-base font-normal text-muted-foreground">/year</span></span>
+                                )}
+                            </div>
+                            <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={isLoading || isAuthLoading}>
+                                {isLoading || isAuthLoading ? <Loader2 className="animate-spin" /> : 'Upgrade and Pay'}
+                            </Button>
+                        </CardContent>
+                    </Card>
                 )}
-                 {user?.plan === 'pro' && (
-                     <p className="text-sm text-muted-foreground">
-                        Your subscription is managed by Razorpay. To change your payment method or cancel your subscription, please visit the Razorpay customer portal.
-                    </p>
-                )}
-            </CardContent>
-            <CardFooter className="border-t pt-6 flex-col items-start gap-4">
-                <div>
-                     <h3 className="font-semibold">Missing your Pro features?</h3>
-                     <p className="text-sm text-muted-foreground">
-                        If you've paid but don't see your Pro features, click here to sync your latest subscription status.
-                     </p>
-                </div>
-                <RestorePurchaseButton />
-            </CardFooter>
-        </Card>
+
+                <Card>
+                    <CardHeader>
+                         <CardTitle>Restore Purchase</CardTitle>
+                         <CardDescription>
+                            If you've paid but don't see your Pro features, click here to sync your latest subscription status.
+                         </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <RestorePurchaseButton />
+                    </CardContent>
+                </Card>
+            </div>
+        </>
     );
 }

@@ -30,7 +30,7 @@ export function LockedFeatureCard({ title, description, children }: LockedFeatur
                 <h3 className="text-lg font-semibold">Upgrade to Pro to unlock</h3>
                 <p className="text-sm text-muted-foreground mb-4">{description}</p>
                 <Button asChild>
-                    <Link href="/pricing">Upgrade Now <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                    <Link href="/dashboard/settings/billing">Upgrade Now <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
             </div>
         </Card>

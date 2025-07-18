@@ -76,51 +76,14 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
         const eventLabel = context === 'onboarding' ? 'upgrade_from_onboarding' : 'upgrade_from_pricing_page';
         trackEvent({ action: 'click_upgrade', category: 'conversion', label: eventLabel, value: planType === 'monthly' ? 89 : 899 });
 
-        if (!user || user.isAnonymous) {
-            router.push(`/auth/signup?plan=pro&interval=${planType}`);
+        // If user is logged in, redirect them to the billing page to upgrade.
+        if (user && !user.isAnonymous) {
+            router.push('/dashboard/settings/billing');
             return;
         }
 
-        try {
-            const subscriptionResult = await createRazorpaySubscription(planType);
-            if ('error' in subscriptionResult) {
-                throw new Error(subscriptionResult.error);
-            }
-            
-            const options = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                subscription_id: subscriptionResult.subscriptionId,
-                name: "MiniFyn Pro",
-                description: planType === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
-                handler: function (response: any) {
-                    toast({ title: 'Payment Successful!', description: 'Your plan has been upgraded to Pro.' });
-                    trackEvent({ action: 'purchase', category: 'conversion', label: 'pro_plan', value: planType === 'monthly' ? 89 : 899 });
-                    window.location.assign('/dashboard');
-                },
-                prefill: {
-                    name: user.name,
-                    email: user.email,
-                },
-                theme: {
-                    color: "#1e40af"
-                }
-            };
-
-            const rzp = new window.Razorpay(options);
-            rzp.on('payment.failed', function (response: any) {
-                toast({ title: 'Payment Failed', description: response.error.description, variant: 'destructive' });
-            });
-            rzp.open();
-
-        } catch (error) {
-            toast({
-                title: 'Error',
-                description: error instanceof Error ? error.message : 'Could not initiate payment.',
-                variant: 'destructive',
-            });
-        } finally {
-            setIsLoading(false);
-        }
+        // If user is not logged in, redirect them to the signup page with params.
+        router.push(`/auth/signup?plan=pro&interval=${planType}`);
     };
     
     if (isAuthLoading && context === 'pricingPage') {
@@ -133,49 +96,6 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
     }
 
     const userPlan = user?.plan;
-    
-    if (context === 'onboarding') {
-        return (
-             <>
-                <Script
-                    id="razorpay-checkout-js"
-                    src="https://checkout.razorpay.com/v1/checkout.js"
-                />
-                <div className="flex justify-center items-center gap-4 mb-6">
-                    <Label htmlFor="plan-toggle" className={cn('text-sm', planType === 'monthly' ? 'text-foreground' : 'text-muted-foreground')}>Monthly</Label>
-                    <Switch
-                        id="plan-toggle"
-                        checked={planType === 'yearly'}
-                        onCheckedChange={(checked) => setPlanType(checked ? 'yearly' : 'monthly')}
-                        aria-label="Toggle between monthly and yearly billing"
-                    />
-                    <Label htmlFor="plan-toggle" className={cn('text-sm', planType === 'yearly' ? 'text-foreground' : 'text-muted-foreground')}>
-                        Yearly <span className="text-primary font-semibold">(Save 15%)</span>
-                    </Label>
-                </div>
-                <div className="text-center pt-2 transition-all duration-300">
-                     {planType === 'monthly' ? (
-                        <>
-                            <span className="text-4xl font-bold">₹89</span>
-                            <span className="text-muted-foreground">/month</span>
-                        </>
-                     ) : (
-                        <>
-                            <span className="text-4xl font-bold">₹899</span>
-                            <span className="text-muted-foreground">/year</span>
-                        </>
-                     )}
-                </div>
-                 <div className="my-6">
-                    <FeatureList features={proFeatures} />
-                 </div>
-                <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={isLoading}>
-                    {isLoading ? <Loader2 className="animate-spin" /> : 'Get Pro Now'}
-                </Button>
-            </>
-        )
-    }
-
 
     return (
         <>
