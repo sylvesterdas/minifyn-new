@@ -6,6 +6,7 @@ import Razorpay from 'razorpay';
 import { auth as adminAuth, db } from '@/lib/firebase-admin';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import { setSessionCookie } from '../auth/cookie';
+import { revalidatePath } from 'next/cache';
 
 // Determine which set of keys and plans to use based on the environment
 const isProduction = process.env.NODE_ENV === 'production';
@@ -49,7 +50,7 @@ export async function createRazorpaySubscription(
     if (idToken) {
         try {
             // Verify the ID token passed from the client
-            const decodedToken: DecodedIdToken = await adminAuth.verifyIdToken(idToken);
+            const decodedToken: DecodedIdToken = await adminAuth().verifyIdToken(idToken);
             userData = { uid: decodedToken.uid, email: decodedToken.email, name: decodedToken.name };
             console.log(`[Payment Action] Verified user via ID token: ${userData.uid}`);
         } catch(e) {
@@ -127,7 +128,7 @@ export async function syncRazorpaySubscription(
 
     if (idToken) {
         try {
-            const decodedToken = await adminAuth.verifyIdToken(idToken);
+            const decodedToken = await adminAuth().verifyIdToken(idToken);
             uid = decodedToken.uid;
             email = decodedToken.email;
         } catch (e) {
@@ -178,12 +179,12 @@ export async function syncRazorpaySubscription(
             const userProfileRef = db.ref(`user_profiles/${uid}`);
             
             await userProfileRef.update({ plan: 'pro', onboardingCompleted: true });
-            await adminAuth.setCustomUserClaims(uid, { plan: 'pro' });
+            await adminAuth().setCustomUserClaims(uid, { plan: 'pro' });
             
             // To get the latest claims, we must create a new custom token and then a session cookie from it.
-            const newCustomToken = await adminAuth.createCustomToken(uid);
+            const newCustomToken = await adminAuth().createCustomToken(uid);
             const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-            const sessionCookie = await adminAuth.createSessionCookie(newCustomToken, { expiresIn });
+            const sessionCookie = await adminAuth().createSessionCookie(newCustomToken, { expiresIn });
             
             console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. New session cookie created.`);
 
@@ -199,5 +200,61 @@ export async function syncRazorpaySubscription(
     } catch (error) {
         console.error(`Error during manual subscription sync for user ${uid}:`, error);
         return { success: false, error: 'An unexpected error occurred while checking your subscription status.' };
+    }
+}
+
+export async function getSubscriptionDetails(): Promise<{ subscription: any | null; error?: string }> {
+    const { user } = await validateRequest();
+    if (!user) {
+        return { subscription: null, error: 'Unauthorized' };
+    }
+
+    try {
+        const userProfileRef = db.ref(`user_profiles/${user.uid}/subscription`);
+        const snapshot = await userProfileRef.once('value');
+        const subData = snapshot.val();
+
+        if (!subData || !subData.id) {
+            return { subscription: null };
+        }
+
+        const subscription = await razorpay.subscriptions.fetch(subData.id);
+        return { subscription };
+    } catch (error) {
+        console.error('Failed to fetch subscription details:', error);
+        return { subscription: null, error: 'Could not retrieve subscription details.' };
+    }
+}
+
+export async function cancelRazorpaySubscription(): Promise<{ success: boolean; subscription?: any; error?: string }> {
+    const { user } = await validateRequest();
+    if (!user) {
+        return { success: false, error: 'Unauthorized' };
+    }
+
+    try {
+        const userProfileRef = db.ref(`user_profiles/${user.uid}/subscription`);
+        const snapshot = await userProfileRef.once('value');
+        const subData = snapshot.val();
+
+        if (!subData || !subData.id) {
+            return { success: false, error: 'No active subscription found to cancel.' };
+        }
+
+        // Cancel at the end of the billing cycle
+        const cancelledSubscription = await razorpay.subscriptions.cancel(subData.id, true);
+
+        // Update our DB to reflect the cancellation
+        await userProfileRef.update({
+            status: cancelledSubscription.status,
+            ended_at: cancelledSubscription.end_at,
+        });
+
+        revalidatePath('/dashboard/settings/billing');
+
+        return { success: true, subscription: cancelledSubscription };
+    } catch (error) {
+        console.error('Failed to cancel subscription:', error);
+        return { success: false, error: 'Could not cancel the subscription. Please contact support.' };
     }
 }

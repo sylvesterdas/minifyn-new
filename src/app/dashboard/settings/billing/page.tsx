@@ -6,10 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { useAuth } from '@/hooks/use-auth';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { syncRazorpaySubscription, createRazorpaySubscription } from '@/app/payments/actions';
-import { useState, useTransition } from 'react';
+import { syncRazorpaySubscription, createRazorpaySubscription, cancelRazorpaySubscription, getSubscriptionDetails } from '@/app/payments/actions';
+import { useState, useTransition, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { Loader2, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import Script from 'next/script';
 import { trackEvent } from '@/lib/gtag';
 import { setSessionCookie } from '@/app/auth/cookie';
+import { format } from 'date-fns';
 
 declare global {
     interface Window {
@@ -86,11 +87,24 @@ export default function BillingPage() {
     const { user, isLoading: isAuthLoading } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [planType, setPlanType] = useState<'monthly' | 'yearly'>('monthly');
+    const [subscription, setSubscription] = useState<any | null>(null);
+    const [isCancelling, startCancelTransition] = useTransition();
     const { toast } = useToast();
     const router = useRouter();
 
+    useEffect(() => {
+        if (user?.plan === 'pro' || user?.plan === 'admin') {
+            getSubscriptionDetails().then(({ subscription }) => {
+                if (subscription) {
+                    setSubscription(subscription);
+                }
+            });
+        }
+    }, [user?.plan]);
+
     const planDetails = getPlanDetails(user?.plan);
     const isFreePlan = user?.plan === 'free';
+    const isProOrAdmin = user?.plan === 'pro' || user?.plan === 'admin';
 
     const handleUpgrade = async () => {
         if (!user || user.isAnonymous) {
@@ -122,7 +136,7 @@ export default function BillingPage() {
                         toast({ title: "Upgrade Complete!", description: "Your plan has been upgraded to Pro." });
                         trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_upgrade_${planType}`, value: planType === 'monthly' ? 89 : 899 });
                          // Use window.location.assign for a hard refresh to ensure user claims are updated.
-                        window.location.assign('/dashboard');
+                        window.location.assign('/dashboard/settings/billing');
                     } else {
                         toast({ title: "Activation Pending", description: "Your payment was successful, but activation is taking a moment. Please try restoring your purchase or refresh the page in a few minutes.", variant: 'destructive' });
                         setIsLoading(false);
@@ -155,6 +169,18 @@ export default function BillingPage() {
             });
             setIsLoading(false);
         }
+    };
+    
+    const handleCancel = () => {
+        startCancelTransition(async () => {
+            const result = await cancelRazorpaySubscription();
+            if (result.success) {
+                toast({ title: 'Subscription Cancelled', description: 'Your Pro plan will remain active until the end of your current billing period.' });
+                setSubscription(result.subscription); // Update state with the cancelled subscription details
+            } else {
+                toast({ title: 'Error', description: result.error, variant: 'destructive' });
+            }
+        });
     };
 
 
@@ -215,6 +241,47 @@ export default function BillingPage() {
                                 {isLoading || isAuthLoading ? <Loader2 className="animate-spin" /> : 'Upgrade and Pay'}
                             </Button>
                         </CardContent>
+                    </Card>
+                )}
+                
+                {isProOrAdmin && subscription && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Manage Subscription</CardTitle>
+                             <CardDescription>
+                                Manage your current Pro subscription plan.
+                             </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                           {subscription.status === 'cancelled' ? (
+                               <div className="p-4 rounded-lg bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 flex items-center gap-3">
+                                   <AlertTriangle className="h-5 w-5" />
+                                   <div>
+                                       <h4 className="font-semibold text-yellow-300">Cancellation Pending</h4>
+                                       <p className="text-sm">Your subscription will be cancelled and access will end on <span className="font-bold">{format(new Date(subscription.current_end * 1000), 'PPP')}.</span></p>
+                                   </div>
+                               </div>
+                           ) : (
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-muted-foreground">Status</span>
+                                        <span className="font-medium capitalize flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />{subscription.status}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-muted-foreground">Renews on</span>
+                                        <span className="font-medium">{format(new Date(subscription.current_end * 1000), 'PPP')}</span>
+                                    </div>
+                                </div>
+                           )}
+                        </CardContent>
+                        {subscription.status !== 'cancelled' && (
+                             <CardFooter className="border-t pt-6">
+                                <Button variant="destructive" onClick={handleCancel} disabled={isCancelling}>
+                                    {isCancelling && <Loader2 className="mr-2 animate-spin" />}
+                                    Cancel Subscription
+                                </Button>
+                            </CardFooter>
+                        )}
                     </Card>
                 )}
 
