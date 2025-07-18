@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
 import { generateOgImage } from '@/ai/flows/generate-og-image-flow';
 import sharp from 'sharp';
+import { Readable } from 'stream';
 
 export const revalidate = 3600; // Cache for 1 hour
 
@@ -100,21 +101,21 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    // 4. Get the image buffer from the response
-    const imageBuffer = await imageResponse.arrayBuffer();
+    // 4. Get the readable stream from the ImageResponse
+    const imageStream = imageResponse.body as ReadableStream<Uint8Array>;
 
-    // 5. Compress the buffer with sharp
-    const compressedImageBuffer = await sharp(imageBuffer)
-        .webp({ quality: 100 }) // Use 100 quality as requested
-        .toBuffer();
+    // 5. Create a sharp pipeline to compress the stream
+    const sharpStream = sharp().webp({ quality: 100 });
 
-    // 6. Return the compressed image as a new response
-    return new NextResponse(compressedImageBuffer, {
-        headers: {
-            'Content-Type': 'image/webp',
-            'Content-Length': compressedImageBuffer.length.toString(),
-            'Cache-Control': 'public, max-age=3600, must-revalidate',
-        },
+    // 6. Pipe the image stream through the sharp pipeline
+    const compressedStream = Readable.fromWeb(imageStream).pipe(sharpStream);
+
+    // 7. Return the compressed stream as a new response
+    return new NextResponse(compressedStream as any, {
+      headers: {
+          'Content-Type': 'image/webp',
+          'Cache-Control': 'public, max-age=3600, must-revalidate',
+      },
     });
 
 
