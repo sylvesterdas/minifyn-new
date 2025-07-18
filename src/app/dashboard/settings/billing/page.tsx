@@ -128,6 +128,7 @@ export default function BillingPage() {
     const isFreePlan = user?.plan === 'free';
     const isProPlan = user?.plan === 'pro';
     const isAdminPlan = user?.plan === 'admin';
+    const isCancellationPending = subscription?.end_at;
 
     const handleUpgrade = async () => {
         if (!user || user.isAnonymous) {
@@ -283,7 +284,7 @@ export default function BillingPage() {
                                      </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                   {subscription.status === 'cancelled' ? (
+                                   {isCancellationPending ? (
                                        <div className="p-4 rounded-lg bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 flex items-center gap-3">
                                            <AlertTriangle className="h-5 w-5" />
                                            <div>
@@ -304,7 +305,7 @@ export default function BillingPage() {
                                         </div>
                                    )}
                                 </CardContent>
-                                {subscription.status !== 'cancelled' && (
+                                {!isCancellationPending && (
                                      <CardFooter className="border-t pt-6">
                                         <Button variant="destructive" onClick={handleCancel} disabled={isCancelling}>
                                             {isCancelling && <Loader2 className="mr-2 animate-spin" />}

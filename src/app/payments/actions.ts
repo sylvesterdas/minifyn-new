@@ -269,11 +269,12 @@ export async function cancelRazorpaySubscription(): Promise<{ success: boolean; 
             console.warn(`[CancelSub] No active subscription found in DB for user ${user.uid} to cancel.`);
             return { success: false, error: 'No active subscription found to cancel.' };
         }
-        console.log(`[CancelSub] Found subscription ${subData.id} for user ${user.uid}. Status: ${subData.status}`);
+        console.log(`[CancelSub] Found subscription ${subData.id} for user ${user.uid}. Current DB Status: ${subData.status}`);
 
         // Cancel at the end of the billing cycle
         console.log(`[CancelSub] Sending cancellation request to Razorpay for subscription ${subData.id}`);
         const cancelledSubscription = await razorpay.subscriptions.cancel(subData.id, { cancel_at_cycle_end: true });
+        
         console.log('[CancelSub] Razorpay response received:', JSON.stringify(cancelledSubscription, null, 2));
 
 
