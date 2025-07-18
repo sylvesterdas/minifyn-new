@@ -96,8 +96,8 @@ export async function GET(request: NextRequest) {
       {
         width: 1200,
         height: 630,
-        // Add options to output a compressed JPEG
-        format: 'jpeg',
+        // Add options to output a compressed WebP
+        format: 'webp',
         quality: 75,
       }
     );
