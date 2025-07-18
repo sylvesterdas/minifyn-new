@@ -15,7 +15,6 @@ import { useRouter } from 'next/navigation';
 function RestorePurchaseButton() {
     const [isPending, startTransition] = useTransition();
     const { toast } = useToast();
-    const router = useRouter();
 
     const handleRestore = () => {
         startTransition(async () => {

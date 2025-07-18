@@ -168,8 +168,7 @@ export async function syncRazorpaySubscription(idToken?: string): Promise<{ succ
             
             await userProfileRef.update({ plan: 'pro', onboardingCompleted: true });
             await adminAuth.setCustomUserClaims(userData.uid, { plan: 'pro', onboardingCompleted: true });
-            await adminAuth.revokeRefreshTokens(userData.uid);
-
+            
             console.log(`[syncRazorpay] User ${userData.uid} plan restored to Pro via manual sync.`);
             return { success: true, message: 'Your Pro plan has been successfully restored!' };
         } else {
@@ -178,6 +177,7 @@ export async function syncRazorpaySubscription(idToken?: string): Promise<{ succ
         }
 
     } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
         console.error(`Error during manual subscription sync for user ${userData.uid}:`, error);
         return { success: false, error: 'An unexpected error occurred while checking your subscription status.' };
     }
