@@ -42,31 +42,36 @@ export async function createRazorpaySubscription(
     idToken?: string
 ): Promise<{ error: string } | CreateSubscriptionResponse> {
     let userData: { uid: string, email?: string } | null = null;
+    console.log('[Payment Action] Starting subscription creation...');
 
     if (idToken) {
         try {
             // Verify the ID token passed from the client
             const decodedToken = await adminAuth.verifyIdToken(idToken);
             userData = { uid: decodedToken.uid, email: decodedToken.email };
+            console.log(`[Payment Action] Verified user via ID token: ${userData.uid}`);
         } catch(e) {
-            console.error("Failed to verify ID token during subscription:", e);
+            console.error("[Payment Action] Failed to verify ID token during subscription:", e);
             return { error: 'Invalid authentication token provided.' };
         }
     } else {
         // Fallback to session cookie if no token is provided (for existing users upgrading)
         const { user } = await validateRequest();
         if (!user) {
+            console.warn('[Payment Action] User must be logged in to subscribe.');
             return { error: 'You must be logged in to subscribe.' };
         }
         userData = { uid: user.uid, email: user.email };
+        console.log(`[Payment Action] Verified user via session cookie: ${userData.uid}`);
     }
 
     if (!userData) {
+        console.error('[Payment Action] Authentication failed, could not get user data.');
         return { error: 'Authentication failed.' };
     }
     
     if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
-        console.error("Razorpay keys are not configured for the current environment.");
+        console.error("[Payment Action] Razorpay keys are not configured for the current environment.");
         return { error: 'Payment service is currently unavailable.' };
     }
     
@@ -76,7 +81,7 @@ export async function createRazorpaySubscription(
 
     const planId = PLAN_IDS[planType];
     if (!planId) {
-        console.error(`Razorpay plan ID for '${planType}' is not configured for the current environment.`);
+        console.error(`[Payment Action] Razorpay plan ID for '${planType}' is not configured for the current environment.`);
         return { error: 'The selected plan is currently unavailable.' };
     }
     
@@ -90,17 +95,19 @@ export async function createRazorpaySubscription(
                 email: userData.email || '',
             },
         };
-
+        
+        console.log(`[Payment Action] Creating Razorpay subscription for user ${userData.uid} with plan ${planId}.`);
         const subscription = await razorpay.subscriptions.create(options);
         const planDetails = await razorpay.plans.fetch(planId);
-
+        
+        console.log(`[Payment Action] Successfully created Razorpay subscription ${subscription.id} for user ${userData.uid}.`);
         return {
             subscriptionId: subscription.id,
             amount: planDetails.item.amount,
             currency: planDetails.item.currency,
         };
     } catch (error) {
-        console.error('Error creating Razorpay subscription:', error);
+        console.error('[Payment Action] Error creating Razorpay subscription:', error);
         return { error: 'Could not create a subscription. Please try again.' };
     }
 }

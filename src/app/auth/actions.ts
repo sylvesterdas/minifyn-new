@@ -52,18 +52,24 @@ export async function login(
 
 export async function sendVerificationOtp(prevState: any, formData: FormData): Promise<{ success: boolean; error?: string, message?: string }> {
     const email = formData.get('email') as string;
+    console.log(`[OTP Action] Attempting to send OTP for email: ${email}`);
 
     if (!email || !email.includes('@')) {
+        console.warn(`[OTP Action] Invalid email provided: ${email}`);
         return { success: false, error: 'Please enter a valid email address.' };
     }
 
     try {
         await auth.getUserByEmail(email);
+        console.warn(`[OTP Action] OTP not sent. Email already in use: ${email}`);
         return { success: false, error: 'This email address is already in use.' };
     } catch (error: any) {
         if (error.code !== 'auth/user-not-found') {
+            console.error(`[OTP Action] Unexpected error checking user:`, error);
             return { success: false, error: 'An unexpected error occurred. Please try again.' };
         }
+        // This is the expected case, user does not exist yet.
+        console.log(`[OTP Action] Email ${email} is available. Proceeding to send OTP.`);
     }
 
     // Generate a 6-digit OTP
@@ -73,6 +79,7 @@ export async function sendVerificationOtp(prevState: any, formData: FormData): P
     try {
         // Store OTP in the database
         await db.ref(`otp_verifications/${encodeEmail(email)}`).set({ otp, expiresAt });
+        console.log(`[OTP Action] Stored OTP for ${email} in database.`);
         
         // Send OTP via email
         const emailResult = await sendEmail({
@@ -87,13 +94,15 @@ export async function sendVerificationOtp(prevState: any, formData: FormData): P
         });
 
         if (!emailResult.success) {
+            console.error(`[OTP Action] Email sending failed for ${email}: ${emailResult.error}`);
             return { success: false, error: emailResult.error };
         }
 
+        console.log(`[OTP Action] Successfully sent OTP to ${email}.`);
         return { success: true, message: 'An OTP has been sent to your email.' };
 
     } catch (err) {
-        console.error("Error in sendVerificationOtp:", err);
+        console.error("[OTP Action] Error in sendVerificationOtp:", err);
         return { success: false, error: 'Failed to send OTP. Please try again.' };
     }
 }
@@ -104,8 +113,10 @@ export async function verifyOtpAndCreateUser(prevState: any, formData: FormData)
     const otp = formData.get('otp') as string;
     const name = formData.get('name') as string;
     const password = formData.get('password') as string;
+    console.log(`[User Creation] Verifying OTP for email: ${email}`);
 
     if (!email || !otp || !name || !password) {
+        console.warn('[User Creation] Missing required fields.');
         return { success: false, error: 'Missing required fields.' };
     }
 
@@ -115,8 +126,10 @@ export async function verifyOtpAndCreateUser(prevState: any, formData: FormData)
         const otpData = snapshot.val();
 
         if (!otpData || otpData.otp !== otp || Date.now() > otpData.expiresAt) {
+            console.warn(`[User Creation] Invalid or expired OTP for ${email}.`);
             return { success: false, error: 'Invalid or expired OTP. Please try again.' };
         }
+        console.log(`[User Creation] OTP verified successfully for ${email}.`);
 
         // OTP is valid, create the user
         const userRecord = await auth.createUser({
@@ -125,6 +138,7 @@ export async function verifyOtpAndCreateUser(prevState: any, formData: FormData)
             displayName: name,
             emailVerified: true, // Mark as verified since OTP was successful
         });
+        console.log(`[User Creation] Firebase Auth user created for UID: ${userRecord.uid}`);
 
         await db.ref(`user_profiles/${userRecord.uid}`).set({
             name: userRecord.displayName,
@@ -134,16 +148,19 @@ export async function verifyOtpAndCreateUser(prevState: any, formData: FormData)
             onboardingCompleted: true, // Skip multi-step onboarding
             plan: 'free', // Start as free, webhook/sync will upgrade to pro
         });
+        console.log(`[User Creation] Firebase RTDB profile created for UID: ${userRecord.uid}`);
         
         // Clean up the used OTP
         await otpRef.remove();
+        console.log(`[User Creation] Cleaned up OTP for ${email}.`);
         
         // Create a custom token to allow client-side sign-in before payment
         const customToken = await auth.createCustomToken(userRecord.uid);
+        console.log(`[User Creation] Custom token generated for UID: ${userRecord.uid}.`);
         
         return { success: true, customToken: customToken };
     } catch (error) {
-        console.error("Error in verifyOtpAndCreateUser:", error);
+        console.error("[User Creation] Error in verifyOtpAndCreateUser:", error);
         return { success: false, error: 'Failed to create account. Please try again.' };
     }
 }

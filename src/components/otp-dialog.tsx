@@ -37,8 +37,18 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
     const [verifyState, verifyFormAction, isVerifying] = useActionState(verifyOtpAndCreateUser, { success: false });
     
     const [resendCooldown, setResendCooldown] = useState(0);
-    const [otpSent, setOtpSent] = useState(false);
 
+    // Automatically send OTP when dialog opens
+    useEffect(() => {
+        if (open && email) {
+            const formData = new FormData();
+            formData.append('email', email);
+            sendFormAction(formData);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, email]); // Only run when dialog opens or email changes
+
+    // Cooldown timer effect
     useEffect(() => {
         if(resendCooldown > 0) {
             const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
@@ -46,18 +56,18 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
         }
     }, [resendCooldown]);
 
+    // Handle toast messages from OTP send action
     useEffect(() => {
         if (sendState.message) {
             toast({ description: sendState.message });
-            setOtpSent(true);
             setResendCooldown(30);
         }
         if (sendState.error) {
             toast({ description: sendState.error, variant: 'destructive' });
-            setOtpSent(false);
         }
     }, [sendState, toast]);
 
+    // Handle toast messages and success from OTP verify action
     useEffect(() => {
         if (verifyState.error) {
             toast({ description: verifyState.error, variant: 'destructive' });
@@ -68,15 +78,11 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
         }
     }, [verifyState, toast, onVerified, name, email]);
 
-    const handleSendCode = () => {
-        const formData = new FormData();
-        formData.append('email', email);
-        sendFormAction(formData);
-    };
-
     const handleResend = () => {
         if (resendCooldown === 0) {
-            handleSendCode();
+            const formData = new FormData();
+            formData.append('email', email);
+            sendFormAction(formData);
         }
     };
 
@@ -104,45 +110,34 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
                 <DialogHeader>
                     <DialogTitle>Verify Your Email for Pro</DialogTitle>
                     <DialogDescription>
-                        {otpSent 
-                            ? `We've sent a 6-digit code to ${email}. Please enter it below.`
-                            : 'Click the button below to send a verification code to your email.'
-                        }
+                        {`We're sending a 6-digit code to ${email}. Please enter it below.`}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="flex flex-col items-center justify-center space-y-4 py-4">
-                    {!otpSent ? (
-                        <Button onClick={handleSendCode} disabled={isLoading} className="w-full">
-                            {isLoading ? <Loader2 className="animate-spin" /> : 'Send Verification Code'}
+                    <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+                        <InputOTPGroup>
+                            <InputOTPSlot index={0} />
+                            <InputOTPSlot index={1} />
+                            <InputOTPSlot index={2} />
+                            <InputOTPSlot index={3} />
+                            <InputOTPSlot index={4} />
+                            <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                    </InputOTP>
+                    <Button onClick={handleVerify} disabled={isLoading || otp.length < 6} className="w-full">
+                        {isLoading ? <Loader2 className="animate-spin" /> : "Verify and Purchase"}
+                    </Button>
+                    <div className="text-sm text-muted-foreground">
+                        Didn't receive a code?{' '}
+                        <Button
+                            variant="link"
+                            className="p-0 h-auto"
+                            onClick={handleResend}
+                            disabled={resendCooldown > 0 || isLoading}
+                        >
+                            Resend {resendCooldown > 0 ? `(${resendCooldown}s)` : ''}
                         </Button>
-                    ) : (
-                        <>
-                            <InputOTP maxLength={6} value={otp} onChange={setOtp}>
-                                <InputOTPGroup>
-                                    <InputOTPSlot index={0} />
-                                    <InputOTPSlot index={1} />
-                                    <InputOTPSlot index={2} />
-                                    <InputOTPSlot index={3} />
-                                    <InputOTPSlot index={4} />
-                                    <InputOTPSlot index={5} />
-                                </InputOTPGroup>
-                            </InputOTP>
-                            <Button onClick={handleVerify} disabled={isLoading || otp.length < 6} className="w-full">
-                                {isLoading ? <Loader2 className="animate-spin" /> : "Verify and Purchase"}
-                            </Button>
-                            <div className="text-sm text-muted-foreground">
-                                Didn't receive a code?{' '}
-                                <Button
-                                    variant="link"
-                                    className="p-0 h-auto"
-                                    onClick={handleResend}
-                                    disabled={resendCooldown > 0 || isLoading}
-                                >
-                                    Resend {resendCooldown > 0 ? `(${resendCooldown}s)` : ''}
-                                </Button>
-                            </div>
-                        </>
-                    )}
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>
