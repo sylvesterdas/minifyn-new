@@ -15,12 +15,6 @@ export default async function DashboardPage() {
         redirect('/auth/signin');
     }
 
-    // This logic is now handled in the new signup flow.
-    // Keeping it here is a good fallback but can be removed if confident in the new flow.
-    if (!user.onboardingCompleted) {
-        redirect('/auth/signup'); // Redirect back to signup if onboarding isn't complete
-    }
-
     // Fetch both stats and summary in parallel
     const [stats, summary] = await Promise.all([
         getDashboardStats(),
