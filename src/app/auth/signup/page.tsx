@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useEffect, useState, Suspense } from 'react';
+import { useActionState, useEffect, useState, Suspense, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 import { signup } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ExternalLink, MailCheck, ShieldCheck, HelpCircle, Star } from 'lucide-react';
+import { Loader2, ExternalLink, MailCheck } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { trackEvent } from '@/lib/gtag';
 import { PlanSelector, type Plan } from '@/components/plan-selector';
@@ -67,7 +67,7 @@ function SignUpPageComponent() {
     const [view, setView] = useState<'form' | 'email_verification' | 'payment_processing' | 'payment_stalled'>('form');
     const [showOtpDialog, setShowOtpDialog] = useState(false);
     const [isPaymentLoading, setIsPaymentLoading] = useState(false);
-    const [isOtpSending, setIsOtpSending] = useState(false);
+    const [isOtpSending, startOtpTransition] = useTransition();
 
 
     // Effect for handling Free Plan submission result
@@ -82,19 +82,19 @@ function SignUpPageComponent() {
         }
     }, [freePlanState, toast]);
 
-    const handleProSignup = async () => {
-        setIsOtpSending(true);
-        const formData = new FormData();
-        formData.append('email', email);
-        const result = await sendVerificationOtp(null, formData);
+    const handleProSignup = () => {
+        startOtpTransition(async () => {
+            const formData = new FormData();
+            formData.append('email', email);
+            const result = await sendVerificationOtp(null, formData);
 
-        if(result.success) {
-            toast({ description: result.message });
-            setShowOtpDialog(true);
-        } else {
-            toast({ description: result.error, variant: 'destructive' });
-        }
-        setIsOtpSending(false);
+            if(result.success) {
+                toast({ description: result.message });
+                setShowOtpDialog(true);
+            } else {
+                toast({ description: result.error, variant: 'destructive' });
+            }
+        });
     };
 
     // Main form submission logic
@@ -222,7 +222,7 @@ function SignUpPageComponent() {
              <Card className="mx-auto max-w-sm text-center">
                 <CardHeader>
                      <div className="mx-auto bg-yellow-500/10 p-3 rounded-full w-fit">
-                        <HelpCircle className="h-12 w-12 text-yellow-400" />
+                        <MailCheck className="h-12 w-12 text-yellow-400" />
                     </div>
                     <CardTitle className="text-2xl pt-4">Activation is Taking Longer Than Usual</CardTitle>
                     <CardDescription>
