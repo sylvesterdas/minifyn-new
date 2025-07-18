@@ -23,6 +23,7 @@ import { login } from '@/app/auth/actions';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import { sendVerificationOtp } from '@/app/auth/actions';
 
 
 export interface FormState {
@@ -66,6 +67,8 @@ function SignUpPageComponent() {
     const [view, setView] = useState<'form' | 'email_verification' | 'payment_processing' | 'payment_stalled'>('form');
     const [showOtpDialog, setShowOtpDialog] = useState(false);
     const [isPaymentLoading, setIsPaymentLoading] = useState(false);
+    const [isOtpSending, setIsOtpSending] = useState(false);
+
 
     // Effect for handling Free Plan submission result
     useEffect(() => {
@@ -79,12 +82,30 @@ function SignUpPageComponent() {
         }
     }, [freePlanState, toast]);
 
+    const handleProSignup = async () => {
+        setIsOtpSending(true);
+        const formData = new FormData();
+        formData.append('email', email);
+        const result = await sendVerificationOtp(null, formData);
+
+        if(result.success) {
+            toast({ description: result.message });
+            setShowOtpDialog(true);
+        } else {
+            toast({ description: result.error, variant: 'destructive' });
+        }
+        setIsOtpSending(false);
+    };
+
     // Main form submission logic
-    const handleSubmit = (formData: FormData) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+
         if (selectedPlan === 'free') {
             freePlanFormAction(formData);
         } else {
-            setShowOtpDialog(true);
+            handleProSignup();
         }
     };
     
@@ -237,7 +258,7 @@ function SignUpPageComponent() {
                         Get started in seconds. Choose your plan below.
                     </CardDescription>
                 </CardHeader>
-                <form action={handleSubmit}>
+                <form onSubmit={handleSubmit}>
                     <CardContent className="grid gap-4">
                         <PlanSelector selectedPlan={selectedPlan} onPlanChange={setSelectedPlan} />
 
@@ -301,7 +322,7 @@ function SignUpPageComponent() {
                         </div>
                     </CardContent>
                     <CardFooter className="flex flex-col gap-4">
-                        <SubmitButton plan={selectedPlan} disabled={!termsAccepted || isPaymentLoading} />
+                        <SubmitButton plan={selectedPlan} disabled={!termsAccepted || isPaymentLoading || isOtpSending} />
                         <div className="text-center text-sm">
                             Already have an account?{' '}
                             <Link href="/auth/signin" className="underline">

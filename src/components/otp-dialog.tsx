@@ -14,7 +14,7 @@ import {
   InputOTPSlot,
 } from '@/components/ui/input-otp';
 import { Button } from '@/components/ui/button';
-import { useActionState, useEffect, useState, useTransition } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { sendVerificationOtp, verifyOtpAndCreateUser } from '@/app/auth/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
@@ -36,36 +36,15 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
     const [sendState, sendFormAction, isSendingOtp] = useActionState(sendVerificationOtp, { success: false });
     const [verifyState, verifyFormAction, isVerifying] = useActionState(verifyOtpAndCreateUser, { success: false });
     
-    const [resendCooldown, setResendCooldown] = useState(0);
-
-    // Automatically send OTP when dialog opens
-    useEffect(() => {
-        if (open && email) {
-            const formData = new FormData();
-            formData.append('email', email);
-            sendFormAction(formData);
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open, email]); // Only run when dialog opens or email changes
+    const [resendCooldown, setResendCooldown] = useState(30);
 
     // Cooldown timer effect
     useEffect(() => {
-        if(resendCooldown > 0) {
+        if(open && resendCooldown > 0) {
             const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
             return () => clearTimeout(timer);
         }
-    }, [resendCooldown]);
-
-    // Handle toast messages from OTP send action
-    useEffect(() => {
-        if (sendState.message) {
-            toast({ description: sendState.message });
-            setResendCooldown(30);
-        }
-        if (sendState.error) {
-            toast({ description: sendState.error, variant: 'destructive' });
-        }
-    }, [sendState, toast]);
+    }, [open, resendCooldown]);
 
     // Handle toast messages and success from OTP verify action
     useEffect(() => {
@@ -74,15 +53,18 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
         }
         if (verifyState.success && verifyState.customToken) {
             toast({ description: "Email verified! Proceeding to payment..." });
-            onVerified(verifyState.customToken!, name, email);
+            onVerified(verifyState.customToken, name, email);
         }
-    }, [verifyState, toast, onVerified, name, email]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [verifyState]);
 
     const handleResend = () => {
         if (resendCooldown === 0) {
             const formData = new FormData();
             formData.append('email', email);
             sendFormAction(formData);
+            setResendCooldown(30);
+            toast({ description: 'A new OTP has been sent.' });
         }
     };
 
@@ -110,7 +92,7 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
                 <DialogHeader>
                     <DialogTitle>Verify Your Email for Pro</DialogTitle>
                     <DialogDescription>
-                        {`We're sending a 6-digit code to ${email}. Please enter it below.`}
+                        {`We've sent a 6-digit code to ${email}. Please enter it below.`}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="flex flex-col items-center justify-center space-y-4 py-4">
