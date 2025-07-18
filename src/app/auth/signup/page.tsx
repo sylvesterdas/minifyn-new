@@ -106,16 +106,19 @@ export default function SignUpPage() {
                     toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
                     
                     const idTokenAfterPayment = await userCredential.user.getIdToken(true);
+                    // This action updates the user to 'pro' on the server
                     const syncResult = await syncRazorpaySubscription(idTokenAfterPayment);
 
                     if (syncResult.success) {
                         trackEvent({ action: 'purchase', category: 'conversion', label: 'pro_plan_signup', value: 89 });
                         
+                        // Now, get a final token with the 'pro' claim and log in to create the session cookie
                         const finalIdToken = await userCredential.user.getIdToken(true);
                         const loginResult = await login(finalIdToken);
                         
                         if (loginResult.success) {
                            toast({ title: "Upgrade Complete!", description: "Redirecting to your dashboard." });
+                           // Hard redirect to ensure the new session cookie is used
                            window.location.assign('/dashboard');
                         } else {
                            throw new Error(loginResult.error || "Failed to log in after purchase.");

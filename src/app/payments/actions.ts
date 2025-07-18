@@ -4,6 +4,7 @@
 import { validateRequest } from '@/lib/auth';
 import Razorpay from 'razorpay';
 import { auth as adminAuth, db } from '@/lib/firebase-admin';
+import type { DecodedIdToken } from 'firebase-admin/auth';
 
 // Determine which set of keys and plans to use based on the environment
 const isProduction = process.env.NODE_ENV === 'production';
@@ -41,14 +42,14 @@ export async function createRazorpaySubscription(
     planType: 'monthly' | 'yearly',
     idToken?: string
 ): Promise<{ error: string } | CreateSubscriptionResponse> {
-    let userData: { uid: string, email?: string } | null = null;
+    let userData: { uid: string, email?: string, name?: string } | null = null;
     console.log('[Payment Action] Starting subscription creation...');
 
     if (idToken) {
         try {
             // Verify the ID token passed from the client
-            const decodedToken = await adminAuth.verifyIdToken(idToken);
-            userData = { uid: decodedToken.uid, email: decodedToken.email };
+            const decodedToken: DecodedIdToken = await adminAuth.verifyIdToken(idToken);
+            userData = { uid: decodedToken.uid, email: decodedToken.email, name: decodedToken.name };
             console.log(`[Payment Action] Verified user via ID token: ${userData.uid}`);
         } catch(e) {
             console.error("[Payment Action] Failed to verify ID token during subscription:", e);
@@ -61,7 +62,7 @@ export async function createRazorpaySubscription(
             console.warn('[Payment Action] User must be logged in to subscribe.');
             return { error: 'You must be logged in to subscribe.' };
         }
-        userData = { uid: user.uid, email: user.email };
+        userData = { uid: user.uid, email: user.email, name: user.name };
         console.log(`[Payment Action] Verified user via session cookie: ${userData.uid}`);
     }
 
@@ -93,6 +94,7 @@ export async function createRazorpaySubscription(
             notes: {
                 userId: userData.uid,
                 email: userData.email || '',
+                name: userData.name || '',
             },
         };
         
@@ -167,10 +169,10 @@ export async function syncRazorpaySubscription(idToken?: string): Promise<{ succ
             const userProfileRef = db.ref(`user_profiles/${userData.uid}`);
             
             await userProfileRef.update({ plan: 'pro', onboardingCompleted: true });
-            await adminAuth.setCustomUserClaims(userData.uid, { plan: 'pro', onboardingCompleted: true });
+            await adminAuth.setCustomUserClaims(userData.uid, { plan: 'pro' });
             
             console.log(`[syncRazorpay] User ${userData.uid} plan restored to Pro via manual sync.`);
-            return { success: true, message: 'Your Pro plan has been successfully restored!' };
+            return { success: true, message: 'Your Pro plan has been successfully synced!' };
         } else {
              console.log(`[syncRazorpay] No active subscription found for user ${userData.uid} (email: ${userData.email}) after checking all records.`);
             return { success: false, error: 'We could not find an active Pro subscription associated with your account.' };
