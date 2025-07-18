@@ -288,7 +288,7 @@ export default function BillingPage() {
                                            <AlertTriangle className="h-5 w-5" />
                                            <div>
                                                <h4 className="font-semibold text-yellow-300">Cancellation Pending</h4>
-                                               <p className="text-sm">Your subscription will be cancelled and access will end on <span className="font-bold">{format(new Date(subscription.end_at * 1000), 'PPP')}.</span></p>
+                                               <p className="text-sm">Your subscription has been cancelled. Pro features will remain active until <span className="font-bold">{format(new Date(subscription.end_at * 1000), 'PPP')}.</span></p>
                                            </div>
                                        </div>
                                    ) : (
