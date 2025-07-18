@@ -19,11 +19,11 @@ import { createRazorpaySubscription, syncRazorpaySubscription } from '@/app/paym
 import Script from 'next/script';
 import { signInWithCustomToken } from 'firebase/auth';
 import { auth as firebaseClientAuth } from '@/lib/firebase';
-import { login } from '@/app/auth/actions';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { sendVerificationOtp } from '@/app/auth/actions';
+import { setSessionCookie } from '@/app/auth/cookie';
 
 
 export interface FormState {
@@ -131,25 +131,20 @@ function SignUpPageComponent() {
                     toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
                     
                     const idTokenAfterPayment = await userCredential.user.getIdToken(true);
-                    // This action updates the user to 'pro' on the server
+                    
+                    // This unified action updates the user to 'pro' and creates the session cookie
                     const syncResult = await syncRazorpaySubscription(idTokenAfterPayment);
 
-                    if (syncResult.success) {
+                    if (syncResult.success && syncResult.sessionCookie) {
                         trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_signup_${interval}`, value: interval === 'monthly' ? 89 : 899 });
                         
-                        // Now, get a final token with the 'pro' claim and log in to create the session cookie
-                        const finalIdToken = await userCredential.user.getIdToken(true);
-                        const loginResult = await login(finalIdToken);
-                        
-                        if (loginResult.success) {
-                           toast({ title: "Upgrade Complete!", description: "Redirecting to your dashboard." });
-                           // Hard redirect to ensure the new session cookie is used
-                           window.location.assign('/dashboard');
-                        } else {
-                           throw new Error(loginResult.error || "Failed to log in after purchase.");
-                        }
+                        // Set the session cookie on the client and perform a hard redirect
+                        await setSessionCookie(syncResult.sessionCookie);
+                        toast({ title: "Upgrade Complete!", description: "Redirecting to your dashboard." });
+                        window.location.assign('/dashboard');
                     } else {
-                         toast({ title: "Activation Pending", description: syncResult.error, variant: 'destructive' });
+                         const errorMessage = ('error' in syncResult && syncResult.error) || "An unknown error occurred during activation.";
+                         toast({ title: "Activation Pending", description: errorMessage, variant: 'destructive' });
                          setView('payment_stalled');
                     }
                 },

@@ -8,6 +8,7 @@ import { sendEmail } from '@/lib/email';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import { randomInt } from 'crypto';
 import type { UserPlan } from '@/lib/data';
+import { setSessionCookie } from './cookie';
 
 function encodeEmail(email: string): string {
   // Replace characters that are invalid in RTDB paths.
@@ -31,14 +32,8 @@ export async function login(
     const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
     console.log(`[Auth Action] Session cookie created for UID: ${decodedToken.uid}.`);
     
-    const cookieStore = await cookies();
-    cookieStore.set('session', sessionCookie, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: expiresIn,
-      path: '/',
-    });
-    console.log(`[Auth Action] Session cookie set in browser for UID: ${decodedToken.uid}.`);
+    await setSessionCookie(sessionCookie);
+    console.log(`[Auth Action] Session cookie set for UID: ${decodedToken.uid}.`);
 
     return { success: true };
   } catch (error: any) {
