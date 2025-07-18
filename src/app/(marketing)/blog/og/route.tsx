@@ -27,9 +27,21 @@ export async function GET(request: NextRequest) {
   try {
     // 2. Generate the AI background image
     const imageResult = await generateOgImage({ title, tags: tags || '' });
-    const { imageUrl: aiBackgroundUrl } = imageResult;
+    const { imageUrl: largeAiBackgroundUrl } = imageResult;
+    
+    // 3. Compress the AI background image with sharp
+    // The AI returns a data URI: 'data:image/png;base64,...'
+    const base64Data = largeAiBackgroundUrl.split(',')[1];
+    const imageBuffer = Buffer.from(base64Data, 'base64');
+    
+    const compressedImageBuffer = await sharp(imageBuffer)
+        .webp({ quality: 75 }) // Compress to WebP with 75% quality
+        .toBuffer();
 
-    // 3. Use ImageResponse to composite the text and background
+    // Convert the compressed buffer back to a data URI to use in ImageResponse
+    const compressedBackgroundUrl = `data:image/webp;base64,${compressedImageBuffer.toString('base64')}`;
+
+    // 4. Use ImageResponse to composite the text and the *compressed* background
     const imageResponse = new ImageResponse(
       (
         <div
@@ -44,9 +56,9 @@ export async function GET(request: NextRequest) {
             position: 'relative',
           }}
         >
-          {/* AI-generated background image */}
+          {/* Use the compressed background image */}
           <img
-            src={aiBackgroundUrl}
+            src={compressedBackgroundUrl}
             alt=""
             tw="absolute inset-0 w-full h-full object-cover"
           />
@@ -100,19 +112,9 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    // 4. Compress the generated image with sharp
-    const imageBuffer = await imageResponse.arrayBuffer();
-    const compressedImageBuffer = await sharp(imageBuffer)
-        .webp({ quality: 75 }) // Compress to WebP with 75% quality
-        .toBuffer();
-
-    // 5. Return the compressed image
-    return new NextResponse(compressedImageBuffer, {
-        headers: {
-            'Content-Type': 'image/webp',
-            'Content-Length': String(compressedImageBuffer.length),
-        },
-    });
+    // 5. Return the final composite image
+    // This response is already a WebP because its background is a WebP.
+    return imageResponse;
 
   } catch (e: any) {
     console.error(`Failed to generate OG image: ${e.message}`);
