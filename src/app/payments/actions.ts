@@ -154,21 +154,22 @@ export async function syncRazorpaySubscription(idToken?: string): Promise<SyncRe
         
         // List of all valid pro plan IDs
         const proPlanIds = [PLAN_IDS.monthly, PLAN_IDS.yearly].filter(Boolean);
+        const validStatuses = ['active', 'completed'];
 
         while (hasMore) {
             console.log(`[syncRazorpay] Fetching subscriptions... Skip: ${skip}, Count: ${count}`);
             const subscriptions = await razorpay.subscriptions.all({ count, skip });
             
-            // Find subscription by email in the notes that has an active status and a pro plan ID
+            // Find subscription by email in the notes that has a valid status and a pro plan ID
             const found = subscriptions.items.find(sub => 
                 sub.notes?.email === userData?.email && 
-                sub.status === 'active' &&
+                validStatuses.includes(sub.status) &&
                 proPlanIds.includes(sub.plan_id)
             );
 
             if (found) {
                 userSubscription = found;
-                console.log(`[syncRazorpay] Found active subscription ${userSubscription.id} (Plan: ${userSubscription.plan_id}) for user with email ${userData?.email}.`);
+                console.log(`[syncRazorpay] Found valid subscription ${userSubscription.id} (Plan: ${userSubscription.plan_id}, Status: ${userSubscription.status}) for user with email ${userData?.email}.`);
                 break; // Exit loop once found
             }
 
@@ -189,8 +190,7 @@ export async function syncRazorpaySubscription(idToken?: string): Promise<SyncRe
             console.log(`[syncRazorpay] User ${userData.uid} plan restored to Pro via manual sync.`);
 
             // Create a new session cookie with the updated claims
-            const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-            const sessionCookie = await adminAuth.createSessionCookie(idToken!, { expiresIn });
+            const sessionCookie = await adminAuth.createSessionCookie(idToken!, { expiresIn: 60 * 60 * 24 * 5 * 1000 });
             console.log(`[syncRazorpay] Created new session cookie for user ${userData.uid} with pro plan.`);
             
             return { 
