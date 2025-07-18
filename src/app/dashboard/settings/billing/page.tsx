@@ -25,7 +25,6 @@ function RestorePurchaseButton() {
                 return;
             }
             
-            // Get the latest ID token to pass to the server action
             const idToken = await user.getIdToken(true);
             const result = await syncRazorpaySubscription(idToken);
 
@@ -34,13 +33,12 @@ function RestorePurchaseButton() {
                     title: 'Success!',
                     description: result.message,
                 });
-                // Refresh the entire page to reflect new auth claims and UI changes
                 window.location.reload();
             } else {
                  toast({
                     title: 'No Active Subscription Found',
                     description: result.error,
-                    variant: 'destructive'
+                    variant: 'default' // Changed from 'destructive'
                 });
             }
         });
