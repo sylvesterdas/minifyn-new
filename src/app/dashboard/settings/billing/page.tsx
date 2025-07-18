@@ -111,11 +111,20 @@ export default function BillingPage() {
                 subscription_id: subscriptionResult.subscriptionId,
                 name: "MiniFyn Pro",
                 description: planType === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
-                handler: function (response: any) {
-                    toast({ title: 'Payment Successful!', description: 'Your plan has been upgraded to Pro.' });
-                    trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_upgrade_${planType}`, value: planType === 'monthly' ? 89 : 899 });
-                    // Use window.location.assign for a hard refresh to ensure user claims are updated.
-                    window.location.assign('/dashboard');
+                handler: async function (response: any) {
+                    toast({ title: 'Payment Successful!', description: 'Finalizing your upgrade...' });
+                    
+                    const syncResult = await syncRazorpaySubscription();
+
+                    if (syncResult.success) {
+                        toast({ title: "Upgrade Complete!", description: "Your plan has been upgraded to Pro." });
+                        trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_upgrade_${planType}`, value: planType === 'monthly' ? 89 : 899 });
+                         // Use window.location.assign for a hard refresh to ensure user claims are updated.
+                        window.location.assign('/dashboard');
+                    } else {
+                        toast({ title: "Activation Pending", description: "Your payment was successful, but activation is taking a moment. Please try restoring your purchase or refresh the page in a few minutes.", variant: 'destructive' });
+                    }
+                    setIsLoading(false);
                 },
                 modal: {
                     ondismiss: () => setIsLoading(false) // Reset loading state if modal is closed
