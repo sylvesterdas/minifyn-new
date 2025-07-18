@@ -18,7 +18,6 @@ export async function GET(request: NextRequest) {
 
   const title = searchParams.get('title');
   const tags = searchParams.get('tags'); // comma-separated
-  const compress = searchParams.get('compress') !== 'false'; // Compression is on by default
 
   if (!title) {
     return new Response('Missing title parameter', { status: 400 });
@@ -27,33 +26,9 @@ export async function GET(request: NextRequest) {
   try {
     // 2. Generate the AI background image
     const imageResult = await generateOgImage({ title, tags: tags || '' });
-    let { imageUrl: aiBackgroundUrl } = imageResult;
+    const { imageUrl: aiBackgroundUrl } = imageResult;
 
-    // 3. (Optional but Default) Compress the AI-generated image before using it.
-    if (compress) {
-        console.log("Compressing background image...");
-        // Step 3a: Create an ImageResponse with only the background image, outputting as a compressed JPEG.
-        const compressedImageResponse = new ImageResponse(
-            (
-                <img
-                    src={aiBackgroundUrl}
-                    alt=""
-                    tw="w-full h-full"
-                    style={{ objectFit: 'cover' }}
-                />
-            ),
-            { width: 1200, height: 630, format: 'jpeg', quality: 75 }
-        );
-
-        // Step 3b: Convert the compressed response into a Buffer, then to a new Data URI.
-        const compressedImageBuffer = await compressedImageResponse.arrayBuffer();
-        const compressedImageDataUri = `data:image/jpeg;base64,${Buffer.from(compressedImageBuffer).toString('base64')}`;
-        aiBackgroundUrl = compressedImageDataUri; // Use the compressed image for the final output.
-        console.log("Compression complete.");
-    }
-
-
-    // 4. Use the (potentially compressed) generated image in the final ImageResponse with text overlay.
+    // 3. Use the generated image in the final ImageResponse with text overlay.
     return new ImageResponse(
       (
         <div
