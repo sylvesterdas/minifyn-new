@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
 import { generateOgImage } from '@/ai/flows/generate-og-image-flow';
-import sharp from 'sharp';
 
 export const revalidate = 3600; // Cache for 1 hour
 
@@ -27,21 +26,9 @@ export async function GET(request: NextRequest) {
   try {
     // 2. Generate the AI background image
     const imageResult = await generateOgImage({ title, tags: tags || '' });
-    const { imageUrl: largeAiBackgroundUrl } = imageResult;
+    const { imageUrl: aiBackgroundUrl } = imageResult;
     
-    // 3. Compress the AI background image with sharp
-    // The AI returns a data URI: 'data:image/png;base64,...'
-    const base64Data = largeAiBackgroundUrl.split(',')[1];
-    const imageBuffer = Buffer.from(base64Data, 'base64');
-    
-    const compressedImageBuffer = await sharp(imageBuffer)
-        .webp({ quality: 75 }) // Compress to WebP with 75% quality
-        .toBuffer();
-
-    // Convert the compressed buffer back to a data URI to use in ImageResponse
-    const compressedBackgroundUrl = `data:image/webp;base64,${compressedImageBuffer.toString('base64')}`;
-
-    // 4. Use ImageResponse to composite the text and the *compressed* background
+    // 3. Use ImageResponse to composite the text and the background
     const imageResponse = new ImageResponse(
       (
         <div
@@ -56,9 +43,9 @@ export async function GET(request: NextRequest) {
             position: 'relative',
           }}
         >
-          {/* Use the compressed background image */}
+          {/* Use the AI-generated background image */}
           <img
-            src={compressedBackgroundUrl}
+            src={aiBackgroundUrl}
             alt=""
             tw="absolute inset-0 w-full h-full object-cover"
           />
@@ -112,8 +99,6 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    // 5. Return the final composite image
-    // This response is already a WebP because its background is a WebP.
     return imageResponse;
 
   } catch (e: any) {
