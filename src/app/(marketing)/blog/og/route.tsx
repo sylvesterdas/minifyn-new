@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
 import { generateOgImage } from '@/ai/flows/generate-og-image-flow';
+import sharp from 'sharp';
 
 export const revalidate = 3600; // Cache for 1 hour
 
@@ -99,11 +100,27 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    return imageResponse;
+    // 4. Get the image buffer from the response
+    const imageBuffer = await imageResponse.arrayBuffer();
+
+    // 5. Compress the buffer with sharp
+    const compressedImageBuffer = await sharp(imageBuffer)
+        .webp({ quality: 100 }) // Use 100 quality as requested
+        .toBuffer();
+
+    // 6. Return the compressed image as a new response
+    return new NextResponse(compressedImageBuffer, {
+        headers: {
+            'Content-Type': 'image/webp',
+            'Content-Length': compressedImageBuffer.length.toString(),
+            'Cache-Control': 'public, max-age=3600, must-revalidate',
+        },
+    });
+
 
   } catch (e: any) {
     console.error(`Failed to generate OG image: ${e.message}`);
-    // Fallback to a simple image if AI fails
+    // Fallback to a simple image if AI or sharp fails
      return new ImageResponse(
       (
         <div
