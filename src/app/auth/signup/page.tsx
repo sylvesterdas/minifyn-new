@@ -183,9 +183,9 @@ export default function SignUpPage() {
                     <div className="mx-auto p-3 rounded-full w-fit">
                         <Loader2 className="h-12 w-12 text-primary animate-spin" />
                     </div>
-                    <CardTitle className="text-2xl pt-4">Processing Subscription</CardTitle>
+                    <CardTitle className="text-2xl pt-4">Redirecting to Payment...</CardTitle>
                     <CardDescription>
-                       Your payment was successful. We're upgrading your account to Pro now. Please wait...
+                       Please complete your purchase in the Razorpay window. Do not close this page.
                     </CardDescription>
                 </CardHeader>
             </Card>
