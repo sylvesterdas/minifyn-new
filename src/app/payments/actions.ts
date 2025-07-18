@@ -5,7 +5,7 @@ import { validateRequest } from '@/lib/auth';
 import Razorpay from 'razorpay';
 import { auth as adminAuth, db } from '@/lib/firebase-admin';
 import type { DecodedIdToken } from 'firebase-admin/auth';
-import { login } from '../auth/actions';
+import { setSessionCookie } from '../auth/cookie';
 
 // Determine which set of keys and plans to use based on the environment
 const isProduction = process.env.NODE_ENV === 'production';
@@ -152,16 +152,23 @@ export async function syncRazorpaySubscription(idToken?: string): Promise<SyncRe
         const count = 100; // Fetch 100 items per page
         let hasMore = true;
         
+        // List of all valid pro plan IDs
+        const proPlanIds = [PLAN_IDS.monthly, PLAN_IDS.yearly].filter(Boolean);
+
         while (hasMore) {
             console.log(`[syncRazorpay] Fetching subscriptions... Skip: ${skip}, Count: ${count}`);
             const subscriptions = await razorpay.subscriptions.all({ count, skip });
             
-            // Find subscription by email in the notes
-            const found = subscriptions.items.find(sub => sub.notes?.email === userData?.email && sub.status === 'active');
+            // Find subscription by email in the notes that has an active status and a pro plan ID
+            const found = subscriptions.items.find(sub => 
+                sub.notes?.email === userData?.email && 
+                sub.status === 'active' &&
+                proPlanIds.includes(sub.plan_id)
+            );
 
             if (found) {
                 userSubscription = found;
-                console.log(`[syncRazorpay] Found active subscription ${userSubscription.id} for user with email ${userData?.email}.`);
+                console.log(`[syncRazorpay] Found active subscription ${userSubscription.id} (Plan: ${userSubscription.plan_id}) for user with email ${userData?.email}.`);
                 break; // Exit loop once found
             }
 
