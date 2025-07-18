@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
         height: 630,
         // Output the final image as a compressed WebP
         format: 'webp',
-        quality: 75,
+        quality: 40,
       }
     );
   } catch (e: any) {
