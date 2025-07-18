@@ -31,11 +31,7 @@ export async function login(
     const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
     console.log(`[Auth Action] Session cookie created for UID: ${decodedToken.uid}.`);
     
-    // Revoke any existing tokens to ensure the new session with the correct claims is used.
-    await auth.revokeRefreshTokens(decodedToken.sub);
-    console.log(`[Auth Action] Existing refresh tokens revoked for UID: ${decodedToken.uid}.`);
-
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     cookieStore.set('session', sessionCookie, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -308,7 +304,7 @@ export async function sendPasswordResetLink(
 
 
 export async function logout(): Promise<{ success?: boolean, error?: string }> {
-  const cookieObj = cookies();
+  const cookieObj = await cookies();
   const sessionCookie = cookieObj.get('session')?.value;
   if (!sessionCookie) {
     console.log('[Auth Action] Logout called, but no session cookie found. Assuming already logged out.');
