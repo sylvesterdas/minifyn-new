@@ -270,8 +270,8 @@ export async function cancelRazorpaySubscription(): Promise<{ success: boolean; 
         // Cancel at the end of the billing cycle
         const cancelledSubscription = await razorpay.subscriptions.cancel(subData.id, { cancel_at_cycle_end: true });
 
-        // Update our DB to reflect the cancellation
-        await userProfileRef.update(cancelledSubscription);
+        // Update our DB with the full response from Razorpay to reflect the cancellation
+        await userProfileRef.set(cancelledSubscription);
 
         revalidatePath('/dashboard/settings/billing');
 
