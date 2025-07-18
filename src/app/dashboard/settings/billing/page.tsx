@@ -11,12 +11,12 @@ import { useState, useTransition } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import Script from 'next/script';
 import { trackEvent } from '@/lib/gtag';
+import { setSessionCookie } from '@/app/auth/cookie';
 
 declare global {
     interface Window {
@@ -36,13 +36,13 @@ function RestorePurchaseButton() {
             if (result.success) {
                 toast({
                     title: 'Success!',
-                    description: result.message,
+                    description: 'Your Pro plan has been successfully synced!',
                 });
                 window.location.reload();
             } else {
                  toast({
                     title: 'No Active Subscription Found',
-                    description: result.error,
+                    description: 'We could not find an active Pro subscription associated with your account.',
                     variant: 'default'
                 });
             }
@@ -116,7 +116,8 @@ export default function BillingPage() {
                     
                     const syncResult = await syncRazorpaySubscription();
 
-                    if (syncResult.success) {
+                    if (syncResult.success && syncResult.sessionCookie) {
+                        await setSessionCookie(syncResult.sessionCookie);
                         toast({ title: "Upgrade Complete!", description: "Your plan has been upgraded to Pro." });
                         trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_upgrade_${planType}`, value: planType === 'monthly' ? 89 : 899 });
                          // Use window.location.assign for a hard refresh to ensure user claims are updated.

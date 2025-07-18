@@ -116,20 +116,37 @@ export async function createRazorpaySubscription(
 }
 
 type SyncResult = 
-  | { success: true; message: string }
+  | { success: true; sessionCookie?: string; }
   | { success: false; error: string };
 
-export async function syncRazorpaySubscription(): Promise<SyncResult> {
-    const { user } = await validateRequest();
-    if (!user) {
-        return { success: false, error: 'You must be logged in.' };
-    }
+export async function syncRazorpaySubscription(
+    idToken?: string
+): Promise<SyncResult> {
+    let uid: string;
+    let email: string | undefined;
 
-    if (!user.email) {
+    if (idToken) {
+        try {
+            const decodedToken = await adminAuth.verifyIdToken(idToken);
+            uid = decodedToken.uid;
+            email = decodedToken.email;
+        } catch (e) {
+            return { success: false, error: 'Invalid authentication token.' };
+        }
+    } else {
+        const { user } = await validateRequest();
+        if (!user) {
+            return { success: false, error: 'You must be logged in.' };
+        }
+        uid = user.uid;
+        email = user.email;
+    }
+    
+    if (!email) {
         return { success: false, error: 'User email not found.' };
     }
     
-    console.log(`[syncRazorpay] Starting subscription sync for user: ${user.uid} (email: ${user.email})`);
+    console.log(`[syncRazorpay] Starting subscription sync for user: ${uid} (email: ${email})`);
 
     try {
         let userSubscription = null;
@@ -140,21 +157,14 @@ export async function syncRazorpaySubscription(): Promise<SyncResult> {
         const proPlanIds = [PLAN_IDS.monthly, PLAN_IDS.yearly].filter(Boolean);
         const validStatuses = ['active', 'completed'];
 
-        while (hasMore) {
-            console.log(`[syncRazorpay] Fetching subscriptions... Skip: ${skip}, Count: ${count}`);
+        while (hasMore && !userSubscription) {
             const subscriptions = await razorpay.subscriptions.all({ count, skip });
             
-            const found = subscriptions.items.find(sub => 
-                sub.notes?.email === user.email && 
+            userSubscription = subscriptions.items.find(sub => 
+                sub.notes?.email === email && 
                 validStatuses.includes(sub.status) &&
                 proPlanIds.includes(sub.plan_id)
-            );
-
-            if (found) {
-                userSubscription = found;
-                console.log(`[syncRazorpay] Found valid subscription ${userSubscription.id} (Plan: ${userSubscription.plan_id}, Status: ${userSubscription.status}) for user with email ${user.email}.`);
-                break;
-            }
+            ) || null;
 
             if (subscriptions.items.length < count) {
                 hasMore = false;
@@ -164,28 +174,29 @@ export async function syncRazorpaySubscription(): Promise<SyncResult> {
         }
 
         if (userSubscription) {
-            const userProfileRef = db.ref(`user_profiles/${user.uid}`);
+            console.log(`[syncRazorpay] Found valid subscription ${userSubscription.id} (Plan: ${userSubscription.plan_id}, Status: ${userSubscription.status}) for user with email ${email}.`);
+            const userProfileRef = db.ref(`user_profiles/${uid}`);
             
             await userProfileRef.update({ plan: 'pro', onboardingCompleted: true });
-            await adminAuth.setCustomUserClaims(user.uid, { plan: 'pro' });
+            await adminAuth.setCustomUserClaims(uid, { plan: 'pro' });
+
+            const finalIdToken = idToken || await adminAuth.createCustomToken(uid);
+            const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+            const sessionCookie = await adminAuth.createSessionCookie(finalIdToken, { expiresIn });
             
-            // Revoke tokens to force client to get new token with 'pro' claim
-            await adminAuth.revokeRefreshTokens(user.uid);
-            
-            console.log(`[syncRazorpay] User ${user.uid} plan restored/updated to Pro. Tokens revoked.`);
+            console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. New session cookie created.`);
 
             return { 
                 success: true, 
-                message: 'Your Pro plan has been successfully synced!' 
+                sessionCookie: sessionCookie
             };
         } else {
-             console.log(`[syncRazorpay] No active or completed Pro subscription found for user ${user.uid} (email: ${user.email}).`);
+             console.log(`[syncRazorpay] No active or completed Pro subscription found for user ${uid} (email: ${email}).`);
             return { success: false, error: 'We could not find an active Pro subscription associated with your account.' };
         }
 
     } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-        console.error(`Error during manual subscription sync for user ${user.uid}:`, error);
+        console.error(`Error during manual subscription sync for user ${uid}:`, error);
         return { success: false, error: 'An unexpected error occurred while checking your subscription status.' };
     }
 }
