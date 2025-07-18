@@ -45,8 +45,33 @@ function RestorePurchaseButton() {
     )
 }
 
+function getPlanDetails(plan: string | undefined) {
+    switch(plan) {
+        case 'pro':
+            return {
+                name: 'Pro',
+                description: 'You have access to all premium features.',
+                badgeVariant: 'default'
+            };
+        case 'admin':
+            return {
+                name: 'Admin',
+                description: 'You have full administrative access to all features.',
+                badgeVariant: 'destructive'
+            };
+        default:
+            return {
+                name: 'Free',
+                description: 'Upgrade to unlock advanced features.',
+                badgeVariant: 'secondary'
+            };
+    }
+}
+
+
 export default function BillingPage() {
     const { user } = useAuth();
+    const planDetails = getPlanDetails(user?.plan);
 
     return (
         <Card>
@@ -60,26 +85,25 @@ export default function BillingPage() {
                 <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
                     <div>
                         <h3 className="text-lg font-semibold">
-                            MiniFyn {user?.plan === 'pro' ? 'Pro' : 'Free'}
+                            MiniFyn {planDetails.name}
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                            {user?.plan === 'pro'
-                                ? "You have access to all premium features."
-                                : "Upgrade to unlock advanced features."}
+                            {planDetails.description}
                         </p>
                     </div>
-                    <Badge variant={user?.plan === 'pro' ? 'default' : 'secondary'} className="capitalize">
+                    <Badge variant={planDetails.badgeVariant as any} className="capitalize">
                         {user?.plan}
                     </Badge>
                 </div>
-                {user?.plan === 'pro' ? (
-                    <p className="text-sm text-muted-foreground">
-                        Your subscription is managed by Razorpay. To change your payment method or cancel your subscription, please visit the Razorpay customer portal.
-                    </p>
-                ) : (
+                {user?.plan === 'free' && (
                     <Button asChild>
                         <Link href="/pricing">Upgrade to Pro</Link>
                     </Button>
+                )}
+                 {user?.plan === 'pro' && (
+                     <p className="text-sm text-muted-foreground">
+                        Your subscription is managed by Razorpay. To change your payment method or cancel your subscription, please visit the Razorpay customer portal.
+                    </p>
                 )}
             </CardContent>
             <CardFooter className="border-t pt-6 flex-col items-start gap-4">

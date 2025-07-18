@@ -211,7 +211,7 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
                     <CardFooter>
                         {userPlan === 'free' ? (
                             <Button size="lg" className="w-full" disabled>Your Current Plan</Button>
-                        ) : userPlan === 'pro' ? (
+                        ) : userPlan === 'pro' || userPlan === 'admin' ? (
                             <Button size="lg" className="w-full" disabled variant="outline">Downgrade not supported</Button>
                         ) : (
                             <Button asChild size="lg" className="w-full">
@@ -243,7 +243,7 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
                         <FeatureList features={proFeatures} />
                     </CardContent>
                     <CardFooter>
-                        {userPlan === 'pro' ? (
+                        {userPlan === 'pro' || userPlan === 'admin' ? (
                             <Button size="lg" className="w-full" disabled>Your Current Plan</Button>
                         ) : (
                             <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={isLoading || isAuthLoading}>
