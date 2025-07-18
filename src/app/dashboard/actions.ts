@@ -86,6 +86,18 @@ export interface ClickEvent {
     platform: string;
 }
 
+function getHostname(url: string): string {
+    if (!url || url === 'Direct') {
+        return 'Direct';
+    }
+    try {
+        return new URL(url).hostname.replace('www.', '');
+    } catch (e) {
+        // If it's not a valid URL (e.g., a custom string), return it as is.
+        return url;
+    }
+}
+
 async function getClickEvents(): Promise<ClickEvent[]> {
     const { user } = await validateRequest();
     if (!user) return [];
@@ -111,7 +123,7 @@ async function getClickEvents(): Promise<ClickEvent[]> {
             Object.values(clicks).forEach((click: any) => {
                 allClicks.push({
                     timestamp: click.timestamp,
-                    referer: click.referer ? new URL(click.referer).hostname.replace('www.', '') : 'Direct',
+                    referer: getHostname(click.referer),
                     platform: click.platform || 'Unknown',
                 });
             });
