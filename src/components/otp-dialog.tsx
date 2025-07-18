@@ -32,6 +32,7 @@ interface OtpDialogProps {
 export function OtpDialog({ open, onOpenChange, email, name, password, onVerified, isPaymentLoading }: OtpDialogProps) {
     const { toast } = useToast();
     const [otp, setOtp] = useState('');
+    const [hasTriggeredPayment, setHasTriggeredPayment] = useState(false);
     
     const [sendState, sendFormAction, isSendingOtp] = useActionState(sendVerificationOtp, { success: false });
     const [verifyState, verifyFormAction, isVerifying] = useActionState(verifyOtpAndCreateUser, { success: false });
@@ -51,12 +52,21 @@ export function OtpDialog({ open, onOpenChange, email, name, password, onVerifie
         if (verifyState.error) {
             toast({ description: verifyState.error, variant: 'destructive' });
         }
-        if (verifyState.success && verifyState.customToken) {
+        if (verifyState.success && verifyState.customToken && !hasTriggeredPayment) {
+            setHasTriggeredPayment(true); // Set flag immediately to prevent re-triggering
             toast({ description: "Email verified! Proceeding to payment..." });
             onVerified(verifyState.customToken, name, email);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [verifyState]);
+    }, [verifyState, hasTriggeredPayment]);
+
+    // Reset the payment trigger flag when the dialog closes
+    useEffect(() => {
+        if (!open) {
+            setHasTriggeredPayment(false);
+            setOtp('');
+        }
+    }, [open]);
 
     const handleResend = () => {
         if (resendCooldown === 0) {
