@@ -18,6 +18,7 @@ import Script from 'next/script';
 import { trackEvent } from '@/lib/gtag';
 import { setSessionCookie } from '@/app/auth/cookie';
 import { format } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
 
 declare global {
     interface Window {
@@ -86,26 +87,31 @@ function getPlanDetails(plan: string | undefined) {
 
 export default function BillingPage() {
     const { user, isLoading: isAuthLoading } = useAuth();
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingPayment, setIsLoadingPayment] = useState(false);
     const [planType, setPlanType] = useState<'monthly' | 'yearly'>('monthly');
     const [subscription, setSubscription] = useState<any | null>(null);
+    const [isFetchingSub, setIsFetchingSub] = useState(true);
     const [isCancelling, startCancelTransition] = useTransition();
     const { toast } = useToast();
     const router = useRouter();
 
     useEffect(() => {
         if (user?.plan === 'pro') {
+            setIsFetchingSub(true);
             getSubscriptionDetails().then(({ subscription }) => {
                 if (subscription) {
                     setSubscription(subscription);
                 }
-            });
+            }).finally(() => setIsFetchingSub(false));
+        } else {
+            setIsFetchingSub(false);
         }
     }, [user?.plan]);
 
     const planDetails = getPlanDetails(user?.plan);
     const isFreePlan = user?.plan === 'free';
     const isProPlan = user?.plan === 'pro';
+    const isAdminPlan = user?.plan === 'admin';
 
     const handleUpgrade = async () => {
         if (!user || user.isAnonymous) {
@@ -113,7 +119,7 @@ export default function BillingPage() {
             return;
         }
 
-        setIsLoading(true);
+        setIsLoadingPayment(true);
         trackEvent({ action: 'click_upgrade', category: 'conversion', label: 'upgrade_from_billing_page', value: planType === 'monthly' ? 89 : 899 });
 
         try {
@@ -140,12 +146,13 @@ export default function BillingPage() {
                         trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_upgrade_${planType}`, value: planType === 'monthly' ? 89 : 899 });
                         window.location.assign('/dashboard/settings/billing');
                     } else {
-                        toast({ title: "Activation Pending", description: "Your payment was successful, but activation is taking a moment. Please try restoring your purchase or refresh the page in a few minutes.", variant: 'destructive' });
-                        setIsLoading(false);
+                         const errorMessage = ('error' in syncResult && syncResult.error) || "An unknown error occurred during activation.";
+                         toast({ title: "Activation Pending", description: errorMessage, variant: 'destructive' });
+                         setIsLoadingPayment(false);
                     }
                 },
                 modal: {
-                    ondismiss: () => setIsLoading(false)
+                    ondismiss: () => setIsLoadingPayment(false)
                 },
                 prefill: {
                     name: user.name,
@@ -159,7 +166,7 @@ export default function BillingPage() {
             const rzp = new window.Razorpay(options);
             rzp.on('payment.failed', function (response: any) {
                 toast({ title: 'Payment Failed', description: response.error.description, variant: 'destructive' });
-                setIsLoading(false);
+                setIsLoadingPayment(false);
             });
             rzp.open();
 
@@ -169,7 +176,7 @@ export default function BillingPage() {
                 description: error instanceof Error ? error.message : 'Could not initiate payment.',
                 variant: 'destructive',
             });
-            setIsLoading(false);
+            setIsLoadingPayment(false);
         }
     };
     
@@ -184,7 +191,10 @@ export default function BillingPage() {
             }
         });
     };
-
+    
+    if (isAuthLoading) {
+        return <Skeleton className="h-48 w-full" />
+    }
 
     return (
         <>
@@ -241,65 +251,78 @@ export default function BillingPage() {
                             </div>
                         </CardContent>
                         <CardFooter>
-                             <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={isLoading || isAuthLoading}>
-                                {isLoading || isAuthLoading ? <Loader2 className="animate-spin" /> : 'Upgrade and Pay'}
+                             <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={isLoadingPayment || isAuthLoading}>
+                                {isLoadingPayment || isAuthLoading ? <Loader2 className="animate-spin" /> : 'Upgrade to Pro'}
                             </Button>
                         </CardFooter>
                     </Card>
                 )}
                 
-                {isProPlan && subscription && (
-                    <Card>
+                {isProPlan && (
+                    isFetchingSub ? <Skeleton className="h-48 w-full" /> : (
+                        subscription ? (
+                             <Card>
+                                <CardHeader>
+                                    <CardTitle>Manage Subscription</CardTitle>
+                                     <CardDescription>
+                                        Manage your current Pro subscription plan.
+                                     </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                   {subscription.status === 'cancelled' ? (
+                                       <div className="p-4 rounded-lg bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 flex items-center gap-3">
+                                           <AlertTriangle className="h-5 w-5" />
+                                           <div>
+                                               <h4 className="font-semibold text-yellow-300">Cancellation Pending</h4>
+                                               <p className="text-sm">Your subscription will be cancelled and access will end on <span className="font-bold">{format(new Date(subscription.end_at * 1000), 'PPP')}.</span></p>
+                                           </div>
+                                       </div>
+                                   ) : (
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-muted-foreground">Status</span>
+                                                <span className="font-medium capitalize flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />{subscription.status}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-muted-foreground">Renews on</span>
+                                                <span className="font-medium">{format(new Date(subscription.current_end * 1000), 'PPP')}</span>
+                                            </div>
+                                        </div>
+                                   )}
+                                </CardContent>
+                                {subscription.status !== 'cancelled' && (
+                                     <CardFooter className="border-t pt-6">
+                                        <Button variant="destructive" onClick={handleCancel} disabled={isCancelling}>
+                                            {isCancelling && <Loader2 className="mr-2 animate-spin" />}
+                                            Cancel Subscription
+                                        </Button>
+                                    </CardFooter>
+                                )}
+                            </Card>
+                        ) : (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Subscription Not Found</CardTitle>
+                                    <CardDescription>We couldn't find your subscription details, but your Pro plan is active. To manage billing, please contact support.</CardDescription>
+                                </CardHeader>
+                            </Card>
+                        )
+                    )
+                )}
+
+                {!isAdminPlan && (
+                     <Card>
                         <CardHeader>
-                            <CardTitle>Manage Subscription</CardTitle>
+                             <CardTitle>Restore Purchase</CardTitle>
                              <CardDescription>
-                                Manage your current Pro subscription plan.
+                                If you've paid but don't see your Pro features, click here to sync your latest subscription status.
                              </CardDescription>
                         </CardHeader>
                         <CardContent>
-                           {subscription.status === 'cancelled' ? (
-                               <div className="p-4 rounded-lg bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 flex items-center gap-3">
-                                   <AlertTriangle className="h-5 w-5" />
-                                   <div>
-                                       <h4 className="font-semibold text-yellow-300">Cancellation Pending</h4>
-                                       <p className="text-sm">Your subscription will be cancelled and access will end on <span className="font-bold">{format(new Date(subscription.end_at * 1000), 'PPP')}.</span></p>
-                                   </div>
-                               </div>
-                           ) : (
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-muted-foreground">Status</span>
-                                        <span className="font-medium capitalize flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />{subscription.status}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-muted-foreground">Renews on</span>
-                                        <span className="font-medium">{format(new Date(subscription.current_end * 1000), 'PPP')}</span>
-                                    </div>
-                                </div>
-                           )}
+                            <RestorePurchaseButton />
                         </CardContent>
-                        {subscription.status !== 'cancelled' && (
-                             <CardFooter className="border-t pt-6">
-                                <Button variant="destructive" onClick={handleCancel} disabled={isCancelling}>
-                                    {isCancelling && <Loader2 className="mr-2 animate-spin" />}
-                                    Cancel Subscription
-                                </Button>
-                            </CardFooter>
-                        )}
                     </Card>
                 )}
-
-                <Card>
-                    <CardHeader>
-                         <CardTitle>Restore Purchase</CardTitle>
-                         <CardDescription>
-                            If you've paid but don't see your Pro features, click here to sync your latest subscription status.
-                         </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <RestorePurchaseButton />
-                    </CardContent>
-                </Card>
             </div>
         </>
     );
