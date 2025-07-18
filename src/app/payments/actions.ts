@@ -161,13 +161,15 @@ export async function syncRazorpaySubscription(
         while (hasMore && !userSubscription) {
             const subscriptions = await razorpay.subscriptions.all({ count, skip });
             
-            userSubscription = subscriptions.items.find(sub => 
-                sub.notes?.email === email && 
-                validStatuses.includes(sub.status) &&
-                proPlanIds.includes(sub.plan_id)
-            ) || null;
+            if (subscriptions.items) {
+                userSubscription = subscriptions.items.find(sub => 
+                    sub.notes?.email === email && 
+                    validStatuses.includes(sub.status) &&
+                    proPlanIds.includes(sub.plan_id)
+                ) || null;
+            }
 
-            if (subscriptions.items.length < count) {
+            if (!subscriptions.items || subscriptions.items.length < count) {
                 hasMore = false;
             } else {
                 skip += count;
@@ -195,16 +197,19 @@ export async function syncRazorpaySubscription(
             // Generate a new session cookie with the updated claims
             const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
             
-            // To create a session cookie, we need a fresh ID token. We create a custom one.
-            const customToken = await adminAuth.createCustomToken(uid);
-            const sessionCookie = await adminAuth.createSessionCookie(customToken, { expiresIn });
+            // Create a session cookie from the provided ID token if it exists.
+            // This is crucial for the signup flow.
+            if (idToken) {
+                const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+                console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. New session cookie created from ID token.`);
+                return { success: true, sessionCookie: sessionCookie };
+            }
             
-            console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. New session cookie created.`);
+            // For other flows (like restore purchase), just confirm success.
+            // The client can then reload to get the new state.
+            console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. No new session cookie requested.`);
+            return { success: true };
 
-            return { 
-                success: true, 
-                sessionCookie: sessionCookie
-            };
         } else {
              console.log(`[syncRazorpay] No active or completed Pro subscription found for user ${uid} (email: ${email}).`);
             return { success: false, error: 'We could not find an active Pro subscription associated with your account.' };
@@ -255,7 +260,7 @@ export async function cancelRazorpaySubscription(): Promise<{ success: boolean; 
         }
 
         // Cancel at the end of the billing cycle
-        const cancelledSubscription = await razorpay.subscriptions.cancel(subData.id, true);
+        const cancelledSubscription = await razorpay.subscriptions.cancel(subData.id);
 
         // Update our DB to reflect the cancellation
         await userProfileRef.update({
