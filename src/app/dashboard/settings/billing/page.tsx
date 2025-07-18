@@ -103,19 +103,16 @@ export default function BillingPage() {
                     setSubscription(subDetails);
                     setIsFetchingSub(false);
                 } else {
-                    // If DB has no details, try to sync from Razorpay automatically
                     console.log("Pro user has no subscription details in DB. Attempting to sync...");
                     const syncResult = await syncRazorpaySubscription();
                     if (syncResult.success) {
-                         // After successful sync, re-fetch details from DB
                          const { subscription: newSubDetails } = await getSubscriptionDetails();
                          if(newSubDetails) {
                             setSubscription(newSubDetails);
                             toast({ title: "Sync Successful", description: "Your subscription details have been updated." });
                          }
                     } else {
-                        // This case is unlikely but handled
-                         toast({ title: "Sync Needed", description: "We couldn't automatically find your subscription. Please try 'Restore Purchase'.", variant: "destructive" });
+                         toast({ title: "Sync Needed", description: "We couldn't automatically find your subscription. Please try 'Restore Purchase'.", variant: "default" });
                     }
                     setIsFetchingSub(false);
                 }
@@ -153,7 +150,7 @@ export default function BillingPage() {
                 description: planType === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
                 handler: async function (response: any) {
                     toast({ title: 'Payment Successful!', description: 'Finalizing your upgrade...' });
-                    const syncResult = await syncRazorpaySubscription();
+                    const syncResult = await syncRazorpaySubscription(await user.getIdToken(true));
 
                     if (syncResult.success && syncResult.sessionCookie) {
                         await setSessionCookie(syncResult.sessionCookie);
@@ -200,6 +197,7 @@ export default function BillingPage() {
             const result = await cancelRazorpaySubscription();
             if (result.success) {
                 toast({ title: 'Subscription Cancelled', description: 'Your Pro plan will remain active until the end of your current billing period.' });
+                // Update the local state with the returned subscription object to re-render the UI
                 setSubscription(result.subscription);
             } else {
                 toast({ title: 'Error', description: result.error, variant: 'destructive' });
@@ -318,8 +316,11 @@ export default function BillingPage() {
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Subscription Not Found</CardTitle>
-                                    <CardDescription>We couldn't find your subscription details, but your Pro plan is active. To manage billing, please contact support.</CardDescription>
+                                    <CardDescription>We couldn't find your subscription details, but your Pro plan is active. To manage billing, please use the restore purchase button or contact support.</CardDescription>
                                 </CardHeader>
+                                <CardContent>
+                                    <RestorePurchaseButton />
+                                </CardContent>
                             </Card>
                         )
                     )

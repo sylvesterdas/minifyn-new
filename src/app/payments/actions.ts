@@ -152,7 +152,6 @@ export async function syncRazorpaySubscription(
     try {
         let userSubscription = null;
         
-        // Step 1: Find the customer by email
         const customers = await razorpay.customers.all({ email: email });
         const customer = customers.items && customers.items.length > 0 ? customers.items[0] : null;
 
@@ -163,7 +162,6 @@ export async function syncRazorpaySubscription(
         
         console.log(`[syncRazorpay] Found customer ${customer.id} for email ${email}.`);
 
-        // Step 2: Find the subscription associated with that customer
         const proPlanIds = [PLAN_IDS.monthly, PLAN_IDS.yearly].filter(Boolean);
         const validStatuses = ['active', 'completed'];
 
@@ -206,9 +204,8 @@ export async function syncRazorpaySubscription(
             });
             await adminAuth.setCustomUserClaims(uid, { plan: 'pro' });
             
-            const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-            
             if (idToken) {
+                const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
                 const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
                 console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. New session cookie created from ID token.`);
                 return { success: true, sessionCookie };
@@ -267,7 +264,7 @@ export async function cancelRazorpaySubscription(): Promise<{ success: boolean; 
         }
 
         // Cancel at the end of the billing cycle
-        const cancelledSubscription = await razorpay.subscriptions.cancel(subData.id, true);
+        const cancelledSubscription = await razorpay.subscriptions.cancel(subData.id, { cancel_at_cycle_end: true });
 
         // Update our DB to reflect the cancellation
         await userProfileRef.update({
@@ -280,6 +277,7 @@ export async function cancelRazorpaySubscription(): Promise<{ success: boolean; 
         return { success: true, subscription: cancelledSubscription };
     } catch (error) {
         console.error('Failed to cancel subscription:', error);
-        return { success: false, error: 'Could not cancel the subscription. Please contact support.' };
+        const message = error instanceof Error ? error.message : 'Could not cancel the subscription. Please contact support.';
+        return { success: false, error: message };
     }
 }
