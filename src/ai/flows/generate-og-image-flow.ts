@@ -40,7 +40,7 @@ const generateOgImageFlow = ai.defineFlow(
     // Step 1: Generate a high-quality prompt for the image model.
     // This uses an AI to write a prompt for another AI.
     const promptGenerationResponse = await ai.generate({
-      prompt: `You are an expert prompt engineer for a generative image model. Your task is to create a detailed, effective prompt that will generate an abstract background image.
+      prompt: `You are an expert prompt engineer for a generative image model. Your task is to create a detailed, effective prompt that will generate an abstract background image suitable for web use (e.g., social media cards).
 
       The user has provided the following topic for a blog post:
       - Title: "${input.title}"
@@ -52,6 +52,7 @@ const generateOgImageFlow = ai.defineFlow(
       3.  The style should be professional, clean, and suitable for a tech blog.
       4.  The desired aspect ratio is 1.91:1 (widescreen).
       5.  The prompt should suggest colors and concepts related to the blog post topic.
+      6.  Emphasize that the image should be optimized for web use with a reasonable file size.
       
       Your output should be ONLY the generated prompt, with no additional explanation or preamble.`,
       model: 'googleai/gemini-2.0-flash', // Use a fast text model for this step.
