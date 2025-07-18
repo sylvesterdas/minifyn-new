@@ -94,7 +94,7 @@ export default function BillingPage() {
     const router = useRouter();
 
     useEffect(() => {
-        if (user?.plan === 'pro' || user?.plan === 'admin') {
+        if (user?.plan === 'pro') {
             getSubscriptionDetails().then(({ subscription }) => {
                 if (subscription) {
                     setSubscription(subscription);
@@ -105,7 +105,7 @@ export default function BillingPage() {
 
     const planDetails = getPlanDetails(user?.plan);
     const isFreePlan = user?.plan === 'free';
-    const isProOrAdmin = user?.plan === 'pro' || user?.plan === 'admin';
+    const isProPlan = user?.plan === 'pro';
 
     const handleUpgrade = async () => {
         if (!user || user.isAnonymous) {
@@ -117,7 +117,8 @@ export default function BillingPage() {
         trackEvent({ action: 'click_upgrade', category: 'conversion', label: 'upgrade_from_billing_page', value: planType === 'monthly' ? 89 : 899 });
 
         try {
-            const subscriptionResult = await createRazorpaySubscription(planType);
+            const idToken = await user.getIdToken();
+            const subscriptionResult = await createRazorpaySubscription(planType, idToken);
             if ('error' in subscriptionResult) {
                 throw new Error(subscriptionResult.error);
             }
@@ -129,14 +130,14 @@ export default function BillingPage() {
                 description: planType === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
                 handler: async function (response: any) {
                     toast({ title: 'Payment Successful!', description: 'Finalizing your upgrade...' });
+                    const idTokenAfterPayment = await user.getIdToken(true);
                     
-                    const syncResult = await syncRazorpaySubscription();
+                    const syncResult = await syncRazorpaySubscription(idTokenAfterPayment);
 
                     if (syncResult.success && syncResult.sessionCookie) {
                         await setSessionCookie(syncResult.sessionCookie);
                         toast({ title: "Upgrade Complete!", description: "Your plan has been upgraded to Pro." });
                         trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_upgrade_${planType}`, value: planType === 'monthly' ? 89 : 899 });
-                         // Use window.location.assign for a hard refresh to ensure user claims are updated.
                         window.location.assign('/dashboard/settings/billing');
                     } else {
                         toast({ title: "Activation Pending", description: "Your payment was successful, but activation is taking a moment. Please try restoring your purchase or refresh the page in a few minutes.", variant: 'destructive' });
@@ -144,7 +145,7 @@ export default function BillingPage() {
                     }
                 },
                 modal: {
-                    ondismiss: () => setIsLoading(false) // Reset loading state if modal is closed
+                    ondismiss: () => setIsLoading(false)
                 },
                 prefill: {
                     name: user.name,
@@ -177,7 +178,7 @@ export default function BillingPage() {
             const result = await cancelRazorpaySubscription();
             if (result.success) {
                 toast({ title: 'Subscription Cancelled', description: 'Your Pro plan will remain active until the end of your current billing period.' });
-                setSubscription(result.subscription); // Update state with the cancelled subscription details
+                setSubscription(result.subscription);
             } else {
                 toast({ title: 'Error', description: result.error, variant: 'destructive' });
             }
@@ -247,7 +248,7 @@ export default function BillingPage() {
                     </Card>
                 )}
                 
-                {isProOrAdmin && subscription && (
+                {isProPlan && subscription && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Manage Subscription</CardTitle>
@@ -261,7 +262,7 @@ export default function BillingPage() {
                                    <AlertTriangle className="h-5 w-5" />
                                    <div>
                                        <h4 className="font-semibold text-yellow-300">Cancellation Pending</h4>
-                                       <p className="text-sm">Your subscription will be cancelled and access will end on <span className="font-bold">{format(new Date(subscription.current_end * 1000), 'PPP')}.</span></p>
+                                       <p className="text-sm">Your subscription will be cancelled and access will end on <span className="font-bold">{format(new Date(subscription.end_at * 1000), 'PPP')}.</span></p>
                                    </div>
                                </div>
                            ) : (
