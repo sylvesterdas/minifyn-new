@@ -6,6 +6,7 @@ import { validateRequest } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { ClicksChart } from './analytics/clicks-chart';
 import { AnalyticsDetailCard } from './analytics/analytics-detail-card';
+import { LockedFeatureCard } from '@/components/locked-feature-card';
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -20,6 +21,8 @@ export default async function DashboardPage() {
         getDashboardStats(),
         getAnalyticsSummary()
     ]);
+
+    const isProOrAdmin = user.plan === 'pro' || user.plan === 'admin';
 
     return (
         <>
@@ -56,7 +59,7 @@ export default async function DashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-            <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-1 pt-6">
+             <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-1 pt-6">
                 <Card>
                     <CardHeader>
                         <CardTitle>Clicks Overview (Last 30 Days)</CardTitle>
@@ -65,6 +68,51 @@ export default async function DashboardPage() {
                          <ClicksChart data={summary.clicksByDay} />
                     </CardContent>
                 </Card>
+            </div>
+             <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2 pt-6">
+                 {isProOrAdmin ? (
+                    <>
+                        <AnalyticsDetailCard
+                            title="Top Referrers"
+                            data={summary.referrers}
+                            categoryKey="referrer"
+                            valueKey="clicks"
+                            defaultIconName="globe"
+                        />
+                        <AnalyticsDetailCard
+                            title="Clicks by Platform"
+                            data={summary.platforms}
+                            categoryKey="platform"
+                            valueKey="clicks"
+                            iconNameMap={{
+                                'Windows': 'laptop',
+                                'macOS': 'laptop',
+                                'Linux': 'laptop',
+                                'iOS': 'smartphone',
+                                'Android': 'smartphonenfc',
+                            }}
+                        />
+                    </>
+                 ) : (
+                    <>
+                        <LockedFeatureCard title="Top Referrers" description="See which websites are sending you the most traffic.">
+                            {/* Placeholder content for layout */}
+                            <div className="space-y-4">
+                                <div className="flex items-center"><div className="w-4 h-4 mr-3 bg-muted rounded-full" /><div className="flex-1 bg-muted h-4 rounded" /></div>
+                                <div className="flex items-center"><div className="w-4 h-4 mr-3 bg-muted rounded-full" /><div className="flex-1 bg-muted h-4 rounded" /></div>
+                                <div className="flex items-center"><div className="w-4 h-4 mr-3 bg-muted rounded-full" /><div className="flex-1 bg-muted h-4 rounded" /></div>
+                            </div>
+                        </LockedFeatureCard>
+                        <LockedFeatureCard title="Clicks by Platform" description="Understand what devices your audience uses.">
+                            {/* Placeholder content for layout */}
+                             <div className="space-y-4">
+                                <div className="flex items-center"><div className="w-4 h-4 mr-3 bg-muted rounded-full" /><div className="flex-1 bg-muted h-4 rounded" /></div>
+                                <div className="flex items-center"><div className="w-4 h-4 mr-3 bg-muted rounded-full" /><div className="flex-1 bg-muted h-4 rounded" /></div>
+                                <div className="flex items-center"><div className="w-4 h-4 mr-3 bg-muted rounded-full" /><div className="flex-1 bg-muted h-4 rounded" /></div>
+                            </div>
+                        </LockedFeatureCard>
+                    </>
+                 )}
             </div>
         </>
     );
