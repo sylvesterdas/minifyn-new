@@ -1,28 +1,30 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
+import { validateRequest } from './lib/auth';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
+    const { user } = await validateRequest();
     const { pathname } = request.nextUrl;
-    const sessionCookie = request.cookies.get('session');
 
-    const isAuthenticated = !!sessionCookie;
-
-    // Protected dashboard routes
     const isDashboardRoute = pathname.startsWith('/dashboard');
-    // Public auth routes
     const isAuthRoute = pathname.startsWith('/auth/signin') || pathname.startsWith('/auth/signup') || pathname.startsWith('/auth/forgot-password');
 
-    // If user is not authenticated and tries to access a protected dashboard route, redirect to signin
-    if (!isAuthenticated && isDashboardRoute) {
+    // If the user is anonymous and trying to access a protected dashboard route, redirect to sign-in.
+    if (user?.isAnonymous && isDashboardRoute) {
         return NextResponse.redirect(new URL('/auth/signin', request.url));
     }
 
-    // If user is authenticated and tries to access a public auth page, redirect to dashboard
-    if (isAuthenticated && isAuthRoute) {
+    // If a non-anonymous (fully authenticated) user tries to access a sign-in/sign-up page, redirect to the dashboard.
+    if (user && !user.isAnonymous && isAuthRoute) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
-    // Allow all other requests to proceed
+    // If there is no user session at all and they try to access the dashboard, redirect to sign-in.
+    if (!user && isDashboardRoute) {
+        return NextResponse.redirect(new URL('/auth/signin', request.url));
+    }
+    
+    // Allow all other requests to proceed.
     return NextResponse.next();
 }
 

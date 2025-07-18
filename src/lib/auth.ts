@@ -11,6 +11,7 @@ import type { UserProfile } from '@/app/dashboard/settings/actions';
 export interface AuthUser extends DecodedIdToken {
     onboardingCompleted: boolean;
     plan: UserPlan;
+    isAnonymous: boolean;
 }
 
 async function getUserProfileData(uid: string): Promise<{ plan: UserPlan, onboardingCompleted: boolean }> {
@@ -23,11 +24,9 @@ async function getUserProfileData(uid: string): Promise<{ plan: UserPlan, onboar
                 onboardingCompleted: profile.onboardingCompleted === true,
             };
         }
-        // Default values if no profile exists
         return { plan: 'free', onboardingCompleted: false };
     } catch (error) {
         console.error(`Failed to fetch profile data for user ${uid}:`, error);
-        // Fail safe: if there's an error, assume they are on the free plan and haven't onboarded.
         return { plan: 'free', onboardingCompleted: false };
     }
 }
@@ -44,16 +43,23 @@ export const validateRequest = cache(
     try {
       const decodedClaims = await adminAuth.verifySessionCookie(
         sessionCookie,
-        true // Check for revocation
+        true
       );
       
-      const { plan, onboardingCompleted } = await getUserProfileData(decodedClaims.uid);
-      const user: AuthUser = { ...decodedClaims, plan, onboardingCompleted };
+      const isAnonymous = decodedClaims.provider_id === 'anonymous';
+      let plan: UserPlan = 'anonymous';
+      let onboardingCompleted = false;
+
+      if (!isAnonymous) {
+          const profileData = await getUserProfileData(decodedClaims.uid);
+          plan = profileData.plan;
+          onboardingCompleted = profileData.onboardingCompleted;
+      }
+      
+      const user: AuthUser = { ...decodedClaims, plan, onboardingCompleted, isAnonymous };
 
       return { user };
     } catch (error: any) {
-      // Session cookie is invalid or expired.
-      // In a real app, you would want to log this error.
       return { user: null };
     }
   }
