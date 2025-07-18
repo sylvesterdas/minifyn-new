@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ExternalLink, MailCheck, ShieldCheck, HelpCircle } from 'lucide-react';
+import { Loader2, ExternalLink, MailCheck, ShieldCheck, HelpCircle, Star } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { trackEvent } from '@/lib/gtag';
 import { PlanSelector, type Plan } from '@/components/plan-selector';
@@ -21,6 +21,8 @@ import { signInWithCustomToken } from 'firebase/auth';
 import { auth as firebaseClientAuth } from '@/lib/firebase';
 import { login } from '@/app/auth/actions';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
 
 
 export interface FormState {
@@ -57,6 +59,7 @@ function SignUpPageComponent() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [selectedPlan, setSelectedPlan] = useState<Plan>(searchParams.get('plan') === 'pro' ? 'pro' : 'free');
+    const [interval, setInterval] = useState<'monthly' | 'yearly'>(searchParams.get('interval') === 'yearly' ? 'yearly' : 'monthly');
     const [termsAccepted, setTermsAccepted] = useState(false);
     
     // UI state
@@ -95,14 +98,14 @@ function SignUpPageComponent() {
             const userCredential = await signInWithCustomToken(firebaseClientAuth, customToken);
             const idToken = await userCredential.user.getIdToken();
 
-            const subscriptionResult = await createRazorpaySubscription('monthly', idToken);
+            const subscriptionResult = await createRazorpaySubscription(interval, idToken);
             if ('error' in subscriptionResult) throw new Error(subscriptionResult.error);
             
             const rzp = new window.Razorpay({
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
                 subscription_id: subscriptionResult.subscriptionId,
                 name: "MiniFyn Pro",
-                description: "Monthly Subscription",
+                description: `${interval.charAt(0).toUpperCase() + interval.slice(1)} Subscription`,
                 handler: async (response: any) => {
                     toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
                     
@@ -111,7 +114,7 @@ function SignUpPageComponent() {
                     const syncResult = await syncRazorpaySubscription(idTokenAfterPayment);
 
                     if (syncResult.success) {
-                        trackEvent({ action: 'purchase', category: 'conversion', label: 'pro_plan_signup', value: 89 });
+                        trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_signup_${interval}`, value: interval === 'monthly' ? 89 : 899 });
                         
                         // Now, get a final token with the 'pro' claim and log in to create the session cookie
                         const finalIdToken = await userCredential.user.getIdToken(true);
@@ -237,6 +240,36 @@ function SignUpPageComponent() {
                 <form action={handleSubmit}>
                     <CardContent className="grid gap-4">
                         <PlanSelector selectedPlan={selectedPlan} onPlanChange={setSelectedPlan} />
+
+                        {selectedPlan === 'pro' && (
+                            <div className="p-4 border rounded-lg bg-muted/30 space-y-4 animate-in fade-in duration-300">
+                                <div className="flex justify-center items-center gap-4">
+                                    <Label htmlFor="plan-toggle" className={cn('text-sm', interval === 'monthly' ? 'text-foreground' : 'text-muted-foreground')}>Monthly</Label>
+                                    <Switch
+                                        id="plan-toggle"
+                                        checked={interval === 'yearly'}
+                                        onCheckedChange={(checked) => setInterval(checked ? 'yearly' : 'monthly')}
+                                        aria-label="Toggle between monthly and yearly billing"
+                                    />
+                                    <Label htmlFor="plan-toggle" className={cn('text-sm', interval === 'yearly' ? 'text-foreground' : 'text-muted-foreground')}>
+                                        Yearly <span className="text-primary font-semibold">(Save 15%)</span>
+                                    </Label>
+                                </div>
+                                <div className="text-center pt-2 transition-all duration-300">
+                                     {interval === 'monthly' ? (
+                                        <div className="text-center">
+                                            <span className="text-3xl font-bold">₹89</span>
+                                            <span className="text-sm text-muted-foreground">/month</span>
+                                        </div>
+                                     ) : (
+                                        <div className="text-center">
+                                            <span className="text-3xl font-bold">₹899</span>
+                                            <span className="text-sm text-muted-foreground">/year</span>
+                                        </div>
+                                     )}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="grid gap-2">
                             <Label htmlFor="name">Name</Label>
