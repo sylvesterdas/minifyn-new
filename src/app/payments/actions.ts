@@ -108,11 +108,11 @@ export async function createRazorpaySubscription(
 
 export async function syncRazorpaySubscription(): Promise<{ success: boolean; message: string } | { success: false; error: string }> {
     const { user } = await validateRequest();
-    if (!user) {
+    if (!user || !user.email) {
         return { success: false, error: 'You must be logged in to perform this action.' };
     }
     
-    console.log(`[syncRazorpay] Starting subscription sync for user: ${user.uid}`);
+    console.log(`[syncRazorpay] Starting subscription sync for user: ${user.uid} (email: ${user.email})`);
 
     try {
         let userSubscription = null;
@@ -124,11 +124,12 @@ export async function syncRazorpaySubscription(): Promise<{ success: boolean; me
             console.log(`[syncRazorpay] Fetching subscriptions... Skip: ${skip}, Count: ${count}`);
             const subscriptions = await razorpay.subscriptions.fetchAll({ count, skip });
             
-            const found = subscriptions.items.find(sub => sub.notes?.userId === user.uid && sub.status === 'active');
+            // Find subscription by email in the notes
+            const found = subscriptions.items.find(sub => sub.notes?.email === user.email && sub.status === 'active');
 
             if (found) {
                 userSubscription = found;
-                console.log(`[syncRazorpay] Found active subscription ${userSubscription.id} for user ${user.uid}.`);
+                console.log(`[syncRazorpay] Found active subscription ${userSubscription.id} for user with email ${user.email}.`);
                 break; // Exit loop once found
             }
 
@@ -149,7 +150,7 @@ export async function syncRazorpaySubscription(): Promise<{ success: boolean; me
             console.log(`[syncRazorpay] User ${user.uid} plan restored to Pro via manual sync.`);
             return { success: true, message: 'Your Pro plan has been successfully restored!' };
         } else {
-             console.log(`[syncRazorpay] No active subscription found for user ${user.uid} after checking all records.`);
+             console.log(`[syncRazorpay] No active subscription found for user ${user.uid} (email: ${user.email}) after checking all records.`);
             return { success: false, error: 'We could not find an active Pro subscription associated with your account.' };
         }
 
