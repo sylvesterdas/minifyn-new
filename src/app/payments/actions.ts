@@ -178,13 +178,24 @@ export async function syncRazorpaySubscription(
             console.log(`[syncRazorpay] Found valid subscription ${userSubscription.id} (Plan: ${userSubscription.plan_id}, Status: ${userSubscription.status}) for user with email ${email}.`);
             const userProfileRef = db.ref(`user_profiles/${uid}`);
             
-            await userProfileRef.update({ plan: 'pro', onboardingCompleted: true });
+            await userProfileRef.update({ 
+                plan: 'pro', 
+                onboardingCompleted: true,
+                subscription: {
+                    id: userSubscription.id,
+                    status: userSubscription.status,
+                    planId: userSubscription.plan_id,
+                    current_start: userSubscription.current_start,
+                    current_end: userSubscription.current_end,
+                    ended_at: userSubscription.ended_at || null,
+                }
+            });
             await adminAuth().setCustomUserClaims(uid, { plan: 'pro' });
             
-            // To get the latest claims, we must create a new custom token and then a session cookie from it.
-            const newCustomToken = await adminAuth().createCustomToken(uid);
+            // Generate a new session cookie with the updated claims
             const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-            const sessionCookie = await adminAuth().createSessionCookie(newCustomToken, { expiresIn });
+            const newIdToken = await adminAuth().createCustomToken(uid);
+            const sessionCookie = await adminAuth().createSessionCookie(newIdToken, { expiresIn });
             
             console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. New session cookie created.`);
 
