@@ -121,12 +121,12 @@ type SyncResult =
 
 export async function syncRazorpaySubscription(idToken?: string): Promise<SyncResult> {
     let userData: { uid: string, email?: string } | null = null;
-    let verifiedToken: DecodedIdToken | null = null;
+    let authSource: DecodedIdToken | null = null;
     
     if (idToken) {
         try {
-            verifiedToken = await adminAuth.verifyIdToken(idToken, true); // Check revocation status
-            userData = { uid: verifiedToken.uid, email: verifiedToken.email };
+            authSource = await adminAuth.verifyIdToken(idToken, true); // Check revocation status
+            userData = { uid: authSource.uid, email: authSource.email };
         } catch (e) {
             console.error("[Sync Action] Invalid ID token provided:", e);
             return { success: false, error: 'Invalid authentication token.' };
@@ -137,10 +137,10 @@ export async function syncRazorpaySubscription(idToken?: string): Promise<SyncRe
             return { success: false, error: 'You must be logged in.' };
         }
         userData = { uid: user.uid, email: user.email };
-        verifiedToken = user;
+        authSource = user;
     }
 
-    if (!userData || !userData.email || !verifiedToken) {
+    if (!userData || !userData.email || !authSource) {
         return { success: false, error: 'User email not found or token invalid.' };
     }
     
@@ -190,7 +190,14 @@ export async function syncRazorpaySubscription(idToken?: string): Promise<SyncRe
             console.log(`[syncRazorpay] User ${userData.uid} plan restored to Pro via manual sync.`);
 
             // Create a new session cookie with the updated claims
-            const sessionCookie = await adminAuth.createSessionCookie(idToken!, { expiresIn: 60 * 60 * 24 * 5 * 1000 });
+            // This requires the original ID token from the client to be passed in.
+            if (!idToken) {
+                 // For restore purchase flow, we can't create a new session cookie without client's ID token.
+                 // The client will need to reload to get a new token with the updated claims.
+                 return { success: true, sessionCookie: '', message: 'Your Pro plan has been successfully synced! The page will now reload.' };
+            }
+            
+            const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn: 60 * 60 * 24 * 5 * 1000 });
             console.log(`[syncRazorpay] Created new session cookie for user ${userData.uid} with pro plan.`);
             
             return { 

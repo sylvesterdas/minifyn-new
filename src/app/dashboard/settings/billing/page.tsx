@@ -11,6 +11,7 @@ import { useTransition } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
 
 function RestorePurchaseButton() {
     const [isPending, startTransition] = useTransition();
@@ -18,7 +19,16 @@ function RestorePurchaseButton() {
 
     const handleRestore = () => {
         startTransition(async () => {
-            const result = await syncRazorpaySubscription();
+            const user = auth.currentUser;
+            if (!user) {
+                toast({ title: 'Authentication Error', description: 'Please sign in again to restore your purchase.', variant: 'destructive' });
+                return;
+            }
+            
+            // Get the latest ID token to pass to the server action
+            const idToken = await user.getIdToken(true);
+            const result = await syncRazorpaySubscription(idToken);
+
             if (result.success) {
                 toast({
                     title: 'Success!',
