@@ -98,15 +98,32 @@ export default function BillingPage() {
     useEffect(() => {
         if (user?.plan === 'pro') {
             setIsFetchingSub(true);
-            getSubscriptionDetails().then(({ subscription }) => {
-                if (subscription) {
-                    setSubscription(subscription);
+            getSubscriptionDetails().then(async ({ subscription: subDetails, error }) => {
+                if (subDetails) {
+                    setSubscription(subDetails);
+                    setIsFetchingSub(false);
+                } else {
+                    // If DB has no details, try to sync from Razorpay automatically
+                    console.log("Pro user has no subscription details in DB. Attempting to sync...");
+                    const syncResult = await syncRazorpaySubscription();
+                    if (syncResult.success) {
+                         // After successful sync, re-fetch details from DB
+                         const { subscription: newSubDetails } = await getSubscriptionDetails();
+                         if(newSubDetails) {
+                            setSubscription(newSubDetails);
+                            toast({ title: "Sync Successful", description: "Your subscription details have been updated." });
+                         }
+                    } else {
+                        // This case is unlikely but handled
+                         toast({ title: "Sync Needed", description: "We couldn't automatically find your subscription. Please try 'Restore Purchase'.", variant: "destructive" });
+                    }
+                    setIsFetchingSub(false);
                 }
-            }).finally(() => setIsFetchingSub(false));
+            });
         } else {
             setIsFetchingSub(false);
         }
-    }, [user?.plan]);
+    }, [user?.plan, toast]);
 
     const planDetails = getPlanDetails(user?.plan);
     const isFreePlan = user?.plan === 'free';
@@ -115,7 +132,7 @@ export default function BillingPage() {
 
     const handleUpgrade = async () => {
         if (!user || user.isAnonymous) {
-            toast({ title: 'Please sign in to upgrade.', variant: 'destructive' });
+            router.push(`/auth/signup?plan=pro&interval=${planType}`);
             return;
         }
 
@@ -136,9 +153,7 @@ export default function BillingPage() {
                 description: planType === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
                 handler: async function (response: any) {
                     toast({ title: 'Payment Successful!', description: 'Finalizing your upgrade...' });
-                    const idTokenAfterPayment = await user.getIdToken(true);
-                    
-                    const syncResult = await syncRazorpaySubscription(idTokenAfterPayment);
+                    const syncResult = await syncRazorpaySubscription();
 
                     if (syncResult.success && syncResult.sessionCookie) {
                         await setSessionCookie(syncResult.sessionCookie);
