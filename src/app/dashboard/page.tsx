@@ -11,7 +11,7 @@ export const revalidate = 3600; // Revalidate every hour
 
 export default async function DashboardPage() {
     const { user } = await validateRequest();
-    if (!user) {
+    if (!user || user.isAnonymous) {
         redirect('/auth/signin');
     }
 
@@ -56,37 +56,15 @@ export default async function DashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-            <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-7 pt-6">
-                <Card className="lg:col-span-4">
+            <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-1 pt-6">
+                <Card>
                     <CardHeader>
-                        <CardTitle>Clicks Overview</CardTitle>
+                        <CardTitle>Clicks Overview (Last 30 Days)</CardTitle>
                     </CardHeader>
                     <CardContent className="pl-2">
                          <ClicksChart data={summary.clicksByDay} />
                     </CardContent>
                 </Card>
-                 <div className="lg:col-span-3 space-y-4">
-                     <AnalyticsDetailCard
-                        title="Top Referrers"
-                        data={summary.referrers}
-                        categoryKey="referrer"
-                        valueKey="clicks"
-                        defaultIconName="globe"
-                     />
-                    <AnalyticsDetailCard
-                        title="Clicks by Platform"
-                        data={summary.platforms}
-                        categoryKey="platform"
-                        valueKey="clicks"
-                        iconNameMap={{
-                            'Windows': 'laptop',
-                            'macOS': 'laptop',
-                            'Linux': 'laptop',
-                            'iOS': 'smartphone',
-                            'Android': 'smartphonenfc',
-                        }}
-                    />
-                 </div>
             </div>
         </>
     );
