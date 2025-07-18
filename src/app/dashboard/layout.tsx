@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Home, Settings, Link as LinkIcon, PanelLeft, Key, LineChart, BookText, ExternalLink, CreditCard } from 'lucide-react';
+import { Home, Settings, Link as LinkIcon, PanelLeft, LineChart, BookText, ExternalLink } from 'lucide-react';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { UserNav } from '@/components/user-nav';
 import { useAuth } from '@/hooks/use-auth';
