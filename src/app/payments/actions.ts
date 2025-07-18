@@ -259,8 +259,8 @@ export async function cancelRazorpaySubscription(): Promise<{ success: boolean; 
     }
 
     try {
-        const userProfileRef = db.ref(`user_profiles/${user.uid}/subscription`);
-        const snapshot = await userProfileRef.once('value');
+        const userProfileRef = db.ref(`user_profiles/${user.uid}`);
+        const snapshot = await userProfileRef.child('subscription').once('value');
         const subData = snapshot.val();
 
         if (!subData || !subData.id) {
@@ -270,8 +270,11 @@ export async function cancelRazorpaySubscription(): Promise<{ success: boolean; 
         // Cancel at the end of the billing cycle
         const cancelledSubscription = await razorpay.subscriptions.cancel(subData.id, { cancel_at_cycle_end: true });
 
-        // Update our DB with the full response from Razorpay to reflect the cancellation
-        await userProfileRef.set(cancelledSubscription);
+        // Update our DB with the full response from Razorpay to reflect the cancellation.
+        // This saves the new `status` and `ended_at` timestamp.
+        await userProfileRef.update({
+            subscription: cancelledSubscription,
+        });
 
         revalidatePath('/dashboard/settings/billing');
 
