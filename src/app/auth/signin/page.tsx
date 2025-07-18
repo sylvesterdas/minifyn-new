@@ -87,8 +87,8 @@ export default function SignInPage() {
                     title: 'Success',
                     description: 'Logged in successfully! Redirecting...',
                 });
-                // Use router.push() for a soft navigation that works with the middleware
-                router.push('/dashboard');
+                // Use a full page reload to ensure the session cookie is sent with the next request.
+                window.location.assign('/dashboard');
             } else {
                 setError(result.error || 'An unknown server error occurred.');
             }
