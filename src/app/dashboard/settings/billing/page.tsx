@@ -39,6 +39,7 @@ function RestorePurchaseButton() {
                 toast({
                     title: 'Success!',
                     description: 'Your Pro plan has been successfully synced!',
+                    variant: 'default',
                 });
                 window.location.reload();
             } else {
@@ -237,10 +238,12 @@ export default function BillingPage() {
                                     <span>₹899 <span className="text-base font-normal text-muted-foreground">/year</span></span>
                                 )}
                             </div>
-                            <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={isLoading || isAuthLoading}>
+                        </CardContent>
+                        <CardFooter>
+                             <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={isLoading || isAuthLoading}>
                                 {isLoading || isAuthLoading ? <Loader2 className="animate-spin" /> : 'Upgrade and Pay'}
                             </Button>
-                        </CardContent>
+                        </CardFooter>
                     </Card>
                 )}
                 
