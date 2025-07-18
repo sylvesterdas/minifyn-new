@@ -50,7 +50,7 @@ export async function createRazorpaySubscription(
     if (idToken) {
         try {
             // Verify the ID token passed from the client
-            const decodedToken: DecodedIdToken = await adminAuth().verifyIdToken(idToken);
+            const decodedToken: DecodedIdToken = await adminAuth.verifyIdToken(idToken);
             userData = { uid: decodedToken.uid, email: decodedToken.email, name: decodedToken.name };
             console.log(`[Payment Action] Verified user via ID token: ${userData.uid}`);
         } catch(e) {
@@ -128,7 +128,7 @@ export async function syncRazorpaySubscription(
 
     if (idToken) {
         try {
-            const decodedToken = await adminAuth().verifyIdToken(idToken);
+            const decodedToken = await adminAuth.verifyIdToken(idToken);
             uid = decodedToken.uid;
             email = decodedToken.email;
         } catch (e) {
@@ -190,12 +190,14 @@ export async function syncRazorpaySubscription(
                     ended_at: userSubscription.ended_at || null,
                 }
             });
-            await adminAuth().setCustomUserClaims(uid, { plan: 'pro' });
+            await adminAuth.setCustomUserClaims(uid, { plan: 'pro' });
             
             // Generate a new session cookie with the updated claims
             const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-            const newIdToken = await adminAuth().createCustomToken(uid);
-            const sessionCookie = await adminAuth().createSessionCookie(newIdToken, { expiresIn });
+            
+            // To create a session cookie, we need a fresh ID token. We create a custom one.
+            const customToken = await adminAuth.createCustomToken(uid);
+            const sessionCookie = await adminAuth.createSessionCookie(customToken, { expiresIn });
             
             console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. New session cookie created.`);
 
