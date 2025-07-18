@@ -77,7 +77,7 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
         trackEvent({ action: 'click_upgrade', category: 'conversion', label: eventLabel, value: planType === 'monthly' ? 89 : 899 });
 
         if (!user || user.isAnonymous) {
-            router.push('/auth/signup');
+            router.push('/auth/signup?plan=pro');
             return;
         }
 

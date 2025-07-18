@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useState, Suspense } from 'react';
 import { useFormStatus } from 'react-dom';
 import { signup } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ import Script from 'next/script';
 import { signInWithCustomToken } from 'firebase/auth';
 import { auth as firebaseClientAuth } from '@/lib/firebase';
 import { login } from '@/app/auth/actions';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 
 export interface FormState {
@@ -46,16 +46,17 @@ function SubmitButton({ plan, disabled }: { plan: Plan, disabled: boolean }) {
     );
 }
 
-export default function SignUpPage() {
+function SignUpPageComponent() {
     const { toast } = useToast();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [freePlanState, freePlanFormAction] = useActionState(signup, { success: false });
     
     // Form state
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [selectedPlan, setSelectedPlan] = useState<Plan>('free');
+    const [selectedPlan, setSelectedPlan] = useState<Plan>(searchParams.get('plan') === 'pro' ? 'pro' : 'free');
     const [termsAccepted, setTermsAccepted] = useState(false);
     
     // UI state
@@ -278,5 +279,13 @@ export default function SignUpPage() {
                 </form>
             </Card>
         </>
+    );
+}
+
+export default function SignUpPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <SignUpPageComponent />
+        </Suspense>
     );
 }
