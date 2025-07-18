@@ -35,8 +35,7 @@ function RestorePurchaseButton() {
         startTransition(async () => {
             const result = await syncRazorpaySubscription();
 
-            if (result.success && result.sessionCookie) {
-                await setSessionCookie(result.sessionCookie);
+            if (result.success) {
                 toast({
                     title: 'Success!',
                     description: 'Your Pro plan has been successfully synced!',
@@ -102,7 +101,7 @@ export default function BillingPage() {
                 if (subDetails) {
                     setSubscription(subDetails);
                     setIsFetchingSub(false);
-                } else {
+                } else if (!error) {
                     console.log("Pro user has no subscription details in DB. Attempting to sync...");
                     const syncResult = await syncRazorpaySubscription();
                     if (syncResult.success) {
@@ -114,6 +113,9 @@ export default function BillingPage() {
                     } else {
                          toast({ title: "Sync Needed", description: "We couldn't automatically find your subscription. Please try 'Restore Purchase'.", variant: "default" });
                     }
+                    setIsFetchingSub(false);
+                } else {
+                    toast({ title: "Error", description: "Could not load subscription details.", variant: 'destructive'});
                     setIsFetchingSub(false);
                 }
             });
@@ -137,7 +139,7 @@ export default function BillingPage() {
         trackEvent({ action: 'click_upgrade', category: 'conversion', label: 'upgrade_from_billing_page', value: planType === 'monthly' ? 89 : 899 });
 
         try {
-            const idToken = await user.getIdToken();
+            const idToken = await user.getIdToken(true);
             const subscriptionResult = await createRazorpaySubscription(planType, idToken);
             if ('error' in subscriptionResult) {
                 throw new Error(subscriptionResult.error);
@@ -195,9 +197,8 @@ export default function BillingPage() {
     const handleCancel = () => {
         startCancelTransition(async () => {
             const result = await cancelRazorpaySubscription();
-            if (result.success) {
+            if (result.success && result.subscription) {
                 toast({ title: 'Subscription Cancelled', description: 'Your Pro plan will remain active until the end of your current billing period.' });
-                // Update the local state with the returned subscription object to re-render the UI
                 setSubscription(result.subscription);
             } else {
                 toast({ title: 'Error', description: result.error, variant: 'destructive' });

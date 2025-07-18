@@ -190,17 +190,19 @@ export async function syncRazorpaySubscription(
             console.log(`[syncRazorpay] Found valid subscription ${userSubscription.id} (Plan: ${userSubscription.plan_id}, Status: ${userSubscription.status}) for user ${uid}.`);
             const userProfileRef = db.ref(`user_profiles/${uid}`);
             
+            const subscriptionData = {
+                id: userSubscription.id,
+                status: userSubscription.status,
+                planId: userSubscription.plan_id,
+                current_start: userSubscription.current_start,
+                current_end: userSubscription.current_end,
+                ended_at: userSubscription.ended_at || null,
+            };
+
             await userProfileRef.update({ 
                 plan: 'pro', 
                 onboardingCompleted: true,
-                subscription: {
-                    id: userSubscription.id,
-                    status: userSubscription.status,
-                    planId: userSubscription.plan_id,
-                    current_start: userSubscription.current_start,
-                    current_end: userSubscription.current_end,
-                    ended_at: userSubscription.ended_at || null,
-                }
+                subscription: subscriptionData,
             });
             await adminAuth.setCustomUserClaims(uid, { plan: 'pro' });
             
@@ -240,13 +242,15 @@ export async function getSubscriptionDetails(): Promise<{ subscription: any | nu
             return { subscription: null };
         }
 
-        const subscription = await razorpay.subscriptions.fetch(subData.id);
-        return { subscription };
+        // Return the locally stored subscription data instead of fetching from Razorpay each time.
+        // The source of truth is updated via webhooks or manual sync.
+        return { subscription: subData };
     } catch (error) {
         console.error('Failed to fetch subscription details:', error);
         return { subscription: null, error: 'Could not retrieve subscription details.' };
     }
 }
+
 
 export async function cancelRazorpaySubscription(): Promise<{ success: boolean; subscription?: any; error?: string }> {
     const { user } = await validateRequest();
@@ -267,10 +271,7 @@ export async function cancelRazorpaySubscription(): Promise<{ success: boolean; 
         const cancelledSubscription = await razorpay.subscriptions.cancel(subData.id, { cancel_at_cycle_end: true });
 
         // Update our DB to reflect the cancellation
-        await userProfileRef.update({
-            status: cancelledSubscription.status,
-            ended_at: cancelledSubscription.end_at,
-        });
+        await userProfileRef.update(cancelledSubscription);
 
         revalidatePath('/dashboard/settings/billing');
 
