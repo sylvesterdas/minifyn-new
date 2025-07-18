@@ -255,8 +255,10 @@ export async function getSubscriptionDetails(): Promise<{ subscription: any | nu
 export async function cancelRazorpaySubscription(): Promise<{ success: boolean; subscription?: any; error?: string }> {
     const { user } = await validateRequest();
     if (!user) {
+        console.log('[CancelSub] Unauthorized attempt.');
         return { success: false, error: 'Unauthorized' };
     }
+    console.log(`[CancelSub] Starting cancellation for user: ${user.uid}`);
 
     try {
         const userProfileRef = db.ref(`user_profiles/${user.uid}`);
@@ -264,23 +266,28 @@ export async function cancelRazorpaySubscription(): Promise<{ success: boolean; 
         const subData = snapshot.val();
 
         if (!subData || !subData.id) {
+            console.warn(`[CancelSub] No active subscription found in DB for user ${user.uid} to cancel.`);
             return { success: false, error: 'No active subscription found to cancel.' };
         }
+        console.log(`[CancelSub] Found subscription ${subData.id} for user ${user.uid}. Status: ${subData.status}`);
 
         // Cancel at the end of the billing cycle
+        console.log(`[CancelSub] Sending cancellation request to Razorpay for subscription ${subData.id}`);
         const cancelledSubscription = await razorpay.subscriptions.cancel(subData.id, { cancel_at_cycle_end: true });
+        console.log('[CancelSub] Razorpay response received:', JSON.stringify(cancelledSubscription, null, 2));
+
 
         // Update our DB with the full response from Razorpay to reflect the cancellation.
         // This saves the new `status` and `ended_at` timestamp.
-        await userProfileRef.update({
-            subscription: cancelledSubscription,
-        });
+        console.log(`[CancelSub] Updating database for user ${user.uid} with new subscription details.`);
+        await userProfileRef.child('subscription').set(cancelledSubscription);
+        console.log(`[CancelSub] Database update successful for user ${user.uid}.`);
 
         revalidatePath('/dashboard/settings/billing');
 
         return { success: true, subscription: cancelledSubscription };
     } catch (error) {
-        console.error('Failed to cancel subscription:', error);
+        console.error(`[CancelSub] Failed to cancel subscription for user ${user.uid}:`, error);
         const message = error instanceof Error ? error.message : 'Could not cancel the subscription. Please contact support.';
         return { success: false, error: message };
     }

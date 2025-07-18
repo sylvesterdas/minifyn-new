@@ -63,6 +63,7 @@ export const validateRequest = cache(
 
       return { user };
     } catch (error: any) {
+      console.error(`[Auth Lib] ${error.message}`)
       console.error('[Auth Lib] validateRequest: Session cookie verification failed.', error.code);
       return { user: null };
     }
