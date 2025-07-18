@@ -129,7 +129,7 @@ export async function syncRazorpaySubscription(): Promise<{ success: boolean; me
         
         while (hasMore) {
             console.log(`[syncRazorpay] Fetching subscriptions... Skip: ${skip}, Count: ${count}`);
-            const subscriptions = await razorpay.subscriptions.fetchAll({ count, skip });
+            const subscriptions = await razorpay.subscriptions.all({ count, skip });
             
             // Find subscription by email in the notes
             const found = subscriptions.items.find(sub => sub.notes?.email === user.email && sub.status === 'active');
