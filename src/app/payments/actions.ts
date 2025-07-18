@@ -151,19 +151,31 @@ export async function syncRazorpaySubscription(
 
     try {
         let userSubscription = null;
-        let skip = 0;
-        const count = 100; // Fetch 100 items per page
-        let hasMore = true;
         
+        // Step 1: Find the customer by email
+        const customers = await razorpay.customers.all({ email: email });
+        const customer = customers.items && customers.items.length > 0 ? customers.items[0] : null;
+
+        if (!customer) {
+            console.log(`[syncRazorpay] No Razorpay customer found for email ${email}.`);
+            return { success: false, error: 'We could not find a subscription associated with your account.' };
+        }
+        
+        console.log(`[syncRazorpay] Found customer ${customer.id} for email ${email}.`);
+
+        // Step 2: Find the subscription associated with that customer
         const proPlanIds = [PLAN_IDS.monthly, PLAN_IDS.yearly].filter(Boolean);
         const validStatuses = ['active', 'completed'];
 
+        let skip = 0;
+        const count = 100;
+        let hasMore = true;
+
         while (hasMore && !userSubscription) {
-            const subscriptions = await razorpay.subscriptions.all({ count, skip });
+            const subscriptions = await razorpay.subscriptions.all({ customer_id: customer.id, count, skip });
             
             if (subscriptions.items) {
                 userSubscription = subscriptions.items.find(sub => 
-                    sub.notes?.email === email && 
                     validStatuses.includes(sub.status) &&
                     proPlanIds.includes(sub.plan_id)
                 ) || null;
@@ -177,7 +189,7 @@ export async function syncRazorpaySubscription(
         }
 
         if (userSubscription) {
-            console.log(`[syncRazorpay] Found valid subscription ${userSubscription.id} (Plan: ${userSubscription.plan_id}, Status: ${userSubscription.status}) for user with email ${email}.`);
+            console.log(`[syncRazorpay] Found valid subscription ${userSubscription.id} (Plan: ${userSubscription.plan_id}, Status: ${userSubscription.status}) for user ${uid}.`);
             const userProfileRef = db.ref(`user_profiles/${uid}`);
             
             await userProfileRef.update({ 
@@ -194,24 +206,19 @@ export async function syncRazorpaySubscription(
             });
             await adminAuth.setCustomUserClaims(uid, { plan: 'pro' });
             
-            // Generate a new session cookie with the updated claims
             const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
             
-            // Create a session cookie from the provided ID token if it exists.
-            // This is crucial for the signup flow.
             if (idToken) {
                 const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
                 console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. New session cookie created from ID token.`);
-                return { success: true, sessionCookie: sessionCookie };
+                return { success: true, sessionCookie };
             }
             
-            // For other flows (like restore purchase), just confirm success.
-            // The client can then reload to get the new state.
             console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. No new session cookie requested.`);
             return { success: true };
 
         } else {
-             console.log(`[syncRazorpay] No active or completed Pro subscription found for user ${uid} (email: ${email}).`);
+             console.log(`[syncRazorpay] No active or completed Pro subscription found for user ${uid} (customer: ${customer.id}).`);
             return { success: false, error: 'We could not find an active Pro subscription associated with your account.' };
         }
 
@@ -260,7 +267,7 @@ export async function cancelRazorpaySubscription(): Promise<{ success: boolean; 
         }
 
         // Cancel at the end of the billing cycle
-        const cancelledSubscription = await razorpay.subscriptions.cancel(subData.id);
+        const cancelledSubscription = await razorpay.subscriptions.cancel(subData.id, true);
 
         // Update our DB to reflect the cancellation
         await userProfileRef.update({
