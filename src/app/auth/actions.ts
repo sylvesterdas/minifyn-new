@@ -17,18 +17,23 @@ function encodeEmail(email: string): string {
 export async function login(
   idToken: string
 ): Promise<{error?: string, success?: boolean}> {
+  console.log('[Auth Action] Initiating login...');
   try {
     const decodedToken: DecodedIdToken = await auth.verifyIdToken(idToken, true);
+    console.log(`[Auth Action] ID token verified for UID: ${decodedToken.uid}`);
 
     if (!decodedToken.email_verified) {
+      console.warn(`[Auth Action] Login failed for UID: ${decodedToken.uid}. Reason: Email not verified.`);
       return { error: 'Email not verified. Please check your inbox for a verification link.' };
     }
 
     const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
     const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
+    console.log(`[Auth Action] Session cookie created for UID: ${decodedToken.uid}.`);
     
     // Revoke any existing tokens to ensure the new session with the correct claims is used.
     await auth.revokeRefreshTokens(decodedToken.sub);
+    console.log(`[Auth Action] Existing refresh tokens revoked for UID: ${decodedToken.uid}.`);
 
     const cookieStore = cookies();
     cookieStore.set('session', sessionCookie, {
@@ -37,10 +42,11 @@ export async function login(
       maxAge: expiresIn,
       path: '/',
     });
+    console.log(`[Auth Action] Session cookie set in browser for UID: ${decodedToken.uid}.`);
 
     return { success: true };
   } catch (error: any) {
-    console.error('Login error:', error);
+    console.error('[Auth Action] Login error:', error);
     if (error.code === 'auth/id-token-expired') {
         return { error: 'Session expired, please sign in again.' };
     }
@@ -305,17 +311,20 @@ export async function logout(): Promise<{ success?: boolean, error?: string }> {
   const cookieObj = cookies();
   const sessionCookie = cookieObj.get('session')?.value;
   if (!sessionCookie) {
+    console.log('[Auth Action] Logout called, but no session cookie found. Assuming already logged out.');
     return { success: true };
   }
 
   try {
     const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
+    console.log(`[Auth Action] Logging out UID: ${decodedClaims.sub}.`);
     await auth.revokeRefreshTokens(decodedClaims.sub);
     cookieObj.delete('session');
+    console.log(`[Auth Action] Logout successful for UID: ${decodedClaims.sub}.`);
     return { success: true };
   } catch (error) {
-    console.warn("Could not revoke session cookie, it might be expired.", error);
-    cookieObj.delete('session');
+    console.warn("[Auth Action] Could not revoke session cookie during logout, it might be expired.", error);
+    cookieObj.delete('session'); // Delete the potentially invalid cookie anyway
     return { success: true };
   }
 }

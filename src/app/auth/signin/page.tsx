@@ -78,8 +78,9 @@ export default function SignInPage() {
                 setIsLoading(false);
                 return;
             }
-
-            const idToken = await user.getIdToken();
+            
+            // Force refresh the token to ensure it's not expired
+            const idToken = await user.getIdToken(true);
             const result = await login(idToken);
 
             if (result.success) {

@@ -37,6 +37,7 @@ export const validateRequest = cache(
     const sessionCookie = cookiesObj.get('session')?.value;
 
     if (!sessionCookie) {
+      console.log('[Auth Lib] validateRequest: No session cookie found.');
       return { user: null };
     }
 
@@ -45,6 +46,7 @@ export const validateRequest = cache(
         sessionCookie,
         true
       );
+      console.log(`[Auth Lib] validateRequest: Session cookie is valid for UID: ${decodedClaims.uid}`);
       
       const isAnonymous = decodedClaims.provider_id === 'anonymous';
       let plan: UserPlan = 'anonymous';
@@ -57,9 +59,11 @@ export const validateRequest = cache(
       }
       
       const user: AuthUser = { ...decodedClaims, plan, onboardingCompleted, isAnonymous };
+      console.log(`[Auth Lib] validateRequest: User object prepared for UID: ${user.uid} with plan: ${user.plan}`);
 
       return { user };
     } catch (error: any) {
+      console.error('[Auth Lib] validateRequest: Session cookie verification failed.', error.code);
       return { user: null };
     }
   }
