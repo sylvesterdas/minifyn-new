@@ -87,8 +87,7 @@ export default function SignInPage() {
                     title: 'Success',
                     description: 'Logged in successfully! Redirecting...',
                 });
-                // Use a full page reload to ensure the session cookie is sent with the next request.
-                window.location.assign('/dashboard');
+                router.push('/dashboard');
             } else {
                 setError(result.error || 'An unknown server error occurred.');
             }
