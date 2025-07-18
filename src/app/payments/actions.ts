@@ -113,15 +113,11 @@ export async function syncRazorpaySubscription(): Promise<{ success: boolean; me
     }
 
     try {
-        // Fetch all subscriptions from Razorpay. In a real-world scenario with many users,
-        // you would want to store the customer ID from Razorpay and fetch subscriptions for that customer.
-        // For this app's scale, fetching all and filtering is acceptable.
         const subscriptions = await razorpay.subscriptions.fetchAll();
         
         const userSubscription = subscriptions.items.find(sub => sub.notes?.userId === user.uid && sub.status === 'active');
 
         if (userSubscription) {
-             // User has an active subscription, let's ensure their plan is 'pro'
             const userProfileRef = db.ref(`user_profiles/${user.uid}`);
             
             await userProfileRef.update({ plan: 'pro' });
@@ -131,7 +127,6 @@ export async function syncRazorpaySubscription(): Promise<{ success: boolean; me
             console.log(`User ${user.uid} plan restored to Pro via manual sync.`);
             return { success: true, message: 'Your Pro plan has been successfully restored!' };
         } else {
-            // No active subscription found for this user
             return { success: false, error: 'We could not find an active Pro subscription associated with your account.' };
         }
 

@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { signup, checkUserPlanStatus } from '@/app/auth/actions';
+import { signup } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,11 +15,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { trackEvent } from '@/lib/gtag';
 import { PlanSelector, type Plan } from '@/components/plan-selector';
 import { OtpDialog } from '@/components/otp-dialog';
-import { createRazorpaySubscription } from '@/app/payments/actions';
+import { createRazorpaySubscription, syncRazorpaySubscription } from '@/app/payments/actions';
 import Script from 'next/script';
 import { signInWithCustomToken } from 'firebase/auth';
 import { auth as firebaseClientAuth } from '@/lib/firebase';
 import { login } from '@/app/auth/actions';
+import { useRouter } from 'next/navigation';
 
 
 export interface FormState {
@@ -47,6 +48,7 @@ function SubmitButton({ plan, disabled }: { plan: Plan, disabled: boolean }) {
 
 export default function SignUpPage() {
     const { toast } = useToast();
+    const router = useRouter();
     const [freePlanState, freePlanFormAction] = useActionState(signup, { success: false });
     
     // Form state
@@ -82,11 +84,11 @@ export default function SignUpPage() {
         }
     };
     
-    // Logic for triggering Razorpay checkout and polling for status
     const triggerPayment = async (customToken: string) => {
         if (isPaymentLoading) return;
         setIsPaymentLoading(true);
         setShowOtpDialog(false);
+        setView('payment_processing');
 
         try {
             const userCredential = await signInWithCustomToken(firebaseClientAuth, customToken);
@@ -101,37 +103,30 @@ export default function SignUpPage() {
                 name: "MiniFyn Pro",
                 description: "Monthly Subscription",
                 handler: async (response: any) => {
-                    setView('payment_processing');
                     toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
 
-                    let pollCount = 0;
-                    const maxPolls = 12; // 12 polls * 5 seconds = 60 seconds total
-                    const pollInterval = 5000; // 5 seconds
+                    // Use the new server action to finalize the upgrade.
+                    const syncResult = await syncRazorpaySubscription();
 
-                    const pollStatus = async () => {
-                        pollCount++;
-                        const freshIdToken = await userCredential.user.getIdToken(true); // Force refresh
-                        const { plan } = await checkUserPlanStatus(freshIdToken);
-                        
-                        if (plan === 'pro') {
-                            const loginResult = await login(freshIdToken);
-                            if (loginResult.success) {
-                                trackEvent({ action: 'purchase', category: 'conversion', label: 'pro_plan_signup', value: 89 });
-                                window.location.assign('/dashboard');
-                            } else {
-                                throw new Error(loginResult.error || 'Failed to create session after upgrade.');
-                            }
-                        } else if (pollCount < maxPolls) {
-                            setTimeout(pollStatus, pollInterval);
-                        } else {
-                            // Polling timed out
-                            setView('payment_stalled');
-                        }
-                    };
-                    
-                    pollStatus();
+                    if (syncResult.success) {
+                        trackEvent({ action: 'purchase', category: 'conversion', label: 'pro_plan_signup', value: 89 });
+                        toast({ title: "Upgrade Complete!", description: "Redirecting to your dashboard." });
+                        // We use window.location.assign to ensure a full page refresh
+                        // which loads the new session cookie and auth claims.
+                        window.location.assign('/dashboard');
+                    } else {
+                        // This case handles if the sync fails for some reason
+                         toast({ title: "Activation Pending", description: syncResult.error, variant: 'destructive' });
+                         setView('payment_stalled');
+                    }
                 },
-                modal: { ondismiss: () => setIsPaymentLoading(false) },
+                modal: { 
+                    ondismiss: () => {
+                        setIsPaymentLoading(false);
+                        // If user closes modal, reset the view
+                        setView('form');
+                    }
+                },
                 prefill: { name, email },
                 theme: { color: "#1e40af" }
             });
@@ -139,6 +134,7 @@ export default function SignUpPage() {
             rzp.on('payment.failed', (response: any) => {
                 toast({ title: 'Payment Failed', description: response.error.description, variant: 'destructive' });
                 setIsPaymentLoading(false);
+                setView('form');
             });
 
             rzp.open();
@@ -147,6 +143,7 @@ export default function SignUpPage() {
              const message = error instanceof Error ? error.message : 'Could not initiate payment.';
              toast({ title: 'Error', description: message, variant: 'destructive' });
              setIsPaymentLoading(false);
+             setView('form');
         }
     };
 

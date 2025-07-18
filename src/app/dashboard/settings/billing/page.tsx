@@ -26,7 +26,7 @@ function RestorePurchaseButton() {
                     description: result.message,
                 });
                 // Refresh the entire page to reflect new auth claims and UI changes
-                router.refresh();
+                window.location.reload();
             } else {
                  toast({
                     title: 'No Active Subscription Found',
@@ -95,7 +95,7 @@ export default function BillingPage() {
                         {user?.plan}
                     </Badge>
                 </div>
-                {user?.plan === 'free' && (
+                {(user?.plan === 'free' || !user?.plan) && (
                     <Button asChild>
                         <Link href="/pricing">Upgrade to Pro</Link>
                     </Button>

@@ -132,13 +132,13 @@ export async function verifyOtpAndCreateUser(prevState: any, formData: FormData)
             termsAcceptedAt: Date.now(),
             createdAt: userRecord.metadata.creationTime,
             onboardingCompleted: true, // Skip multi-step onboarding
-            plan: 'free', // Start as free, webhook will upgrade to pro
+            plan: 'free', // Start as free, webhook/sync will upgrade to pro
         });
         
         // Clean up the used OTP
         await otpRef.remove();
         
-        // Create a custom token to allow client-side sign-in AFTER payment
+        // Create a custom token to allow client-side sign-in before payment
         const customToken = await auth.createCustomToken(userRecord.uid);
         
         return { success: true, customToken: customToken };
@@ -147,22 +147,6 @@ export async function verifyOtpAndCreateUser(prevState: any, formData: FormData)
         return { success: false, error: 'Failed to create account. Please try again.' };
     }
 }
-
-export async function checkUserPlanStatus(idToken: string): Promise<{ plan: UserPlan, error?: string }> {
-    try {
-        const decodedToken = await auth.verifyIdToken(idToken);
-        const profileSnapshot = await db.ref(`user_profiles/${decodedToken.uid}`).once('value');
-        
-        if (profileSnapshot.exists()) {
-            const plan = profileSnapshot.val().plan || 'free';
-            return { plan };
-        }
-        return { plan: 'free' };
-    } catch (e) {
-        return { plan: 'free', error: 'Failed to check status.' };
-    }
-}
-
 
 export async function resendVerificationLink(prevState: any, formData: FormData): Promise<{ success?: boolean; message?: string; error?: string }> {
     const email = formData.get('email');
