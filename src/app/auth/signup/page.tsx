@@ -75,6 +75,7 @@ function SignUpPageComponent() {
     const [otpSent, setOtpSent] = useState(false);
     const [emailVerified, setEmailVerified] = useState(false);
     const [otpError, setOtpError] = useState(false);
+    const [isFinalizing, setIsFinalizing] = useState(false);
     
     const initialPlan = searchParams.get('plan') === 'pro'
         ? (searchParams.get('interval') === 'yearly' ? 'pro-yearly' : 'pro-monthly')
@@ -153,6 +154,7 @@ function SignUpPageComponent() {
                 name: "MiniFyn Pro",
                 description: interval === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
                 handler: async function (response: any) {
+                    setIsFinalizing(true);
                     toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
                     const finalizeResult = await finalizeProSignup(await userCredential.user.getIdToken(true));
 
@@ -162,6 +164,7 @@ function SignUpPageComponent() {
                         window.location.assign('/dashboard');
                     } else {
                          toast({ title: "Activation Error", description: finalizeResult.error, variant: 'destructive' });
+                         setIsFinalizing(false);
                     }
                 },
                 modal: { ondismiss: () => handleFreeSignup(customToken) },
@@ -190,8 +193,6 @@ function SignUpPageComponent() {
 
     const handleSendOtp = () => {
         // This regex is environment-dependent.
-        // In production, it rejects emails with '+'.
-        // In development, it allows them.
         const isProduction = process.env.NODE_ENV === 'production';
         const emailRegex = isProduction 
             ? /^[a-zA-Z0-9._%'-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
@@ -237,6 +238,13 @@ function SignUpPageComponent() {
 
     return (
         <>
+        {isFinalizing && (
+            <div className="fixed inset-0 bg-background/80 flex flex-col items-center justify-center z-[100] animate-in fade-in duration-300">
+                <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+                <h2 className="text-xl font-semibold">Finalizing Setup...</h2>
+                <p className="text-muted-foreground">Please wait while we activate your Pro account.</p>
+            </div>
+        )}
         <Script id="razorpay-checkout-js" src="https://checkout.razorpay.com/v1/checkout.js" />
         <Card className="mx-auto max-w-md mb-8">
             <CardHeader>
@@ -246,7 +254,6 @@ function SignUpPageComponent() {
                 </CardDescription>
             </CardHeader>
             <form action={signupAction}>
-                {/* This hidden input ensures email is submitted even when the visible input is disabled */}
                 <input type="hidden" name="email" value={email} />
                 <CardContent className="grid gap-4">
                      <div className="grid gap-4">
