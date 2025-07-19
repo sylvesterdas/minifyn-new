@@ -274,6 +274,17 @@ function SignUpPageComponent() {
                                 </Label>
                             </div>
                         </RadioGroup>
+                        {selectedPlan === 'free' && (
+                            <div className="text-center p-2 text-xs text-muted-foreground animate-in fade-in duration-500">
+                                <p>
+                                    Missing out on Pro features?{' '}
+                                    <Link href="/pricing" className="underline text-primary hover:text-primary/80">
+                                        Compare plans
+                                    </Link>
+                                    {' '}and unlock permanent links and advanced analytics.
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid gap-2">
