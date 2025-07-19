@@ -214,6 +214,9 @@ export async function resendVerificationLink(prevState: any, formData: FormData)
 
     try {
         const userRecord = await auth.getUserByEmail(email);
+        if (userRecord.emailVerified) {
+            return { message: 'This email address has already been verified.' };
+        }
         const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
         
         const emailResult = await sendEmail({
@@ -232,6 +235,9 @@ export async function resendVerificationLink(prevState: any, formData: FormData)
         }
         return { success: true, message: 'A new verification link has been sent to your email.' };
     } catch (error: any) {
+        if (error.code === 'auth/user-not-found') {
+             return { error: 'No account found with this email address.' };
+        }
         console.error('Resend verification link error:', error);
         return { error: 'Failed to send verification email. Please try again.' };
     }
@@ -299,19 +305,17 @@ export async function logout(): Promise<{ success?: boolean, error?: string }> {
 
 export async function finalizeProSignup(idToken: string): Promise<{ success: boolean; error?: string }> {
     try {
-        const { user } = await validateRequest();
-        if (!user) {
-             return { success: false, error: "Authentication failed during finalization." };
-        }
-        
+        // We use the ID token to ensure we're acting on behalf of the correct, just-paid user.
         const syncResult = await syncRazorpaySubscription(idToken);
+
         if (syncResult.success && syncResult.sessionCookie) {
             await setSessionCookie(syncResult.sessionCookie);
             return { success: true };
         } else {
-             return { success: false, error: "Failed to sync your subscription." };
+             const errorMessage = ('error' in syncResult && syncResult.error) || 'Failed to sync your subscription.';
+             return { success: false, error: errorMessage };
         }
     } catch(error) {
-        return { success: false, error: "An unexpected error occurred." };
+        return { success: false, error: "An unexpected error occurred during signup finalization." };
     }
 }

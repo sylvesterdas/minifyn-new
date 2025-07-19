@@ -182,6 +182,7 @@ function SignUpPageComponent() {
                 description: error instanceof Error ? error.message : 'Could not initiate payment.',
                 variant: 'destructive',
             });
+            // If payment initiation fails, still log them in with a free account as a fallback
             handleFreeSignup(customToken);
         }
     }

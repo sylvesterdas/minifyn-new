@@ -92,7 +92,7 @@ export async function createRazorpaySubscription(
         const options = {
             plan_id: planId,
             customer_notify: 1,
-            total_count: planType === 'monthly' ? 12 : 1, // 12 monthly payments or 1 yearly
+            total_count: planType === 'monthly' ? 36 : 3, // 36 monthly payments or 3 yearly
             notes: {
                 userId: userData.uid,
                 email: userData.email || '',
