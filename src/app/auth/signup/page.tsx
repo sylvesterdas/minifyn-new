@@ -290,7 +290,7 @@ function SignUpPageComponent() {
                     <div className="grid gap-2">
                         <Label htmlFor="email">Email</Label>
                         <div className="flex gap-2">
-                             <Input id="email" name="email" type="email" placeholder="m@example.com" required value={email} onChange={e => setEmail(e.target.value)} disabled={otpSent} />
+                             <Input id="email" name="email" type="email" placeholder="name@example.com" required value={email} onChange={e => setEmail(e.target.value)} disabled={otpSent} />
                              {emailVerified ? (
                                 <Button type="button" variant="outline" className="w-32 text-green-500" disabled>
                                     <Check className="mr-2 h-4 w-4" /> Verified
