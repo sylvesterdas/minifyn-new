@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import { SocialLinks } from './social-links';
 import Logo from './logo';
@@ -5,12 +6,12 @@ import Logo from './logo';
 const footerLinks = {
     product: [
         { href: '/features', label: 'Features' },
-        { href: '/tools/code-minifier', label: 'Code Minifier' },
-        { href: '/tools/json-formatter', label: 'JSON Formatter' },
         { href: '/blog', label: 'Blog' },
+        { href: '/tools', label: 'Developer Tools' },
+        { href: '/pricing', label: 'Pricing' },
     ],
     resources: [
-        { href: '/docs', label: 'Docs' },
+        { href: '/docs', label: 'Docs Home' },
         { href: '/docs/guides', label: 'How-to Guides' },
         { href: '/docs/api', label: 'API Reference' },
         { href: '/help/faq', label: 'FAQ' },
@@ -18,6 +19,7 @@ const footerLinks = {
     company: [
         { href: '/contact', label: 'Contact Us' },
         { href: '/help', label: 'Help Center' },
+        { href: '/sitemap.xml', label: 'Sitemap' },
     ],
     legal: [
         { href: '/terms', label: 'Terms of Service' },
@@ -26,7 +28,6 @@ const footerLinks = {
         { href: '/shipping-and-delivery-policy', label: 'Shipping & Delivery' },
         { href: '/acceptable-use', label: 'Acceptable Use' },
         { href: '/dmca', label: 'DMCA' },
-        { href: '/sitemap.xml', label: 'Sitemap' },
     ],
 };
 
@@ -38,11 +39,22 @@ const FooterLink = ({ href, label }: { href: string; label: string }) => (
     </li>
 );
 
+function FooterColumn({ title, links }: { title: string; links: { href: string; label: string }[] }) {
+    return (
+        <div>
+            <h4 className="font-semibold mb-4 text-foreground">{title}</h4>
+            <ul className="space-y-3 text-sm">
+                {links.map(link => <FooterLink key={link.href} {...link} />)}
+            </ul>
+        </div>
+    );
+}
+
 export function Footer() {
   return (
     <footer className="border-t bg-muted/40 py-12">
         <div className="container mx-auto px-4 md:px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
                 {/* Logo and Social */}
                 <div className="col-span-2 md:col-span-1 flex flex-col items-start gap-4">
                      <Link href="/" className="flex items-center gap-2">
@@ -56,25 +68,10 @@ export function Footer() {
                 </div>
 
                 {/* Link Columns */}
-                <div>
-                    <h4 className="font-semibold mb-4 text-foreground">Product</h4>
-                    <ul className="space-y-3 text-sm">
-                        {footerLinks.product.map(link => <FooterLink key={link.href} {...link} />)}
-                    </ul>
-                </div>
-                <div>
-                    <h4 className="font-semibold mb-4 text-foreground">Resources</h4>
-                    <ul className="space-y-3 text-sm">
-                        {footerLinks.resources.map(link => <FooterLink key={link.href} {...link} />)}
-                    </ul>
-                </div>
-                <div>
-                    <h4 className="font-semibold mb-4 text-foreground">Legal & Help</h4>
-                    <ul className="space-y-3 text-sm">
-                        {footerLinks.company.map(link => <FooterLink key={link.href} {...link} />)}
-                        {footerLinks.legal.map(link => <FooterLink key={link.href} {...link} />)}
-                    </ul>
-                </div>
+                <FooterColumn title="Product" links={footerLinks.product} />
+                <FooterColumn title="Resources" links={footerLinks.resources} />
+                <FooterColumn title="Company" links={footerLinks.company} />
+                <FooterColumn title="Legal" links={footerLinks.legal} />
             </div>
             <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
                 &copy; {new Date().getFullYear()} MiniFyn. All rights reserved.
