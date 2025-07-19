@@ -259,8 +259,10 @@ function SignUpPageComponent() {
                             <div className="relative">
                                 <RadioGroupItem value="pro-yearly" id="pro-yearly" className="peer sr-only" />
                                 <Label htmlFor="pro-yearly" className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 text-xs hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full">
-                                    <p className="font-bold">Pro Yearly</p>
-                                    <p className="font-normal">₹899/yr</p>
+                                    <div className="text-center">
+                                        <p className="font-bold">Pro Yearly</p>
+                                        <p className="font-normal">₹899/yr</p>
+                                    </div>
                                 </Label>
                                 <Badge variant="secondary" className="absolute -top-2 -left-2 transform -translate-x-1/4 -translate-y-1/4 text-xs h-auto py-0.5 px-1.5 text-green-600 bg-green-500/10 border-green-500/20">
                                     Save 15%
