@@ -74,14 +74,10 @@ export async function signup(
     prevState: FormState,
     formData: FormData
   ): Promise<FormState> {
-  const name = formData.get('name');
   const email = formData.get('email');
   const password = formData.get('password');
   const termsAccepted = formData.get('terms-accepted');
 
-  if (typeof name !== 'string' || name.length < 2) {
-    return { error: 'Name must be at least 2 characters long.' };
-  }
   if (
     typeof email !== 'string' ||
     email.length < 3 ||
@@ -100,11 +96,10 @@ export async function signup(
     const userRecord = await auth.createUser({
       email,
       password,
-      displayName: name,
     });
     
     await db.ref(`user_profiles/${userRecord.uid}`).set({
-      name: userRecord.displayName,
+      name: email.split('@')[0], // Use part of email as initial name
       email: userRecord.email,
       termsAcceptedAt: Date.now(),
       createdAt: userRecord.metadata.creationTime,
