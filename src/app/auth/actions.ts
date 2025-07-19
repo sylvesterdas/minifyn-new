@@ -6,14 +6,8 @@ import { cookies } from 'next/headers';
 import type { FormState } from './signin/page';
 import { sendEmail } from '@/lib/email';
 import type { DecodedIdToken } from 'firebase-admin/auth';
-import { randomInt } from 'crypto';
 import type { UserPlan } from '@/lib/data';
 import { setSessionCookie } from './cookie';
-
-function encodeEmail(email: string): string {
-  // Replace characters that are invalid in RTDB paths.
-  return Buffer.from(email).toString('base64');
-}
 
 export async function login(
   idToken: string
@@ -43,121 +37,6 @@ export async function login(
     }
     return { error: 'An unknown error occurred during login.' };
   }
-}
-
-export async function sendVerificationOtp(prevState: any, formData: FormData): Promise<{ success: boolean; error?: string, message?: string }> {
-    const email = formData.get('email') as string;
-    console.log(`[OTP Action] Attempting to send OTP for email: ${email}`);
-
-    if (!email || !email.includes('@')) {
-        console.warn(`[OTP Action] Invalid email provided: ${email}`);
-        return { success: false, error: 'Please enter a valid email address.' };
-    }
-
-    try {
-        await auth.getUserByEmail(email);
-        console.warn(`[OTP Action] OTP not sent. Email already in use: ${email}`);
-        return { success: false, error: 'This email address is already in use.' };
-    } catch (error: any) {
-        if (error.code !== 'auth/user-not-found') {
-            console.error(`[OTP Action] Unexpected error checking user:`, error);
-            return { success: false, error: 'An unexpected error occurred. Please try again.' };
-        }
-        // This is the expected case, user does not exist yet.
-        console.log(`[OTP Action] Email ${email} is available. Proceeding to send OTP.`);
-    }
-
-    // Generate a 6-digit OTP
-    const otp = randomInt(100000, 999999).toString();
-    const expiresAt = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
-
-    try {
-        // Store OTP in the database
-        await db.ref(`otp_verifications/${encodeEmail(email)}`).set({ otp, expiresAt });
-        console.log(`[OTP Action] Stored OTP for ${email} in database.`);
-        
-        // Send OTP via email
-        const emailResult = await sendEmail({
-            to: email,
-            subject: `Your MiniFyn Verification Code: ${otp}`,
-            html: `
-                <h1>Your MiniFyn Verification Code</h1>
-                <p>Enter the following code to verify your email address and continue:</p>
-                <h2 style="font-size: 24px; letter-spacing: 4px; text-align: center;">${otp}</h2>
-                <p>This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
-            `,
-        });
-
-        if (!emailResult.success) {
-            console.error(`[OTP Action] Email sending failed for ${email}: ${emailResult.error}`);
-            return { success: false, error: emailResult.error };
-        }
-
-        console.log(`[OTP Action] Successfully sent OTP to ${email}.`);
-        return { success: true, message: 'An OTP has been sent to your email.' };
-
-    } catch (err) {
-        console.error("[OTP Action] Error in sendVerificationOtp:", err);
-        return { success: false, error: 'Failed to send OTP. Please try again.' };
-    }
-}
-
-
-export async function verifyOtpAndCreateUser(prevState: any, formData: FormData): Promise<{ success: boolean; customToken?: string; error?: string }> {
-    const email = formData.get('email') as string;
-    const otp = formData.get('otp') as string;
-    const name = formData.get('name') as string;
-    const password = formData.get('password') as string;
-    console.log(`[User Creation] Verifying OTP for email: ${email}`);
-
-    if (!email || !otp || !name || !password) {
-        console.warn('[User Creation] Missing required fields.');
-        return { success: false, error: 'Missing required fields.' };
-    }
-
-    try {
-        const otpRef = db.ref(`otp_verifications/${encodeEmail(email)}`);
-        const snapshot = await otpRef.once('value');
-        const otpData = snapshot.val();
-
-        if (!otpData || otpData.otp !== otp || Date.now() > otpData.expiresAt) {
-            console.warn(`[User Creation] Invalid or expired OTP for ${email}.`);
-            return { success: false, error: 'Invalid or expired OTP. Please try again.' };
-        }
-        console.log(`[User Creation] OTP verified successfully for ${email}.`);
-
-        // OTP is valid, create the user
-        const userRecord = await auth.createUser({
-            email,
-            password,
-            displayName: name,
-            emailVerified: true, // Mark as verified since OTP was successful
-        });
-        console.log(`[User Creation] Firebase Auth user created for UID: ${userRecord.uid}`);
-
-        await db.ref(`user_profiles/${userRecord.uid}`).set({
-            name: userRecord.displayName,
-            email: userRecord.email,
-            termsAcceptedAt: Date.now(),
-            createdAt: userRecord.metadata.creationTime,
-            onboardingCompleted: true, // Skip multi-step onboarding
-            plan: 'free', // Start as free, webhook/sync will upgrade to pro
-        });
-        console.log(`[User Creation] Firebase RTDB profile created for UID: ${userRecord.uid}`);
-        
-        // Clean up the used OTP
-        await otpRef.remove();
-        console.log(`[User Creation] Cleaned up OTP for ${email}.`);
-        
-        // Create a custom token to allow client-side sign-in before payment
-        const customToken = await auth.createCustomToken(userRecord.uid);
-        console.log(`[User Creation] Custom token generated for UID: ${userRecord.uid}.`);
-        
-        return { success: true, customToken: customToken };
-    } catch (error) {
-        console.error("[User Creation] Error in verifyOtpAndCreateUser:", error);
-        return { success: false, error: 'Failed to create account. Please try again.' };
-    }
 }
 
 export async function resendVerificationLink(prevState: any, formData: FormData): Promise<{ success?: boolean; message?: string; error?: string }> {
@@ -229,7 +108,7 @@ export async function signup(
       email: userRecord.email,
       termsAcceptedAt: Date.now(),
       createdAt: userRecord.metadata.creationTime,
-      onboardingCompleted: true, // Skip multi-step onboarding now
+      onboardingCompleted: true,
       plan: 'free',
     });
     

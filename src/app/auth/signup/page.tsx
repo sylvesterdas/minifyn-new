@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useEffect, useState, Suspense, useTransition } from 'react';
+import { useActionState, useEffect, useState, Suspense } from 'react';
 import { useFormStatus } from 'react-dom';
 import { signup } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
@@ -13,18 +13,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, ExternalLink, MailCheck } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { trackEvent } from '@/lib/gtag';
-import { PlanSelector, type Plan } from '@/components/plan-selector';
-import { OtpDialog } from '@/components/otp-dialog';
-import { createRazorpaySubscription, syncRazorpaySubscription } from '@/app/payments/actions';
-import Script from 'next/script';
-import { signInWithCustomToken } from 'firebase/auth';
-import { auth as firebaseClientAuth } from '@/lib/firebase';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Switch } from '@/components/ui/switch';
-import { cn } from '@/lib/utils';
-import { sendVerificationOtp } from '@/app/auth/actions';
-import { setSessionCookie } from '@/app/auth/cookie';
-
 
 export interface FormState {
     error?: string;
@@ -32,148 +20,31 @@ export interface FormState {
     message?: string;
 }
 
-declare global {
-    interface Window {
-        Razorpay: any;
-    }
-}
-
-function SubmitButton({ plan, disabled }: { plan: Plan, disabled: boolean }) {
+function SubmitButton({ disabled }: { disabled: boolean }) {
     const { pending } = useFormStatus();
-    const isPro = plan === 'pro';
-    const buttonText = isPro ? "Continue to Purchase" : "Create an account";
     return (
         <Button type="submit" className="w-full" disabled={pending || disabled}>
-            {pending ? <Loader2 className="animate-spin" /> : buttonText}
+            {pending ? <Loader2 className="animate-spin" /> : 'Create an account'}
         </Button>
     );
 }
 
 function SignUpPageComponent() {
     const { toast } = useToast();
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const [freePlanState, freePlanFormAction] = useActionState(signup, { success: false });
-    
-    // Form state
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [selectedPlan, setSelectedPlan] = useState<Plan>(searchParams.get('plan') === 'pro' ? 'pro' : 'free');
-    const [interval, setInterval] = useState<'monthly' | 'yearly'>(searchParams.get('interval') === 'yearly' ? 'yearly' : 'monthly');
+    const [state, formAction] = useActionState(signup, { success: false });
     const [termsAccepted, setTermsAccepted] = useState(false);
-    
-    // UI state
-    const [view, setView] = useState<'form' | 'email_verification' | 'payment_processing' | 'payment_stalled'>('form');
-    const [showOtpDialog, setShowOtpDialog] = useState(false);
-    const [isPaymentLoading, setIsPaymentLoading] = useState(false);
-    const [isOtpSending, startOtpTransition] = useTransition();
+    const [view, setView] = useState<'form' | 'email_verification'>('form');
 
-
-    // Effect for handling Free Plan submission result
     useEffect(() => {
-        if (freePlanState.error) {
-            toast({ title: 'Error', description: freePlanState.error, variant: 'destructive' });
+        if (state.error) {
+            toast({ title: 'Error', description: state.error, variant: 'destructive' });
         }
-        if (freePlanState.success) {
-            toast({ title: 'Account Created!', description: freePlanState.message });
+        if (state.success) {
+            toast({ title: 'Account Created!', description: state.message });
             trackEvent({ action: 'sign_up', category: 'conversion', label: 'email_password_signup_free' });
             setView('email_verification');
         }
-    }, [freePlanState, toast]);
-
-    const handleProSignup = () => {
-        startOtpTransition(async () => {
-            const formData = new FormData();
-            formData.append('email', email);
-            const result = await sendVerificationOtp(null, formData);
-
-            if(result.success) {
-                toast({ description: result.message });
-                setShowOtpDialog(true);
-            } else {
-                toast({ description: result.error, variant: 'destructive' });
-            }
-        });
-    };
-
-    // Main form submission logic
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-
-        if (selectedPlan === 'free') {
-            freePlanFormAction(formData);
-        } else {
-            handleProSignup();
-        }
-    };
-    
-    const triggerPayment = async (customToken: string) => {
-        if (isPaymentLoading) return;
-        setIsPaymentLoading(true);
-        setShowOtpDialog(false);
-        setView('payment_processing');
-
-        try {
-            const userCredential = await signInWithCustomToken(firebaseClientAuth, customToken);
-            const idToken = await userCredential.user.getIdToken();
-
-            const subscriptionResult = await createRazorpaySubscription(interval, idToken);
-            if ('error' in subscriptionResult) throw new Error(subscriptionResult.error);
-            
-            const rzp = new window.Razorpay({
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                subscription_id: subscriptionResult.subscriptionId,
-                name: "MiniFyn Pro",
-                description: `${interval.charAt(0).toUpperCase() + interval.slice(1)} Subscription`,
-                handler: async (response: any) => {
-                    toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
-                    
-                    const idTokenAfterPayment = await userCredential.user.getIdToken(true);
-                    
-                    // This unified action updates the user to 'pro' and creates the session cookie
-                    const syncResult = await syncRazorpaySubscription(idTokenAfterPayment);
-
-                    if (syncResult.success && syncResult.sessionCookie) {
-                        trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_signup_${interval}`, value: interval === 'monthly' ? 89 : 899 });
-                        
-                        // Set the session cookie on the client and perform a hard redirect
-                        await setSessionCookie(syncResult.sessionCookie);
-                        toast({ title: "Upgrade Complete!", description: "Redirecting to your dashboard." });
-                        window.location.assign('/dashboard');
-                    } else {
-                         const errorMessage = ('error' in syncResult && syncResult.error) || "An unknown error occurred during activation.";
-                         toast({ title: "Activation Pending", description: errorMessage, variant: 'destructive' });
-                         setView('payment_stalled');
-                    }
-                },
-                modal: { 
-                    ondismiss: () => {
-                        setIsPaymentLoading(false);
-                        // If user closes modal, reset the view
-                        setView('form');
-                    }
-                },
-                prefill: { name, email },
-                theme: { color: "#1e40af" }
-            });
-
-            rzp.on('payment.failed', (response: any) => {
-                toast({ title: 'Payment Failed', description: response.error.description, variant: 'destructive' });
-                setIsPaymentLoading(false);
-                setView('form');
-            });
-
-            rzp.open();
-
-        } catch(error) {
-             const message = error instanceof Error ? error.message : 'Could not initiate payment.';
-             toast({ title: 'Error', description: message, variant: 'destructive' });
-             setIsPaymentLoading(false);
-             setView('form');
-        }
-    };
+    }, [state, toast]);
 
     if (view === 'email_verification') {
         return (
@@ -196,138 +67,56 @@ function SignUpPageComponent() {
         )
     }
 
-     if (view === 'payment_processing') {
-        return (
-             <Card className="mx-auto max-w-sm text-center">
-                <CardHeader>
-                    <div className="mx-auto p-3 rounded-full w-fit">
-                        <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                    </div>
-                    <CardTitle className="text-2xl pt-4">Redirecting to Payment...</CardTitle>
-                    <CardDescription>
-                       Please complete your purchase in the Razorpay window. Do not close this page.
-                    </CardDescription>
-                </CardHeader>
-            </Card>
-        )
-    }
-    
-    if (view === 'payment_stalled') {
-        return (
-             <Card className="mx-auto max-w-sm text-center">
-                <CardHeader>
-                     <div className="mx-auto bg-yellow-500/10 p-3 rounded-full w-fit">
-                        <MailCheck className="h-12 w-12 text-yellow-400" />
-                    </div>
-                    <CardTitle className="text-2xl pt-4">Activation is Taking Longer Than Usual</CardTitle>
-                    <CardDescription>
-                       Your payment was successful, but we're still waiting for final confirmation from the payment provider. You can now safely close this window. Please try logging in again in a few minutes. If you still don't have access, use the "Restore Purchase" button on the billing page.
-                    </CardDescription>
-                </CardHeader>
-                 <CardFooter className="flex flex-col gap-2">
-                     <Button asChild className="w-full">
-                        <Link href="/auth/signin">Go to Sign In</Link>
-                    </Button>
-                 </CardFooter>
-            </Card>
-        )
-    }
-
-
     return (
-        <>
-            <Script id="razorpay-checkout-js" src="https://checkout.razorpay.com/v1/checkout.js" />
-            <OtpDialog 
-                open={showOtpDialog}
-                onOpenChange={setShowOtpDialog}
-                email={email}
-                name={name}
-                password={password}
-                onVerified={triggerPayment}
-                isPaymentLoading={isPaymentLoading}
-            />
-            <Card className="mx-auto max-w-md">
-                <CardHeader>
-                    <CardTitle className="text-2xl">Create your account</CardTitle>
-                    <CardDescription>
-                        Get started in seconds. Choose your plan below.
-                    </CardDescription>
-                </CardHeader>
-                <form onSubmit={handleSubmit}>
-                    <CardContent className="grid gap-4">
-                        <PlanSelector selectedPlan={selectedPlan} onPlanChange={setSelectedPlan} />
-
-                        {selectedPlan === 'pro' && (
-                            <div className="p-4 border rounded-lg bg-muted/30 space-y-4 animate-in fade-in duration-300">
-                                <div className="flex justify-center items-center gap-4">
-                                    <Label htmlFor="plan-toggle" className={cn('text-sm', interval === 'monthly' ? 'text-foreground' : 'text-muted-foreground')}>Monthly</Label>
-                                    <Switch
-                                        id="plan-toggle"
-                                        checked={interval === 'yearly'}
-                                        onCheckedChange={(checked) => setInterval(checked ? 'yearly' : 'monthly')}
-                                        aria-label="Toggle between monthly and yearly billing"
-                                    />
-                                    <Label htmlFor="plan-toggle" className={cn('text-sm', interval === 'yearly' ? 'text-foreground' : 'text-muted-foreground')}>
-                                        Yearly <span className="text-primary font-semibold">(Save 15%)</span>
-                                    </Label>
-                                </div>
-                                <div className="text-center pt-2 transition-all duration-300">
-                                     {interval === 'monthly' ? (
-                                        <div className="text-center">
-                                            <span className="text-3xl font-bold">₹89</span>
-                                            <span className="text-sm text-muted-foreground">/month</span>
-                                        </div>
-                                     ) : (
-                                        <div className="text-center">
-                                            <span className="text-3xl font-bold">₹899</span>
-                                            <span className="text-sm text-muted-foreground">/year</span>
-                                        </div>
-                                     )}
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">Name</Label>
-                            <Input id="name" name="name" placeholder="John Doe" required value={name} onChange={e => setName(e.target.value)} />
+        <Card className="mx-auto max-w-md">
+            <CardHeader>
+                <CardTitle className="text-2xl">Create a free account</CardTitle>
+                <CardDescription>
+                    Get started with a free account to manage your links. You can upgrade to Pro anytime.
+                </CardDescription>
+            </CardHeader>
+            <form action={formAction}>
+                <CardContent className="grid gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input id="name" name="name" placeholder="John Doe" required />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" name="email" type="email" placeholder="m@example.com" required />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="password">Password</Label>
+                        <Input id="password" name="password" type="password" required />
+                    </div>
+                     <div className="flex items-center space-x-2">
+                        <Checkbox 
+                            id="terms-accepted" 
+                            name="terms-accepted"
+                            checked={termsAccepted}
+                            onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                        />
+                        <div className="grid gap-1.5 leading-none">
+                            <label
+                                htmlFor="terms-accepted"
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                                I accept the <Link href="/terms" target="_blank" rel="noopener noreferrer" className="inline-flex items-center underline hover:text-primary">Terms of Service <ExternalLink className="ml-1 h-3 w-3" /></Link>
+                            </label>
                         </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input id="email" name="email" type="email" placeholder="m@example.com" required value={email} onChange={e => setEmail(e.target.value)}/>
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input id="password" name="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} />
-                        </div>
-                         <div className="flex items-center space-x-2">
-                            <Checkbox 
-                                id="terms-accepted" 
-                                name="terms-accepted"
-                                checked={termsAccepted}
-                                onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
-                            />
-                            <div className="grid gap-1.5 leading-none">
-                                <label
-                                    htmlFor="terms-accepted"
-                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                >
-                                    I accept the <Link href="/terms" target="_blank" rel="noopener noreferrer" className="inline-flex items-center underline hover:text-primary">Terms of Service <ExternalLink className="ml-1 h-3 w-3" /></Link>
-                                </label>
-                            </div>
-                        </div>
-                    </CardContent>
-                    <CardFooter className="flex flex-col gap-4">
-                        <SubmitButton plan={selectedPlan} disabled={!termsAccepted || isPaymentLoading || isOtpSending} />
-                        <div className="text-center text-sm">
-                            Already have an account?{' '}
-                            <Link href="/auth/signin" className="underline">
-                                Sign in
-                            </Link>
-                        </div>
-                    </CardFooter>
-                </form>
-            </Card>
-        </>
+                    </div>
+                </CardContent>
+                <CardFooter className="flex flex-col gap-4">
+                    <SubmitButton disabled={!termsAccepted} />
+                    <div className="text-center text-sm">
+                        Already have an account?{' '}
+                        <Link href="/auth/signin" className="underline">
+                            Sign in
+                        </Link>
+                    </div>
+                </CardFooter>
+            </form>
+        </Card>
     );
 }
 
