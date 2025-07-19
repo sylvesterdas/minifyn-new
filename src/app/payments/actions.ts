@@ -49,7 +49,6 @@ export async function createRazorpaySubscription(
 
     if (idToken) {
         try {
-            // Verify the ID token passed from the client
             const decodedToken: DecodedIdToken = await adminAuth.verifyIdToken(idToken);
             userData = { uid: decodedToken.uid, email: decodedToken.email, name: decodedToken.name };
             console.log(`[Payment Action] Verified user via ID token: ${userData.uid}`);
@@ -58,7 +57,6 @@ export async function createRazorpaySubscription(
             return { error: 'Invalid authentication token provided.' };
         }
     } else {
-        // Fallback to session cookie if no token is provided (for existing users upgrading)
         const { user } = await validateRequest();
         if (!user) {
             console.warn('[Payment Action] User must be logged in to subscribe.');
@@ -104,7 +102,14 @@ export async function createRazorpaySubscription(
         const subscription = await razorpay.subscriptions.create(options);
         const planDetails = await razorpay.plans.fetch(planId);
         
-        console.log(`[Payment Action] Successfully created Razorpay subscription ${subscription.id} for user ${userData.uid}.`);
+        // **Store the subscription ID in our database immediately.**
+        await db.ref(`user_profiles/${userData.uid}/subscription`).set({
+            id: subscription.id,
+            planId: subscription.plan_id,
+            status: 'created', // Initial status
+        });
+        
+        console.log(`[Payment Action] Successfully created and stored Razorpay subscription ${subscription.id} for user ${userData.uid}.`);
         return {
             subscriptionId: subscription.id,
             amount: planDetails.item.amount,
@@ -150,53 +155,31 @@ export async function syncRazorpaySubscription(
     console.log(`[syncRazorpay] Starting subscription sync for user: ${uid} (email: ${email})`);
 
     try {
-        let userSubscription = null;
-        
-        const customers = await razorpay.customers.all({ email: email });
-        const customer = customers.items && customers.items.length > 0 ? customers.items[0] : null;
+        const userProfileRef = db.ref(`user_profiles/${uid}`);
+        const subIdSnapshot = await userProfileRef.child('subscription/id').once('value');
+        const subscriptionId = subIdSnapshot.val();
 
-        if (!customer) {
-            console.log(`[syncRazorpay] No Razorpay customer found for email ${email}.`);
-            return { success: false, error: 'We could not find a subscription associated with your account.' };
+        if (!subscriptionId) {
+            console.log(`[syncRazorpay] No subscription ID found in DB for user ${uid}.`);
+            return { success: false, error: 'Could not find a subscription reference for your account.' };
         }
         
-        console.log(`[syncRazorpay] Found customer ${customer.id} for email ${email}.`);
-
-        const proPlanIds = [PLAN_IDS.monthly, PLAN_IDS.yearly].filter(Boolean);
+        console.log(`[syncRazorpay] Found subscription ID ${subscriptionId} for user ${uid}. Fetching from Razorpay.`);
+        
+        const subscriptionDetails = await razorpay.subscriptions.fetch(subscriptionId);
+        
         const validStatuses = ['active', 'completed'];
 
-        let skip = 0;
-        const count = 100;
-        let hasMore = true;
-
-        while (hasMore && !userSubscription) {
-            const subscriptions = await razorpay.subscriptions.all({ customer_id: customer.id, count, skip });
-            
-            if (subscriptions.items) {
-                userSubscription = subscriptions.items.find(sub => 
-                    validStatuses.includes(sub.status) &&
-                    proPlanIds.includes(sub.plan_id)
-                ) || null;
-            }
-
-            if (!subscriptions.items || subscriptions.items.length < count) {
-                hasMore = false;
-            } else {
-                skip += count;
-            }
-        }
-
-        if (userSubscription) {
-            console.log(`[syncRazorpay] Found valid subscription ${userSubscription.id} (Plan: ${userSubscription.plan_id}, Status: ${userSubscription.status}) for user ${uid}.`);
-            const userProfileRef = db.ref(`user_profiles/${uid}`);
+        if (subscriptionDetails && validStatuses.includes(subscriptionDetails.status)) {
+            console.log(`[syncRazorpay] Found valid subscription ${subscriptionDetails.id} (Plan: ${subscriptionDetails.plan_id}, Status: ${subscriptionDetails.status}) for user ${uid}.`);
             
             const subscriptionData = {
-                id: userSubscription.id,
-                status: userSubscription.status,
-                planId: userSubscription.plan_id,
-                current_start: userSubscription.current_start,
-                current_end: userSubscription.current_end,
-                ended_at: userSubscription.ended_at || null,
+                id: subscriptionDetails.id,
+                status: subscriptionDetails.status,
+                planId: subscriptionDetails.plan_id,
+                current_start: subscriptionDetails.current_start,
+                current_end: subscriptionDetails.current_end,
+                ended_at: subscriptionDetails.ended_at || null,
             };
 
             await userProfileRef.update({ 
@@ -217,7 +200,7 @@ export async function syncRazorpaySubscription(
             return { success: true };
 
         } else {
-             console.log(`[syncRazorpay] No active or completed Pro subscription found for user ${uid} (customer: ${customer.id}).`);
+             console.log(`[syncRazorpay] Subscription ${subscriptionId} for user ${uid} is not active or completed. Status: ${subscriptionDetails?.status}.`);
             return { success: false, error: 'We could not find an active Pro subscription associated with your account.' };
         }
 
