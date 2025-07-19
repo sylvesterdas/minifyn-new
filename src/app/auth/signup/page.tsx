@@ -256,11 +256,16 @@ function SignUpPageComponent() {
                                     <p className="font-normal">₹89/mo</p>
                                 </Label>
                             </div>
-                            <div>
+                            <div className="relative">
                                 <RadioGroupItem value="pro-yearly" id="pro-yearly" className="peer sr-only" />
-                                <Label htmlFor="pro-yearly" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-2 text-xs hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full">
-                                    <p className="font-bold">Pro Yearly</p>
-                                    <Badge variant="secondary" className="text-xs h-auto py-0.5 px-1.5 mt-1 text-primary bg-primary/10 border-primary/20">Save 15%</Badge>
+                                <Label htmlFor="pro-yearly" className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-2 py-4 text-xs hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full">
+                                    <Badge variant="secondary" className="absolute top-1 left-1 text-xs h-auto py-0.5 px-1.5 text-green-600 bg-green-500/10 border-green-500/20">
+                                        Save 15%
+                                    </Badge>
+                                    <Badge variant="secondary" className="absolute top-1 right-1 text-xs h-auto py-0.5 px-1.5 text-primary bg-primary/10 border-primary/20">
+                                        Best Value
+                                    </Badge>
+                                    <p className="font-bold mt-2">Pro Yearly</p>
                                     <p className="font-normal mt-1">₹899/yr</p>
                                 </Label>
                             </div>
