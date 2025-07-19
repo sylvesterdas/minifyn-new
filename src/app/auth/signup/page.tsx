@@ -278,8 +278,8 @@ function SignUpPageComponent() {
                             <div className="text-center p-2 text-xs text-muted-foreground animate-in fade-in duration-500">
                                 <p>
                                     Missing out on Pro features?{' '}
-                                    <Link href="/pricing" className="underline text-primary hover:text-primary/80">
-                                        Compare plans
+                                    <Link href="/pricing" target="_blank" rel="noopener noreferrer" className="inline-flex items-center underline text-primary hover:text-primary/80">
+                                        Compare plans <ExternalLink className="ml-1 h-3 w-3" />
                                     </Link>
                                     {' '}and unlock permanent links and advanced analytics.
                                 </p>
