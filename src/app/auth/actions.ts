@@ -120,17 +120,15 @@ export async function signup(prevState: FormState, formData: FormData): Promise<
       email,
       password,
       emailVerified: true, // OTP verification serves as email verification
-      displayName: email.split('@')[0],
     });
 
     const isProPlan = plan.startsWith('pro-');
     
     await db.ref(`user_profiles/${userRecord.uid}`).set({
-      name: email.split('@')[0],
       email: userRecord.email,
       termsAcceptedAt: Date.now(),
       createdAt: userRecord.metadata.creationTime,
-      onboardingCompleted: !isProPlan, // Onboarding is complete for free users, pending for pro until payment
+      onboardingCompleted: false, // Onboarding is false for all new users
       plan: isProPlan ? 'pro' : 'free',
     });
     
