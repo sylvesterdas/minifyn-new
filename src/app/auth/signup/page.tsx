@@ -258,10 +258,10 @@ function SignUpPageComponent() {
                                             <p className="font-normal mt-2 text-lg">₹899/yr</p>
                                         </div>
                                     </Label>
-                                    <Badge variant="secondary" className="absolute -top-2 -left-2 transform -translate-x-1/4 -translate-y-1/4 text-xs h-auto py-0.5 px-1.5 text-green-600 bg-green-500/10 border-green-500/20">
+                                    <Badge variant="secondary" className="absolute top-2 left-2 text-xs h-auto py-0.5 px-1.5 text-green-600 bg-green-500/10 border-green-500/20">
                                         Save 15%
                                     </Badge>
-                                    <Badge variant="secondary" className="absolute -top-2 -right-2 transform translate-x-1/4 -translate-y-1/4 text-xs h-auto py-0.5 px-1.5 text-primary bg-primary/10 border-primary/20">
+                                    <Badge variant="secondary" className="absolute top-2 right-2 text-xs h-auto py-0.5 px-1.5 text-primary bg-primary/10 border-primary/20">
                                         Best Value
                                     </Badge>
                                 </div>
