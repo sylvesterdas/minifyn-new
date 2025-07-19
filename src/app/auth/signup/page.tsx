@@ -245,6 +245,8 @@ function SignUpPageComponent() {
                 </CardDescription>
             </CardHeader>
             <form action={signupAction}>
+                {/* This hidden input ensures email is submitted even when the visible input is disabled */}
+                <input type="hidden" name="email" value={email} />
                 <CardContent className="grid gap-4">
                      <div className="grid gap-4">
                         <Label>Choose your plan</Label>
@@ -302,7 +304,7 @@ function SignUpPageComponent() {
                     <div className="grid gap-2">
                         <Label htmlFor="email">Email</Label>
                         <div className="flex gap-2">
-                             <Input id="email" name="email" type="email" placeholder="name@example.com" required value={email} onChange={e => setEmail(e.target.value)} disabled={otpSent} />
+                             <Input id="email" type="email" placeholder="name@example.com" required value={email} onChange={e => setEmail(e.target.value)} disabled={otpSent} />
                              {emailVerified ? (
                                 <Button type="button" variant="outline" className="w-32 text-green-500" disabled>
                                     <Check className="mr-2 h-4 w-4" /> Verified
@@ -382,5 +384,3 @@ export default function SignUpPage() {
         </Suspense>
     );
 }
-
-    
