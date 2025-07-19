@@ -166,11 +166,30 @@ export async function syncRazorpaySubscription(
         
         console.log(`[syncRazorpay] Found subscription ID ${subscriptionId} for user ${uid}. Fetching from Razorpay.`);
         
-        const subscriptionDetails = await razorpay.subscriptions.fetch(subscriptionId);
-        
-        const validStatuses = ['active', 'completed'];
+        let subscriptionDetails: any | null = null;
+        const maxRetries = 5;
+        const retryDelay = 2000; // 2 seconds
 
-        if (subscriptionDetails && validStatuses.includes(subscriptionDetails.status)) {
+        for (let i = 0; i < maxRetries; i++) {
+            const tempSubDetails = await razorpay.subscriptions.fetch(subscriptionId);
+            const validStatuses = ['active', 'completed'];
+
+            console.log(`[syncRazorpay] Attempt ${i + 1}: Status is '${tempSubDetails.status}'.`);
+
+            if (tempSubDetails && validStatuses.includes(tempSubDetails.status)) {
+                subscriptionDetails = tempSubDetails;
+                break; // Success, exit loop
+            }
+
+            // If it's the last attempt and still not active, we'll let it fail.
+            if (i < maxRetries - 1) {
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+            } else {
+                 subscriptionDetails = tempSubDetails; // Store the final status for error reporting
+            }
+        }
+
+        if (subscriptionDetails && ['active', 'completed'].includes(subscriptionDetails.status)) {
             console.log(`[syncRazorpay] Found valid subscription ${subscriptionDetails.id} (Plan: ${subscriptionDetails.plan_id}, Status: ${subscriptionDetails.status}) for user ${uid}.`);
             
             const subscriptionData = {
@@ -200,8 +219,8 @@ export async function syncRazorpaySubscription(
             return { success: true };
 
         } else {
-             console.log(`[syncRazorpay] Subscription ${subscriptionId} for user ${uid} is not active or completed. Status: ${subscriptionDetails?.status}.`);
-            return { success: false, error: 'We could not find an active Pro subscription associated with your account.' };
+             console.log(`[syncRazorpay] Subscription ${subscriptionId} for user ${uid} is not active or completed after retries. Final status: ${subscriptionDetails?.status}.`);
+            return { success: false, error: 'We could not confirm an active Pro subscription. Please try restoring your purchase in Settings or contact support.' };
         }
 
     } catch (error) {
