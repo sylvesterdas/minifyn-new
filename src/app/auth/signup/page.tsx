@@ -22,6 +22,7 @@ import { signInWithCustomToken } from 'firebase/auth';
 import { auth as firebaseClientAuth } from '@/lib/firebase';
 import { createRazorpaySubscription } from '@/app/payments/actions';
 import { setSessionCookie } from '../cookie';
+import { Badge } from '@/components/ui/badge';
 
 type Plan = 'free' | 'pro-monthly' | 'pro-yearly';
 
@@ -259,7 +260,8 @@ function SignUpPageComponent() {
                                 <RadioGroupItem value="pro-yearly" id="pro-yearly" className="peer sr-only" />
                                 <Label htmlFor="pro-yearly" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-2 text-xs hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full">
                                     <p className="font-bold">Pro Yearly</p>
-                                    <p className="font-normal">₹899/yr</p>
+                                    <Badge variant="secondary" className="text-xs h-auto py-0.5 px-1.5 mt-1 text-primary bg-primary/10 border-primary/20">Save 15%</Badge>
+                                    <p className="font-normal mt-1">₹899/yr</p>
                                 </Label>
                             </div>
                         </RadioGroup>
