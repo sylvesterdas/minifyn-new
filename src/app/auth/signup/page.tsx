@@ -189,7 +189,8 @@ function SignUpPageComponent() {
 
 
     const handleSendOtp = () => {
-        if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)) {
+        // This regex is more permissive and allows for characters like '+' in the email username.
+        if (!email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)) {
             toast({ title: 'Invalid Email', description: 'Please enter a valid email address.', variant: 'destructive'});
             return;
         }
