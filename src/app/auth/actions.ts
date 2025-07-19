@@ -3,11 +3,121 @@
 
 import { auth, db } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
-import type { FormState } from './signin/page';
+import type { FormState } from './signup/page';
 import { sendEmail } from '@/lib/email';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import type { UserPlan } from '@/lib/data';
 import { setSessionCookie } from './cookie';
+
+function encodeEmail(email: string): string {
+  return Buffer.from(email).toString('base64');
+}
+
+export async function sendVerificationOtp(email: string): Promise<{ success: boolean; error?: string }> {
+  if (typeof email !== 'string' || !email.includes('@')) {
+    return { success: false, error: 'Invalid email' };
+  }
+
+  // Check if user already exists
+  try {
+    await auth.getUserByEmail(email);
+    return { success: false, error: 'An account with this email already exists.' };
+  } catch (error: any) {
+    if (error.code !== 'auth/user-not-found') {
+      console.error('Error checking user:', error);
+      return { success: false, error: 'An unexpected error occurred.' };
+    }
+    // User not found, which is good. We can proceed.
+  }
+
+  const otp = Math.floor(1000 + Math.random() * 9000).toString();
+  const expires = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
+
+  try {
+    const encodedEmail = encodeEmail(email);
+    await db.ref(`otps/${encodedEmail}`).set({ otp, expires });
+
+    const emailResult = await sendEmail({
+      to: email,
+      subject: 'Your MiniFyn Verification Code',
+      html: `
+        <div style="font-family: sans-serif; text-align: center; padding: 20px;">
+          <h2>Your Verification Code</h2>
+          <p>Use the code below to verify your email address.</p>
+          <h2 style="font-size: 36px; letter-spacing: 8px; margin: 20px 0;">${otp}</h2>
+          <p>This code will expire in 10 minutes.</p>
+        </div>
+      `,
+    });
+
+    if (!emailResult.success) {
+      return { success: false, error: emailResult.error };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('OTP sending error:', error);
+    return { success: false, error: 'Could not send verification code.' };
+  }
+}
+
+export async function verifyOtpAndCreateUser(prevState: FormState, formData: FormData): Promise<FormState> {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const otp = formData.get('otp') as string;
+  const termsAccepted = formData.get('terms-accepted') === 'on';
+
+  if (!email || !password || !otp || !termsAccepted) {
+    return { error: 'Missing required fields.' };
+  }
+  
+  if (password.length < 6) {
+    return { error: 'Password must be at least 6 characters long.' };
+  }
+
+  try {
+    const encodedEmail = encodeEmail(email);
+    const otpRef = db.ref(`otps/${encodedEmail}`);
+    const snapshot = await otpRef.once('value');
+    const otpData = snapshot.val();
+
+    if (!otpData || otpData.otp !== otp) {
+      return { error: 'Invalid or incorrect OTP.', otpError: true };
+    }
+
+    if (Date.now() > otpData.expires) {
+      return { error: 'Your OTP has expired. Please request a new one.' };
+    }
+    
+    // OTP is valid, create user
+    const userRecord = await auth.createUser({
+      email,
+      password,
+      emailVerified: true, // OTP verification serves as email verification
+    });
+
+    await db.ref(`user_profiles/${userRecord.uid}`).set({
+      name: email.split('@')[0],
+      email: userRecord.email,
+      termsAcceptedAt: Date.now(),
+      createdAt: userRecord.metadata.creationTime,
+      onboardingCompleted: true,
+      plan: 'free',
+    });
+    
+    // Clean up OTP
+    await otpRef.remove();
+
+    return { success: true, message: `Account for ${email} created successfully!` };
+
+  } catch (error: any) {
+    if (error.code === 'auth/email-already-exists') {
+      return { error: 'Email already in use' };
+    }
+    console.error('Signup error:', error);
+    return { error: 'An unknown error occurred during signup.' };
+  }
+}
 
 export async function login(
   idToken: string
@@ -70,76 +180,11 @@ export async function resendVerificationLink(prevState: any, formData: FormData)
     }
 }
 
-export async function signup(
-    prevState: FormState,
-    formData: FormData
-  ): Promise<FormState> {
-  const email = formData.get('email');
-  const password = formData.get('password');
-  const termsAccepted = formData.get('terms-accepted');
-
-  if (
-    typeof email !== 'string' ||
-    email.length < 3 ||
-    !email.includes('@')
-  ) {
-    return { error: 'Invalid email' };
-  }
-  if (typeof password !== 'string' || password.length < 6) {
-    return { error: 'Password must be at least 6 characters long' };
-  }
-  if (termsAccepted !== 'on') {
-    return { error: 'You must accept the Terms of Service to create an account.' };
-  }
-
-  try {
-    const userRecord = await auth.createUser({
-      email,
-      password,
-    });
-    
-    await db.ref(`user_profiles/${userRecord.uid}`).set({
-      name: email.split('@')[0], // Use part of email as initial name
-      email: userRecord.email,
-      termsAcceptedAt: Date.now(),
-      createdAt: userRecord.metadata.creationTime,
-      onboardingCompleted: true,
-      plan: 'free',
-    });
-    
-    const verificationLink = await auth.generateEmailVerificationLink(userRecord.email!);
-
-    const emailResult = await sendEmail({
-        to: email,
-        subject: 'Welcome to MiniFyn! Please Verify Your Email',
-        html: `
-            <h1>Welcome to MiniFyn!</h1>
-            <p>Thanks for signing up. Please click the link below to verify your email address:</p>
-            <a href="${verificationLink}">Verify Your Email</a>
-            <p>This link will expire in 1 hour.</p>
-        `,
-    });
-
-    if (!emailResult.success) {
-        // Even if email fails, account is created. User can resend from signin page.
-        return { success: true, message: `Your account was created, but we failed to send a verification email. Please try signing in to resend the link.` };
-    }
-
-    return { success: true, message: `A verification link has been sent to ${email}.` };
-
-  } catch (error: any) {
-    if (error.code === 'auth/email-already-exists') {
-      return { error: 'Email already in use' };
-    }
-    console.error('Signup error:', error);
-    return { error: 'An unknown error occurred' };
-  }
-}
 
 export async function sendPasswordResetLink(
-  prevState: FormState,
+  prevState: any,
   formData: FormData
-): Promise<FormState> {
+): Promise<any> {
     const email = formData.get('email');
     if (typeof email !== 'string' || !email.includes('@')) {
         return { error: 'Please enter a valid email address.' };
