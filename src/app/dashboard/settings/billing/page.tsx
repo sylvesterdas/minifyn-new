@@ -328,7 +328,7 @@ export default function BillingPage() {
                     )
                 )}
 
-                {!isAdminPlan && (
+                {isFreePlan && (
                      <Card>
                         <CardHeader>
                              <CardTitle>Restore Purchase</CardTitle>
