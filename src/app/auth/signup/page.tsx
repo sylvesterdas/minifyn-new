@@ -4,22 +4,45 @@
 import Link from 'next/link';
 import { useActionState, useEffect, useState, useTransition, Suspense } from 'react';
 import { useFormStatus } from 'react-dom';
-import { sendVerificationOtp, verifyOtp, signup } from '@/app/auth/actions';
+import { sendVerificationOtp, verifyOtp, signup, finalizeProSignup } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ExternalLink, MailCheck, Check, BadgeAlert } from 'lucide-react';
+import { Loader2, ExternalLink, MailCheck, Check, BadgeAlert, Star, CreditCard } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { trackEvent } from '@/lib/gtag';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { cn } from '@/lib/utils';
+import { useSearchParams } from 'next/navigation';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import Script from 'next/script';
+import { signInWithCustomToken } from 'firebase/auth';
+import { auth as firebaseClientAuth } from '@/lib/firebase';
+import { createRazorpaySubscription } from '@/app/payments/actions';
+import { setSessionCookie } from '../cookie';
+
+type Plan = 'free' | 'pro-monthly' | 'pro-yearly';
+
+declare global {
+    interface Window {
+        Razorpay: any;
+    }
+}
 
 export interface FormState {
     error?: string;
     success?: boolean;
     message?: string;
+    plan?: 'free' | 'pro';
+    interval?: 'monthly' | 'yearly';
+    user?: {
+        uid: string;
+        email: string;
+        name: string;
+        customToken: string;
+    };
 }
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
@@ -33,6 +56,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
 
 function SignUpPageComponent() {
     const { toast } = useToast();
+    const searchParams = useSearchParams();
     const [view, setView] = useState<'form' | 'success'>('form');
 
     const [email, setEmail] = useState('');
@@ -46,19 +70,83 @@ function SignUpPageComponent() {
     const [otpSent, setOtpSent] = useState(false);
     const [emailVerified, setEmailVerified] = useState(false);
     const [otpError, setOtpError] = useState(false);
+    
+    const initialPlan = searchParams.get('plan') === 'pro'
+        ? (searchParams.get('interval') === 'monthly' ? 'pro-monthly' : 'pro-yearly')
+        : 'free';
+    const [selectedPlan, setSelectedPlan] = useState<Plan>(initialPlan);
 
     const [signupState, signupAction] = useActionState(signup, { success: false });
 
     useEffect(() => {
-        if (signupState.success && signupState.message) {
-            setView('success');
-            toast({ title: 'Success!', description: signupState.message });
-            trackEvent({ action: 'sign_up', category: 'conversion', label: 'email_password_signup_free' });
-        }
         if (signupState.error) {
             toast({ title: 'Error', description: signupState.error, variant: 'destructive' });
+        } else if (signupState.success) {
+            if (signupState.plan === 'pro' && signupState.user && signupState.interval) {
+                // Pro plan: Initiate payment
+                handlePayment(signupState.user.customToken, signupState.interval, signupState.user);
+            } else {
+                // Free plan: Show success view
+                setView('success');
+                toast({ title: 'Success!', description: signupState.message });
+                trackEvent({ action: 'sign_up', category: 'conversion', label: 'email_password_signup_free' });
+            }
         }
     }, [signupState, toast]);
+
+    const handlePayment = async (customToken: string, interval: 'monthly' | 'yearly', user: FormState['user']) => {
+        if (!user) return;
+        
+        try {
+             // 1. Sign in with the custom token to get an ID token
+            const userCredential = await signInWithCustomToken(firebaseClientAuth, customToken);
+            const idToken = await userCredential.user.getIdToken(true);
+
+            // 2. Create Razorpay subscription
+            const subscriptionResult = await createRazorpaySubscription(interval, idToken);
+            if ('error' in subscriptionResult) {
+                throw new Error(subscriptionResult.error);
+            }
+
+            const options = {
+                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                subscription_id: subscriptionResult.subscriptionId,
+                name: "MiniFyn Pro",
+                description: interval === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
+                handler: async function (response: any) {
+                    toast({ title: 'Payment Successful!', description: 'Finalizing your account...' });
+                    const finalizeResult = await finalizeProSignup(await userCredential.user.getIdToken(true));
+
+                    if (finalizeResult.success) {
+                        toast({ title: "Upgrade Complete!", description: "Your account is now Pro." });
+                        trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_signup_${interval}` });
+                        window.location.assign('/dashboard');
+                    } else {
+                         toast({ title: "Activation Error", description: finalizeResult.error, variant: 'destructive' });
+                    }
+                },
+                modal: { ondismiss: () => setView('success') /* Show free user success message if they close payment modal */ },
+                prefill: { name: user.name, email: user.email },
+                theme: { color: "#1e40af" }
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', function (response: any) {
+                toast({ title: 'Payment Failed', description: response.error.description, variant: 'destructive' });
+                setView('success'); // Still show success for free account creation
+            });
+            rzp.open();
+
+        } catch (error) {
+             toast({
+                title: 'Error',
+                description: error instanceof Error ? error.message : 'Could not initiate payment.',
+                variant: 'destructive',
+            });
+            setView('success'); // Still show success for free account creation
+        }
+    }
+
 
     const handleSendOtp = () => {
         if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)) {
@@ -99,7 +187,7 @@ function SignUpPageComponent() {
                     </div>
                     <CardTitle className="text-2xl pt-4">Account Created!</CardTitle>
                     <CardDescription>
-                       Your account has been successfully created. You can now sign in.
+                       Your free account has been successfully created. You can now sign in.
                     </CardDescription>
                 </CardHeader>
                 <CardFooter>
@@ -112,15 +200,49 @@ function SignUpPageComponent() {
     }
 
     return (
+        <>
+        <Script id="razorpay-checkout-js" src="https://checkout.razorpay.com/v1/checkout.js" />
         <Card className="mx-auto max-w-md mb-8">
             <CardHeader>
-                <CardTitle className="text-2xl">Create a free account</CardTitle>
+                <CardTitle className="text-2xl">Create your account</CardTitle>
                 <CardDescription>
-                    Get started with a free account to manage your links. You can upgrade to Pro anytime.
+                    Get started with a free account, or choose a Pro plan to unlock more features.
                 </CardDescription>
             </CardHeader>
             <form action={signupAction}>
                 <CardContent className="grid gap-4">
+                     <div className="grid gap-2">
+                        <Label>Choose your plan</Label>
+                        <RadioGroup
+                            name="plan"
+                            value={selectedPlan}
+                            onValueChange={(value: Plan) => setSelectedPlan(value)}
+                            className="grid grid-cols-3 gap-2"
+                        >
+                             <div>
+                                <RadioGroupItem value="free" id="free" className="peer sr-only" />
+                                <Label htmlFor="free" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-2 text-xs hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full">
+                                    <p className="font-bold">Free</p>
+                                    <p className="font-normal">₹0</p>
+                                </Label>
+                            </div>
+                             <div>
+                                <RadioGroupItem value="pro-monthly" id="pro-monthly" className="peer sr-only" />
+                                <Label htmlFor="pro-monthly" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-2 text-xs hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full">
+                                    <p className="font-bold">Pro Monthly</p>
+                                    <p className="font-normal">₹89/mo</p>
+                                </Label>
+                            </div>
+                            <div>
+                                <RadioGroupItem value="pro-yearly" id="pro-yearly" className="peer sr-only" />
+                                <Label htmlFor="pro-yearly" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-2 text-xs hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full">
+                                    <p className="font-bold">Pro Yearly</p>
+                                    <p className="font-normal">₹899/yr</p>
+                                </Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
+
                     <div className="grid gap-2">
                         <Label htmlFor="email">Email</Label>
                         <div className="flex gap-2">
@@ -188,6 +310,7 @@ function SignUpPageComponent() {
                 </CardFooter>
             </form>
         </Card>
+        </>
     );
 }
 

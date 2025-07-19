@@ -8,6 +8,7 @@ import { sendEmail } from '@/lib/email';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import type { UserPlan } from '@/lib/data';
 import { setSessionCookie } from './cookie';
+import { createRazorpaySubscription, syncRazorpaySubscription } from '../payments/actions';
 
 function encodeEmail(email: string): string {
   return Buffer.from(email).toString('base64');
@@ -93,8 +94,9 @@ export async function signup(prevState: FormState, formData: FormData): Promise<
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const termsAccepted = formData.get('terms-accepted') === 'on';
+  const plan = formData.get('plan') as 'free' | 'pro-monthly' | 'pro-yearly';
 
-  if (!email || !password || !termsAccepted) {
+  if (!email || !password || !termsAccepted || !plan) {
     return { error: 'Missing required fields.' };
   }
   
@@ -118,25 +120,46 @@ export async function signup(prevState: FormState, formData: FormData): Promise<
       email,
       password,
       emailVerified: true, // OTP verification serves as email verification
+      displayName: email.split('@')[0],
     });
 
+    const isProPlan = plan.startsWith('pro-');
+    
     await db.ref(`user_profiles/${userRecord.uid}`).set({
       name: email.split('@')[0],
       email: userRecord.email,
       termsAcceptedAt: Date.now(),
       createdAt: userRecord.metadata.creationTime,
-      onboardingCompleted: true,
-      plan: 'free',
+      onboardingCompleted: !isProPlan, // Onboarding is complete for free users, pending for pro until payment
+      plan: isProPlan ? 'pro' : 'free',
     });
     
     // Clean up OTP
     await otpRef.remove();
+    
+    // If Pro plan, create subscription and return details for client-side payment
+    if (isProPlan) {
+        const interval = plan === 'pro-monthly' ? 'monthly' : 'yearly';
+        const customToken = await auth.createCustomToken(userRecord.uid);
 
-    return { success: true, message: `Account for ${email} created successfully!` };
+        return {
+            success: true,
+            plan: 'pro',
+            interval: interval,
+            user: {
+                uid: userRecord.uid,
+                email: userRecord.email!,
+                name: userRecord.displayName!,
+                customToken,
+            }
+        };
+    }
+
+    return { success: true, message: `Account for ${email} created successfully!`, plan: 'free' };
 
   } catch (error: any) {
     if (error.code === 'auth/email-already-exists') {
-      return { error: 'Email already in use' };
+      return { error: 'An account with this email address already exists.' };
     }
     console.error('Signup error:', error);
     return { error: 'An unknown error occurred during signup.' };
@@ -262,4 +285,23 @@ export async function logout(): Promise<{ success?: boolean, error?: string }> {
     cookieObj.delete('session'); // Delete the potentially invalid cookie anyway
     return { success: true };
   }
+}
+
+export async function finalizeProSignup(idToken: string): Promise<{ success: boolean; error?: string }> {
+    try {
+        const { user } = await validateRequest();
+        if (!user) {
+             return { success: false, error: "Authentication failed during finalization." };
+        }
+        
+        const syncResult = await syncRazorpaySubscription(idToken);
+        if (syncResult.success && syncResult.sessionCookie) {
+            await setSessionCookie(syncResult.sessionCookie);
+            return { success: true };
+        } else {
+             return { success: false, error: "Failed to sync your subscription." };
+        }
+    } catch(error) {
+        return { success: false, error: "An unexpected error occurred." };
+    }
 }
