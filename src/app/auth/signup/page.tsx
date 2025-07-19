@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { useActionState, useEffect, useState, useTransition, Suspense, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
-import { sendVerificationOtp, verifyOtp, signup, finalizeProSignup } from '@/app/auth/actions';
+import { sendVerificationOtp, verifyOtp, signup, finalizeProSignup, login } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,7 +21,6 @@ import Script from 'next/script';
 import { signInWithCustomToken } from 'firebase/auth';
 import { auth as firebaseClientAuth } from '@/lib/firebase';
 import { createRazorpaySubscription } from '@/app/payments/actions';
-import { setSessionCookie } from '../cookie';
 import { Badge } from '@/components/ui/badge';
 
 type Plan = 'free' | 'pro-monthly' | 'pro-yearly';
@@ -65,7 +64,6 @@ function SubmitButton({ disabled, isProPlan }: { disabled: boolean; isProPlan: b
 function SignUpPageComponent() {
     const { toast } = useToast();
     const searchParams = useSearchParams();
-    const [view, setView] = useState<'form' | 'success'>('form');
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -101,18 +99,37 @@ function SignUpPageComponent() {
         };
     }, [isProPlan]);
 
+    const handleFreeSignup = async (customToken: string) => {
+        try {
+            const userCredential = await signInWithCustomToken(firebaseClientAuth, customToken);
+            const idToken = await userCredential.user.getIdToken(true);
+            const result = await login(idToken);
+            if (result.success) {
+                toast({ title: 'Welcome!', description: 'Your account has been created.' });
+                trackEvent({ action: 'sign_up', category: 'conversion', label: 'email_password_signup_free' });
+                window.location.assign('/dashboard');
+            } else {
+                throw new Error(result.error || 'Failed to create session.');
+            }
+        } catch (error) {
+             toast({
+                title: 'Login Failed',
+                description: error instanceof Error ? error.message : 'An unknown error occurred.',
+                variant: 'destructive'
+            });
+        }
+    };
+    
     useEffect(() => {
         if (signupState.error) {
             toast({ title: 'Error', description: signupState.error, variant: 'destructive' });
-        } else if (signupState.success) {
-            if (signupState.plan === 'pro' && signupState.user && signupState.interval) {
+        } else if (signupState.success && signupState.user) {
+            if (signupState.plan === 'pro' && signupState.interval) {
                 // Pro plan: Initiate payment
                 handlePayment(signupState.user.customToken, signupState.interval, signupState.user);
-            } else {
-                // Free plan: Show success view
-                setView('success');
-                toast({ title: 'Success!', description: signupState.message });
-                trackEvent({ action: 'sign_up', category: 'conversion', label: 'email_password_signup_free' });
+            } else if (signupState.plan === 'free') {
+                // Free plan: Auto-login
+                handleFreeSignup(signupState.user.customToken);
             }
         }
     }, [signupState, toast]);
@@ -148,7 +165,7 @@ function SignUpPageComponent() {
                          toast({ title: "Activation Error", description: finalizeResult.error, variant: 'destructive' });
                     }
                 },
-                modal: { ondismiss: () => setView('success') /* Show free user success message if they close payment modal */ },
+                modal: { ondismiss: () => handleFreeSignup(customToken) },
                 prefill: { name: user.name, email: user.email },
                 theme: { color: "#1e40af" }
             };
@@ -156,7 +173,7 @@ function SignUpPageComponent() {
             const rzp = new window.Razorpay(options);
             rzp.on('payment.failed', function (response: any) {
                 toast({ title: 'Payment Failed', description: response.error.description, variant: 'destructive' });
-                setView('success'); // Still show success for free account creation
+                handleFreeSignup(customToken);
             });
             rzp.open();
 
@@ -166,7 +183,7 @@ function SignUpPageComponent() {
                 description: error instanceof Error ? error.message : 'Could not initiate payment.',
                 variant: 'destructive',
             });
-            setView('success'); // Still show success for free account creation
+            handleFreeSignup(customToken);
         }
     }
 
@@ -199,27 +216,6 @@ function SignUpPageComponent() {
                 toast({ title: 'Invalid OTP', description: result.error, variant: 'destructive' });
             }
         });
-    }
-
-    if (view === 'success') {
-         return (
-             <Card className="mx-auto max-w-sm text-center mb-8">
-                <CardHeader>
-                    <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit">
-                        <MailCheck className="h-12 w-12 text-primary" />
-                    </div>
-                    <CardTitle className="text-2xl pt-4">Account Created!</CardTitle>
-                    <CardDescription>
-                       Your free account has been successfully created. You can now sign in.
-                    </CardDescription>
-                </CardHeader>
-                <CardFooter>
-                     <Button asChild className="w-full">
-                        <Link href="/auth/signin">Proceed to Sign In</Link>
-                    </Button>
-                </CardFooter>
-            </Card>
-        )
     }
 
     return (

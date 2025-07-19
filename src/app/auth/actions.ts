@@ -137,25 +137,31 @@ export async function signup(prevState: FormState, formData: FormData): Promise<
     // Clean up OTP
     await otpRef.remove();
     
-    // If Pro plan, create subscription and return details for client-side payment
+    const customToken = await auth.createCustomToken(userRecord.uid);
+    const commonResponseUser = {
+        uid: userRecord.uid,
+        email: userRecord.email!,
+        name: userRecord.displayName!,
+        customToken,
+    };
+    
+    // If Pro plan, return details for client-side payment
     if (isProPlan) {
         const interval = plan === 'pro-monthly' ? 'monthly' : 'yearly';
-        const customToken = await auth.createCustomToken(userRecord.uid);
-
         return {
             success: true,
             plan: 'pro',
             interval: interval,
-            user: {
-                uid: userRecord.uid,
-                email: userRecord.email!,
-                name: userRecord.displayName!,
-                customToken,
-            }
+            user: commonResponseUser,
         };
     }
 
-    return { success: true, message: `Account for ${email} created successfully!`, plan: 'free' };
+    // If Free plan, return details for immediate login
+    return { 
+        success: true, 
+        plan: 'free', 
+        user: commonResponseUser
+    };
 
   } catch (error: any) {
     if (error.code === 'auth/email-already-exists') {
