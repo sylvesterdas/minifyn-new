@@ -22,6 +22,7 @@ const footerLinks = {
     legal: [
         { href: '/terms', label: 'Terms of Service' },
         { href: '/privacy', label: 'Privacy Policy' },
+        { href: '/cancellation-and-refund-policy', label: 'Cancellation & Refund' },
         { href: '/acceptable-use', label: 'Acceptable Use' },
         { href: '/dmca', label: 'DMCA' },
         { href: '/sitemap.xml', label: 'Sitemap' },

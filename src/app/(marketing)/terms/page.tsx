@@ -32,7 +32,7 @@ export default function TermsPage() {
             <p>While some features are available anonymously, full access to features like link management and higher usage limits requires you to create an account. When you create an account, you must provide information that is accurate and complete. You are responsible for safeguarding your password and for any activities or actions under your account. Failure to comply constitutes a breach of the Terms, which may result in immediate termination of your account.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">4. Subscriptions and Payments</h2>
-            <p>For paid plans, you agree to pay the subscription fees specified on our Pricing page. Payments are handled by our third-party payment processor, Razorpay. By providing payment information, you authorize us to charge the fees on a recurring basis. All payments are non-refundable. Please see our <Link href="/refund-policy">Refund and Cancellation Policy</Link> for details on cancelling your subscription.</p>
+            <p>For paid plans, you agree to pay the subscription fees specified on our Pricing page. Payments are handled by our third-party payment processor, Razorpay. By providing payment information, you authorize us to charge the fees on a recurring basis. All payments are non-refundable. Please see our <Link href="/cancellation-and-refund-policy">Cancellation and Refund Policy</Link> for details on cancelling your subscription.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">5. Acceptable Use</h2>
             <p>You agree not to use the Service for any unlawful purpose. To protect the integrity of our service, we scan submitted URLs for malicious content. You must not use the Service to shorten URLs that point to content that is unlawful, harmful, or otherwise objectionable. Please see our <Link href="/acceptable-use">Acceptable Use Policy</Link> for full details.</p>
@@ -41,7 +41,7 @@ export default function TermsPage() {
             <p>The Service and its original content, features, and functionality are and will remain the exclusive property of MiniFyn and its licensors.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">7. Termination</h2>
-            <p>We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including if you breach the Terms. If you wish to terminate your account, you may do so by discontinuing use of the Service. For paid plans, you must cancel your subscription according to our Refund and Cancellation Policy to avoid future charges.</p>
+            <p>We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including if you breach the Terms. If you wish to terminate your account, you may do so by discontinuing use of the Service. For paid plans, you must cancel your subscription according to our Cancellation and Refund Policy to avoid future charges.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">8. Disclaimer of Warranties</h2>
             <p>The Service is provided on an "AS IS" and "AS AVAILABLE" basis. Your use of the Service is at your sole risk. The Service is provided without warranties of any kind, whether express or implied.</p>
