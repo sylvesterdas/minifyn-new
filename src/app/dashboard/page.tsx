@@ -12,6 +12,9 @@ export const revalidate = 3600; // Revalidate every hour
 
 export default async function DashboardPage() {
     const { user } = await validateRequest();
+
+    // Protect the page on the server. If the user is not logged in or is anonymous,
+    // redirect them to the sign-in page before rendering anything.
     if (!user || user.isAnonymous) {
         redirect('/auth/signin');
     }
