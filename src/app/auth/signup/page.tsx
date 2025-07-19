@@ -40,7 +40,6 @@ export interface FormState {
     user?: {
         uid: string;
         email: string;
-        name: string;
         customToken: string;
     };
 }
@@ -166,7 +165,7 @@ function SignUpPageComponent() {
                     }
                 },
                 modal: { ondismiss: () => handleFreeSignup(customToken) },
-                prefill: { name: user.name, email: user.email },
+                prefill: { email: user.email },
                 theme: { color: "#1e40af" }
             };
 
@@ -189,11 +188,22 @@ function SignUpPageComponent() {
 
 
     const handleSendOtp = () => {
-        // This regex is more permissive and allows for characters like '+' in the email username.
-        if (!email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)) {
-            toast({ title: 'Invalid Email', description: 'Please enter a valid email address.', variant: 'destructive'});
+        // This regex is environment-dependent.
+        // In production, it rejects emails with '+'.
+        // In development, it allows them.
+        const isProduction = process.env.NODE_ENV === 'production';
+        const emailRegex = isProduction 
+            ? /^[a-zA-Z0-9._%'-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+            : /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            
+        if (!emailRegex.test(email)) {
+            const errorMessage = isProduction 
+                ? 'Please enter a valid email address without sub-addressing (+ symbols).'
+                : 'Please enter a valid email address.';
+            toast({ title: 'Invalid Email', description: errorMessage, variant: 'destructive'});
             return;
         }
+
         startOtpTransition(async () => {
             const result = await sendVerificationOtp(email);
             if (result.success) {
@@ -217,6 +227,11 @@ function SignUpPageComponent() {
                 toast({ title: 'Invalid OTP', description: result.error, variant: 'destructive' });
             }
         });
+    }
+
+    const validatePassword = (pass: string) => {
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return passwordRegex.test(pass);
     }
 
     return (
@@ -322,6 +337,11 @@ function SignUpPageComponent() {
                     <div className="grid gap-2">
                         <Label htmlFor="password">Password</Label>
                         <Input id="password" name="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} />
+                        {password.length > 0 && !validatePassword(password) && (
+                            <p className="text-xs text-muted-foreground animate-in fade-in duration-300">
+                                Must be 8+ characters with an uppercase letter, a number, and a symbol (e.g., @, $, !).
+                            </p>
+                        )}
                     </div>
                     <div className="flex items-center space-x-2">
                         <Checkbox 
@@ -341,7 +361,7 @@ function SignUpPageComponent() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">
-                    <SubmitButton disabled={!emailVerified || !password || !termsAccepted} isProPlan={isProPlan} />
+                    <SubmitButton disabled={!emailVerified || !validatePassword(password) || !termsAccepted} isProPlan={isProPlan} />
                     <div className="text-center text-sm">
                         Already have an account?{' '}
                         <Link href="/auth/signin" className="underline">

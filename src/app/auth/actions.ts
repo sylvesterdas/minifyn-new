@@ -15,8 +15,13 @@ function encodeEmail(email: string): string {
 }
 
 export async function sendVerificationOtp(email: string): Promise<{ success: boolean; error?: string }> {
-  if (typeof email !== 'string' || !email.includes('@')) {
-    return { success: false, error: 'Invalid email' };
+  const isProduction = process.env.NODE_ENV === 'production';
+  const emailRegex = isProduction 
+      ? /^[a-zA-Z0-9._%'-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+      : /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  if (typeof email !== 'string' || !emailRegex.test(email)) {
+    return { success: false, error: 'Invalid email format.' };
   }
 
   // Check if user already exists
@@ -100,8 +105,10 @@ export async function signup(prevState: FormState, formData: FormData): Promise<
     return { error: 'Missing required fields.' };
   }
   
-  if (password.length < 6) {
-    return { error: 'Password must be at least 6 characters long.' };
+  // Stricter password validation
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!passwordRegex.test(password)) {
+    return { error: 'Password must be at least 8 characters long and include an uppercase letter, a number, and a symbol.' };
   }
 
   try {
@@ -139,7 +146,6 @@ export async function signup(prevState: FormState, formData: FormData): Promise<
     const commonResponseUser = {
         uid: userRecord.uid,
         email: userRecord.email!,
-        name: userRecord.displayName!,
         customToken,
     };
     
