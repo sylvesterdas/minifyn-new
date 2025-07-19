@@ -48,7 +48,7 @@ function SignUpPageComponent() {
 
     if (view === 'email_verification') {
         return (
-             <Card className="mx-auto max-w-sm text-center">
+             <Card className="mx-auto max-w-sm text-center mb-8">
                 <CardHeader>
                     <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit">
                         <MailCheck className="h-12 w-12 text-primary" />
@@ -68,7 +68,7 @@ function SignUpPageComponent() {
     }
 
     return (
-        <Card className="mx-auto max-w-md">
+        <Card className="mx-auto max-w-md mb-8">
             <CardHeader>
                 <CardTitle className="text-2xl">Create a free account</CardTitle>
                 <CardDescription>
