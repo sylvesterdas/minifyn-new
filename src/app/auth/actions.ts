@@ -35,7 +35,7 @@ export async function sendVerificationOtp(email: string): Promise<{ success: boo
 
   try {
     const encodedEmail = encodeEmail(email);
-    await db.ref(`otps/${encodedEmail}`).set({ otp, expires });
+    await db.ref(`otps/${encodedEmail}`).set({ otp, expires, verified: false });
 
     const emailResult = await sendEmail({
       to: email,
@@ -61,13 +61,40 @@ export async function sendVerificationOtp(email: string): Promise<{ success: boo
   }
 }
 
-export async function verifyOtpAndCreateUser(prevState: FormState, formData: FormData): Promise<FormState> {
+export async function verifyOtp(email: string, otp: string): Promise<{ success: boolean; error?: string }> {
+    if (!email || !otp) {
+        return { success: false, error: 'Email and OTP are required.' };
+    }
+    try {
+        const encodedEmail = encodeEmail(email);
+        const otpRef = db.ref(`otps/${encodedEmail}`);
+        const snapshot = await otpRef.once('value');
+        const otpData = snapshot.val();
+
+        if (!otpData || otpData.otp !== otp) {
+            return { success: false, error: 'Invalid or incorrect OTP.' };
+        }
+
+        if (Date.now() > otpData.expires) {
+            return { success: false, error: 'Your OTP has expired. Please request a new one.' };
+        }
+        
+        // Mark OTP as verified in the database
+        await otpRef.update({ verified: true });
+        return { success: true };
+    } catch(error) {
+        console.error('OTP verification error:', error);
+        return { success: false, error: 'An unexpected error occurred during OTP verification.' };
+    }
+}
+
+
+export async function signup(prevState: FormState, formData: FormData): Promise<FormState> {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
-  const otp = formData.get('otp') as string;
   const termsAccepted = formData.get('terms-accepted') === 'on';
 
-  if (!email || !password || !otp || !termsAccepted) {
+  if (!email || !password || !termsAccepted) {
     return { error: 'Missing required fields.' };
   }
   
@@ -76,20 +103,17 @@ export async function verifyOtpAndCreateUser(prevState: FormState, formData: For
   }
 
   try {
+    // Check if the email was verified via OTP
     const encodedEmail = encodeEmail(email);
     const otpRef = db.ref(`otps/${encodedEmail}`);
     const snapshot = await otpRef.once('value');
     const otpData = snapshot.val();
-
-    if (!otpData || otpData.otp !== otp) {
-      return { error: 'Invalid or incorrect OTP.', otpError: true };
-    }
-
-    if (Date.now() > otpData.expires) {
-      return { error: 'Your OTP has expired. Please request a new one.' };
+    
+    if (!otpData || otpData.verified !== true) {
+        return { error: 'Email has not been verified.' };
     }
     
-    // OTP is valid, create user
+    // Email is verified, create user
     const userRecord = await auth.createUser({
       email,
       password,
