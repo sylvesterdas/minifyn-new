@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useEffect, useState, useTransition, Suspense } from 'react';
+import { useActionState, useEffect, useState, useTransition, Suspense, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
 import { sendVerificationOtp, verifyOtp, signup, finalizeProSignup } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ExternalLink, MailCheck, Check, BadgeAlert, Star, CreditCard } from 'lucide-react';
+import { Loader2, ExternalLink, MailCheck, Check, BadgeAlert, Star, CreditCard, ArrowRight } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { trackEvent } from '@/lib/gtag';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
@@ -45,11 +45,18 @@ export interface FormState {
     };
 }
 
-function SubmitButton({ disabled }: { disabled: boolean }) {
+function SubmitButton({ disabled, isProPlan }: { disabled: boolean; isProPlan: boolean; }) {
     const { pending } = useFormStatus();
+    const buttonText = isProPlan ? 'Proceed to Payment' : 'Create a free account';
+    
     return (
         <Button type="submit" className="w-full" disabled={pending || disabled}>
-            {pending ? <Loader2 className="animate-spin" /> : 'Create an account'}
+            {pending ? <Loader2 className="animate-spin" /> : (
+                <>
+                    {buttonText}
+                    {isProPlan && <ArrowRight className="ml-2" />}
+                </>
+            )}
         </Button>
     );
 }
@@ -72,11 +79,26 @@ function SignUpPageComponent() {
     const [otpError, setOtpError] = useState(false);
     
     const initialPlan = searchParams.get('plan') === 'pro'
-        ? (searchParams.get('interval') === 'monthly' ? 'pro-monthly' : 'pro-yearly')
+        ? (searchParams.get('interval') === 'yearly' ? 'pro-yearly' : 'pro-monthly')
         : 'free';
     const [selectedPlan, setSelectedPlan] = useState<Plan>(initialPlan);
 
     const [signupState, signupAction] = useActionState(signup, { success: false });
+
+    const isProPlan = selectedPlan.startsWith('pro-');
+
+    const dynamicTexts = useMemo(() => {
+        if (isProPlan) {
+            return {
+                title: 'Go Pro',
+                description: 'You\'re one step away from unlocking all premium features. Complete your payment to get started.'
+            };
+        }
+        return {
+            title: 'Create your account',
+            description: 'Get started with a free account to manage your links and view analytics.'
+        };
+    }, [isProPlan]);
 
     useEffect(() => {
         if (signupState.error) {
@@ -204,9 +226,9 @@ function SignUpPageComponent() {
         <Script id="razorpay-checkout-js" src="https://checkout.razorpay.com/v1/checkout.js" />
         <Card className="mx-auto max-w-md mb-8">
             <CardHeader>
-                <CardTitle className="text-2xl">Create your account</CardTitle>
+                <CardTitle className="text-2xl">{dynamicTexts.title}</CardTitle>
                 <CardDescription>
-                    Get started with a free account, or choose a Pro plan to unlock more features.
+                    {dynamicTexts.description}
                 </CardDescription>
             </CardHeader>
             <form action={signupAction}>
@@ -300,7 +322,7 @@ function SignUpPageComponent() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">
-                    <SubmitButton disabled={!emailVerified || !password || !termsAccepted} />
+                    <SubmitButton disabled={!emailVerified || !password || !termsAccepted} isProPlan={isProPlan} />
                     <div className="text-center text-sm">
                         Already have an account?{' '}
                         <Link href="/auth/signin" className="underline">
