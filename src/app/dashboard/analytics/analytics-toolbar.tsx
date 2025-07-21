@@ -27,15 +27,40 @@ export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedL
         },
         ...userLinks.map(link => ({
             value: link.id,
+            // The label is now what's displayed in the input field when selected
+            label: `mnfy.in/${link.id}`,
+            // We can put rich content inside the dropdown list itself
+            listLabel: (
+                <>
+                    <span className="font-mono text-sm">mnfy.in/{link.id}</span>
+                    <span className="text-xs text-muted-foreground truncate block">{link.longUrl}</span>
+                </>
+            ),
+            keywords: [link.id, link.longUrl, `mnfy.in/${link.id}`]
+        }))
+    ];
+
+     const richLinkOptions = [
+        {
+            value: 'all',
+            label: <span className="font-semibold">All Links</span>,
+            searchLabel: 'All Links',
+            keywords: ['all', 'links']
+        },
+        ...userLinks.map(link => ({
+            value: link.id,
             label: (
                 <div className="flex flex-col" title={link.longUrl}>
                     <span className="font-mono text-sm">mnfy.in/{link.id}</span>
                     <span className="text-xs text-muted-foreground truncate">{link.longUrl}</span>
                 </div>
             ),
+            searchLabel: `mnfy.in/${link.id}`, // for the input display
             keywords: [link.id, link.longUrl, `mnfy.in/${link.id}`]
         }))
     ];
+
+    const selectedOptionDisplay = richLinkOptions.find(opt => opt.value === selectedLink)?.searchLabel || 'All Links';
 
     return (
         <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
@@ -57,10 +82,10 @@ export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedL
                 <div className="w-full">
                     <label className="text-sm font-medium text-muted-foreground">Filter by Link</label>
                     <Combobox
-                        options={linkOptions}
+                        options={richLinkOptions.map(o => ({ value: o.value, label: o.label, keywords: o.keywords }))}
                         value={selectedLink}
                         onSelect={setSelectedLink}
-                        placeholder="Select a link..."
+                        placeholder={selectedOptionDisplay}
                         searchPlaceholder="Search by shortcode or URL..."
                         emptyText="No matching links found."
                     />

@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/popover"
 
 interface ComboboxProps {
-    options: { value: string; label: React.ReactNode; keywords?: string[] }[];
+    options: { value: string; label: string | React.ReactNode; keywords?: string[] }[];
     value: string;
     onSelect: (value: string) => void;
     placeholder?: string;
@@ -41,41 +41,42 @@ export function Combobox({ options, value, onSelect, placeholder = "Select an op
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between h-16 md:h-10" // Adjust height for mobile
+          className="w-full justify-between h-10" // Standardized height
         >
           <span className="truncate">
-             {selectedOption ? selectedOption.label : placeholder}
+             {selectedOption ? (typeof selectedOption.label === 'string' ? selectedOption.label : value) : placeholder}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <Command
-           filter={(itemValue, search) => {
-                const option = options.find(opt => opt.value === itemValue);
-                if (!option) return 0;
+            // Use keyword-based filtering logic
+            filter={(itemValue, search) => {
+              const option = options.find(opt => opt.value === itemValue);
+              if (!option) return 0;
+              
+              const allKeywords = [
+                typeof option.label === 'string' ? option.label : '',
+                ...(option.keywords || [])
+              ].join(' ').toLowerCase();
 
-                const searchLower = search.toLowerCase();
-                
-                // Check if any keyword contains search term
-                if (option.keywords?.some(kw => kw.toLowerCase().includes(searchLower))) {
-                    return 1;
-                }
-                return 0;
+              return allKeywords.includes(search.toLowerCase()) ? 1 : 0;
             }}
         >
           <CommandInput placeholder={searchPlaceholder} />
-          <CommandEmpty>{emptyText}</CommandEmpty>
           <CommandList>
+            <CommandEmpty>{emptyText}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
                   value={option.value}
                   onSelect={(currentValue) => {
-                    onSelect(currentValue) // Correctly set the value
-                    setOpen(false)
+                    onSelect(currentValue === value ? "" : currentValue);
+                    setOpen(false);
                   }}
+                  className="h-16 md:h-auto" // Taller items on mobile
                 >
                   <Check
                     className={cn(
@@ -83,7 +84,9 @@ export function Combobox({ options, value, onSelect, placeholder = "Select an op
                       value === option.value ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {option.label}
+                   <div className="flex flex-col">
+                      {option.label}
+                   </div>
                 </CommandItem>
               ))}
             </CommandGroup>
