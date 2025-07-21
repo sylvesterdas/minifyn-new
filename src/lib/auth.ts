@@ -16,15 +16,47 @@ export interface AuthUser extends DecodedIdToken {
 
 async function getUserProfileData(uid: string): Promise<{ plan: UserPlan, onboardingCompleted: boolean }> {
     try {
-        const snapshot = await db.ref(`user_profiles/${uid}`).once('value');
+        const userProfileRef = db.ref(`user_profiles/${uid}`);
+        const snapshot = await userProfileRef.once('value');
+        
         if (snapshot.exists()) {
-            const profile = snapshot.val() as UserProfile;
+            const profile = snapshot.val();
+
+            // Check for expired "Pro" subscriptions that need to be downgraded
+            if (
+                profile.plan === 'pro' &&
+                profile.subscription &&
+                profile.subscription.status === 'active' &&
+                profile.subscription.ended_at &&
+                profile.subscription.ended_at * 1000 < Date.now()
+            ) {
+                console.log(`[Auth Lib] User ${uid}'s subscription has expired. Downgrading to 'free' plan.`);
+                
+                // Perform the downgrade
+                await userProfileRef.update({
+                    plan: 'free',
+                    subscription: null,
+                });
+                await adminAuth.setCustomUserClaims(uid, { plan: 'free' });
+                await adminAuth.revokeRefreshTokens(uid); // Force re-login to get new claims
+
+                // Return the new, downgraded plan details
+                return {
+                    plan: 'free',
+                    onboardingCompleted: profile.onboardingCompleted === true,
+                };
+            }
+            
+            // If not expired, return current details
             return {
                 plan: profile.plan || 'free',
                 onboardingCompleted: profile.onboardingCompleted === true,
             };
         }
+        
+        // Default for users with no profile
         return { plan: 'free', onboardingCompleted: false };
+
     } catch (error) {
         console.error(`Failed to fetch profile data for user ${uid}:`, error);
         return { plan: 'free', onboardingCompleted: false };
