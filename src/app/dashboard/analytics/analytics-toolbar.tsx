@@ -19,27 +19,6 @@ interface AnalyticsToolbarProps {
 }
 
 export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedLink, setSelectedLink, totalClicks }: AnalyticsToolbarProps) {
-    const linkOptions = [
-        {
-            value: 'all',
-            label: 'All Links',
-            keywords: ['all', 'links']
-        },
-        ...userLinks.map(link => ({
-            value: link.id,
-            // The label is now what's displayed in the input field when selected
-            label: `mnfy.in/${link.id}`,
-            // We can put rich content inside the dropdown list itself
-            listLabel: (
-                <>
-                    <span className="font-mono text-sm">mnfy.in/{link.id}</span>
-                    <span className="text-xs text-muted-foreground truncate block">{link.longUrl}</span>
-                </>
-            ),
-            keywords: [link.id, link.longUrl, `mnfy.in/${link.id}`]
-        }))
-    ];
-
      const richLinkOptions = [
         {
             value: 'all',

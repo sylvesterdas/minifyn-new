@@ -46,10 +46,13 @@ export function Combobox({
       if (!option) return placeholder;
       if (typeof option.label === 'string') return option.label;
       // Heuristic to get a string from a JSX label for display in the button.
-      // This is a common pattern for rich comboboxes.
       const richOption = options.find(o => o.value === option.value) as any;
       return richOption?.searchLabel || placeholder;
   }
+
+  // Show top 5 recent links + "All Links" by default, or all if searching
+  const [searchValue, setSearchValue] = React.useState("");
+  const visibleOptions = searchValue ? options : options.slice(0, 6); // "All Links" + 5 recent links
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -67,21 +70,21 @@ export function Combobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-        <Command>
+        <Command onValueChange={setSearchValue}>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
             <CommandEmpty>{emptyText}</CommandEmpty>
             <CommandGroup>
-              {options.map((option) => (
+              {visibleOptions.map((option) => (
                 <CommandItem
                   key={option.value}
-                  value={option.value}
+                  value={option.keywords ? option.keywords.join(' ') : option.value}
                   onSelect={(currentValue) => {
-                    // This is the key fix: use the `currentValue` from the event
-                    onSelect(currentValue === value ? "" : currentValue)
+                    const selectedValue = options.find(o => o.keywords?.includes(currentValue) || o.value === currentValue)?.value || '';
+                    onSelect(selectedValue === value ? "" : selectedValue)
                     setOpen(false)
                   }}
-                  className="h-auto min-h-10" // Allow items to have variable height
+                  className="h-auto min-h-10"
                 >
                   <Check
                     className={cn(
