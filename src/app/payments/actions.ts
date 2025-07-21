@@ -36,7 +36,7 @@ const PLAN_IDS = {
 
 interface CreateSubscriptionResponse {
     subscriptionId: string;
-    amount: number;
+    amount: string | number;
     currency: string;
 }
 
@@ -89,7 +89,7 @@ export async function createRazorpaySubscription(
     try {
         const options = {
             plan_id: planId,
-            customer_notify: 1,
+            customer_notify: true,
             total_count: planType === 'monthly' ? 36 : 3, // 36 monthly payments or 3 yearly
             notes: {
                 userId: userData.uid,
@@ -208,9 +208,7 @@ export async function syncRazorpaySubscription(
             });
             await adminAuth.setCustomUserClaims(uid, { plan: 'pro' });
             
-            // Revoke tokens to force client to re-fetch the token with new claims.
-            await adminAuth.revokeRefreshTokens(uid);
-            console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. Refresh tokens revoked.`);
+            console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro.`);
             
             return { success: true };
 

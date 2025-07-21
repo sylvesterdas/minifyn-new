@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { redirect, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Home, Settings, Link as LinkIcon, PanelLeft, LineChart, BookText, ExternalLink } from 'lucide-react';
@@ -39,9 +39,13 @@ function NavLinks({ onLinkClick }: { onLinkClick?: () => void }) {
   }
 
   const userPlan = user?.plan || 'anonymous';
+
+  if (userPlan === 'anonymous') {
+    return redirect('/auth/signin');
+  }
+
   const visibleNavItems = navItems.filter(item => item.plans.includes(userPlan));
   const visibleExternalLinks = externalLinks.filter(item => item.plans.includes(userPlan));
-
 
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
