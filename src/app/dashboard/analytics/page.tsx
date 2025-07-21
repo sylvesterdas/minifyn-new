@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, Suspense } from 'react';
 import { getAnalyticsSummary, getUserLinks, type AnalyticsSummary, type UserLink } from '../actions';
 import { ClicksChart } from './clicks-chart';
 import { AnalyticsDetailCard } from './analytics-detail-card';
@@ -14,15 +14,19 @@ import { subDays, startOfDay, endOfDay } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { AnalyticsToolbar } from './analytics-toolbar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useSearchParams } from 'next/navigation';
 
 function AnalyticsSkeleton() {
     return (
         <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-24 w-full" />
+                <div className="lg:col-span-3 flex flex-col md:flex-row gap-4">
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                </div>
             </div>
-             <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-7">
+             <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-7 pt-6">
                 <Card className="lg:col-span-4">
                     <CardHeader>
                         <Skeleton className="h-6 w-1/2" />
@@ -41,8 +45,11 @@ function AnalyticsSkeleton() {
     )
 }
 
-export default function AnalyticsPage() {
+function AnalyticsPageComponent() {
     const { user } = useAuth();
+    const searchParams = useSearchParams();
+    const shortcodeFromQuery = searchParams.get('shortcode');
+
     const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
     const [userLinks, setUserLinks] = useState<UserLink[]>([]);
     const [isPending, startTransition] = useTransition();
@@ -51,26 +58,42 @@ export default function AnalyticsPage() {
         from: subDays(startOfDay(new Date()), 29),
         to: endOfDay(new Date()),
     });
-    const [selectedLink, setSelectedLink] = useState<string>('all');
-    
-    useEffect(() => {
-        if (user?.plan === 'pro' || user?.plan === 'admin') {
-            getUserLinks().then(setUserLinks);
-        }
-    }, [user?.plan]);
+    // State is now initialized based on query params or the latest link
+    const [selectedLink, setSelectedLink] = useState<string>('');
 
     useEffect(() => {
-        if (dateRange?.from && dateRange?.to && (user?.plan === 'pro' || user?.plan === 'admin')) {
-            startTransition(async () => {
-                const range = { from: dateRange.from!.toISOString(), to: dateRange.to!.toISOString() };
-                const linkId = selectedLink === 'all' ? undefined : selectedLink;
-                const newSummary = await getAnalyticsSummary(range, linkId);
-                setSummary(newSummary);
+        if (user?.plan === 'pro' || user?.plan === 'admin') {
+            getUserLinks().then(links => {
+                setUserLinks(links);
+                // Set initial selected link after links are fetched
+                if (shortcodeFromQuery && links.some(link => link.id === shortcodeFromQuery)) {
+                    setSelectedLink(shortcodeFromQuery);
+                } else if (links.length > 0) {
+                    // Default to the latest link if no valid query param
+                    setSelectedLink(links[0].id); 
+                } else {
+                    setSelectedLink('all');
+                }
             });
+        } else {
+             setSelectedLink('all');
+        }
+    }, [user?.plan, shortcodeFromQuery]);
+
+    useEffect(() => {
+        // Only fetch data if a selection has been made and user plan is valid
+        if (selectedLink && (user?.plan === 'pro' || user?.plan === 'admin')) {
+             if (dateRange?.from && dateRange?.to) {
+                startTransition(async () => {
+                    const range = { from: dateRange.from!.toISOString(), to: dateRange.to!.toISOString() };
+                    const linkId = selectedLink === 'all' ? undefined : selectedLink;
+                    const newSummary = await getAnalyticsSummary(range, linkId);
+                    setSummary(newSummary);
+                });
+            }
         }
     }, [dateRange, selectedLink, user?.plan]);
     
-    // Display upgrade message for free users
     if (user?.plan !== 'pro' && user?.plan !== 'admin') {
         return (
              <div className="flex items-center justify-center h-full">
@@ -89,7 +112,7 @@ export default function AnalyticsPage() {
                             Track referrers, geographic location, and more for every link you create.
                         </p>
                         <Button asChild>
-                            <Link href="/pricing">Upgrade to Pro</Link>
+                            <Link href="/dashboard/settings/billing">Upgrade to Pro</Link>
                         </Button>
                     </CardContent>
                 </Card>
@@ -97,8 +120,7 @@ export default function AnalyticsPage() {
         )
     }
 
-    // Display skeleton while loading
-    if (isPending || !summary) {
+    if (isPending || !summary || !selectedLink) {
         return <AnalyticsSkeleton />;
     }
 
@@ -129,7 +151,7 @@ export default function AnalyticsPage() {
                         data={summary.referrers}
                         categoryKey="name"
                         valueKey="value"
-                        defaultIconName="globe"
+                        defaultIconName="Direct"
                      />
                     <AnalyticsDetailCard
                         title="Top Countries"
@@ -152,5 +174,14 @@ export default function AnalyticsPage() {
                  </div>
             </div>
          </div>
+    );
+}
+
+// Wrap with Suspense to allow useSearchParams
+export default function AnalyticsPage() {
+    return (
+        <Suspense fallback={<AnalyticsSkeleton />}>
+            <AnalyticsPageComponent />
+        </Suspense>
     );
 }

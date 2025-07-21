@@ -2,7 +2,7 @@
 'use client';
 
 import { type ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, ArrowUpDown, ExternalLink } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, ExternalLink, LineChart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,12 +10,14 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import type { UserLink } from '../actions';
 import { formatDistanceToNow } from 'date-fns';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 function ActionsCell({ link }: { link: UserLink }) {
   const { toast } = useToast();
@@ -42,7 +44,12 @@ function ActionsCell({ link }: { link: UserLink }) {
         <DropdownMenuItem onClick={copyToClipboard}>
           Copy Link
         </DropdownMenuItem>
-        <DropdownMenuItem disabled>View Analytics</DropdownMenuItem>
+        <DropdownMenuItem asChild>
+            <Link href={`/dashboard/analytics?shortcode=${link.id}`}>
+                <LineChart className="mr-2 h-4 w-4" />
+                View Analytics
+            </Link>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
