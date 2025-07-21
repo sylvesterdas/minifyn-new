@@ -1,3 +1,4 @@
+
 import { getLinkBySlug, recordClick } from '@/lib/data';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -19,24 +20,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         };
     }
     
-    const title = link.title || 'Redirecting...';
-    const description = link.description || 'You are being redirected to your destination.';
-    const images = [link.ogImage, link.twitterImage].filter(Boolean) as string[];
+    const title = link.seo?.title || link.title || 'Redirecting...';
+    const description = link.seo?.description || link.description || 'You are being redirected to your destination.';
+    
+    // Construct images array, preferring OG then Twitter, and filtering out falsy values
+    const images = [
+        link.seo?.ogImage,
+        link.seo?.twitterImage
+    ].filter(Boolean) as string[];
 
     return {
-        title: `${title} | MiniFyn`,
+        title: `${title}`, // Simpler title for social sharing
         description: description,
         openGraph: {
-            title: title,
-            description: description,
+            title: link.seo?.ogTitle || title,
+            description: link.seo?.ogDescription || description,
             url: link.longUrl,
             images: images.length > 0 ? images : undefined,
+            type: link.seo?.ogType || 'website',
         },
         twitter: {
             card: 'summary_large_image',
-            title: title,
-            description: description,
+            title: link.seo?.twitterTitle || title,
+            description: link.seo?.twitterDescription || description,
             images: images.length > 0 ? images : undefined,
+        },
+        alternates: {
+            canonical: link.seo?.canonical || link.longUrl,
         }
     };
 }

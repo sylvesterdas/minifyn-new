@@ -1,19 +1,76 @@
 
-import { validateRequest } from '@/lib/auth';
-import { getAnalyticsSummary } from '../actions';
+'use client';
+
+import { useState, useEffect, useTransition } from 'react';
+import { getAnalyticsSummary, getUserLinks, type AnalyticsSummary, type UserLink } from '../actions';
 import { ClicksChart } from './clicks-chart';
 import { AnalyticsDetailCard } from './analytics-detail-card';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useAuth } from '@/lib/auth-client';
+import { subDays, startOfDay, endOfDay } from 'date-fns';
+import { DateRange } from 'react-day-picker';
+import { AnalyticsToolbar } from './analytics-toolbar';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export const revalidate = 3600; // Revalidate every hour
+function AnalyticsSkeleton() {
+    return (
+        <div className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+            </div>
+             <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-7">
+                <Card className="lg:col-span-4">
+                    <CardHeader>
+                        <Skeleton className="h-6 w-1/2" />
+                    </CardHeader>
+                    <CardContent className="pl-2">
+                         <Skeleton className="h-[350px] w-full" />
+                    </CardContent>
+                </Card>
+                 <div className="lg:col-span-3 space-y-4">
+                    <Skeleton className="h-48 w-full" />
+                    <Skeleton className="h-48 w-full" />
+                    <Skeleton className="h-48 w-full" />
+                 </div>
+            </div>
+        </div>
+    )
+}
 
-export default async function AnalyticsPage() {
-    const { user } = await validateRequest();
+export default function AnalyticsPage() {
+    const { user } = useAuth();
+    const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
+    const [userLinks, setUserLinks] = useState<UserLink[]>([]);
+    const [isPending, startTransition] = useTransition();
     
-    // Allow 'pro' and 'admin' users to see this page
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+        from: subDays(startOfDay(new Date()), 29),
+        to: endOfDay(new Date()),
+    });
+    const [selectedLink, setSelectedLink] = useState<string>('all');
+    
+    useEffect(() => {
+        if (user?.plan === 'pro' || user?.plan === 'admin') {
+            getUserLinks().then(setUserLinks);
+        }
+    }, [user?.plan]);
+
+    useEffect(() => {
+        if (dateRange?.from && dateRange?.to && (user?.plan === 'pro' || user?.plan === 'admin')) {
+            startTransition(async () => {
+                const range = { from: dateRange.from!.toISOString(), to: dateRange.to!.toISOString() };
+                const linkId = selectedLink === 'all' ? undefined : selectedLink;
+                const newSummary = await getAnalyticsSummary(range, linkId);
+                setSummary(newSummary);
+            });
+        }
+    }, [dateRange, selectedLink, user?.plan]);
+    
+    // Display upgrade message for free users
     if (user?.plan !== 'pro' && user?.plan !== 'admin') {
         return (
              <div className="flex items-center justify-center h-full">
@@ -40,41 +97,57 @@ export default async function AnalyticsPage() {
         )
     }
 
-    // Pro and Admin users can see the full page
-    const summary = await getAnalyticsSummary();
+    // Display skeleton while loading
+    if (isPending || !summary) {
+        return <AnalyticsSkeleton />;
+    }
 
     return (
          <div className="flex flex-col gap-6">
-            <h1 className="text-lg font-semibold md:text-2xl">Analytics</h1>
+            <AnalyticsToolbar 
+                dateRange={dateRange}
+                setDateRange={setDateRange}
+                userLinks={userLinks}
+                selectedLink={selectedLink}
+                setSelectedLink={setSelectedLink}
+                totalClicks={summary.totalClicks}
+            />
+
              <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-7 pt-6">
                 <Card className="lg:col-span-4">
                     <CardHeader>
-                        <CardTitle>Clicks Overview (Last 30 Days)</CardTitle>
+                        <CardTitle>Clicks Overview</CardTitle>
+                        <CardDescription>Total clicks over the selected period.</CardDescription>
                     </CardHeader>
                     <CardContent className="pl-2">
                          <ClicksChart data={summary.clicksByDay} />
                     </CardContent>
                 </Card>
                  <div className="lg:col-span-3 space-y-4">
-                     <AnalyticsDetailCard
+                    <AnalyticsDetailCard
                         title="Top Referrers"
                         data={summary.referrers}
-                        categoryKey="referrer"
-                        valueKey="clicks"
+                        categoryKey="name"
+                        valueKey="value"
                         defaultIconName="globe"
                      />
                     <AnalyticsDetailCard
-                        title="Clicks by Platform"
+                        title="Top Countries"
+                        data={summary.countries}
+                        categoryKey="name"
+                        valueKey="value"
+                     />
+                    <AnalyticsDetailCard
+                        title="Platforms"
                         data={summary.platforms}
-                        categoryKey="platform"
-                        valueKey="clicks"
-                        iconNameMap={{
-                            'Windows': 'laptop',
-                            'macOS': 'laptop',
-                            'Linux': 'laptop',
-                            'iOS': 'smartphone',
-                            'Android': 'smartphonenfc',
-                        }}
+                        categoryKey="name"
+                        valueKey="value"
+                    />
+                     <AnalyticsDetailCard
+                        title="Browsers"
+                        data={summary.browsers}
+                        categoryKey="name"
+                        valueKey="value"
                     />
                  </div>
             </div>

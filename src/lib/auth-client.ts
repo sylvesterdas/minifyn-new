@@ -1,5 +1,4 @@
 
-// This file is deprecated. Please use `src/lib/auth-client.ts` instead.
 'use client';
 
 import { useAuthContext } from '@/context/auth-context';

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
@@ -8,17 +9,17 @@ interface ClicksChartProps {
 }
 
 export function ClicksChart({ data }: ClicksChartProps) {
-    if (!data || data.length === 0) {
+    if (!data || data.length === 0 || data.every(d => d.clicks === 0)) {
         return (
             <div className="flex items-center justify-center h-[350px]">
-                <p className="text-muted-foreground">Not enough data to display chart yet.</p>
+                <p className="text-muted-foreground">No clicks recorded in this period.</p>
             </div>
         );
     }
     
     return (
         <ResponsiveContainer width="100%" height={350}>
-            <BarChart data={data}>
+            <BarChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis
                     dataKey="date"
@@ -33,6 +34,7 @@ export function ClicksChart({ data }: ClicksChartProps) {
                     tickLine={false}
                     axisLine={false}
                     allowDecimals={false}
+                    width={30}
                 />
                  <Tooltip
                     cursor={{ fill: 'hsl(var(--accent) / 0.2)' }}

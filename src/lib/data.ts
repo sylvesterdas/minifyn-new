@@ -1,4 +1,5 @@
 
+
 import { db } from './firebase-admin';
 import type { DataSnapshot } from 'firebase-admin/database';
 import { fetchMetadata, type Metadata } from './scraper';
@@ -7,6 +8,7 @@ import { auth } from 'firebase-admin';
 import type { UserRecord } from 'firebase-admin/auth';
 import { SUPER_USER_ID } from './config';
 import type { UserProfile } from '@/app/dashboard/settings/actions';
+import { getCountryFromIP } from './ip-to-country';
 
 export type UserPlan = 'pro' | 'free' | 'admin' | 'anonymous';
 

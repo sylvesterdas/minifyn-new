@@ -4,7 +4,9 @@
 import { validateRequest } from '@/lib/auth';
 import { db } from '@/lib/firebase-admin';
 import type { Link } from '@/lib/data';
-import { startOfDay, subDays, format } from 'date-fns';
+import { startOfDay, subDays, format, isWithinInterval, endOfDay } from 'date-fns';
+import { getCountryFromIP } from '@/lib/ip-to-country';
+import { parse, uas } from 'node-uas';
 
 export interface UserLink extends Omit<Link, 'seo' | 'expiresAt' | 'userId'> {
 }
@@ -80,10 +82,12 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     }
 }
 
-export interface ClickEvent {
+interface ClickEvent {
     timestamp: number;
     referer: string;
     platform: string;
+    browser: string;
+    country: string | null;
 }
 
 function getHostname(url: string): string {
@@ -93,24 +97,41 @@ function getHostname(url: string): string {
     try {
         return new URL(url).hostname.replace('www.', '');
     } catch (e) {
-        // If it's not a valid URL (e.g., a custom string), return it as is.
         return url;
     }
 }
 
-async function getClickEvents(): Promise<ClickEvent[]> {
+function parseUserAgent(ua: string | null): { platform: string, browser: string } {
+    if (!ua) return { platform: 'Unknown', browser: 'Unknown' };
+    const agentInfo = parse(ua);
+    return {
+        platform: agentInfo.os.name || 'Unknown',
+        browser: agentInfo.ua.name || 'Unknown',
+    }
+}
+
+
+async function getClickEvents(dateRange: { from: Date; to: Date }, linkId?: string): Promise<ClickEvent[]> {
     const { user } = await validateRequest();
     if (!user) return [];
 
-    const userLinks = await getUserLinks();
-    if (userLinks.length === 0) return [];
+    let linkIdsToFetch: string[];
 
-    const thirtyDaysAgo = subDays(new Date(), 30).getTime();
-
-    const clickPromises = userLinks.map(link => 
-        db.ref(`analytics/${link.id}`)
+    if (linkId) {
+        linkIdsToFetch = [linkId];
+    } else {
+        const userLinks = await getUserLinks();
+        if (userLinks.length === 0) return [];
+        linkIdsToFetch = userLinks.map(link => link.id);
+    }
+    
+    // Firebase Realtime DB doesn't support complex 'OR' queries across different parents efficiently.
+    // So we fetch data for each linkId within the date range.
+    const clickPromises = linkIdsToFetch.map(id => 
+        db.ref(`analytics/${id}`)
           .orderByChild('timestamp')
-          .startAt(thirtyDaysAgo)
+          .startAt(dateRange.from.getTime())
+          .endAt(dateRange.to.getTime())
           .once('value')
     );
 
@@ -121,10 +142,13 @@ async function getClickEvents(): Promise<ClickEvent[]> {
         if (snapshot.exists()) {
             const clicks = snapshot.val();
             Object.values(clicks).forEach((click: any) => {
+                const userAgentInfo = parseUserAgent(click.userAgent);
                 allClicks.push({
                     timestamp: click.timestamp,
                     referer: getHostname(click.referer),
-                    platform: click.platform || 'Unknown',
+                    platform: userAgentInfo.platform,
+                    browser: userAgentInfo.browser,
+                    country: getCountryFromIP(click.ip),
                 });
             });
         }
@@ -136,44 +160,54 @@ async function getClickEvents(): Promise<ClickEvent[]> {
 
 export interface AnalyticsSummary {
     clicksByDay: { date: string; clicks: number }[];
-    referrers: { referrer: string; clicks: number }[];
-    platforms: { platform: string; clicks: number }[];
+    referrers: { name: string; value: number }[];
+    platforms: { name: string; value: number }[];
+    browsers: { name: string; value: number }[];
+    countries: { name: string; value: number }[];
+    totalClicks: number;
 }
 
-export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
-    const clicks = await getClickEvents();
+export async function getAnalyticsSummary(dateRange: { from: string; to: string }, linkId?: string): Promise<AnalyticsSummary> {
+    const fromDate = startOfDay(new Date(dateRange.from));
+    const toDate = endOfDay(new Date(dateRange.to));
+
+    const clicks = await getClickEvents({ from: fromDate, to: toDate }, linkId);
     
     // Clicks by Day
     const clicksByDayMap = new Map<string, number>();
-    for (let i = 29; i >= 0; i--) {
-        const date = format(subDays(new Date(), i), 'MMM d');
-        clicksByDayMap.set(date, 0);
+    let currentDate = fromDate;
+    while (currentDate <= toDate) {
+        const dateKey = format(currentDate, 'MMM d');
+        clicksByDayMap.set(dateKey, 0);
+        currentDate = addDays(currentDate, 1);
     }
     clicks.forEach(click => {
-        const date = format(new Date(click.timestamp), 'MMM d');
-        if(clicksByDayMap.has(date)) {
-            clicksByDayMap.set(date, (clicksByDayMap.get(date) || 0) + 1);
+        const dateKey = format(new Date(click.timestamp), 'MMM d');
+        if(clicksByDayMap.has(dateKey)) {
+            clicksByDayMap.set(dateKey, (clicksByDayMap.get(dateKey) || 0) + 1);
         }
     });
     const clicksByDay = Array.from(clicksByDayMap, ([date, clicks]) => ({ date, clicks }));
     
-    // Referrers
-    const referrersMap = new Map<string, number>();
-    clicks.forEach(click => {
-        referrersMap.set(click.referer, (referrersMap.get(click.referer) || 0) + 1);
-    });
-    const referrers = Array.from(referrersMap, ([referrer, clicks]) => ({ referrer, clicks }))
-        .sort((a, b) => b.clicks - a.clicks)
-        .slice(0, 7);
-        
-    // Platforms
-    const platformsMap = new Map<string, number>();
-    clicks.forEach(click => {
-        platformsMap.set(click.platform, (platformsMap.get(click.platform) || 0) + 1);
-    });
-    const platforms = Array.from(platformsMap, ([platform, clicks]) => ({ platform, clicks }))
-        .sort((a, b) => b.clicks - a.clicks)
-        .slice(0, 7);
+    const aggregate = (key: keyof ClickEvent) => {
+        const map = new Map<string, number>();
+        clicks.forEach(click => {
+            const value = click[key];
+            if (typeof value === 'string' && value) {
+                map.set(value, (map.get(value) || 0) + 1);
+            }
+        });
+        return Array.from(map, ([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 7);
+    }
 
-    return { clicksByDay, referrers, platforms };
+    return {
+        clicksByDay,
+        referrers: aggregate('referer'),
+        platforms: aggregate('platform'),
+        browsers: aggregate('browser'),
+        countries: aggregate('country'),
+        totalClicks: clicks.length,
+    };
 }
