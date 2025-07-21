@@ -2,8 +2,8 @@
 
 'use client';
 
-import { useState, useEffect, useTransition, Suspense } from 'react';
-import { getAnalyticsSummary, getUserLinks, type AnalyticsSummary, type UserLink } from '../actions';
+import { useState, useEffect, useTransition, Suspense, useCallback } from 'react';
+import { getAnalyticsSummary, getUserLinks, searchUserLinks, type AnalyticsSummary, type UserLink } from '../actions';
 import { ClicksChart } from './clicks-chart';
 import { AnalyticsDetailCard } from './analytics-detail-card';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import { DateRange } from 'react-day-picker';
 import { AnalyticsToolbar } from './analytics-toolbar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSearchParams } from 'next/navigation';
+import { useDebounce } from 'use-debounce';
 
 function AnalyticsSkeleton() {
     return (
@@ -53,39 +54,61 @@ function AnalyticsPageComponent() {
 
     const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
     const [userLinks, setUserLinks] = useState<UserLink[]>([]);
-    const [isPending, startTransition] = useTransition();
+    const [isAnalyticsPending, startAnalyticsTransition] = useTransition();
+    const [isSearchPending, startSearchTransition] = useTransition();
     
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
         from: subDays(startOfDay(new Date()), 29),
         to: endOfDay(new Date()),
     });
     const [selectedLink, setSelectedLink] = useState<string>('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
 
+    // Initial fetch for the 10 most recent links
     useEffect(() => {
         if (user?.plan === 'pro' || user?.plan === 'admin') {
-            // Fetch a limited number of links for the dropdown to improve performance
-            getUserLinks(100).then(links => {
+            getUserLinks(10).then(links => {
                 setUserLinks(links);
-                if (shortcodeFromQuery && links.some(link => link.id === shortcodeFromQuery)) {
-                    setSelectedLink(shortcodeFromQuery);
-                } else if (links.length > 0) {
-                    setSelectedLink(links[0].id); 
+                const linkToSelect = shortcodeFromQuery && links.some(link => link.id === shortcodeFromQuery)
+                    ? shortcodeFromQuery
+                    : links[0]?.id;
+                
+                if (linkToSelect) {
+                    setSelectedLink(linkToSelect);
                 }
             });
         }
     }, [user?.plan, shortcodeFromQuery]);
 
+    // Fetch analytics when selected link or date range changes
     useEffect(() => {
-        if (selectedLink && (user?.plan === 'pro' || user?.plan === 'admin')) {
-             if (dateRange?.from && dateRange?.to) {
-                startTransition(async () => {
-                    const range = { from: dateRange.from!.toISOString(), to: dateRange.to!.toISOString() };
-                    const newSummary = await getAnalyticsSummary(range, selectedLink);
-                    setSummary(newSummary);
-                });
-            }
+        if (selectedLink && dateRange?.from && dateRange?.to && (user?.plan === 'pro' || user?.plan === 'admin')) {
+            startAnalyticsTransition(async () => {
+                const range = { from: dateRange.from!.toISOString(), to: dateRange.to!.toISOString() };
+                const newSummary = await getAnalyticsSummary(range, selectedLink);
+                setSummary(newSummary);
+            });
         }
     }, [dateRange, selectedLink, user?.plan]);
+    
+    // Perform backend search when debounced search term changes
+    useEffect(() => {
+        if (debouncedSearchTerm.length > 0) {
+            startSearchTransition(async () => {
+                const searchResults = await searchUserLinks(debouncedSearchTerm);
+                // Combine search results with initial links, removing duplicates
+                setUserLinks(prevLinks => {
+                    const combined = [...searchResults, ...prevLinks];
+                    const uniqueLinks = Array.from(new Map(combined.map(link => [link.id, link])).values());
+                    return uniqueLinks.sort((a,b) => b.createdAt - a.createdAt);
+                });
+            });
+        } else {
+            // If search is cleared, revert to the initial 10 links
+            getUserLinks(10).then(links => setUserLinks(links));
+        }
+    }, [debouncedSearchTerm]);
     
     if (user?.plan !== 'pro' && user?.plan !== 'admin') {
         return (
@@ -113,7 +136,7 @@ function AnalyticsPageComponent() {
         )
     }
 
-    if (!userLinks.length && !isPending) {
+    if (!userLinks.length && !isAnalyticsPending && !isSearchPending) {
       return (
         <div className="flex items-center justify-center h-full">
             <Card className="text-center max-w-lg">
@@ -135,7 +158,7 @@ function AnalyticsPageComponent() {
       )
     }
 
-    if (isPending || !summary || !selectedLink) {
+    if (isAnalyticsPending || !summary || !selectedLink) {
         return <AnalyticsSkeleton />;
     }
 
@@ -148,6 +171,9 @@ function AnalyticsPageComponent() {
                 selectedLink={selectedLink}
                 setSelectedLink={setSelectedLink}
                 totalClicks={summary.totalClicks}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                isSearching={isSearchPending}
             />
 
              <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-7 pt-6">

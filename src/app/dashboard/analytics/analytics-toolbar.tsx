@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -16,9 +17,22 @@ interface AnalyticsToolbarProps {
   selectedLink: string;
   setSelectedLink: (linkId: string) => void;
   totalClicks: number;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  isSearching: boolean;
 }
 
-export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedLink, setSelectedLink, totalClicks }: AnalyticsToolbarProps) {
+export function AnalyticsToolbar({ 
+    dateRange, 
+    setDateRange, 
+    userLinks, 
+    selectedLink, 
+    setSelectedLink, 
+    totalClicks,
+    searchTerm,
+    setSearchTerm,
+    isSearching,
+}: AnalyticsToolbarProps) {
      const richLinkOptions = userLinks.map(link => ({
             value: link.id,
             label: (
@@ -28,11 +42,7 @@ export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedL
                 </div>
             ),
             searchLabel: `mnfy.in/${link.id}`, // for the input display
-            keywords: [link.id, link.longUrl, `mnfy.in/${link.id}`]
         }));
-    
-    // Display only the top 10 links initially, but allow searching through all
-    const displayOptions = richLinkOptions.slice(0, 10);
     
     const selectedOptionDisplay = richLinkOptions.find(opt => opt.value === selectedLink)?.searchLabel || 'Select a link...';
 
@@ -56,13 +66,15 @@ export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedL
                 <div className="w-full">
                     <label className="text-sm font-medium text-muted-foreground">Link</label>
                     <Combobox
-                        options={displayOptions}
-                        allOptions={richLinkOptions}
+                        options={richLinkOptions}
                         value={selectedLink}
                         onSelect={setSelectedLink}
                         placeholder={selectedOptionDisplay}
-                        searchPlaceholder="Search by shortcode or URL..."
+                        searchPlaceholder="Search links..."
                         emptyText="No matching links found."
+                        searchTerm={searchTerm}
+                        onSearchTermChange={setSearchTerm}
+                        isSearching={isSearching}
                     />
                 </div>
                 <div className="w-full">

@@ -1,8 +1,9 @@
 
+
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -21,29 +22,31 @@ import {
 } from "@/components/ui/popover"
 
 interface ComboboxProps {
-    options: { value: string; label: React.ReactNode; searchLabel: string; keywords?: string[] }[];
-    allOptions?: { value: string; label: React.ReactNode; searchLabel: string; keywords?: string[] }[]; // Optional full list for searching
+    options: { value: string; label: React.ReactNode; searchLabel: string; }[];
     value: string;
     onSelect: (value: string) => void;
     placeholder?: string;
     searchPlaceholder?: string;
     emptyText?: string;
+    searchTerm: string;
+    onSearchTermChange: (search: string) => void;
+    isSearching?: boolean;
 }
 
 export function Combobox({ 
-    options, 
-    allOptions,
+    options,
     value, 
     onSelect, 
     placeholder = "Select an option...", 
     searchPlaceholder = "Search...", 
-    emptyText = "No results found." 
+    emptyText = "No results found.",
+    searchTerm,
+    onSearchTermChange,
+    isSearching = false,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
-  const [search, setSearch] = React.useState('');
 
-  const selectedOption = options.find((option) => option.value === value) || allOptions?.find((option) => option.value === value);
-  const searchList = allOptions || options;
+  const selectedOption = options.find((option) => option.value === value);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -62,21 +65,23 @@ export function Combobox({
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <Command>
-          <CommandInput 
-            placeholder={searchPlaceholder} 
-            value={search}
-            onValueChange={setSearch}
-          />
+          <div className="flex items-center border-b px-3">
+            <CommandInput 
+                placeholder={searchPlaceholder} 
+                value={searchTerm}
+                onValueChange={onSearchTermChange}
+            />
+            {isSearching && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          </div>
           <CommandList>
             <CommandEmpty>{emptyText}</CommandEmpty>
             <CommandGroup>
-              {(search.length > 0 ? searchList : options).map((option) => (
+              {options.map((option) => (
                 <CommandItem
                   key={option.value}
-                  value={option.keywords ? option.keywords.join(' ') : option.value}
+                  value={option.value}
                   onSelect={(currentValue) => {
-                    const selectedValue = searchList.find(o => o.keywords?.join(' ') === currentValue)?.value || option.value;
-                    onSelect(selectedValue === value ? "" : selectedValue)
+                    onSelect(currentValue === value ? "" : currentValue)
                     setOpen(false)
                   }}
                   className="h-auto min-h-10"

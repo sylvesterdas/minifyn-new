@@ -53,6 +53,30 @@ export async function getUserLinks(limit?: number): Promise<UserLink[]> {
     }
 }
 
+export async function searchUserLinks(searchTerm: string): Promise<UserLink[]> {
+    const { user } = await validateRequest();
+    if (!user) {
+        return [];
+    }
+    
+    // Fetch all links for the user on the backend
+    const allLinks = await getUserLinks();
+    if (!allLinks.length) {
+        return [];
+    }
+
+    const lowercasedTerm = searchTerm.toLowerCase();
+
+    // Filter links based on the search term
+    const filteredLinks = allLinks.filter(link => 
+        link.id.toLowerCase().includes(lowercasedTerm) || 
+        link.longUrl.toLowerCase().includes(lowercasedTerm)
+    );
+
+    // Return the top 10 matches
+    return filteredLinks.slice(0, 10);
+}
+
 
 export interface DashboardStats {
     totalLinks: number;
@@ -121,17 +145,9 @@ function parseUserAgent(ua: string | null): { platform: string, browser: string 
 
 async function getClickEvents(dateRange: { from: Date; to: Date }, linkId?: string): Promise<ClickEvent[]> {
     const { user } = await validateRequest();
-    if (!user) return [];
+    if (!user || !linkId) return [];
 
-    let linkIdsToFetch: string[];
-
-    if (linkId) {
-        linkIdsToFetch = [linkId];
-    } else {
-        const userLinks = await getUserLinks();
-        if (userLinks.length === 0) return [];
-        linkIdsToFetch = userLinks.map(link => link.id);
-    }
+    let linkIdsToFetch: string[] = [linkId];
     
     // Firebase Realtime DB doesn't support complex 'OR' queries across different parents efficiently.
     // So we fetch data for each linkId within the date range.
