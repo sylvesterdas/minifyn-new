@@ -58,36 +58,27 @@ function AnalyticsPageComponent() {
         from: subDays(startOfDay(new Date()), 29),
         to: endOfDay(new Date()),
     });
-    // State is now initialized based on query params or the latest link
     const [selectedLink, setSelectedLink] = useState<string>('');
 
     useEffect(() => {
         if (user?.plan === 'pro' || user?.plan === 'admin') {
             getUserLinks().then(links => {
                 setUserLinks(links);
-                // Set initial selected link after links are fetched
                 if (shortcodeFromQuery && links.some(link => link.id === shortcodeFromQuery)) {
                     setSelectedLink(shortcodeFromQuery);
                 } else if (links.length > 0) {
-                    // Default to the latest link if no valid query param
                     setSelectedLink(links[0].id); 
-                } else {
-                    setSelectedLink('all');
                 }
             });
-        } else {
-             setSelectedLink('all');
         }
     }, [user?.plan, shortcodeFromQuery]);
 
     useEffect(() => {
-        // Only fetch data if a selection has been made and user plan is valid
         if (selectedLink && (user?.plan === 'pro' || user?.plan === 'admin')) {
              if (dateRange?.from && dateRange?.to) {
                 startTransition(async () => {
                     const range = { from: dateRange.from!.toISOString(), to: dateRange.to!.toISOString() };
-                    const linkId = selectedLink === 'all' ? undefined : selectedLink;
-                    const newSummary = await getAnalyticsSummary(range, linkId);
+                    const newSummary = await getAnalyticsSummary(range, selectedLink);
                     setSummary(newSummary);
                 });
             }
@@ -118,6 +109,28 @@ function AnalyticsPageComponent() {
                 </Card>
             </div>
         )
+    }
+
+    if (!userLinks.length && !isPending) {
+      return (
+        <div className="flex items-center justify-center h-full">
+            <Card className="text-center max-w-lg">
+                <CardHeader>
+                    <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+                        No Links Found
+                    </CardTitle>
+                    <CardDescription>
+                        You haven't created any links yet. Create one to see analytics.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button asChild>
+                        <Link href="/dashboard/links">Create a Link</Link>
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
+      )
     }
 
     if (isPending || !summary || !selectedLink) {
@@ -177,7 +190,6 @@ function AnalyticsPageComponent() {
     );
 }
 
-// Wrap with Suspense to allow useSearchParams
 export default function AnalyticsPage() {
     return (
         <Suspense fallback={<AnalyticsSkeleton />}>

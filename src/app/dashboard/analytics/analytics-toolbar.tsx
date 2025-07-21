@@ -19,14 +19,7 @@ interface AnalyticsToolbarProps {
 }
 
 export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedLink, setSelectedLink, totalClicks }: AnalyticsToolbarProps) {
-     const richLinkOptions = [
-        {
-            value: 'all',
-            label: <span className="font-semibold">All Links</span>,
-            searchLabel: 'All Links',
-            keywords: ['all', 'links']
-        },
-        ...userLinks.map(link => ({
+     const richLinkOptions = userLinks.map(link => ({
             value: link.id,
             label: (
                 <div className="flex flex-col" title={link.longUrl}>
@@ -36,10 +29,9 @@ export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedL
             ),
             searchLabel: `mnfy.in/${link.id}`, // for the input display
             keywords: [link.id, link.longUrl, `mnfy.in/${link.id}`]
-        }))
-    ];
+        }));
 
-    const selectedOptionDisplay = richLinkOptions.find(opt => opt.value === selectedLink)?.searchLabel || 'All Links';
+    const selectedOptionDisplay = richLinkOptions.find(opt => opt.value === selectedLink)?.searchLabel || 'Select a link...';
 
     return (
         <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
@@ -53,7 +45,7 @@ export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedL
                 <CardContent>
                     <div className="text-2xl font-bold">{totalClicks.toLocaleString()}</div>
                     <p className="text-xs text-muted-foreground">
-                        in the selected date range
+                        for the selected link and period
                     </p>
                 </CardContent>
             </Card>
