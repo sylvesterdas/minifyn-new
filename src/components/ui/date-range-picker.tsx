@@ -2,8 +2,8 @@
 "use client"
 
 import * as React from "react"
-import { format, addDays, differenceInDays } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
+import { format, addDays, differenceInDays, subDays, startOfDay, endOfDay } from "date-fns"
+import { Calendar as CalendarIcon, X } from "lucide-react"
 import { DateRange } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
@@ -14,6 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Separator } from "./separator"
 
 interface DateRangePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   date: DateRange | undefined
@@ -42,6 +43,12 @@ export function DateRangePicker({
     }
   }
 
+  const setPresetRange = (days: number) => {
+    const from = startOfDay(subDays(new Date(), days - 1));
+    const to = endOfDay(new Date());
+    onDateChange({ from, to });
+  }
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -67,22 +74,34 @@ export function DateRangePicker({
             ) : (
               <span>Pick a date</span>
             )}
+             {date && (
+                <X className="ml-auto h-4 w-4 text-muted-foreground hover:text-foreground" onClick={(e) => {
+                  e.stopPropagation();
+                  onDateChange(undefined);
+                }} />
+            )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={date?.from}
-            selected={date}
-            onSelect={handleSelect}
-            numberOfMonths={2}
-            disabled={
-              (d) => (date?.from && !date.to) 
-              ? (differenceInDays(d, date.from) >= numberOfDays || differenceInDays(d, date.from) < 0)
-              : false
-            }
-          />
+        <PopoverContent className="w-auto p-0 flex" align="start">
+            <div className="flex flex-col space-y-2 border-r p-4">
+                <Button variant="ghost" className="justify-start" onClick={() => setPresetRange(7)}>Last 7 Days</Button>
+                <Button variant="ghost" className="justify-start" onClick={() => setPresetRange(30)}>Last 30 Days</Button>
+                <Separator />
+                <Button variant="ghost" className="justify-start text-destructive hover:text-destructive" onClick={() => onDateChange(undefined)}>Reset</Button>
+            </div>
+            <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={date?.from}
+                selected={date}
+                onSelect={handleSelect}
+                numberOfMonths={1}
+                disabled={
+                (d) => (date?.from && !date.to) 
+                ? (differenceInDays(d, date.from) >= numberOfDays || differenceInDays(d, date.from) < 0)
+                : false
+                }
+            />
         </PopoverContent>
       </Popover>
     </div>
