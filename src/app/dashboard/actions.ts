@@ -12,24 +12,25 @@ import UAParser from 'ua-parser-js';
 export interface UserLink extends Omit<Link, 'seo' | 'expiresAt' | 'userId'> {
 }
 
-export async function getUserLinks(): Promise<UserLink[]> {
+export async function getUserLinks(limit?: number): Promise<UserLink[]> {
     const { user } = await validateRequest();
     if (!user) {
         return [];
     }
 
     try {
-        const linksSnapshot = await db.ref('urls')
+        let query = db.ref('urls')
             .orderByChild('userId')
-            .equalTo(user.uid)
-            .once('value');
+            .equalTo(user.uid);
+
+        const linksSnapshot = await query.once('value');
 
         if (!linksSnapshot.exists()) {
             return [];
         }
 
         const linksData = linksSnapshot.val();
-        const userLinks: UserLink[] = Object.keys(linksData).map(id => {
+        let userLinks: UserLink[] = Object.keys(linksData).map(id => {
             const link = linksData[id];
             return {
                 id,
@@ -39,7 +40,11 @@ export async function getUserLinks(): Promise<UserLink[]> {
                 title: link.title,
                 description: link.description,
             };
-        }).sort((a, b) => b.createdAt - a.createdAt);
+        }).sort((a, b) => b.createdAt - a.createdAt); // Sort by most recent
+
+        if (limit) {
+            userLinks = userLinks.slice(0, limit);
+        }
 
         return userLinks;
     } catch (error) {
@@ -47,6 +52,7 @@ export async function getUserLinks(): Promise<UserLink[]> {
         return [];
     }
 }
+
 
 export interface DashboardStats {
     totalLinks: number;
@@ -173,6 +179,17 @@ export async function getAnalyticsSummary(dateRange?: { from: string; to: string
     const fromDate = dateRange?.from ? startOfDay(new Date(dateRange.from)) : startOfDay(subDays(new Date(), 29));
     const toDate = dateRange?.to ? endOfDay(new Date(dateRange.to)) : endOfDay(new Date());
 
+    if (!linkId) {
+         return {
+            clicksByDay: [],
+            referrers: [],
+            platforms: [],
+            browsers: [],
+            countries: [],
+            totalClicks: 0
+        };
+    }
+    
     const clicks = await getClickEvents({ from: fromDate, to: toDate }, linkId);
     
     // Clicks by Day
@@ -191,7 +208,7 @@ export async function getAnalyticsSummary(dateRange?: { from: string; to: string
     });
     const clicksByDay = Array.from(clicksByDayMap, ([date, clicks]) => ({ date, clicks }));
     
-    const aggregate = (key: keyof ClickEvent) => {
+    const aggregate = (key: keyof Omit<ClickEvent, 'timestamp'>) => {
         const map = new Map<string, number>();
         clicks.forEach(click => {
             const value = click[key];

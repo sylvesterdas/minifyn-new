@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useTransition, Suspense } from 'react';
@@ -62,7 +63,8 @@ function AnalyticsPageComponent() {
 
     useEffect(() => {
         if (user?.plan === 'pro' || user?.plan === 'admin') {
-            getUserLinks().then(links => {
+            // Fetch a limited number of links for the dropdown to improve performance
+            getUserLinks(100).then(links => {
                 setUserLinks(links);
                 if (shortcodeFromQuery && links.some(link => link.id === shortcodeFromQuery)) {
                     setSelectedLink(shortcodeFromQuery);
