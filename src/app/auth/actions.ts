@@ -305,17 +305,24 @@ export async function logout(): Promise<{ success?: boolean, error?: string }> {
 
 export async function finalizeProSignup(idToken: string): Promise<{ success: boolean; error?: string }> {
     try {
-        // We use the ID token to ensure we're acting on behalf of the correct, just-paid user.
+        // First, sync the subscription status based on the payment.
         const syncResult = await syncRazorpaySubscription(idToken);
 
-        if (syncResult.success && syncResult.sessionCookie) {
-            await setSessionCookie(syncResult.sessionCookie);
-            return { success: true };
-        } else {
-             const errorMessage = ('error' in syncResult && syncResult.error) || 'Failed to sync your subscription.';
-             return { success: false, error: errorMessage };
+        if (!syncResult.success) {
+            const errorMessage = ('error' in syncResult && syncResult.error) || 'Failed to sync your subscription.';
+            return { success: false, error: errorMessage };
         }
+        
+        // Now that the user's plan is 'pro' in the db and claims, create a session cookie.
+        // The idToken is fresh from the client after sign-in, so it's valid.
+        const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+        const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
+        await setSessionCookie(sessionCookie);
+
+        return { success: true };
+        
     } catch(error) {
+        console.error("Error during signup finalization:", error);
         return { success: false, error: "An unexpected error occurred during signup finalization." };
     }
 }

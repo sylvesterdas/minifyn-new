@@ -122,7 +122,7 @@ export async function createRazorpaySubscription(
 }
 
 type SyncResult = 
-  | { success: true; sessionCookie?: string; }
+  | { success: true; }
   | { success: false; error: string };
 
 export async function syncRazorpaySubscription(
@@ -208,13 +208,11 @@ export async function syncRazorpaySubscription(
             });
             await adminAuth.setCustomUserClaims(uid, { plan: 'pro' });
             
-            // Re-validate the user session by creating a new session cookie
-            const newIdToken = await adminAuth.createCustomToken(uid);
-
-            const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-            const sessionCookie = await adminAuth.createSessionCookie(newIdToken, { expiresIn });
-            console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. New session cookie created.`);
-            return { success: true, sessionCookie };
+            // Revoke tokens to force client to re-fetch the token with new claims.
+            await adminAuth.revokeRefreshTokens(uid);
+            console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. Refresh tokens revoked.`);
+            
+            return { success: true };
 
         } else {
              console.log(`[syncRazorpay] Subscription ${subscriptionId} for user ${uid} is not active or completed after retries. Final status: ${subscriptionDetails?.status}.`);
