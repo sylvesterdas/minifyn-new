@@ -30,7 +30,10 @@ export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedL
             searchLabel: `mnfy.in/${link.id}`, // for the input display
             keywords: [link.id, link.longUrl, `mnfy.in/${link.id}`]
         }));
-
+    
+    // Display only the top 10 links initially, but allow searching through all
+    const displayOptions = richLinkOptions.slice(0, 10);
+    
     const selectedOptionDisplay = richLinkOptions.find(opt => opt.value === selectedLink)?.searchLabel || 'Select a link...';
 
     return (
@@ -53,7 +56,8 @@ export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedL
                 <div className="w-full">
                     <label className="text-sm font-medium text-muted-foreground">Link</label>
                     <Combobox
-                        options={richLinkOptions.map(o => ({ value: o.value, label: o.label, keywords: o.keywords }))}
+                        options={displayOptions}
+                        allOptions={richLinkOptions}
                         value={selectedLink}
                         onSelect={setSelectedLink}
                         placeholder={selectedOptionDisplay}

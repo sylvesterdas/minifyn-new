@@ -22,6 +22,7 @@ import {
 
 interface ComboboxProps {
     options: { value: string; label: React.ReactNode; searchLabel: string; keywords?: string[] }[];
+    allOptions?: { value: string; label: React.ReactNode; searchLabel: string; keywords?: string[] }[]; // Optional full list for searching
     value: string;
     onSelect: (value: string) => void;
     placeholder?: string;
@@ -31,6 +32,7 @@ interface ComboboxProps {
 
 export function Combobox({ 
     options, 
+    allOptions,
     value, 
     onSelect, 
     placeholder = "Select an option...", 
@@ -38,8 +40,10 @@ export function Combobox({
     emptyText = "No results found." 
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
+  const [search, setSearch] = React.useState('');
 
-  const selectedOption = options.find((option) => option.value === value);
+  const selectedOption = options.find((option) => option.value === value) || allOptions?.find((option) => option.value === value);
+  const searchList = allOptions || options;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -58,19 +62,22 @@ export function Combobox({
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} />
+          <CommandInput 
+            placeholder={searchPlaceholder} 
+            value={search}
+            onValueChange={setSearch}
+          />
           <CommandList>
             <CommandEmpty>{emptyText}</CommandEmpty>
             <CommandGroup>
-              {options.map((option) => (
+              {(search.length > 0 ? searchList : options).map((option) => (
                 <CommandItem
                   key={option.value}
                   value={option.keywords ? option.keywords.join(' ') : option.value}
                   onSelect={(currentValue) => {
-                    // Find the option's value based on the search keywords (which is what currentValue is)
-                    const selectedValue = options.find(o => o.keywords?.join(' ') === currentValue)?.value || option.value;
-                    onSelect(selectedValue === value ? "" : selectedValue);
-                    setOpen(false);
+                    const selectedValue = searchList.find(o => o.keywords?.join(' ') === currentValue)?.value || option.value;
+                    onSelect(selectedValue === value ? "" : selectedValue)
+                    setOpen(false)
                   }}
                   className="h-auto min-h-10"
                 >
