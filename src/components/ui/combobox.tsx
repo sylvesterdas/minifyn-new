@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import * as React from "react"
@@ -64,7 +63,7 @@ export function Combobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-        <Command>
+        <Command shouldFilter={false}>
           <div className="flex items-center border-b px-3">
             <CommandInput 
                 placeholder={searchPlaceholder} 
@@ -81,10 +80,10 @@ export function Combobox({
                   key={option.value}
                   value={option.value}
                   onSelect={(currentValue) => {
-                    onSelect(currentValue === value ? "" : currentValue)
+                    onSelect(currentValue)
                     setOpen(false)
                   }}
-                  className="h-auto min-h-10"
+                  className="h-auto min-h-10 cursor-pointer"
                 >
                   <Check
                     className={cn(
