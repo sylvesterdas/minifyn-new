@@ -66,9 +66,11 @@ export function Combobox({
                 <CommandItem
                   key={option.value}
                   value={option.keywords ? option.keywords.join(' ') : option.value}
-                  onSelect={() => {
-                    onSelect(option.value === value ? "" : option.value)
-                    setOpen(false)
+                  onSelect={(currentValue) => {
+                    // Find the option's value based on the search keywords (which is what currentValue is)
+                    const selectedValue = options.find(o => o.keywords?.join(' ') === currentValue)?.value || option.value;
+                    onSelect(selectedValue === value ? "" : selectedValue);
+                    setOpen(false);
                   }}
                   className="h-auto min-h-10"
                 >

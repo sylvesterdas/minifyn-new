@@ -1,10 +1,11 @@
 
+
 'use server';
 
 import { validateRequest } from '@/lib/auth';
 import { db } from '@/lib/firebase-admin';
 import type { Link } from '@/lib/data';
-import { startOfDay, addDays, format, endOfDay } from 'date-fns';
+import { startOfDay, addDays, format, endOfDay, subDays } from 'date-fns';
 import { getCountryFromIP } from '@/lib/ip-to-country';
 import UAParser from 'ua-parser-js';
 
@@ -168,9 +169,9 @@ export interface AnalyticsSummary {
     totalClicks: number;
 }
 
-export async function getAnalyticsSummary(dateRange: { from: string; to: string }, linkId?: string): Promise<AnalyticsSummary> {
-    const fromDate = startOfDay(new Date(dateRange.from));
-    const toDate = endOfDay(new Date(dateRange.to));
+export async function getAnalyticsSummary(dateRange?: { from: string; to: string }, linkId?: string): Promise<AnalyticsSummary> {
+    const fromDate = dateRange?.from ? startOfDay(new Date(dateRange.from)) : startOfDay(subDays(new Date(), 29));
+    const toDate = dateRange?.to ? endOfDay(new Date(dateRange.to)) : endOfDay(new Date());
 
     const clicks = await getClickEvents({ from: fromDate, to: toDate }, linkId);
     
