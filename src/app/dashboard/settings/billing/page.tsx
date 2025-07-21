@@ -33,7 +33,6 @@ function RestorePurchaseButton() {
     const handleRestore = () => {
         startTransition(async () => {
             const result = await syncRazorpaySubscription();
-
             if (result.success) {
                 toast({
                     title: 'Success!',
@@ -125,7 +124,7 @@ export default function BillingPage() {
     const isFreePlan = user?.plan === 'free';
     const isProPlan = user?.plan === 'pro';
     const isAdminPlan = user?.plan === 'admin';
-    const isCancellationPending = subscription?.status === 'cancelled' || (subscription?.ended_at && subscription.ended_at * 1000 > Date.now());
+    const isCancellationPending = subscription?.cancel_scheduled === true;
 
     const handleUpgrade = async () => {
         if (!user || user.isAnonymous) {
@@ -284,8 +283,8 @@ export default function BillingPage() {
                                        <div className="p-4 rounded-lg bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 flex items-center gap-3">
                                            <AlertTriangle className="h-5 w-5" />
                                            <div>
-                                               <h4 className="font-semibold text-yellow-300">Cancellation Pending</h4>
-                                               <p className="text-sm">Your subscription has been cancelled. Pro features will remain active until <span className="font-bold">{format(new Date(subscription.ended_at * 1000), 'PPP')}.</span></p>
+                                               <h4 className="font-semibold text-yellow-300">Cancellation Scheduled</h4>
+                                               <p className="text-sm">Your subscription has been cancelled. Pro features will remain active until <span className="font-bold">{format(new Date(subscription.current_end * 1000), 'PPP')}.</span></p>
                                            </div>
                                        </div>
                                    ) : (

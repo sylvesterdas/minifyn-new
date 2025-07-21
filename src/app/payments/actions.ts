@@ -273,22 +273,24 @@ export async function cancelRazorpaySubscription(): Promise<{ success: boolean; 
         console.log('[CancelSub] Razorpay response received:', JSON.stringify(cancelledSubscription, null, 2));
 
 
-        // Update our DB with the full response from Razorpay to reflect the cancellation.
-        // This saves the new `status` and `ended_at` timestamp.
+        // Update our DB with the full response from Razorpay and our custom flag
         console.log(`[CancelSub] Updating database for user ${user.uid} with new subscription details.`);
         await userProfileRef.child('subscription').update({
             id: cancelledSubscription.id,
-            status: cancelledSubscription.status,
+            status: cancelledSubscription.status, // Will still be 'active'
             planId: cancelledSubscription.plan_id,
             current_start: cancelledSubscription.current_start,
             current_end: cancelledSubscription.current_end,
-            ended_at: cancelledSubscription.ended_at || null,
+            cancel_scheduled: true, // Our custom flag
         });
         console.log(`[CancelSub] Database update successful for user ${user.uid}.`);
 
         revalidatePath('/dashboard/settings/billing');
 
-        return { success: true, subscription: cancelledSubscription };
+        // Return the updated object from our database, which now includes our flag
+        const finalSubData = (await userProfileRef.child('subscription').once('value')).val();
+        return { success: true, subscription: finalSubData };
+
     } catch (error) {
         console.error(`[CancelSub] Failed to cancel subscription for user ${user.uid}:`, error);
         const message = error instanceof Error ? error.message : 'Could not cancel the subscription. Please contact support.';
