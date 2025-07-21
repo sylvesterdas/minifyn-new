@@ -21,33 +21,7 @@ async function getUserProfileData(uid: string): Promise<{ plan: UserPlan, onboar
         
         if (snapshot.exists()) {
             const profile = snapshot.val();
-
-            // Check for expired "Pro" subscriptions that need to be downgraded
-            if (
-                profile.plan === 'pro' &&
-                profile.subscription &&
-                profile.subscription.status === 'active' &&
-                profile.subscription.ended_at &&
-                profile.subscription.ended_at * 1000 < Date.now()
-            ) {
-                console.log(`[Auth Lib] User ${uid}'s subscription has expired. Downgrading to 'free' plan.`);
-                
-                // Perform the downgrade
-                await userProfileRef.update({
-                    plan: 'free',
-                    subscription: null,
-                });
-                await adminAuth.setCustomUserClaims(uid, { plan: 'free' });
-                await adminAuth.revokeRefreshTokens(uid); // Force re-login to get new claims
-
-                // Return the new, downgraded plan details
-                return {
-                    plan: 'free',
-                    onboardingCompleted: profile.onboardingCompleted === true,
-                };
-            }
-            
-            // If not expired, return current details
+            // The plan downgrade logic is now handled in getUserPlan in data.ts
             return {
                 plan: profile.plan || 'free',
                 onboardingCompleted: profile.onboardingCompleted === true,

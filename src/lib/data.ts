@@ -32,22 +32,46 @@ const API_REQUEST_INTERVAL = 1000; // 1 second in milliseconds
 
 async function getUserPlan(userId: string): Promise<UserPlan> {
     if (userId === SUPER_USER_ID) return 'admin';
+    
     try {
         const user = await auth().getUser(userId);
-        
-        const profileSnapshot = await db.ref(`user_profiles/${userId}`).once('value');
-        if (profileSnapshot.exists()) {
-            const profile = profileSnapshot.val() as UserProfile;
-            // The profile plan is the source of truth.
+        const userProfileRef = db.ref(`user_profiles/${userId}`);
+        const snapshot = await userProfileRef.once('value');
+
+        if (snapshot.exists()) {
+            const profile = snapshot.val();
+
+            // Check for expired "Pro" subscriptions that need to be downgraded
+            if (
+                profile.plan === 'pro' &&
+                profile.subscription &&
+                profile.subscription.status === 'active' && // It's active but past its end date
+                profile.subscription.ended_at &&
+                profile.subscription.ended_at * 1000 < Date.now()
+            ) {
+                console.log(`[getUserPlan] User ${userId}'s subscription has expired. Downgrading to 'free' plan.`);
+                
+                await userProfileRef.update({
+                    plan: 'free',
+                    subscription: null,
+                });
+                await auth.setCustomUserClaims(userId, { plan: 'free' });
+                await auth.revokeRefreshTokens(userId);
+
+                return 'free';
+            }
+            
+            // If not expired, return current plan
             return profile.plan || 'free';
         }
         
-        // Fallback for users that might not have a profile yet, but have a verified email.
-        if (!user.emailVerified) return 'anonymous';
+        // Fallback for users with no profile yet, but have a verified email.
+        if (user.emailVerified) return 'free';
 
-        return 'free'; // Default to free if no profile but email is verified
+        return 'anonymous';
+
     } catch (error) {
-        // User is likely anonymous if getUser fails
+        // User is likely anonymous or an error occurred
         return 'anonymous';
     }
 }
