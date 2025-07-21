@@ -67,7 +67,7 @@ export function Combobox({
                   key={option.value}
                   value={option.keywords ? option.keywords.join(' ') : option.value}
                   onSelect={() => {
-                    onSelect(option.value)
+                    onSelect(option.value === value ? "" : option.value)
                     setOpen(false)
                   }}
                   className="h-auto min-h-10"
