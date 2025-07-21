@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -26,6 +27,7 @@ import { LinksDataTableToolbar } from './links-data-table-toolbar';
 import { LinksDataTablePagination } from './links-data-table-pagination';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
+import { CreateLinkDialog } from './create-link-dialog';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -107,7 +109,12 @@ export function LinksDataTable<TData, TValue>({
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No links found. <Link href="/" className="text-primary underline">Create your first link!</Link>
+                    No links found.{' '}
+                    <CreateLinkDialog>
+                        <span className="text-primary underline cursor-pointer">
+                            Create your first link!
+                        </span>
+                    </CreateLinkDialog>
                   </TableCell>
                 </TableRow>
               )}

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useActionState, useRef } from 'react';
@@ -37,7 +38,7 @@ function SubmitButton({ pending, disabled }: { pending: boolean; disabled: boole
   );
 }
 
-export function CreateLinkDialog() {
+export function CreateLinkDialog({ children }: { children?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [shortenedUrl, setShortenedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -87,7 +88,7 @@ export function CreateLinkDialog() {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button><PlusCircle className="mr-2"/>Create New Link</Button>
+        {children || <Button><PlusCircle className="mr-2"/>Create New Link</Button>}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
