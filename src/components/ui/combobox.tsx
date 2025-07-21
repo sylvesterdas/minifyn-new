@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/popover"
 
 interface ComboboxProps {
-    options: { value: string; label: string | React.ReactNode; keywords?: string[] }[];
+    options: { value: string; label: React.ReactNode; keywords?: string[] }[];
     value: string;
     onSelect: (value: string) => void;
     placeholder?: string;
@@ -29,10 +29,27 @@ interface ComboboxProps {
     emptyText?: string;
 }
 
-export function Combobox({ options, value, onSelect, placeholder = "Select an option...", searchPlaceholder = "Search...", emptyText = "No results found." }: ComboboxProps) {
+export function Combobox({ 
+    options, 
+    value, 
+    onSelect, 
+    placeholder = "Select an option...", 
+    searchPlaceholder = "Search...", 
+    emptyText = "No results found." 
+}: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
 
   const selectedOption = options.find((option) => option.value === value);
+
+  // For display purposes, we need a string version of the label.
+  const getDisplayLabel = (option: { value: string; label: React.ReactNode } | undefined): string => {
+      if (!option) return placeholder;
+      if (typeof option.label === 'string') return option.label;
+      // Heuristic to get a string from a JSX label for display in the button.
+      // This is a common pattern for rich comboboxes.
+      const richOption = options.find(o => o.value === option.value) as any;
+      return richOption?.searchLabel || placeholder;
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -41,29 +58,16 @@ export function Combobox({ options, value, onSelect, placeholder = "Select an op
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between h-10" // Standardized height
+          className="w-full justify-between h-10"
         >
           <span className="truncate">
-             {selectedOption ? (typeof selectedOption.label === 'string' ? selectedOption.label : value) : placeholder}
+             {getDisplayLabel(selectedOption)}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-        <Command
-            // Use keyword-based filtering logic
-            filter={(itemValue, search) => {
-              const option = options.find(opt => opt.value === itemValue);
-              if (!option) return 0;
-              
-              const allKeywords = [
-                typeof option.label === 'string' ? option.label : '',
-                ...(option.keywords || [])
-              ].join(' ').toLowerCase();
-
-              return allKeywords.includes(search.toLowerCase()) ? 1 : 0;
-            }}
-        >
+        <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
             <CommandEmpty>{emptyText}</CommandEmpty>
@@ -73,10 +77,11 @@ export function Combobox({ options, value, onSelect, placeholder = "Select an op
                   key={option.value}
                   value={option.value}
                   onSelect={(currentValue) => {
-                    onSelect(currentValue === value ? "" : currentValue);
-                    setOpen(false);
+                    // This is the key fix: use the `currentValue` from the event
+                    onSelect(currentValue === value ? "" : currentValue)
+                    setOpen(false)
                   }}
-                  className="h-16 md:h-auto" // Taller items on mobile
+                  className="h-auto min-h-10" // Allow items to have variable height
                 >
                   <Check
                     className={cn(
@@ -84,9 +89,7 @@ export function Combobox({ options, value, onSelect, placeholder = "Select an op
                       value === option.value ? "opacity-100" : "opacity-0"
                     )}
                   />
-                   <div className="flex flex-col">
-                      {option.label}
-                   </div>
+                  {option.label}
                 </CommandItem>
               ))}
             </CommandGroup>
