@@ -1,8 +1,7 @@
-
 'use client';
 
 import Script from 'next/script';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
 declare global {
@@ -14,18 +13,17 @@ declare global {
 export function GoogleAnalytics() {
     const gtmId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
     const pathname = usePathname();
-    const searchParams = useSearchParams();
 
     useEffect(() => {
         if (pathname && gtmId) {
-            const url = pathname + (searchParams ? searchParams.toString() : '');
+            const url = pathname + window.location.search;
             if (window.gtag) {
                 window.gtag('config', gtmId, {
                     page_path: url,
                 });
             }
         }
-    }, [pathname, searchParams, gtmId]);
+    }, [pathname, gtmId]);
 
     if (!gtmId) {
         console.warn("Google Analytics Measurement ID is not set. Tracking will be disabled.");

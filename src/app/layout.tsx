@@ -28,7 +28,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <AuthProvider>
-            <Suspense>
+            <Suspense fallback={null}>
               <PageLoader />
             </Suspense>
             <ConsentManager />
