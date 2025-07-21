@@ -48,7 +48,7 @@ function AnalyticsSkeleton() {
 }
 
 function AnalyticsPageComponent() {
-    const { user } = useAuth();
+    const { user, isLoading } = useAuth();
     const searchParams = useSearchParams();
     const shortcodeFromQuery = searchParams.get('shortcode');
 
@@ -97,18 +97,19 @@ function AnalyticsPageComponent() {
         if (debouncedSearchTerm.length > 0) {
             startSearchTransition(async () => {
                 const searchResults = await searchUserLinks(debouncedSearchTerm);
-                // Combine search results with initial links, removing duplicates
-                setUserLinks(prevLinks => {
-                    const combined = [...searchResults, ...prevLinks];
-                    const uniqueLinks = Array.from(new Map(combined.map(link => [link.id, link])).values());
-                    return uniqueLinks.sort((a,b) => b.createdAt - a.createdAt);
-                });
+                // Replace with search results only
+                setUserLinks(searchResults);
             });
         } else {
             // If search is cleared, revert to the initial 10 links
             getUserLinks(10).then(links => setUserLinks(links));
         }
     }, [debouncedSearchTerm]);
+    
+    // Show loading while auth is loading OR user exists but plan isn't loaded yet
+    if (isLoading || (user && !user.plan)) {
+        return <AnalyticsSkeleton />;
+    }
     
     if (user?.plan !== 'pro' && user?.plan !== 'admin') {
         return (

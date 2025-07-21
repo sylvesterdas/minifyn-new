@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -7,18 +6,11 @@ import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Input } from "@/components/ui/input"
 
 interface ComboboxProps {
     options: { value: string; label: React.ReactNode; searchLabel: string; }[];
@@ -47,6 +39,11 @@ export function Combobox({
 
   const selectedOption = options.find((option) => option.value === value);
 
+  const handleSelect = (optionValue: string) => {
+    onSelect(optionValue);
+    setOpen(false);
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -63,40 +60,45 @@ export function Combobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-        <Command shouldFilter={false}>
-          <div className="flex items-center border-b px-3">
-            <CommandInput 
-                placeholder={searchPlaceholder} 
-                value={searchTerm}
-                onValueChange={onSearchTermChange}
+        <div className="flex flex-col">
+          {/* Search Input */}
+          <div className="flex items-center border-b px-3 py-2">
+            <Input
+              placeholder={searchPlaceholder}
+              value={searchTerm}
+              onChange={(e) => onSearchTermChange(e.target.value)}
+              className="h-8 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
-            {isSearching && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isSearching && <Loader2 className="ml-2 h-4 w-4 animate-spin flex-shrink-0" />}
           </div>
-          <CommandList>
-            <CommandEmpty>{emptyText}</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
+          
+          {/* Options List */}
+          <div className="max-h-60 overflow-y-auto">
+            {options.length === 0 ? (
+              <div className="px-3 py-2 text-sm text-muted-foreground text-center">
+                {emptyText}
+              </div>
+            ) : (
+              options.map((option) => (
+                <div
                   key={option.value}
-                  value={option.value}
-                  onSelect={(currentValue: string) => {
-                    onSelect(currentValue)
-                    setOpen(false)
-                  }}
-                  className="h-auto min-h-10 cursor-pointer"
+                  onClick={() => handleSelect(option.value)}
+                  className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground min-h-10"
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-2 h-4 w-4 flex-shrink-0",
                       value === option.value ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
+                  <div className="flex-1 truncate">
+                    {option.label}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   )
