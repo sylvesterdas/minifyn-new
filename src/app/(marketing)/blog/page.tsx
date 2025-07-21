@@ -1,9 +1,12 @@
+
 import type { Metadata } from 'next';
 import { getPosts } from '@/lib/hashnode';
 import { BlogPostList } from '@/components/blog-post-list';
 import type { Blog, WithContext } from 'schema-dts';
 
 const siteUrl = 'https://www.minifyn.com';
+
+export const revalidate = 3600; // Revalidate every hour
 
 export async function generateMetadata(): Promise<Metadata> {
     const title = 'Blog | MiniFyn';
