@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -40,7 +41,7 @@ export function Combobox({ options, value, onSelect, placeholder = "Select an op
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className="w-full justify-between h-16 md:h-10" // Adjust height for mobile
         >
           <span className="truncate">
              {selectedOption ? selectedOption.label : placeholder}
@@ -55,10 +56,7 @@ export function Combobox({ options, value, onSelect, placeholder = "Select an op
                 if (!option) return 0;
 
                 const searchLower = search.toLowerCase();
-                // Check if label (as string) contains search term
-                if (typeof option.label === 'string' && option.label.toLowerCase().includes(searchLower)) {
-                    return 1;
-                }
+                
                 // Check if any keyword contains search term
                 if (option.keywords?.some(kw => kw.toLowerCase().includes(searchLower))) {
                     return 1;
@@ -75,7 +73,7 @@ export function Combobox({ options, value, onSelect, placeholder = "Select an op
                   key={option.value}
                   value={option.value}
                   onSelect={(currentValue) => {
-                    onSelect(currentValue === value ? "" : currentValue)
+                    onSelect(currentValue) // Correctly set the value
                     setOpen(false)
                   }}
                 >

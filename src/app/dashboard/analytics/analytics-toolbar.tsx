@@ -8,7 +8,6 @@ import type { UserLink } from '../actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3 } from 'lucide-react';
 import { Combobox } from '@/components/ui/combobox';
-import { ExternalLink } from 'lucide-react';
 
 interface AnalyticsToolbarProps {
   dateRange: DateRange | undefined;
@@ -29,12 +28,12 @@ export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedL
         ...userLinks.map(link => ({
             value: link.id,
             label: (
-                <div className="flex flex-col">
+                <div className="flex flex-col" title={link.longUrl}>
                     <span className="font-mono text-sm">mnfy.in/{link.id}</span>
                     <span className="text-xs text-muted-foreground truncate">{link.longUrl}</span>
                 </div>
             ),
-            keywords: [link.id, link.longUrl]
+            keywords: [link.id, link.longUrl, `mnfy.in/${link.id}`]
         }))
     ];
 
