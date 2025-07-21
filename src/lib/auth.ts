@@ -21,9 +21,22 @@ async function getUserProfileData(uid: string): Promise<{ plan: UserPlan, onboar
         
         if (snapshot.exists()) {
             const profile = snapshot.val();
-            // The plan downgrade logic is now handled in getUserPlan in data.ts
+            // This is a simplified check for the session validation.
+            // The full downgrade logic lives in getUserPlan in data.ts to handle API calls too.
+            // This just ensures the session reflects the most likely current state.
+            let currentPlan = profile.plan || 'free';
+             if (
+                profile.plan === 'pro' &&
+                profile.subscription &&
+                profile.subscription.cancel_scheduled === true &&
+                profile.subscription.current_end &&
+                profile.subscription.current_end * 1000 < Date.now()
+            ) {
+                currentPlan = 'free';
+            }
+
             return {
-                plan: profile.plan || 'free',
+                plan: currentPlan,
                 onboardingCompleted: profile.onboardingCompleted === true,
             };
         }

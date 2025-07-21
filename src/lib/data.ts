@@ -41,22 +41,23 @@ async function getUserPlan(userId: string): Promise<UserPlan> {
         if (snapshot.exists()) {
             const profile = snapshot.val();
 
-            // Check for expired "Pro" subscriptions that need to be downgraded
+            // Check for expired "Pro" subscriptions that need to be downgraded.
+            // This happens if a user cancels and their billing period ends.
             if (
                 profile.plan === 'pro' &&
                 profile.subscription &&
-                profile.subscription.status === 'active' && // It's active but past its end date
-                profile.subscription.ended_at &&
-                profile.subscription.ended_at * 1000 < Date.now()
+                profile.subscription.cancel_scheduled === true &&
+                profile.subscription.current_end &&
+                profile.subscription.current_end * 1000 < Date.now()
             ) {
-                console.log(`[getUserPlan] User ${userId}'s subscription has expired. Downgrading to 'free' plan.`);
+                console.log(`[getUserPlan] User ${userId}'s scheduled cancellation is now effective. Downgrading to 'free' plan.`);
                 
                 await userProfileRef.update({
                     plan: 'free',
                     subscription: null,
                 });
-                await auth.setCustomUserClaims(userId, { plan: 'free' });
-                await auth.revokeRefreshTokens(userId);
+                await auth().setCustomUserClaims(userId, { plan: 'free' });
+                await auth().revokeRefreshTokens(userId);
 
                 return 'free';
             }
