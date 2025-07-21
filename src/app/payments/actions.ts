@@ -5,7 +5,6 @@ import { validateRequest } from '@/lib/auth';
 import Razorpay from 'razorpay';
 import { auth as adminAuth, db } from '@/lib/firebase-admin';
 import type { DecodedIdToken } from 'firebase-admin/auth';
-import { setSessionCookie } from '../auth/cookie';
 import { revalidatePath } from 'next/cache';
 
 // Determine which set of keys and plans to use based on the environment
@@ -277,7 +276,14 @@ export async function cancelRazorpaySubscription(): Promise<{ success: boolean; 
         // Update our DB with the full response from Razorpay to reflect the cancellation.
         // This saves the new `status` and `ended_at` timestamp.
         console.log(`[CancelSub] Updating database for user ${user.uid} with new subscription details.`);
-        await userProfileRef.child('subscription').update(cancelledSubscription);
+        await userProfileRef.child('subscription').update({
+            id: cancelledSubscription.id,
+            status: cancelledSubscription.status,
+            planId: cancelledSubscription.plan_id,
+            current_start: cancelledSubscription.current_start,
+            current_end: cancelledSubscription.current_end,
+            ended_at: cancelledSubscription.ended_at || null,
+        });
         console.log(`[CancelSub] Database update successful for user ${user.uid}.`);
 
         revalidatePath('/dashboard/settings/billing');
