@@ -1,6 +1,8 @@
 import { getPosts } from '@/lib/hashnode';
 import type { MetadataRoute } from 'next';
 
+export const revalidate = 3600; // Revalidate every hour
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = 'https://www.minifyn.com';
   const lastModifiedStatic = new Date('2024-01-01').toISOString();
