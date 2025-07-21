@@ -58,7 +58,7 @@ const geoDb = [
   { start: '200.96.0.0', end: '200.255.255.255', country: 'BR' }, // Brazil
 ];
 
-export function getCountryFromIP(ip: string | null): string | null {
+export async function getCountryFromIP(ip: string | null): Promise<string | null> {
   if (!ip || ip.includes(':') || isPrivateIp(ip)) { // Basic IPv6 check and private IP check
     return null;
   }
