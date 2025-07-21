@@ -208,15 +208,13 @@ export async function syncRazorpaySubscription(
             });
             await adminAuth.setCustomUserClaims(uid, { plan: 'pro' });
             
-            if (idToken) {
-                const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-                const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
-                console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. New session cookie created from ID token.`);
-                return { success: true, sessionCookie };
-            }
-            
-            console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. No new session cookie requested.`);
-            return { success: true };
+            // Re-validate the user session by creating a new session cookie
+            const newIdToken = await adminAuth.createCustomToken(uid);
+
+            const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+            const sessionCookie = await adminAuth.createSessionCookie(newIdToken, { expiresIn });
+            console.log(`[syncRazorpay] User ${uid} plan restored/updated to Pro. New session cookie created.`);
+            return { success: true, sessionCookie };
 
         } else {
              console.log(`[syncRazorpay] Subscription ${subscriptionId} for user ${uid} is not active or completed after retries. Final status: ${subscriptionDetails?.status}.`);
@@ -283,7 +281,7 @@ export async function cancelRazorpaySubscription(): Promise<{ success: boolean; 
         // Update our DB with the full response from Razorpay to reflect the cancellation.
         // This saves the new `status` and `ended_at` timestamp.
         console.log(`[CancelSub] Updating database for user ${user.uid} with new subscription details.`);
-        await userProfileRef.child('subscription').set(cancelledSubscription);
+        await userProfileRef.child('subscription').update(cancelledSubscription);
         console.log(`[CancelSub] Database update successful for user ${user.uid}.`);
 
         revalidatePath('/dashboard/settings/billing');

@@ -16,7 +16,6 @@ import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import Script from 'next/script';
 import { trackEvent } from '@/lib/gtag';
-import { setSessionCookie } from '@/app/auth/cookie';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -100,7 +99,6 @@ export default function BillingPage() {
             getSubscriptionDetails().then(async ({ subscription: subDetails, error }) => {
                 if (subDetails) {
                     setSubscription(subDetails);
-                    setIsFetchingSub(false);
                 } else if (!error) {
                     console.log("Pro user has no subscription details in DB. Attempting to sync...");
                     const syncResult = await syncRazorpaySubscription();
@@ -113,11 +111,10 @@ export default function BillingPage() {
                     } else {
                          toast({ title: "Sync Needed", description: "We couldn't automatically find your subscription. Please try 'Restore Purchase'.", variant: "default" });
                     }
-                    setIsFetchingSub(false);
                 } else {
                     toast({ title: "Error", description: "Could not load subscription details.", variant: 'destructive'});
-                    setIsFetchingSub(false);
                 }
+                setIsFetchingSub(false);
             });
         } else {
             setIsFetchingSub(false);
@@ -128,7 +125,7 @@ export default function BillingPage() {
     const isFreePlan = user?.plan === 'free';
     const isProPlan = user?.plan === 'pro';
     const isAdminPlan = user?.plan === 'admin';
-    const isCancellationPending = subscription?.end_at;
+    const isCancellationPending = subscription?.status === 'cancelled' || !!subscription?.ended_at;
 
     const handleUpgrade = async () => {
         if (!user || user.isAnonymous) {
@@ -140,8 +137,7 @@ export default function BillingPage() {
         trackEvent({ action: 'click_upgrade', category: 'conversion', label: 'upgrade_from_billing_page', value: planType === 'monthly' ? 89 : 899 });
 
         try {
-            const idToken = await user.getIdToken(true);
-            const subscriptionResult = await createRazorpaySubscription(planType, idToken);
+            const subscriptionResult = await createRazorpaySubscription(planType);
             if ('error' in subscriptionResult) {
                 throw new Error(subscriptionResult.error);
             }
@@ -153,12 +149,12 @@ export default function BillingPage() {
                 description: planType === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
                 handler: async function (response: any) {
                     toast({ title: 'Payment Successful!', description: 'Finalizing your upgrade...' });
-                    const syncResult = await syncRazorpaySubscription(await user.getIdToken(true));
+                    const syncResult = await syncRazorpaySubscription();
 
-                    if (syncResult.success && syncResult.sessionCookie) {
-                        await setSessionCookie(syncResult.sessionCookie);
+                    if (syncResult.success) {
                         toast({ title: "Upgrade Complete!", description: "Your plan has been upgraded to Pro." });
                         trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_upgrade_${planType}`, value: planType === 'monthly' ? 89 : 899 });
+                        // A hard reload is the most reliable way to ensure the session and all server components are updated with the new 'pro' claim.
                         window.location.assign('/dashboard/settings/billing');
                     } else {
                          const errorMessage = ('error' in syncResult && syncResult.error) || "An unknown error occurred during activation.";
@@ -328,7 +324,7 @@ export default function BillingPage() {
                     )
                 )}
 
-                {isFreePlan && (
+                {(isFreePlan || isProPlan) && (
                      <Card>
                         <CardHeader>
                              <CardTitle>Restore Purchase</CardTitle>
