@@ -51,7 +51,7 @@ export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedL
             </Card>
             <div className="lg:col-span-3 flex flex-col md:flex-row items-center gap-4">
                 <div className="w-full">
-                    <label className="text-sm font-medium text-muted-foreground">Filter by Link</label>
+                    <label className="text-sm font-medium text-muted-foreground">Link</label>
                     <Combobox
                         options={richLinkOptions.map(o => ({ value: o.value, label: o.label, keywords: o.keywords }))}
                         value={selectedLink}
@@ -62,8 +62,12 @@ export function AnalyticsToolbar({ dateRange, setDateRange, userLinks, selectedL
                     />
                 </div>
                 <div className="w-full">
-                    <label className="text-sm font-medium text-muted-foreground">Filter by Date</label>
-                    <DateRangePicker date={dateRange} onDateChange={setDateRange} />
+                    <label className="text-sm font-medium text-muted-foreground">Date Range</label>
+                    <DateRangePicker 
+                        date={dateRange} 
+                        onDateChange={setDateRange}
+                        numberOfDays={30}
+                    />
                 </div>
             </div>
         </div>
