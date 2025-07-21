@@ -4,9 +4,9 @@
 import { validateRequest } from '@/lib/auth';
 import { db } from '@/lib/firebase-admin';
 import type { Link } from '@/lib/data';
-import { startOfDay, subDays, format, isWithinInterval, endOfDay } from 'date-fns';
+import { startOfDay, addDays, format, endOfDay } from 'date-fns';
 import { getCountryFromIP } from '@/lib/ip-to-country';
-import { parse, uas } from 'node-uas';
+import UAParser from 'ua-parser-js';
 
 export interface UserLink extends Omit<Link, 'seo' | 'expiresAt' | 'userId'> {
 }
@@ -103,10 +103,11 @@ function getHostname(url: string): string {
 
 function parseUserAgent(ua: string | null): { platform: string, browser: string } {
     if (!ua) return { platform: 'Unknown', browser: 'Unknown' };
-    const agentInfo = parse(ua);
+    const parser = new UAParser(ua);
+    const result = parser.getResult();
     return {
-        platform: agentInfo.os.name || 'Unknown',
-        browser: agentInfo.ua.name || 'Unknown',
+        platform: result.os.name || 'Unknown',
+        browser: result.browser.name || 'Unknown',
     }
 }
 
