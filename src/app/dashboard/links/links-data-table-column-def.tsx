@@ -1,3 +1,4 @@
+
 'use client';
 
 import { type ColumnDef } from '@tanstack/react-table';
@@ -42,8 +43,6 @@ function ActionsCell({ link }: { link: UserLink }) {
           Copy Link
         </DropdownMenuItem>
         <DropdownMenuItem disabled>View Analytics</DropdownMenuItem>
-        <DropdownMenuItem disabled>Edit Link</DropdownMenuItem>
-        <DropdownMenuItem disabled className="text-destructive focus:text-destructive">Delete Link</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
