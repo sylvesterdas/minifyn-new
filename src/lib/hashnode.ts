@@ -66,7 +66,7 @@ async function fetchFromHashnode<T>(query: string, variables: Record<string, any
             'Authorization': HASHNODE_ACCESS_TOKEN
         },
         body: JSON.stringify({ query, variables }),
-        next: { revalidate: 3600 } // Revalidate every hour
+        next: { revalidate: 3600, tags: ['hashnode-posts'] } // Revalidate every hour and tag for on-demand revalidation
     });
 
     if (!res.ok) {

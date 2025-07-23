@@ -175,6 +175,7 @@ interface CreateShortLinkInput {
 }
 
 export const createShortLink = async ({ longUrl, userId }: CreateShortLinkInput): Promise<Link> => {
+    console.log(`[createShortLink] Attempting to create short link for URL: ${longUrl}`);
     let slug;
     do {
         slug = generateShortCode();
@@ -195,6 +196,7 @@ export const createShortLink = async ({ longUrl, userId }: CreateShortLinkInput)
     let fetchedMetadata: Metadata;
     try {
         fetchedMetadata = await fetchMetadata(longUrl);
+        console.log('[createShortLink] Fetched metadata:', fetchedMetadata);
     } catch (error) {
         console.error("Failed to fetch metadata:", error);
         fetchedMetadata = {};
@@ -217,6 +219,8 @@ export const createShortLink = async ({ longUrl, userId }: CreateShortLinkInput)
         twitterImage: fetchedMetadata.twitterImage || '',
         canonical: fetchedMetadata.canonical || '',
     };
+
+    console.log('[createShortLink] SEO data to be stored:', seoData);
 
     const newLinkData = {
         longUrl,

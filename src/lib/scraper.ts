@@ -29,11 +29,12 @@ function extractLinkTag(html: string, rel: string): string | undefined {
 }
 
 function extractTitle(html: string): string | undefined {
-    const match = html.match(/<title>([\s\S]*?)<\/title>/);
+    const match = html.match(/<title>([sS]*?)</title>/);
     return match ? match[1]?.trim() : undefined;
 }
 
 export async function fetchMetadata(url: string): Promise<Metadata> {
+    console.log(`[fetchMetadata] Attempting to fetch metadata for URL: ${url}`);
     try {
         const response = await fetch(url, {
             headers: {
@@ -45,13 +46,13 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
         if (!response.ok) {
             // Instead of throwing an error, we log it and return an empty object.
             // This prevents the entire link creation process from failing if a page is temporarily down or returns a 404.
-            console.warn(`Could not fetch metadata for ${url}, status: ${response.status}`);
+            console.warn(`[fetchMetadata] Could not fetch metadata for ${url}, status: ${response.status}`);
             return {};
         }
 
         const html = await response.text();
 
-        const headMatch = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
+        const headMatch = html.match(/<head[^>]*>([sS]*?)</head>/i);
         const headHtml = headMatch ? headMatch[1] : html; // Fallback to full HTML if head not found
 
         const metadata: Metadata = {
@@ -73,9 +74,11 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
         if (!metadata.title) metadata.title = metadata.ogTitle || metadata.twitterTitle;
         if (!metadata.description) metadata.description = metadata.ogDescription || metadata.twitterDescription;
 
+        console.log('[fetchMetadata] Extracted metadata:', metadata);
+
         return metadata;
     } catch (error) {
-        console.error(`Error fetching metadata for ${url}:`, error);
+        console.error(`[fetchMetadata] Error fetching metadata for ${url}:`, error);
         // Return an empty object on any other error (e.g., network failure)
         return {};
     }
