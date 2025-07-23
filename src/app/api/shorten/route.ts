@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { urlSchema } from '@/lib/schema';
 import { createShortLink, validateApiKey, checkRateLimit, incrementUsage } from '@/lib/data';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('Authorization');
@@ -44,6 +45,9 @@ export async function POST(request: NextRequest) {
 
         const host = process.env.NEXT_PUBLIC_SHORT_DOMAIN || 'mnfy.in';
         const shortUrl = `https://${host}/${newLink.id}`;
+        
+        // Revalidate the links page so the new link appears in the dashboard table
+        revalidatePath('/dashboard/links');
         
         return NextResponse.json({
             message: 'URL shortened successfully',
