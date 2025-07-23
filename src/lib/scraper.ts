@@ -29,7 +29,7 @@ function extractLinkTag(html: string, rel: string): string | undefined {
 }
 
 function extractTitle(html: string): string | undefined {
-    const match = html.match(/<title>(.*?)</title>/s); // Corrected regex with 's' flag
+    const match = html.match(/<title>(.*?)<\/title>/s); // Corrected regex with 's' flag
     return match ? match[1]?.trim() : undefined;
 }
 
@@ -52,7 +52,7 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
 
         const html = await response.text();
 
-        const headMatch = html.match(/<head[^>]*>([sS]*?)</head>/i);
+        const headMatch = html.match(/<head[^>]*>([sS]*?)<\/head>/i);
         const headHtml = headMatch ? headMatch[1] : html; // Fallback to full HTML if head not found
 
         const metadata: Metadata = {
