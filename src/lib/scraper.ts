@@ -29,7 +29,7 @@ function extractLinkTag(html: string, rel: string): string | undefined {
 }
 
 function extractTitle(html: string): string | undefined {
-    const match = html.match(/<title>([sS]*?)</title>/);
+    const match = html.match(/<title>(.*?)</title>/s); // Corrected regex with 's' flag
     return match ? match[1]?.trim() : undefined;
 }
 
