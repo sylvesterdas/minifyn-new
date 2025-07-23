@@ -1,4 +1,6 @@
 
+'use server';
+
 const HASHNODE_GQL_ENDPOINT = (process.env.HASHNODE_GQL_ENDPOINT || '').replace(/;$/, '');
 const HASHNODE_PUBLICATION_ID = process.env.HASHNODE_PUBLICATION_ID!;
 const HASHNODE_ACCESS_TOKEN = process.env.NEXT_HASHNODE_ACCESS_TOKEN!;
@@ -66,7 +68,9 @@ async function fetchFromHashnode<T>(query: string, variables: Record<string, any
             'Authorization': HASHNODE_ACCESS_TOKEN
         },
         body: JSON.stringify({ query, variables }),
-        next: { revalidate: 3600, tags: ['hashnode-posts'] } // Revalidate every hour and tag for on-demand revalidation
+        // This tells Next.js not to cache the result of this specific fetch call.
+        // The page-level revalidation will handle the caching of the page itself.
+        cache: 'no-store',
     });
 
     if (!res.ok) {
