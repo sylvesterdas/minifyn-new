@@ -40,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   while (hasNextPage) {
     try {
       const { posts, pageInfo } = await getPosts(50, cursor); // Fetch 50 at a time
-      const postData = posts.map(p => ({ slug: p.slug, publishedAt: p.publishedAt }));
+      const postData = posts.map((p: any) => ({ slug: p.slug, publishedAt: p.publishedAt }));
       allPosts = allPosts.concat(postData);
       hasNextPage = pageInfo.hasNextPage;
       cursor = pageInfo.endCursor;

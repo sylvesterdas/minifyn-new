@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     // 2. Generate the AI background image
     const imageResult = await generateOgImage({ title, tags: tags || '' });
     const { imageUrl: aiBackgroundUrl } = imageResult;
-    
+
     // 3. Use ImageResponse to composite the text and the background
     const imageResponse = new ImageResponse(
       (
@@ -104,8 +104,8 @@ export async function GET(request: NextRequest) {
     // 4. Get the readable stream from the ImageResponse
     const imageStream = imageResponse.body as ReadableStream<Uint8Array>;
 
-    // 5. Create a sharp pipeline to compress the stream
-    const sharpStream = sharp().webp({ quality: 100 });
+    // 5. Create a sharp pipeline to compress the stream and output as JPEG
+    const sharpStream = sharp().jpeg({ quality: 100 }); // Changed to jpeg with quality 100
 
     // 6. Pipe the image stream through the sharp pipeline
     const compressedStream = Readable.fromWeb(imageStream).pipe(sharpStream);
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
     // 7. Return the compressed stream as a new response
     return new NextResponse(compressedStream as any, {
       headers: {
-          'Content-Type': 'image/webp',
+          'Content-Type': 'image/jpeg', // Changed Content-Type to image/jpeg
           'Cache-Control': 'public, max-age=3600, must-revalidate',
       },
     });
