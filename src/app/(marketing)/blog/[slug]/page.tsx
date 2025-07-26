@@ -1,13 +1,14 @@
 
-import { getPostBySlug } from '@/lib/hashnode';
+import { getPostBySlug, getPosts } from '@/lib/hashnode';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { Article, WithContext } from 'schema-dts';
 import { BlogPostDetail } from '@/components/blog-post-detail';
 
-export const revalidate = 3600; // Revalidate every hour
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+
+export async function generateMetadata({ params }: { params: any }): Promise<Metadata> {
+    params = await params;
     const post = await getPostBySlug(params.slug);
     
     if (!post) {
@@ -52,7 +53,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     };
 }
 
-export default async function PostPage({ params }: { params: { slug: string } }) {
+export default async function PostPage({ params }: { params: any }) {
+    params = await params;
     const post = await getPostBySlug(params.slug);
     
     if (!post) {

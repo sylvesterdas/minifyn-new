@@ -8,7 +8,7 @@ import { ClicksChart } from './analytics/clicks-chart';
 import { AnalyticsDetailCard } from './analytics/analytics-detail-card';
 import { LockedFeatureCard } from '@/components/locked-feature-card';
 
-export const revalidate = 3600; // Revalidate every hour
+export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
     const { user } = await validateRequest();

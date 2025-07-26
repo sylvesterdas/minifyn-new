@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/ca
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export const revalidate = 0;
+
 
 export const metadata: Metadata = {
   title: 'Help Center | MiniFyn',

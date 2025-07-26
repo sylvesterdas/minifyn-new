@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { FileQuestion, LifeBuoy } from 'lucide-react';
 import type { ContactPage, WithContext } from 'schema-dts';
 
-export const revalidate = 0;
+
 
 export const metadata: Metadata = {
   title: 'Contact Us | MiniFyn',

@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/ca
 import { UrlShortenerCard } from '@/components/url-shortener-card';
 import type { WithContext, ItemList } from 'schema-dts';
 
-export const revalidate = 0;
+
 
 export const metadata: Metadata = {
   title: 'Developer Tools | MiniFyn',

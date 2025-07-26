@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-export const revalidate = 0;
+
 
 export const metadata: Metadata = {
   title: 'Documentation | MiniFyn',

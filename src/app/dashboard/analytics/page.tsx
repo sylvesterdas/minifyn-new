@@ -2,6 +2,8 @@
 
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect, useTransition, Suspense, useCallback } from 'react';
 import { getAnalyticsSummary, getUserLinks, searchUserLinks, type AnalyticsSummary, type UserLink } from '../actions';
 import { ClicksChart } from './clicks-chart';

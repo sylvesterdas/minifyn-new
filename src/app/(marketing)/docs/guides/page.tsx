@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
 
-export const revalidate = 0;
+
 
 export const metadata: Metadata = {
   title: 'How-to Guides | MiniFyn Help Center',

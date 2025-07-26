@@ -191,6 +191,57 @@ export interface AnalyticsSummary {
     totalClicks: number;
 }
 
+export interface UserProfile {
+    name: string;
+    email: string;
+    role: string;
+    timezone: string;
+    company: string;
+}
+
+export async function updateUserProfile(prevState: any, formData: FormData) {
+    const { user } = await validateRequest();
+    if (!user) {
+        return { success: false, error: "Unauthorized" };
+    }
+
+    const name = formData.get('name') as string;
+    const role = formData.get('role') as string;
+    const timezone = formData.get('timezone') as string;
+    const company = formData.get('company') as string;
+
+    try {
+        await db.ref(`users/${user.uid}/profile`).update({
+            name,
+            role,
+            timezone,
+            company,
+        });
+        return { success: true, message: "Profile updated successfully!" };
+    } catch (error: any) {
+        console.error("Error updating profile:", error);
+        return { success: false, error: error.message || "Failed to update profile." };
+    }
+}
+
+export async function getUserProfile(): Promise<{ profile: UserProfile | null; error?: string }> {
+    const { user } = await validateRequest();
+    if (!user) {
+        return { profile: null, error: "Unauthorized" };
+    }
+
+    try {
+        const snapshot = await db.ref(`users/${user.uid}/profile`).once('value');
+        if (snapshot.exists()) {
+            return { profile: snapshot.val() as UserProfile };
+        }
+        return { profile: null, error: "Profile not found." };
+    } catch (error: any) {
+        console.error("Error fetching profile:", error);
+        return { profile: null, error: error.message || "Failed to fetch profile." };
+    }
+}
+
 export async function getAnalyticsSummary(dateRange?: { from: string; to: string }, linkId?: string): Promise<AnalyticsSummary> {
     const fromDate = dateRange?.from ? startOfDay(new Date(dateRange.from)) : startOfDay(subDays(new Date(), 29));
     const toDate = dateRange?.to ? endOfDay(new Date(dateRange.to)) : endOfDay(new Date());
@@ -245,4 +296,61 @@ export async function getAnalyticsSummary(dateRange?: { from: string; to: string
         countries: aggregate('country'),
         totalClicks: clicks.length,
     };
+}
+
+export async function generateApiKey(): Promise<{ key?: string; error?: string }> {
+    const { user } = await validateRequest();
+    if (!user) {
+        return { error: "Unauthorized" };
+    }
+
+    try {
+        // Check if an API key already exists for the user
+        const existingKeySnapshot = await db.ref(`apiKeys/${user.uid}`).once('value');
+        if (existingKeySnapshot.exists()) {
+            return { error: "An API key already exists for this user. Please revoke the existing key before generating a new one." };
+        }
+
+        // Generate a new API key (simple random string for demonstration)
+        const newKey = `mk_${Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}`;
+
+        // Store the new key in the database
+        await db.ref(`apiKeys/${user.uid}`).set({
+            key: newKey,
+            createdAt: Date.now(),
+        });
+
+        return { key: newKey };
+    } catch (error: any) {
+        console.error("Error generating API key:", error);
+        return { error: error.message || "Failed to generate API key." };
+    }
+}
+
+export async function revokeApiKey(): Promise<{ success?: boolean; error?: string }> {
+    const { user } = await validateRequest();
+    if (!user) {
+        return { error: "Unauthorized" };
+    }
+
+    try {
+        await db.ref(`apiKeys/${user.uid}`).remove();
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error revoking API key:", error);
+        return { error: error.message || "Failed to revoke API key." };
+    }
+}
+
+export async function getApiKeyForUser(userId: string): Promise<string | null> {
+    try {
+        const snapshot = await db.ref(`apiKeys/${userId}`).once('value');
+        if (snapshot.exists()) {
+            return snapshot.val().key;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching API key:", error);
+        return null;
+    }
 }

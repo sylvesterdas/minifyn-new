@@ -10,8 +10,9 @@ import { PageLoader } from '@/components/page-loader';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://minifyn.com'),
   title: 'MiniFyn - Simple URL Shortener',
-  description: 'The simplest way to shorten, share, and track your links.',
+  description: 'The simplest way to shorten, share, and track your links',
 };
 
 export default function RootLayout({

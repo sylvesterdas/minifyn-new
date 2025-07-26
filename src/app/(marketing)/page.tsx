@@ -8,7 +8,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { WebSite, WithContext } from 'schema-dts';
 
-export const revalidate = 0;
+
+
+export const dynamic = 'force-dynamic';
 
 const siteTitle = 'MiniFyn - Simple URL Shortener';
 const siteDescription = 'The simplest way to shorten, share, and track your links.';

@@ -57,21 +57,27 @@ interface HashnodePostResponse {
     }
 }
 
-async function fetchFromHashnode<T>(query: string, variables: Record<string, any>): Promise<T> {
+async function fetchFromHashnode<T>(query: string, variables: Record<string, any>, revalidate?: number): Promise<T> {
     if (!HASHNODE_GQL_ENDPOINT) {
         throw new Error('Hashnode GraphQL endpoint is not configured.');
     }
-    const res = await fetch(HASHNODE_GQL_ENDPOINT, {
+    const fetchOptions: RequestInit = {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': HASHNODE_ACCESS_TOKEN
         },
         body: JSON.stringify({ query, variables }),
-        // This tells Next.js not to cache the result of this specific fetch call.
-        // The page-level revalidation will handle the caching of the page itself.
-        cache: 'no-store',
-    });
+    };
+
+    if (revalidate !== undefined) {
+        fetchOptions.next = { revalidate };
+    } else {
+        // Default to no-store if revalidate is not specified
+        fetchOptions.cache = 'no-store';
+    }
+
+    const res = await fetch(HASHNODE_GQL_ENDPOINT, fetchOptions);
 
     if (!res.ok) {
         console.error("Hashnode API Error:", await res.text());
@@ -116,12 +122,12 @@ const GET_POSTS_QUERY = `
   }
 `;
 
-export async function getPosts(first: number = 6, after?: string | null): Promise<{ posts: Omit<HashnodePost, 'content' | 'ogImage' | 'updatedAt'>[], pageInfo: PageInfo }> {
+export async function getPosts(first: number = 6, after?: string | null, revalidate?: number): Promise<{ posts: Omit<HashnodePost, 'content' | 'ogImage' | 'updatedAt'>[], pageInfo: PageInfo }> {
     const response = await fetchFromHashnode<HashnodePostsResponse>(GET_POSTS_QUERY, {
         publicationId: HASHNODE_PUBLICATION_ID,
         first,
         after: after ?? null,
-    });
+    }, revalidate);
     const posts = response.data.publication.posts.edges.map(edge => edge.node);
     const pageInfo = response.data.publication.posts.pageInfo;
     return { posts, pageInfo };

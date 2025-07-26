@@ -2,7 +2,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const revalidate = 0;
+
 
 export const metadata: Metadata = {
   title: 'Terms of Service | MiniFyn',

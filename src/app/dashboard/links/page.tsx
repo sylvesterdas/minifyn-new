@@ -3,7 +3,7 @@ import { LinksDataTable } from './links-data-table';
 import { columns } from './links-data-table-column-def';
 import { CreateLinkDialog } from './create-link-dialog';
 
-export const revalidate = 3600; // Revalidate every hour
+export const dynamic = 'force-dynamic';
 
 export default async function LinksPage() {
   const links = await getUserLinks();

@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { TechArticle, WithContext } from 'schema-dts';
 
-export const revalidate = 0;
+
 
 export const metadata: Metadata = {
     title: 'API Documentation | MiniFyn',

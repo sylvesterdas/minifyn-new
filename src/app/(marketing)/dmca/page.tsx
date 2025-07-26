@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 
-export const revalidate = 0;
+
 
 export const metadata: Metadata = {
   title: 'DMCA Policy | MiniFyn',

@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { LifeBuoy, ShieldAlert, ArrowRight } from 'lucide-react';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 
-export const revalidate = 0;
+
 
 export const metadata: Metadata = {
   title: 'FAQ | MiniFyn Help Center',

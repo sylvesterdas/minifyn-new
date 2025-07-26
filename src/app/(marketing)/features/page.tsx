@@ -6,7 +6,7 @@ import NextLink from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
-export const revalidate = 0;
+
 
 export const metadata: Metadata = {
   title: 'Features | MiniFyn',
