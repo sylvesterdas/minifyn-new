@@ -1,3 +1,4 @@
+
 import { CodeBlock } from '@/components/code-block';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +14,11 @@ export const metadata: Metadata = {
     description: 'Integrate MiniFyn\'s powerful link shortening capabilities into your application with our simple and robust API.',
     alternates: {
         canonical: 'https://www.minifyn.com/docs/api',
+    },
+    openGraph: {
+        type: 'article',
+        publishedTime: '2024-01-01T08:00:00+00:00',
+        modifiedTime: new Date().toISOString(),
     },
 };
 
