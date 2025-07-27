@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default function ShippingAndDeliveryPolicyPage() {
-  const lastUpdated = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const lastUpdated = "July 15, 2024";
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
         <div className="prose prose-invert mx-auto">
@@ -36,7 +36,7 @@ export default function ShippingAndDeliveryPolicyPage() {
             <p>The delivery of our service is considered complete when the digital service or feature is made accessible to you. For the Pro plan, this is the moment your account is upgraded after payment confirmation.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">5. Contact Us</h2>
-            <p>If you have any questions about our Shipping and Delivery Policy or experience any issues accessing our services after a purchase, please contact our support team immediately.</p>
+            <p>If you have any questions about our Shipping and Delivery Policy or experience any issues accessing our services after a purchase, please contact our support team.</p>
         </div>
     </div>
   );

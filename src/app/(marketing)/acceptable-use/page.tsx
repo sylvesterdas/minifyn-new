@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default function AcceptableUsePage() {
-  const lastUpdated = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const lastUpdated = "July 15, 2024";
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
         <div className="prose prose-invert mx-auto">

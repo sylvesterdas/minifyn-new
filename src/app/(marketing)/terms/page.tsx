@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default function TermsPage() {
-  const lastUpdated = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const lastUpdated = "July 15, 2024";
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
         <div className="prose prose-invert mx-auto">
@@ -50,7 +50,7 @@ export default function TermsPage() {
             <p>In no event shall MiniFyn be liable for any indirect, incidental, special, consequential or punitive damages resulting from your access to or use of the Service.</p>
 
             <h2 className="mt-8 text-2xl font-semibold">10. Changes to Terms</h2>
-            <p>We reserve the right to modify or replace these Terms at any time. We will provide notice of significant changes. By continuing to access or use our Service after revisions become effective, you agree to be bound by the revised terms.</p>
+            <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.</p>
         </div>
     </div>
   );
