@@ -52,6 +52,10 @@ const faqs = [
         answer: "Basic click analytics are available to all registered users in their dashboard. The <strong>Pro</strong> plan unlocks advanced analytics, including referrers, geographic data, and a longer data retention period."
     },
     {
+        question: "Is my payment information secure?",
+        answer: "Yes, absolutely. We use <a href='https://razorpay.com/security/' target='_blank' rel='noopener noreferrer' class='text-primary underline'>Razorpay</a>, a leading and secure payment gateway, to handle all transactions. We do not store any of your sensitive credit card information on our servers. All payment data is handled directly by Razorpay."
+    },
+    {
         question: "Is there a developer API?",
         answer: "Yes! All registered users can generate an API key from the 'API Keys' section in their dashboard. Our <a href='/docs/api' class='text-primary underline'>API documentation</a> has everything you need to get started integrating MiniFyn into your applications."
     },
