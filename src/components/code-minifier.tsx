@@ -6,8 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileDown, Loader2, ArrowRight, Clipboard, Check, Trash2, FolderUp, Settings2, Code, FileCode } from 'lucide-react';
-import { minify } from 'terser';
-import JSZip from 'jszip';
+// import { minify } from 'terser'; // Dynamically import terser
+// import JSZip from 'jszip'; // Dynamically import JSZip
 import { useToast } from '@/hooks/use-toast';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
@@ -98,6 +98,7 @@ function BulkMinifier({ mangleJs }: { mangleJs: boolean }) {
         if (!files || files.length === 0) return;
 
         startZipTransition(async () => {
+            const JSZip = (await import('jszip')).default;
             const zip = new JSZip();
             const minificationPromises = Array.from(files).map(async (file) => {
                 const extension = file.name.split('.').pop()?.toLowerCase();
@@ -112,6 +113,7 @@ function BulkMinifier({ mangleJs }: { mangleJs: boolean }) {
                 let minifiedContent: string;
                 try {
                     if (extension === 'js') {
+                        const { minify } = await import('terser');
                         const result = await minify(content, { mangle: mangleJs, compress: true });
                         if (result.error) throw result.error;
                         minifiedContent = result.code || '';
@@ -226,6 +228,7 @@ function SinglePasteMinifier({ mangleJs }: { mangleJs: boolean }) {
         startTransition(async () => {
             try {
                 if (detectedLang === 'javascript') {
+                    const { minify } = await import('terser');
                     const result = await minify(inputCode, {
                         mangle: mangleJs,
                         compress: true,
