@@ -10,7 +10,7 @@ import type { WebSite, WithContext } from 'schema-dts';
 
 
 
-export const dynamic = 'force-dynamic';
+
 
 const siteTitle = 'MiniFyn - Simple URL Shortener';
 const siteDescription = 'The simplest way to shorten, share, and track your links.';
