@@ -89,7 +89,7 @@ export default function ApiDocsPage() {
                         </nav>
                     </aside>
 
-                     <main className="prose prose-invert mx-auto max-w-none w-full">
+                     <main className="prose prose-invert mx-auto max-w-none w-full min-w-0">
                         <section id="getting-started" className="scroll-mt-24">
                             <h1 className="text-4xl font-bold">API Documentation</h1>
                             <p className="text-lg text-muted-foreground">
