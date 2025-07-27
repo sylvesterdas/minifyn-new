@@ -1,4 +1,5 @@
-import { FileQuestion, LifeBuoy, ShieldAlert, BookOpen, Key } from 'lucide-react';
+
+import { FileQuestion, LifeBuoy, ShieldAlert, BookOpen, Key, Wand2 } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -33,6 +34,12 @@ const helpSections = [
         icon: <Key className="h-8 w-8 text-primary" />,
         title: 'API Documentation',
         description: 'Integrate our service with your own applications.'
+    },
+    {
+        href: '/tools',
+        icon: <Wand2 className="h-8 w-8 text-primary" />,
+        title: 'Developer Tools',
+        description: 'Explore all our free, client-side developer utilities.'
     },
     {
         href: '/help/report-abuse',

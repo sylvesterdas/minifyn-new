@@ -40,8 +40,12 @@ const faqs = [
         answer: "On the <strong>Free</strong> plan, links expire after <strong>60 days</strong>. If you upgrade to our <strong>Pro</strong> plan, your links will <strong>never expire</strong>."
     },
     {
-        question: "What is the daily limit for creating links?",
-        answer: "Anonymous users can create up to 3 links per day. Users on the <strong>Free</strong> plan can create up to <strong>20 links</strong> per day. <strong>Pro</strong> plan users can create up to <strong>100 links</strong> per day. The same limits apply to API usage."
+        question: "What happens to my Pro links if I cancel my subscription?",
+        answer: "If you cancel your Pro subscription, your existing Pro links will <strong>remain active and will not expire</strong>. You will retain the benefit of permanent links for everything created during your subscription period. Any new links you create after your subscription ends will be subject to the Free plan's limits and 60-day expiration."
+    },
+    {
+        question: "What are the daily creation limits?",
+        answer: "Anonymous users are limited to <strong>3 links/day</strong>. Users on the <strong>Free</strong> plan can create up to <strong>20 links/day</strong>. <strong>Pro</strong> plan users have a limit of <strong>100 links/day</strong>. These limits also apply to API usage."
     },
     {
         question: "How do I view analytics for my links?",
@@ -50,10 +54,6 @@ const faqs = [
     {
         question: "Is there a developer API?",
         answer: "Yes! All registered users can generate an API key from the 'API Keys' section in their dashboard. Our <a href='/docs/api' class='text-primary underline'>API documentation</a> has everything you need to get started integrating MiniFyn into your applications."
-    },
-     {
-        question: "What happens if I cancel my Pro subscription?",
-        answer: "You can cancel your subscription at any time. You will retain Pro features until the end of your current billing period. Afterwards, your account will be downgraded to the Free plan. Your existing Pro links will remain active and will not expire, but any new links you create will be subject to the Free plan's limits."
     },
     {
         question: "What happens if I shorten a malicious link?",

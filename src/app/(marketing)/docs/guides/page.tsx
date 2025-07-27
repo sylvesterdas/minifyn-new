@@ -1,5 +1,5 @@
 
-import { Link as LinkIcon, QrCode, HardDrive } from 'lucide-react';
+import { Link as LinkIcon, QrCode, HardDrive, Key } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
@@ -18,6 +18,7 @@ const navLinks = [
     { name: 'Shortening a URL', href: '#shorten-url' },
     { name: 'Generating a QR Code', href: '#generate-qr' },
     { name: 'Managing Your Links', href: '#manage-links' },
+    { name: 'Using the API', href: '#using-api' },
 ];
 
 export default function GuidesPage() {
@@ -91,6 +92,24 @@ export default function GuidesPage() {
                                 <li>Click on the "Links" tab in the sidebar to see all your links.</li>
                                 <li>Use the action menu (three dots) on each link to copy, edit, or delete it.</li>
                                 <li>Click on the "Analytics" tab to view detailed statistics for all your links.</li>
+                            </ol>
+                        </CardContent>
+                    </Card>
+                </section>
+                
+                 <section id="using-api" className="scroll-mt-24">
+                    <Card>
+                        <CardHeader>
+                             <CardTitle className="flex items-center text-2xl"><Key className="mr-3 text-primary" /> Using the API</CardTitle>
+                             <CardDescription>To use the API, you must have a registered account.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                             <ol className="list-decimal list-inside space-y-3 text-muted-foreground text-base">
+                                <li><Link href="/auth/signin" className="underline text-primary">Sign in</Link> to your account.</li>
+                                <li>Navigate to <Link href="/dashboard/settings/api-keys" className="underline text-primary">Settings &gt; API Keys</Link>.</li>
+                                <li>Click the "Generate New Key" button to get your API key.</li>
+                                <li>Use this key in the `Authorization: Bearer YOUR_API_KEY` header when making requests.</li>
+                                <li>For detailed endpoint information, refer to our full <Link href="/docs/api" className="underline text-primary">API Documentation</Link>.</li>
                             </ol>
                         </CardContent>
                     </Card>
