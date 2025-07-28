@@ -30,6 +30,10 @@ export default function PrivacyPage() {
                 <li><strong>Analytics Data:</strong> For each click on a shortened link, we collect the user's IP address, user agent, referrer, and approximate geographic location to provide analytics to our users. Data retention periods for this analytics data vary based on your subscription plan.</li>
             </ul>
 
+            <h2 className="mt-8 text-2xl font-semibold">Google Analytics 4 (GA4)</h2>
+            <p>We use Google Analytics 4 (GA4) to understand how our Service is used and to improve your experience. GA4 collects data about your interactions with our website, such as pages visited, time spent on pages, and your general geographic location. This data is anonymized and aggregated, and it helps us analyze trends, administer the site, track users' movements around the site, and gather demographic information.</p>
+            <p>GA4 uses cookies and other tracking technologies to collect this information. You can learn more about how Google uses data when you use our partners' sites or apps by visiting <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">Google's Privacy & Terms page</a>. You can opt-out of Google Analytics tracking by installing the Google Analytics Opt-out Browser Add-on, available <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">here</a>.</p>
+
             <h2 className="mt-8 text-2xl font-semibold">2. How We Use Information</h2>
             <p>We use the information we collect to:</p>
             <ul>
@@ -62,6 +66,10 @@ export default function PrivacyPage() {
             
             <h2 className="mt-8 text-2xl font-semibold">7. Changes to This Privacy Policy</h2>
             <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.</p>
+
+            <h2 className="mt-8 text-2xl font-semibold">8. Google AdSense and Cookies</h2>
+            <p>Google, as a third-party vendor, uses cookies to serve ads on our site. Google's use of the DART cookie enables it to serve ads to our users based on their visit to our site and other sites on the Internet. Users may opt out of the use of the DART cookie by visiting the Google Ad and Content Network Privacy Policy.</p>
+            <p>We use Google AdSense to display advertisements on our website. Google AdSense may use cookies and web beacons to collect information (not including your name, address, email address, or telephone number) about your visits to this and other websites in order to provide advertisements about goods and services of interest to you. If you would like more information about this practice and to know your choices about not having this information used by Google, click here: <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer">Google Ad and Content Network Privacy Policy</a>.</p>
         </div>
     </div>
   );

@@ -17,6 +17,7 @@ const footerLinks = {
         { href: '/help/faq', label: 'FAQ' },
     ],
     company: [
+        { href: '/about', label: 'About Us' },
         { href: '/contact', label: 'Contact Us' },
         { href: '/help', label: 'Help Center' },
         { href: '/sitemap.xml', label: 'Sitemap' },
