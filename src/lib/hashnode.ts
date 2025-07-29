@@ -1,60 +1,67 @@
+"use server";
 
-'use server';
-
-const HASHNODE_GQL_ENDPOINT = (process.env.HASHNODE_GQL_ENDPOINT || '').replace(/;$/, '');
+const HASHNODE_GQL_ENDPOINT = (process.env.HASHNODE_GQL_ENDPOINT || "").replace(
+  /;$/,
+  ""
+);
 const HASHNODE_PUBLICATION_ID = process.env.HASHNODE_PUBLICATION_ID!;
 const HASHNODE_ACCESS_TOKEN = process.env.NEXT_HASHNODE_ACCESS_TOKEN!;
 
 export interface HashnodePost {
-    id: string;
+  id: string;
+  slug: string;
+  title: string;
+  url: string; // Canonical URL for the post
+  brief: string;
+  publishedAt: string;
+  updatedAt: string;
+  readTimeInMinutes: number;
+  author: {
+    name: string;
+    profilePicture?: string;
+  };
+  tags: {
+    name: string;
     slug: string;
-    title: string;
-    url: string; // Canonical URL for the post
-    brief: string;
-    publishedAt: string;
-    updatedAt: string;
-    readTimeInMinutes: number;
-    author: {
-        name: string;
-        profilePicture?: string;
-    };
-    tags: {
-        name: string;
-        slug: string;
-    }[];
-    coverImage: {
-        url: string;
-    } | null;
-    ogImage: {
-        url: string;
-    } | null;
-    content: {
-        html: string;
-    };
+  }[];
+  coverImage: {
+    url: string;
+  } | null;
+  ogImage: {
+    url: string;
+  } | null;
+  content: {
+    html: string;
+  };
 }
 
 interface PageInfo {
-    hasNextPage: boolean;
-    endCursor: string | null;
+  hasNextPage: boolean;
+  endCursor: string | null;
 }
 
 interface HashnodePostsResponse {
-    data: {
-        publication: {
-            posts: {
-                edges: { node: Omit<HashnodePost, 'content' | 'ogImage' | 'updatedAt' | 'brief'> }[];
-                pageInfo: PageInfo;
-            };
-        }
-    }
+  data: {
+    publication: {
+      posts: {
+        edges: {
+          node: Omit<
+            HashnodePost,
+            "content" | "ogImage" | "updatedAt" | "brief"
+          >;
+        }[];
+        pageInfo: PageInfo;
+      };
+    };
+  };
 }
 
 interface HashnodePostResponse {
-    data: {
-        publication: {
-            post: HashnodePost;
-        }
-    }
+  data: {
+    publication: {
+      post: HashnodePost;
+    };
+  };
 }
 
 async function fetchFromHashnode<T>(query: string, variables: Record<string, any>, revalidate?: number): Promise<T> {
@@ -77,7 +84,8 @@ async function fetchFromHashnode<T>(query: string, variables: Record<string, any
         fetchOptions.cache = 'no-store';
     }
 
-    const res = await fetch(HASHNODE_GQL_ENDPOINT, fetchOptions);
+    const separator = HASHNODE_GQL_ENDPOINT.includes('?') ? '&' : '?';
+    const res = await fetch(`${HASHNODE_GQL_ENDPOINT}${separator}cacheBuster=${Math.random()}`, fetchOptions);
 
     if (!res.ok) {
         console.error("Hashnode API Error:", await res.text());
@@ -122,15 +130,26 @@ const GET_POSTS_QUERY = `
   }
 `;
 
-export async function getPosts(first: number = 6, after?: string | null, revalidate?: number): Promise<{ posts: Omit<HashnodePost, 'content' | 'ogImage' | 'updatedAt'>[], pageInfo: PageInfo }> {
-    const response = await fetchFromHashnode<HashnodePostsResponse>(GET_POSTS_QUERY, {
-        publicationId: HASHNODE_PUBLICATION_ID,
-        first,
-        after: after ?? null,
-    }, revalidate);
-    const posts = response.data.publication.posts.edges.map(edge => edge.node);
-    const pageInfo = response.data.publication.posts.pageInfo;
-    return { posts, pageInfo };
+export async function getPosts(
+  first: number = 6,
+  after?: string | null,
+  revalidate?: number
+): Promise<{
+  posts: Omit<HashnodePost, "content" | "ogImage" | "updatedAt">[];
+  pageInfo: PageInfo;
+}> {
+  const response = await fetchFromHashnode<HashnodePostsResponse>(
+    GET_POSTS_QUERY,
+    {
+      publicationId: HASHNODE_PUBLICATION_ID,
+      first,
+      after: after ?? null,
+    },
+    revalidate
+  );
+  const posts = response.data.publication.posts.edges.map((edge) => edge.node);
+  const pageInfo = response.data.publication.posts.pageInfo;
+  return { posts, pageInfo };
 }
 
 const GET_POST_BY_SLUG_QUERY = `
@@ -167,16 +186,21 @@ const GET_POST_BY_SLUG_QUERY = `
   }
 `;
 
-export async function getPostBySlug(slug: string): Promise<HashnodePost | null> {
-    const response = await fetchFromHashnode<HashnodePostResponse>(GET_POST_BY_SLUG_QUERY, {
-        publicationId: HASHNODE_PUBLICATION_ID,
-        slug
-    });
-    // The response has `ogImage.image`, so we need to flatten it
-    const post = response.data.publication.post;
-    if (post && post.ogImage) {
-        (post.ogImage as any).url = (post.ogImage as any).image;
-        delete (post.ogImage as any).image;
+export async function getPostBySlug(
+  slug: string
+): Promise<HashnodePost | null> {
+  const response = await fetchFromHashnode<HashnodePostResponse>(
+    GET_POST_BY_SLUG_QUERY,
+    {
+      publicationId: HASHNODE_PUBLICATION_ID,
+      slug,
     }
-    return post;
+  );
+  // The response has `ogImage.image`, so we need to flatten it
+  const post = response.data.publication.post;
+  if (post && post.ogImage) {
+    (post.ogImage as any).url = (post.ogImage as any).image;
+    delete (post.ogImage as any).image;
+  }
+  return post;
 }

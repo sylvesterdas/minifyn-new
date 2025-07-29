@@ -1,10 +1,9 @@
-import type {NextConfig} from 'next';
-
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   output: 'standalone',
   typescript: {
     ignoreBuildErrors: true,

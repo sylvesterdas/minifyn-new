@@ -6,7 +6,7 @@ import { BlogPostList } from '@/components/blog-post-list';
 
 const siteUrl = 'https://www.minifyn.com';
 
-
+export const revalidate = 600; // Revalidate every 10 minutes
 
 export const metadata: Metadata = {
   title: 'Blog - MiniFyn',

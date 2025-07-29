@@ -1,6 +1,5 @@
 
-import type {Config} from 'tailwindcss';
-
+/** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ['class'],
   content: [
@@ -16,7 +15,7 @@ export default {
         code: ['monospace'],
       },
       // This is the officially recommended way to customize the typography plugin.
-      typography: ({ theme }: { theme: any }) => ({
+      typography: ({ theme }) => ({
         DEFAULT: {
           css: {
             // Remove backticks from inline code
@@ -148,4 +147,4 @@ export default {
     },
   },
   plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
-} satisfies Config;
+};
