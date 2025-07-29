@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
     const sharpStream = sharp().jpeg({ quality: 100 }); // Changed to jpeg with quality 100
 
     // 6. Pipe the image stream through the sharp pipeline
-    const compressedStream = Readable.fromWeb(imageStream).pipe(sharpStream);
+    const compressedStream = (imageStream as any).pipe(sharpStream);
 
     // 7. Return the compressed stream as a new response
     return new NextResponse(compressedStream as any, {

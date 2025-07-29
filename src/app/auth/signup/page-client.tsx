@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useEffect, useState, useTransition, useMemo } from 'react';
+import { useEffect, useState, useTransition, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
 import { sendVerificationOtp, verifyOtp, signup, finalizeProSignup, login } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
@@ -44,8 +44,7 @@ export interface FormState {
     };
 }
 
-function SubmitButton({ disabled, isProPlan }: { disabled: boolean; isProPlan: boolean; }) {
-    const { pending } = useFormStatus();
+function SubmitButton({ disabled, isProPlan, pending }: { disabled: boolean; isProPlan: boolean; pending: boolean; }) {
     const buttonText = isProPlan ? 'Proceed to Payment' : 'Create a free account';
     
     return (
@@ -82,7 +81,8 @@ export function SignUpPageComponent() {
         : 'free';
     const [selectedPlan, setSelectedPlan] = useState<Plan>(initialPlan);
 
-    const [signupState, signupAction] = useActionState(signup, { success: false });
+    const [signupState, setSignupState] = useState<FormState>({ success: false });
+    const [isSigningUp, setIsSigningUp] = useState(false);
 
     const isProPlan = selectedPlan.startsWith('pro-');
 
@@ -253,7 +253,14 @@ export function SignUpPageComponent() {
                     {dynamicTexts.description}
                 </CardDescription>
             </CardHeader>
-            <form action={signupAction}>
+            <form onSubmit={async (e) => {
+                e.preventDefault();
+                setIsSigningUp(true);
+                const formData = new FormData(e.currentTarget);
+                const result = await signup(signupState, formData);
+                setSignupState(result);
+                setIsSigningUp(false);
+            }}>
                 <input type="hidden" name="email" value={email} />
                 <CardContent className="grid gap-4">
                      <div className="grid gap-4">
@@ -371,7 +378,7 @@ export function SignUpPageComponent() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">
-                    <SubmitButton disabled={!emailVerified || !validatePassword(password) || !termsAccepted} isProPlan={isProPlan} />
+                    <SubmitButton disabled={!emailVerified || !validatePassword(password) || !termsAccepted} isProPlan={isProPlan} pending={isSigningUp} />
                     <div className="text-center text-sm">
                         Already have an account?{' '}
                         <Link href="/auth/signin" className="underline">

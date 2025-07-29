@@ -122,7 +122,7 @@ export default function ApiDocsPage() {
 
                         <section id="versioning" className="mt-12 scroll-mt-24">
                             <h2 className="text-2xl font-semibold">Versioning</h2>
-                            <p>The current version of the API is <Badge variant="secondary">v1</Badge>. The API is stable, but any future breaking changes will be introduced under a new version number.</p>
+                            <p>The current version of the API is <span><Badge variant="secondary">v1</Badge></span>. The API is stable, but any future breaking changes will be introduced under a new version number.</p>
                         </section>
                         
                         <section id="endpoints" className="mt-12 scroll-mt-24">

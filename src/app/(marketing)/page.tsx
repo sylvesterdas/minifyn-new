@@ -81,7 +81,7 @@ export default function Home() {
                 '@type': 'EntryPoint',
                 urlTemplate: 'https://www.minifyn.com/blog?search={search_term_string}'
             },
-            'query-input': 'required name=search_term_string',
+            
         },
     };
 

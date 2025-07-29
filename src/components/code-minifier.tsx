@@ -1,389 +1,491 @@
+"use client";
 
-'use client';
-
-import { useState, useTransition, useCallback, useRef } from 'react';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileDown, Loader2, ArrowRight, Clipboard, Check, Trash2, FolderUp, Settings2, Code, FileCode } from 'lucide-react';
+import { useState, useTransition, useCallback, useRef } from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  FileDown,
+  Loader2,
+  ArrowRight,
+  Clipboard,
+  Check,
+  Trash2,
+  FolderUp,
+  Settings2,
+  Code,
+  FileCode,
+} from "lucide-react";
 // import { minify } from 'terser'; // Dynamically import terser
 // import JSZip from 'jszip'; // Dynamically import JSZip
-import { useToast } from '@/hooks/use-toast';
-import { Label } from './ui/label';
-import { Switch } from './ui/switch';
-import hljs from 'highlight.js/lib/core';
-import javascript from 'highlight.js/lib/languages/javascript';
-import css from 'highlight.js/lib/languages/css';
-import xml from 'highlight.js/lib/languages/xml'; // For HTML
-import json from 'highlight.js/lib/languages/json';
-import { trackEvent } from '@/lib/gtag';
+import { useToast } from "@/hooks/use-toast";
+import { Label } from "./ui/label";
+import { Switch } from "./ui/switch";
+import hljs from "highlight.js/lib/core";
+import javascript from "highlight.js/lib/languages/javascript";
+import css from "highlight.js/lib/languages/css";
+import xml from "highlight.js/lib/languages/xml"; // For HTML
+import json from "highlight.js/lib/languages/json";
+import { trackEvent } from "@/lib/gtag";
 
 // Register languages for highlight.js
-hljs.registerLanguage('javascript', javascript);
-hljs.registerLanguage('css', css);
-hljs.registerLanguage('xml', xml); // highlight.js uses 'xml' for HTML
-hljs.registerLanguage('json', json);
+hljs.registerLanguage("javascript", javascript);
+hljs.registerLanguage("css", css);
+hljs.registerLanguage("xml", xml); // highlight.js uses 'xml' for HTML
+hljs.registerLanguage("json", json);
 
-type Language = 'javascript' | 'css' | 'html' | 'json';
+type Language = "javascript" | "css" | "html" | "json";
 
 const minifyCss = (cssCode: string): string => {
-    let minified = cssCode.replace(/\/\*[\s\S]*?\*\//g, ''); 
-    minified = minified.replace(/\s*([,>+~{}\s])\s*/g, '$1'); 
-    minified = minified.replace(/;}/g, '}');
-    minified = minified.replace(/\s\s+/g, ' '); 
-    return minified.trim();
+  let minified = cssCode.replace(/\/\*[\s\S]*?\*\//g, "");
+  minified = minified.replace(/\s*([,>+~{}\s])\s*/g, "$1");
+  minified = minified.replace(/;}/g, "}");
+  minified = minified.replace(/\s\s+/g, " ");
+  return minified.trim();
 };
 
 const minifyHtml = (htmlCode: string): string => {
-    let minified = htmlCode.replace(/<!--[\s\S]*?-->/g, ''); // Remove comments
-    minified = minified.replace(/\s+/g, ' '); // Collapse whitespace
-    minified = minified.replace(/> </g, '><'); // Remove space between tags
-    return minified.trim();
+  let minified = htmlCode.replace(/<!--[\s\S]*?-->/g, ""); // Remove comments
+  minified = minified.replace(/\s+/g, " "); // Collapse whitespace
+  minified = minified.replace(/> </g, "><"); // Remove space between tags
+  return minified.trim();
 };
 
 const minifyJson = (jsonCode: string): string => {
-    return JSON.stringify(JSON.parse(jsonCode));
-}
-
-const detectLanguage = (code: string): Language | null => {
-    // Use highlight.js to auto-detect the language
-    const result = hljs.highlightAuto(code, ['javascript', 'css', 'xml', 'json']);
-    const language = result.language;
-
-    if (language === 'javascript') return 'javascript';
-    if (language === 'css') return 'css';
-    if (language === 'xml') return 'html'; // Treat XML as HTML for our purposes
-    if (language === 'json') return 'json';
-
-    // Fallback for simple cases if highlight.js is unsure (low relevance)
-    const trimmedCode = code.trim();
-    if (trimmedCode.startsWith('{') && trimmedCode.endsWith('}')) return 'json';
-    if (trimmedCode.startsWith('<') && trimmedCode.endsWith('>')) return 'html';
-
-    return null;
+  return JSON.stringify(JSON.parse(jsonCode));
 };
 
-function JavascriptOptions({ mangleJs, setMangleJs }: { mangleJs: boolean, setMangleJs: (val: boolean) => void }) {
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg"><Settings2 className="h-5 w-5 text-primary" /> JavaScript Options</CardTitle>
-                 <CardDescription>These settings apply to both bulk and single file minification.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="flex items-center space-x-3 p-4 border rounded-md">
-                    <Switch
-                        id="mangle-js"
-                        checked={mangleJs}
-                        onCheckedChange={setMangleJs}
-                        aria-label="Mangle variable names"
-                    />
-                    <div>
-                        <Label htmlFor="mangle-js" className="cursor-pointer">Mangle variable names</Label>
-                        <p className="text-xs text-muted-foreground">Reduces file size by shortening variable names.</p>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    );
+const detectLanguage = (code: string): Language | null => {
+  // Use highlight.js to auto-detect the language
+  const result = hljs.highlightAuto(code, ["javascript", "css", "xml", "json"]);
+  const language = result.language;
+
+  if (language === "javascript") return "javascript";
+  if (language === "css") return "css";
+  if (language === "xml") return "html"; // Treat XML as HTML for our purposes
+  if (language === "json") return "json";
+
+  // Fallback for simple cases if highlight.js is unsure (low relevance)
+  const trimmedCode = code.trim();
+  if (trimmedCode.startsWith("{") && trimmedCode.endsWith("}")) return "json";
+  if (trimmedCode.startsWith("<") && trimmedCode.endsWith(">")) return "html";
+
+  return null;
+};
+
+function JavascriptOptions({
+  mangleJs,
+  setMangleJs,
+}: {
+  mangleJs: boolean;
+  setMangleJs: (val: boolean) => void;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Settings2 className="h-5 w-5 text-primary" /> JavaScript Options
+        </CardTitle>
+        <CardDescription>
+          These settings apply to both bulk and single file minification.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center space-x-3 p-4 border rounded-md">
+          <Switch
+            id="mangle-js"
+            checked={mangleJs}
+            onCheckedChange={setMangleJs}
+            aria-label="Mangle variable names"
+          />
+          <div>
+            <Label htmlFor="mangle-js" className="cursor-pointer">
+              Mangle variable names
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Reduces file size by shortening variable names.
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 function BulkMinifier({ mangleJs }: { mangleJs: boolean }) {
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [isZipping, startZipTransition] = useTransition();
-    const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isZipping, startZipTransition] = useTransition();
+  const { toast } = useToast();
 
-    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (!files || files.length === 0) return;
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-        startZipTransition(async () => {
-            const JSZip = (await import('jszip')).default;
-            const zip = new JSZip();
-            const minificationPromises = Array.from(files).map(async (file) => {
-                const extension = file.name.split('.').pop()?.toLowerCase();
-                const validExtensions = ['js', 'css', 'html', 'json'];
+    startZipTransition(async () => {
+      const JSZip = (await import("jszip")).default;
+      const zip = new JSZip();
+      const minificationPromises = Array.from(files).map(async (file) => {
+        const extension = file.name.split(".").pop()?.toLowerCase();
+        const validExtensions = ["js", "css", "html", "json"];
 
-                if (!extension || !validExtensions.includes(extension)) {
-                    toast({ title: "Skipped File", description: `Cannot minify '${file.name}'. Only .js, .css, .html, and .json files are supported.`, variant: "destructive"});
-                    return;
-                }
-
-                const content = await file.text();
-                let minifiedContent: string;
-                try {
-                    if (extension === 'js') {
-                        const { minify } = await import('terser');
-                        const result = await minify(content, { mangle: mangleJs, compress: true });
-                        if (result.error) throw result.error;
-                        minifiedContent = result.code || '';
-                    } else if (extension === 'css') {
-                        minifiedContent = minifyCss(content);
-                    } else if (extension === 'html') {
-                        minifiedContent = minifyHtml(content);
-                    } else { // json
-                        minifiedContent = minifyJson(content);
-                    }
-                    const newFileName = file.name.replace(/\.(js|css|html|json)$/, `.min.${extension}`);
-                    zip.file(newFileName, minifiedContent);
-                } catch(e) {
-                     toast({ title: "Minification Error", description: `Skipping '${file.name}' due to invalid syntax or other error.`, variant: "destructive"});
-                     return;
-                }
-            });
-
-            await Promise.all(minificationPromises);
-            
-            if (Object.keys(zip.files).length > 0) {
-                 zip.generateAsync({ type: 'blob' }).then((content) => {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(content);
-                    link.download = 'minified-files.zip';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(link.href);
-
-                    trackEvent({
-                        action: 'minify_bulk',
-                        category: 'dev_tools',
-                        label: 'code_minifier',
-                        value: Object.keys(zip.files).length
-                    });
-                });
-            } else {
-                 toast({ title: "No files minified", description: "Could not process any of the selected files. Check if they have valid syntax."});
-            }
-        });
-
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+        if (!extension || !validExtensions.includes(extension)) {
+          toast({
+            title: "Skipped File",
+            description: `Cannot minify '${file.name}'. Only .js, .css, .html, and .json files are supported.`,
+            variant: "destructive",
+          });
+          return;
         }
-    };
-    
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><FileCode className="h-6 w-6 text-primary"/> Bulk Minify</CardTitle>
-                <CardDescription>Select multiple JS, CSS, HTML, or JSON files to minify and download them as a zip archive.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                 <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileSelect}
-                    multiple
-                    accept=".js,.css,.html,.json"
-                    className="hidden"
-                />
-                <Button
-                    onClick={() => fileInputRef.current?.click()}
-                    variant="secondary"
-                    size="lg"
-                    className="w-full"
-                    disabled={isZipping}
-                >
-                    {isZipping ? (
-                         <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Processing Files...
-                        </>
-                    ) : (
-                         <>
-                            <FolderUp className="mr-2 h-5 w-5" />
-                            Select Files & Download Zip
-                        </>
-                    )}
-                </Button>
-            </CardContent>
-        </Card>
-    );
+
+        const content = await file.text();
+        let minifiedContent: string;
+        try {
+          if (extension === "js") {
+            const { minify } = await import("terser");
+            const result = await minify(content, {
+              mangle: mangleJs,
+              compress: true,
+            });
+            minifiedContent = result.code || "";
+          } else if (extension === "css") {
+            minifiedContent = minifyCss(content);
+          } else if (extension === "html") {
+            minifiedContent = minifyHtml(content);
+          } else {
+            // json
+            minifiedContent = minifyJson(content);
+          }
+          const newFileName = file.name.replace(
+            /\.(js|css|html|json)$/,
+            `.min.${extension}`
+          );
+          zip.file(newFileName, minifiedContent);
+        } catch (e) {
+          toast({
+            title: "Minification Error",
+            description: `Skipping '${file.name}' due to invalid syntax or other error.`,
+            variant: "destructive",
+          });
+          return;
+        }
+      });
+
+      await Promise.all(minificationPromises);
+
+      if (Object.keys(zip.files).length > 0) {
+        zip.generateAsync({ type: "blob" }).then((content) => {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(content);
+          link.download = "minified-files.zip";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(link.href);
+
+          trackEvent({
+            action: "minify_bulk",
+            category: "dev_tools",
+            label: "code_minifier",
+            value: Object.keys(zip.files).length,
+          });
+        });
+      } else {
+        toast({
+          title: "No files minified",
+          description:
+            "Could not process any of the selected files. Check if they have valid syntax.",
+        });
+      }
+    });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <FileCode className="h-6 w-6 text-primary" /> Bulk Minify
+        </CardTitle>
+        <CardDescription>
+          Select multiple JS, CSS, HTML, or JSON files to minify and download
+          them as a zip archive.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileSelect}
+          multiple
+          accept=".js,.css,.html,.json"
+          className="hidden"
+        />
+        <Button
+          onClick={() => fileInputRef.current?.click()}
+          variant="secondary"
+          size="lg"
+          className="w-full"
+          disabled={isZipping}
+        >
+          {isZipping ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing Files...
+            </>
+          ) : (
+            <>
+              <FolderUp className="mr-2 h-5 w-5" />
+              Select Files & Download Zip
+            </>
+          )}
+        </Button>
+      </CardContent>
+    </Card>
+  );
 }
 
 function SinglePasteMinifier({ mangleJs }: { mangleJs: boolean }) {
-    const [inputCode, setInputCode] = useState('');
-    const [outputCode, setOutputCode] = useState('');
-    const [isPending, startTransition] = useTransition();
-    const [copied, setCopied] = useState(false);
-    const { toast } = useToast();
-    
-    const inputSize = new Blob([inputCode]).size;
-    const outputSize = new Blob([outputCode]).size;
-    const sizeReduction = inputSize > 0 ? ((inputSize - outputSize) / inputSize) * 100 : 0;
+  const [inputCode, setInputCode] = useState("");
+  const [outputCode, setOutputCode] = useState("");
+  const [isPending, startTransition] = useTransition();
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
 
-    const handleMinify = useCallback(() => {
-        if (!inputCode) {
-            setOutputCode('');
-            return;
-        }
+  const inputSize = new Blob([inputCode]).size;
+  const outputSize = new Blob([outputCode]).size;
+  const sizeReduction =
+    inputSize > 0 ? ((inputSize - outputSize) / inputSize) * 100 : 0;
 
-        const detectedLang = detectLanguage(inputCode);
-        if (!detectedLang) {
-            toast({ title: "Detection Failed", description: "Could not automatically detect the language. Please check your code.", variant: "destructive"});
-            return;
-        }
-
-        toast({ title: "Language Detected", description: `Minifying as ${detectedLang.toUpperCase()}.`});
-
-        startTransition(async () => {
-            try {
-                if (detectedLang === 'javascript') {
-                    const { minify } = await import('terser');
-                    const result = await minify(inputCode, {
-                        mangle: mangleJs,
-                        compress: true,
-                    });
-                    if (result.error) throw result.error;
-                    setOutputCode(result.code || '');
-                } else if (detectedLang === 'css') {
-                    setOutputCode(minifyCss(inputCode));
-                } else if (detectedLang === 'html') {
-                    setOutputCode(minifyHtml(inputCode));
-                } else if (detectedLang === 'json') {
-                    setOutputCode(minifyJson(inputCode));
-                }
-
-                trackEvent({
-                    action: 'minify_single',
-                    category: 'dev_tools',
-                    label: `code_minifier_${detectedLang}`
-                });
-
-            } catch (error) {
-                console.error("Minification error:", error);
-                setOutputCode('');
-                toast({ title: "Minification Error", description: "The code appears to have invalid syntax and could not be minified.", variant: 'destructive'});
-            }
-        });
-    }, [inputCode, toast, mangleJs]);
-    
-    const handleCopy = () => {
-        if (outputCode) {
-            navigator.clipboard.writeText(outputCode).then(() => {
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-            });
-        }
-    };
-    
-    const handleDownload = () => {
-        if (outputCode) {
-            const detectedLang = detectLanguage(outputCode) || 'text';
-            const mimeType = {
-                javascript: 'application/javascript',
-                css: 'text/css',
-                html: 'text/html',
-                json: 'application/json',
-                text: 'text/plain'
-            }[detectedLang];
-            const extension = {
-                javascript: 'js',
-                css: 'css',
-                html: 'html',
-                json: 'json',
-                text: 'txt'
-            }[detectedLang];
-            
-            const blob = new Blob([outputCode], { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `minified.${extension}`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-    };
-    
-    const handleClear = () => {
-        setInputCode('');
-        setOutputCode('');
+  const handleMinify = useCallback(() => {
+    if (!inputCode) {
+      setOutputCode("");
+      return;
     }
 
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Code className="h-6 w-6 text-primary"/> Single Paste</CardTitle>
-                <CardDescription>Paste any JS, CSS, HTML, or JSON code into the editor below. The language will be detected automatically.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                 <div className="grid md:grid-cols-2 gap-8 items-start">
-                    {/* Input Section */}
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-semibold">Input</h3>
-                            <Button variant="ghost" size="icon" onClick={handleClear} disabled={!inputCode && !outputCode}>
-                                <Trash2 className="h-4 w-4" />
-                                <span className="sr-only">Clear</span>
-                            </Button>
-                        </div>
-                        <Textarea
-                            placeholder={`Paste your code here...`}
-                            value={inputCode}
-                            onChange={(e) => setInputCode(e.target.value)}
-                            className="h-80 font-mono text-xs"
-                            aria-label="Code Input"
-                        />
-                        <Button onClick={handleMinify} disabled={isPending || !inputCode} className="w-full">
-                            {isPending ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Minifying...
-                                </>
-                            ) : (
-                                <>
-                                    Minify Code
-                                    <ArrowRight className="ml-2 h-4 w-4" />
-                                </>
-                            )}
-                        </Button>
-                    </div>
-                    
-                    {/* Output Section */}
-                    <div className="space-y-4">
-                         <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-semibold">Output</h3>
-                            <div className="flex gap-2">
-                                <Button variant="ghost" size="icon" onClick={handleCopy} disabled={!outputCode}>
-                                    {copied ? <Check className="h-4 w-4 text-green-500"/> : <Clipboard className="h-4 w-4" />}
-                                    <span className="sr-only">Copy</span>
-                                </Button>
-                                <Button variant="ghost" size="icon" onClick={handleDownload} disabled={!outputCode}>
-                                    <FileDown className="h-4 w-4" />
-                                    <span className="sr-only">Download</span>
-                                </Button>
-                            </div>
-                        </div>
-                        <Textarea
-                            placeholder="Minified code will appear here..."
-                            value={outputCode}
-                            readOnly
-                            className="h-80 font-mono text-xs bg-muted/50"
-                            aria-label="Code Output"
-                        />
-                         {outputCode && (
-                            <div className="text-sm text-muted-foreground text-center animate-in fade-in duration-500">
-                                Original: <span className="font-medium text-foreground">{(inputSize / 1024).toFixed(2)} KB</span>
-                                 | Minified: <span className="font-medium text-foreground">{(outputSize / 1024).toFixed(2)} KB</span>
-                                 | Reduction: <span className="font-medium text-green-400">{sizeReduction.toFixed(2)}%</span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    );
+    const detectedLang = detectLanguage(inputCode);
+    if (!detectedLang) {
+      toast({
+        title: "Detection Failed",
+        description:
+          "Could not automatically detect the language. Please check your code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Language Detected",
+      description: `Minifying as ${detectedLang.toUpperCase()}.`,
+    });
+
+    startTransition(async () => {
+      try {
+        if (detectedLang === "javascript") {
+          const { minify } = await import("terser");
+          const result = await minify(inputCode, {
+            mangle: mangleJs,
+            compress: true,
+          });
+          setOutputCode(result.code || "");
+        } else if (detectedLang === "css") {
+          setOutputCode(minifyCss(inputCode));
+        } else if (detectedLang === "html") {
+          setOutputCode(minifyHtml(inputCode));
+        } else if (detectedLang === "json") {
+          setOutputCode(minifyJson(inputCode));
+        }
+
+        trackEvent({
+          action: "minify_single",
+          category: "dev_tools",
+          label: `code_minifier_${detectedLang}`,
+        });
+      } catch (error) {
+        console.error("Minification error:", error);
+        setOutputCode("");
+        toast({
+          title: "Minification Error",
+          description:
+            "The code appears to have invalid syntax and could not be minified.",
+          variant: "destructive",
+        });
+      }
+    });
+  }, [inputCode, toast, mangleJs]);
+
+  const handleCopy = () => {
+    if (outputCode) {
+      navigator.clipboard.writeText(outputCode).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  };
+
+  const handleDownload = () => {
+    if (outputCode) {
+      const detectedLang = detectLanguage(outputCode) || "text";
+      const mimeType = {
+        javascript: "application/javascript",
+        css: "text/css",
+        html: "text/html",
+        json: "application/json",
+        text: "text/plain",
+      }[detectedLang];
+      const extension = {
+        javascript: "js",
+        css: "css",
+        html: "html",
+        json: "json",
+        text: "txt",
+      }[detectedLang];
+
+      const blob = new Blob([outputCode], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `minified.${extension}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const handleClear = () => {
+    setInputCode("");
+    setOutputCode("");
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Code className="h-6 w-6 text-primary" /> Single Paste
+        </CardTitle>
+        <CardDescription>
+          Paste any JS, CSS, HTML, or JSON code into the editor below. The
+          language will be detected automatically.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid md:grid-cols-2 gap-8 items-start">
+          {/* Input Section */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Input</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClear}
+                disabled={!inputCode && !outputCode}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">Clear</span>
+              </Button>
+            </div>
+            <Textarea
+              placeholder={`Paste your code here...`}
+              value={inputCode}
+              onChange={(e) => setInputCode(e.target.value)}
+              className="h-80 font-mono text-xs"
+              aria-label="Code Input"
+            />
+            <Button
+              onClick={handleMinify}
+              disabled={isPending || !inputCode}
+              className="w-full"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Minifying...
+                </>
+              ) : (
+                <>
+                  Minify Code
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Output Section */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Output</h3>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCopy}
+                  disabled={!outputCode}
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Clipboard className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">Copy</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleDownload}
+                  disabled={!outputCode}
+                >
+                  <FileDown className="h-4 w-4" />
+                  <span className="sr-only">Download</span>
+                </Button>
+              </div>
+            </div>
+            <Textarea
+              placeholder="Minified code will appear here..."
+              value={outputCode}
+              readOnly
+              className="h-80 font-mono text-xs bg-muted/50"
+              aria-label="Code Output"
+            />
+            {outputCode && (
+              <div className="text-sm text-muted-foreground text-center animate-in fade-in duration-500">
+                Original:{" "}
+                <span className="font-medium text-foreground">
+                  {(inputSize / 1024).toFixed(2)} KB
+                </span>
+                | Minified:{" "}
+                <span className="font-medium text-foreground">
+                  {(outputSize / 1024).toFixed(2)} KB
+                </span>
+                | Reduction:{" "}
+                <span className="font-medium text-green-400">
+                  {sizeReduction.toFixed(2)}%
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export function CodeMinifier() {
-    const [mangleJs, setMangleJs] = useState(false);
+  const [mangleJs, setMangleJs] = useState(false);
 
-    return (
-        <div className="space-y-8">
-            <JavascriptOptions mangleJs={mangleJs} setMangleJs={setMangleJs} />
-            <BulkMinifier mangleJs={mangleJs} />
-            <SinglePasteMinifier mangleJs={mangleJs} />
-        </div>
-    );
+  return (
+    <div className="space-y-8">
+      <JavascriptOptions mangleJs={mangleJs} setMangleJs={setMangleJs} />
+      <BulkMinifier mangleJs={mangleJs} />
+      <SinglePasteMinifier mangleJs={mangleJs} />
+    </div>
+  );
 }

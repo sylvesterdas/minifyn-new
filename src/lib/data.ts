@@ -172,9 +172,10 @@ export const isSlugTaken = async (slug: string): Promise<boolean> => {
 interface CreateShortLinkInput {
     longUrl: string;
     userId: string;
+    isVerifiedUser?: boolean;
 }
 
-export const createShortLink = async ({ longUrl, userId }: CreateShortLinkInput): Promise<Link> => {
+export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: CreateShortLinkInput): Promise<Link> => {
     console.log(`[createShortLink] Attempting to create short link for URL: ${longUrl}`);
     let slug;
     do {

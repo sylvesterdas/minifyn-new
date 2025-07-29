@@ -84,7 +84,7 @@ export function UrlShortenerForm() {
     return () => unsubscribe();
   }, []);
 
-  const initialState: FormState = { success: false, message: "" };
+  const initialState: FormState = { success: false, message: "", shortUrl: "" };
   const [state, formAction] = useFormState(
     shortenUrl,
     initialState

@@ -107,6 +107,7 @@ const GET_POSTS_QUERY = `
             url
             brief
             publishedAt
+            updatedAt
             readTimeInMinutes
             author {
                 name
@@ -135,7 +136,7 @@ export async function getPosts(
   after?: string | null,
   revalidate?: number
 ): Promise<{
-  posts: Omit<HashnodePost, "content" | "ogImage" | "updatedAt">[];
+  posts: any;
   pageInfo: PageInfo;
 }> {
   const response = await fetchFromHashnode<HashnodePostsResponse>(
@@ -147,7 +148,7 @@ export async function getPosts(
     },
     revalidate
   );
-  const posts = response.data.publication.posts.edges.map((edge) => edge.node);
+  const posts = response.data.publication.posts.edges.map((edge) => edge.node) as any;
   const pageInfo = response.data.publication.posts.pageInfo;
   return { posts, pageInfo };
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
 import { sendPasswordResetLink } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
@@ -17,8 +17,7 @@ interface FormState {
     message?: string;
 }
 
-function SubmitButton() {
-    const { pending } = useFormStatus();
+function SubmitButton({ pending }: { pending: boolean }) {
     return (
         <Button type="submit" className="w-full" disabled={pending}>
             {pending ? <Loader2 className="animate-spin" /> : 'Send Reset Link'}
@@ -27,7 +26,8 @@ function SubmitButton() {
 }
 
 export default function ForgotPasswordPage() {
-    const [state, formAction] = useActionState(sendPasswordResetLink, { success: false });
+    const [state, setState] = useState<FormState>({ success: false });
+    const [pending, setPending] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -54,7 +54,14 @@ export default function ForgotPasswordPage() {
                     Enter your email and we'll send you a link to reset your password.
                 </CardDescription>
             </CardHeader>
-            <form action={formAction}>
+            <form onSubmit={async (e) => {
+                e.preventDefault();
+                setPending(true);
+                const formData = new FormData(e.currentTarget);
+                const result = await sendPasswordResetLink(state, formData);
+                setState(result);
+                setPending(false);
+            }}>
                 <CardContent className="grid gap-4">
                     <div className="grid gap-2">
                         <Label htmlFor="email">Email</Label>
@@ -66,7 +73,7 @@ export default function ForgotPasswordPage() {
                             required
                         />
                     </div>
-                    <SubmitButton />
+                    <SubmitButton pending={pending} />
                 </CardContent>
             </form>
             <div className="mt-4 text-center text-sm pb-6">

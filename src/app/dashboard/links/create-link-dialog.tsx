@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useActionState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -47,7 +47,8 @@ export function CreateLinkDialog({ children }: { children?: React.ReactNode }) {
   const formRef = useRef<HTMLFormElement>(null);
 
   const initialState = { success: false, message: '', shortUrl: '' };
-  const [state, formAction, isPending] = useActionState(shortenUrl, initialState);
+  const [state, setState] = useState(initialState);
+  const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
     if (state.success && state.shortUrl) {
@@ -115,7 +116,14 @@ export function CreateLinkDialog({ children }: { children?: React.ReactNode }) {
                 </DialogFooter>
             </div>
         ) : (
-            <form ref={formRef} action={formAction} className="space-y-4 py-4">
+            <form ref={formRef} onSubmit={async (e) => {
+                e.preventDefault();
+                setIsPending(true);
+                const formData = new FormData(e.currentTarget);
+                const result = await shortenUrl(state, formData);
+                setState(result);
+                setIsPending(false);
+            }} className="space-y-4 py-4">
                 <div className="grid gap-2">
                     <Label htmlFor="longUrl" className="sr-only">URL to shorten</Label>
                     <Input

@@ -23,7 +23,7 @@ export default async function BlogPage() {
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "ItemList",
-      "itemListElement": posts.map((post, index) => ({
+      "itemListElement": posts.map((post: { slug: any; title: any; }, index: number) => ({
         "@type": "ListItem",
         "position": index + 1,
         "url": `${siteUrl}/blog/${post.slug}`,
@@ -51,7 +51,14 @@ export default async function BlogPage() {
                     <p className="text-lg font-semibold">Loading posts...</p>
                 </div>
             }>
-              <BlogPostList initialPosts={posts} initialPageInfo={pageInfo} />
+              <BlogPostList
+                initialPosts={posts.map((post: { brief: any; updatedAt: any; }) => ({
+                  ...post,
+                  brief: post.brief ?? '',
+                  updatedAt: post.updatedAt,
+                }))}
+                initialPageInfo={pageInfo}
+              />
             </Suspense>
         </div>
     );

@@ -3,7 +3,7 @@
 
 import { auth, db } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
-import type { FormState } from './signup/page';
+import type { FormState } from './signup/page-client';
 import { sendEmail } from '@/lib/email';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import type { UserPlan } from '@/lib/data';

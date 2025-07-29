@@ -78,22 +78,16 @@ export default async function DashboardPage() {
                         <AnalyticsDetailCard
                             title="Top Referrers"
                             data={summary.referrers}
-                            categoryKey="referrer"
-                            valueKey="clicks"
+                            categoryKey="name"
+                            valueKey="value"
                             defaultIconName="globe"
                         />
                         <AnalyticsDetailCard
                             title="Clicks by Platform"
                             data={summary.platforms}
-                            categoryKey="platform"
-                            valueKey="clicks"
-                            iconNameMap={{
-                                'Windows': 'laptop',
-                                'macOS': 'laptop',
-                                'Linux': 'laptop',
-                                'iOS': 'smartphone',
-                                'Android': 'smartphonenfc',
-                            }}
+                            categoryKey="name"
+                            valueKey="value"
+                            
                         />
                     </>
                  ) : (

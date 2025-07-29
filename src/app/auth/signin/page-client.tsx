@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { login, resendVerificationLink } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,7 +30,7 @@ export function SignInPageComponent() {
     const [error, setError] = useState<string | null>(null);
     const [showResend, setShowResend] = useState(false);
     
-    const [resendState, resendAction] = useActionState(resendVerificationLink, { success: false });
+    const [resendState, setResendState] = useState<{ error?: string; success?: boolean; message?: string; }>({ success: false });
 
     const { toast } = useToast();
     
@@ -135,7 +135,12 @@ export function SignInPageComponent() {
                     {showResend && (
                          <p className="text-sm text-center text-muted-foreground">
                             Your email is not verified.
-                            <form action={resendAction}>
+                            <form onSubmit={async (e) => {
+                                e.preventDefault();
+                                const formData = new FormData(e.currentTarget);
+                                const result = await resendVerificationLink(resendState, formData);
+                                setResendState(result);
+                            }}>
                                 <input type="hidden" name="email" value={email} />
                                 <Button variant="link" type="submit" className="p-0 h-auto">Resend verification email</Button>
                             </form>
