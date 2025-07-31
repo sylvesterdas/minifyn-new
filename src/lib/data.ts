@@ -25,6 +25,8 @@ export interface Link {
   twitterImage?: string;
   seo: Metadata;
   plan: UserPlan;
+  articleAuthor?: string;
+  articlePublishedTime?: string;
 }
 
 const ANON_DAILY_LIMIT = 3;
@@ -219,11 +221,13 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         twitterDescription: fetchedMetadata.twitterDescription || '',
         twitterImage: fetchedMetadata.twitterImage || '',
         canonical: fetchedMetadata.canonical || '',
+        articleAuthor: fetchedMetadata.articleAuthor,
+        articlePublishedTime: fetchedMetadata.articlePublishedTime,
     };
 
     console.log('[createShortLink] SEO data to be stored:', seoData);
 
-    const newLinkData = {
+    const newLinkData: any = {
         longUrl,
         createdAt: now,
         expiresAt,
@@ -234,6 +238,16 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         seo: seoData,
         plan: plan,
     };
+
+    if (fetchedMetadata.ogType === 'article') {
+        if (fetchedMetadata.articleAuthor) {
+            newLinkData.articleAuthor = fetchedMetadata.articleAuthor;
+        }
+        if (fetchedMetadata.articlePublishedTime) {
+            newLinkData.articlePublishedTime = fetchedMetadata.articlePublishedTime;
+        }
+    }
+
 
     await db.ref(`urls/${slug}`).set(newLinkData);
     
@@ -267,6 +281,8 @@ export const getLinkBySlug = async (slug: string): Promise<Link | null> => {
         twitterImage: linkData.seo?.twitterImage,
         seo: linkData.seo,
         plan: linkData.plan || 'free',
+        articleAuthor: linkData.articleAuthor,
+        articlePublishedTime: linkData.articlePublishedTime,
     };
 }
 

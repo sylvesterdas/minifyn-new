@@ -1,3 +1,4 @@
+
 'use server';
 
 export interface Metadata {
@@ -13,6 +14,8 @@ export interface Metadata {
     canonical?: string;
     ogType?: string;
     ogUrl?: string;
+    articleAuthor?: string;
+    articlePublishedTime?: string;
 }
 
 function extractMetaTag(html: string, property: string): string | undefined {
@@ -67,7 +70,9 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
             twitterTitle: extractMetaTag(headHtml, 'twitter:title'),
             twitterDescription: extractMetaTag(headHtml, 'twitter:description'),
             twitterImage: extractMetaTag(headHtml, 'twitter:image'),
-            canonical: extractLinkTag(headHtml, 'canonical')
+            canonical: extractLinkTag(headHtml, 'canonical'),
+            articleAuthor: extractMetaTag(headHtml, 'article:author'),
+            articlePublishedTime: extractMetaTag(headHtml, 'article:published_time'),
         };
         
         // Use fallbacks for primary fields
