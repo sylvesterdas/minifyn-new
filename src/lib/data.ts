@@ -278,7 +278,7 @@ export const getLinkBySlug = async (slug: string): Promise<Link | null> => {
         ogImage: linkData.seo?.ogImage,
         twitterImage: linkData.seo?.twitterImage,
         seo: linkData.seo,
-        plan: linkData.plan || 'free',
+        plan: linkData.plan || 'anonymous',
         articleAuthor: linkData.articleAuthor,
         articlePublishedTime: linkData.articlePublishedTime,
     };
