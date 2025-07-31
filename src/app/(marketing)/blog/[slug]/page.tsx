@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { Article, WithContext } from 'schema-dts';
 import { BlogPostDetail } from '@/components/blog-post-detail';
-
+import { generateBlogCover } from '@/ai/flows/generate-blog-cover-flow';
 
 
 export async function generateMetadata({ params }: { params: any }): Promise<Metadata> {
@@ -20,7 +20,19 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
     const siteUrl = 'https://www.minifyn.com';
     const authorName = post.author?.name || 'Sylvester Das';
     
-    const ogImageUrl = post.ogImage?.url || post.coverImage?.url || `${siteUrl}/og.png`;
+    let finalOgImage = post.ogImage?.url;
+
+    if (!finalOgImage) {
+        try {
+            console.log(`No OG image found for "${post.title}", generating a new one.`);
+            const coverImage = await generateBlogCover({ title: post.title });
+            finalOgImage = coverImage.imageUrl;
+        } catch (e) {
+            console.error("Failed to generate blog cover for metadata:", e);
+            finalOgImage = `${siteUrl}/og.png`; // Fallback
+        }
+    }
+
 
     return {
         title: `${post.title} | MiniFyn Blog`,
@@ -35,9 +47,9 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
             type: 'article',
             publishedTime: post.publishedAt,
             authors: [authorName],
-            images: ogImageUrl ? [
+            images: finalOgImage ? [
                 {
-                    url: ogImageUrl,
+                    url: finalOgImage,
                     width: 1200,
                     height: 630,
                     alt: post.title,
@@ -48,7 +60,7 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
             card: 'summary_large_image',
             title: post.title,
             description: post.brief,
-            images: ogImageUrl ? [ogImageUrl] : undefined,
+            images: finalOgImage ? [finalOgImage] : undefined,
         }
     };
 }
