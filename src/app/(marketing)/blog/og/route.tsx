@@ -76,7 +76,16 @@ export async function GET(request: NextRequest) {
             }}
           />
           {/* Dark overlay for text readability */}
-          <div tw="absolute inset-0 w-full h-full bg-black/60" />
+           <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            }}
+          />
 
           {/* Centered content */}
           <div
