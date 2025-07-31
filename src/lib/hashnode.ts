@@ -7,14 +7,12 @@ const HASHNODE_GQL_ENDPOINT = (process.env.HASHNODE_GQL_ENDPOINT || "").replace(
 const HASHNODE_PUBLICATION_ID = process.env.HASHNODE_PUBLICATION_ID!;
 const HASHNODE_ACCESS_TOKEN = process.env.NEXT_HASHNODE_ACCESS_TOKEN!;
 
-// All your interfaces (HashnodePost, PageInfo, etc.) remain the same.
-// ...
-
+// Interfaces remain the same...
 export interface HashnodePost {
   id: string;
   slug: string;
   title: string;
-  url: string; 
+  url: string;
   brief: string;
   publishedAt: string;
   updatedAt: string;
@@ -68,80 +66,69 @@ interface HashnodePostResponse {
 }
 
 
-/**
- * Simplified fetch function.
- * It no longer has custom caching logic. Next.js's fetch will automatically
- * "dedupe" requests and inherit the caching/revalidation strategy from the
- * page or layout that calls the function.
- */
 async function fetchFromHashnode<T>(query: string, variables: Record<string, any>): Promise<T> {
-    if (!HASHNODE_GQL_ENDPOINT) {
-        throw new Error('Hashnode GraphQL endpoint is not configured.');
-    }
+  if (!HASHNODE_GQL_ENDPOINT) {
+    throw new Error('Hashnode GraphQL endpoint is not configured.');
+  }
 
-    // The fetch call will now automatically inherit the caching strategy.
-    // Since your page has `revalidate = 600`, this fetch request will be
-    // cached and revalidated on the same schedule.
-    const res = await fetch(HASHNODE_GQL_ENDPOINT, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': HASHNODE_ACCESS_TOKEN
-        },
-        body: JSON.stringify({ query, variables }),
-        // ✅ REMOVED: All custom `cache` and `next` properties.
-        // ✅ REMOVED: The `cacheBuster` query parameter is no longer needed.
-    });
+  const res = await fetch(HASHNODE_GQL_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': HASHNODE_ACCESS_TOKEN
+    },
+    body: JSON.stringify({ query, variables }),
+    // Keep this to ensure Next.js doesn't add its own caching layer on top.
+    cache: 'no-store',
+  });
 
-    if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Hashnode API Error:", errorText);
-        throw new Error(`Failed to fetch from Hashnode API. Status: ${res.status}`);
-    }
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("Hashnode API Error:", errorText);
+    throw new Error(`Failed to fetch from Hashnode API. Status: ${res.status}`);
+  }
 
-    return res.json() as Promise<T>;
+  return res.json() as Promise<T>;
 }
 
+// --- START: CACHE BUSTING CHANGE ---
+// 1. We add a new, unused variable `$cacheBuster` to the query definition.
 const GET_POSTS_QUERY = `
-  query GetPosts($publicationId: ObjectId!, $first: Int!, $after: String) {
-    publication(id: $publicationId) {
-      posts(first: $first, after: $after) {
-        edges {
-          node {
-            id
-            slug
-            title
-            url
-            brief
-            publishedAt
-            updatedAt
-            readTimeInMinutes
-            author {
-                name
-                profilePicture
-            }
-            tags {
-                name
-                slug
-            }
-            coverImage {
-              url
-            }
-          }
-        }
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-      }
-    }
-  }
-`;
+                                                                                                                                                                                                                                                                                                                            query GetPosts($publicationId: ObjectId!, $first: Int!, $after: String, $cacheBuster: String) {
+                                                                                                                                                                                                                                                                                                                                publication(id: $publicationId) {
+                                                                                                                                                                                                                                                                                                                                      posts(first: $first, after: $after) {
+                                                                                                                                                                                                                                                                                                                                              edges {
+                                                                                                                                                                                                                                                                                                                                                        node {
+                                                                                                                                                                                                                                                                                                                                                                    id
+                                                                                                                                                                                                                                                                                                                                                                                slug
+                                                                                                                                                                                                                                                                                                                                                                                            title
+                                                                                                                                                                                                                                                                                                                                                                                                        url
+                                                                                                                                                                                                                                                                                                                                                                                                                    brief
+                                                                                                                                                                                                                                                                                                                                                                                                                                publishedAt
+                                                                                                                                                                                                                                                                                                                                                                                                                                            updatedAt
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        readTimeInMinutes
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    author {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    name
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    profilePicture
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            tags {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            name
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            slug
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    coverImage {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  url
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        pageInfo {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  hasNextPage
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            endCursor
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                `;
 
-/**
- * The getPosts function is now simpler.
- * It no longer needs to worry about passing a revalidate parameter.
- */
 export async function getPosts(
   first: number = 6,
   after?: string | null
@@ -155,6 +142,10 @@ export async function getPosts(
       publicationId: HASHNODE_PUBLICATION_ID,
       first,
       after: after ?? null,
+      // 2. We pass the current timestamp as the value for our new variable.
+      // This makes the body of the POST request unique every time,
+      // bypassing Hashnode's CDN cache.
+      cacheBuster: Date.now().toString(),
     }
   );
   const posts = response.data.publication.posts.edges.map((edge) => edge.node) as any;
@@ -162,39 +153,40 @@ export async function getPosts(
   return { posts, pageInfo };
 }
 
+// Applying the same logic to the single post query for consistency.
 const GET_POST_BY_SLUG_QUERY = `
-  query GetPostBySlug($publicationId: ObjectId!, $slug: String!) {
-    publication(id: $publicationId) {
-      post(slug: $slug) {
-        id
-        slug
-        title
-        url
-        brief
-        publishedAt
-        updatedAt
-        readTimeInMinutes
-        author {
-            name
-            profilePicture
-        }
-        tags {
-            name
-            slug
-        }
-        ogImage: ogMetaData {
-            image
-        }
-        coverImage {
-          url
-        }
-        content {
-          html
-        }
-      }
-    }
-  }
-`;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          query GetPostBySlug($publicationId: ObjectId!, $slug: String!, $cacheBuster: String) {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              publication(id: $publicationId) {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    post(slug: $slug) {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            id
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    slug
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            title
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    url
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            brief
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    publishedAt
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            updatedAt
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    readTimeInMinutes
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            author {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        name
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    profilePicture
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    tags {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                name
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            slug
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ogImage: ogMetaData {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        image
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        coverImage {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  url
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  content {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            html
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                `;
 
 export async function getPostBySlug(
   slug: string
@@ -204,9 +196,10 @@ export async function getPostBySlug(
     {
       publicationId: HASHNODE_PUBLICATION_ID,
       slug,
+      cacheBuster: Date.now().toString(),
     }
   );
-  
+
   const post = response.data.publication.post;
   if (post && post.ogImage) {
     (post.ogImage as any).url = (post.ogImage as any).image;
@@ -214,3 +207,4 @@ export async function getPostBySlug(
   }
   return post;
 }
+
