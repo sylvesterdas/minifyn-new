@@ -7,11 +7,14 @@ const HASHNODE_GQL_ENDPOINT = (process.env.HASHNODE_GQL_ENDPOINT || "").replace(
 const HASHNODE_PUBLICATION_ID = process.env.HASHNODE_PUBLICATION_ID!;
 const HASHNODE_ACCESS_TOKEN = process.env.NEXT_HASHNODE_ACCESS_TOKEN!;
 
+// All your interfaces (HashnodePost, PageInfo, etc.) remain the same.
+// ...
+
 export interface HashnodePost {
   id: string;
   slug: string;
   title: string;
-  url: string; // Canonical URL for the post
+  url: string; 
   brief: string;
   publishedAt: string;
   updatedAt: string;
@@ -64,32 +67,36 @@ interface HashnodePostResponse {
   };
 }
 
-async function fetchFromHashnode<T>(query: string, variables: Record<string, any>, revalidate?: number): Promise<T> {
+
+/**
+ * Simplified fetch function.
+ * It no longer has custom caching logic. Next.js's fetch will automatically
+ * "dedupe" requests and inherit the caching/revalidation strategy from the
+ * page or layout that calls the function.
+ */
+async function fetchFromHashnode<T>(query: string, variables: Record<string, any>): Promise<T> {
     if (!HASHNODE_GQL_ENDPOINT) {
         throw new Error('Hashnode GraphQL endpoint is not configured.');
     }
-    const fetchOptions: RequestInit = {
+
+    // The fetch call will now automatically inherit the caching strategy.
+    // Since your page has `revalidate = 600`, this fetch request will be
+    // cached and revalidated on the same schedule.
+    const res = await fetch(HASHNODE_GQL_ENDPOINT, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': HASHNODE_ACCESS_TOKEN
         },
         body: JSON.stringify({ query, variables }),
-    };
-
-    if (revalidate !== undefined) {
-        fetchOptions.next = { revalidate };
-    } else {
-        // Default to no-store if revalidate is not specified
-        fetchOptions.cache = 'no-store';
-    }
-
-    const separator = HASHNODE_GQL_ENDPOINT.includes('?') ? '&' : '?';
-    const res = await fetch(`${HASHNODE_GQL_ENDPOINT}${separator}cacheBuster=${Math.random()}`, fetchOptions);
+        // ✅ REMOVED: All custom `cache` and `next` properties.
+        // ✅ REMOVED: The `cacheBuster` query parameter is no longer needed.
+    });
 
     if (!res.ok) {
-        console.error("Hashnode API Error:", await res.text());
-        throw new Error('Failed to fetch from Hashnode API');
+        const errorText = await res.text();
+        console.error("Hashnode API Error:", errorText);
+        throw new Error(`Failed to fetch from Hashnode API. Status: ${res.status}`);
     }
 
     return res.json() as Promise<T>;
@@ -131,10 +138,13 @@ const GET_POSTS_QUERY = `
   }
 `;
 
+/**
+ * The getPosts function is now simpler.
+ * It no longer needs to worry about passing a revalidate parameter.
+ */
 export async function getPosts(
   first: number = 6,
-  after?: string | null,
-  revalidate?: number
+  after?: string | null
 ): Promise<{
   posts: any;
   pageInfo: PageInfo;
@@ -145,8 +155,7 @@ export async function getPosts(
       publicationId: HASHNODE_PUBLICATION_ID,
       first,
       after: after ?? null,
-    },
-    revalidate
+    }
   );
   const posts = response.data.publication.posts.edges.map((edge) => edge.node) as any;
   const pageInfo = response.data.publication.posts.pageInfo;
@@ -197,7 +206,7 @@ export async function getPostBySlug(
       slug,
     }
   );
-  // The response has `ogImage.image`, so we need to flatten it
+  
   const post = response.data.publication.post;
   if (post && post.ogImage) {
     (post.ogImage as any).url = (post.ogImage as any).image;
