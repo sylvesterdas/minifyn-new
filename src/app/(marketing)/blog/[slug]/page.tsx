@@ -4,7 +4,6 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { Article, WithContext } from 'schema-dts';
 import { BlogPostDetail } from '@/components/blog-post-detail';
-import { generateBlogCover } from '@/ai/flows/generate-blog-cover-flow';
 
 
 export async function generateMetadata({ params }: { params: any }): Promise<Metadata> {
@@ -20,19 +19,8 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
     const siteUrl = 'https://www.minifyn.com';
     const authorName = post.author?.name || 'Sylvester Das';
     
-    let finalOgImage = post.ogImage?.url;
-
-    if (!finalOgImage) {
-        try {
-            console.log(`No OG image found for "${post.title}", generating a new one.`);
-            const coverImage = await generateBlogCover({ title: post.title });
-            finalOgImage = coverImage.imageUrl;
-        } catch (e) {
-            console.error("Failed to generate blog cover for metadata:", e);
-            finalOgImage = `${siteUrl}/og.png`; // Fallback
-        }
-    }
-
+    // Use the OG image if available, otherwise fall back to the cover image, then a site default.
+    const finalOgImage = post.ogImage?.url || post.coverImage?.url || `${siteUrl}/og.png`;
 
     return {
         title: `${post.title} | MiniFyn Blog`,
