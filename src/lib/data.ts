@@ -66,13 +66,11 @@ async function getUserPlan(userId: string): Promise<UserPlan> {
                 return 'free';
             }
             
-            // If not expired, return current plan
-            return profile.plan || 'free';
+            // If not expired, return current plan, otherwise default to anonymous
+            return profile.plan || 'anonymous';
         }
         
-        // Fallback for users with no profile yet, but have a verified email.
-        if (user.emailVerified) return 'free';
-
+        // Fallback for users with no profile yet
         return 'anonymous';
 
     } catch (error) {
