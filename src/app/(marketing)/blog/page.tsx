@@ -6,7 +6,10 @@ import { BlogPostList } from '@/components/blog-post-list';
 
 const siteUrl = 'https://www.minifyn.com';
 
-export const revalidate = 600; // Revalidate every 10 minutes
+// CHANGE 1: Replaced time-based revalidation with forced dynamic rendering.
+// This is the strongest instruction to ensure the page is never cached and is
+// rebuilt on every single request.
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Blog - MiniFyn',
@@ -17,9 +20,9 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogPage() {
+    // This function will now run on every page load.
     const { posts, pageInfo } = await getPosts(6);
 
-    // Generate structured data on the server
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "ItemList",
@@ -33,7 +36,6 @@ export default async function BlogPage() {
 
     return (
         <div className="container mx-auto px-4 sm:px-6 py-12 md:py-16">
-            {/* Embed structured data in the page */}
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
