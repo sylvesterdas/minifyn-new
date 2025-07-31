@@ -3,11 +3,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
 import { generateOgImage } from '@/ai/flows/generate-og-image-flow';
 import sharp from 'sharp';
-import { Readable } from 'stream';
+import { Readable, Writable } from 'stream';
 
 export const revalidate = 3600; // Cache for 1 hour
 
 const OG_IMAGE_SECRET = process.env.OG_IMAGE_SECRET;
+
+// Helper to convert a Web Stream to a Node.js Readable stream
+function webStreamToNodeReadable(webStream: ReadableStream<Uint8Array>): Readable {
+    const reader = webStream.getReader();
+    const nodeStream = new Readable({
+        read() {
+            reader.read().then(({ done, value }) => {
+                if (done) {
+                    this.push(null);
+                } else {
+                    this.push(Buffer.from(value));
+                }
+            }).catch(err => this.emit('error', err));
+        }
+    });
+    return nodeStream;
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -49,7 +66,14 @@ export async function GET(request: NextRequest) {
           <img
             src={aiBackgroundUrl}
             alt=""
-            tw="absolute inset-0 w-full h-full object-cover"
+            style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+            }}
           />
           {/* Dark overlay for text readability */}
           <div tw="absolute inset-0 w-full h-full bg-black/60" />
@@ -102,18 +126,23 @@ export async function GET(request: NextRequest) {
     );
 
     // 4. Get the readable stream from the ImageResponse
-    const imageStream = imageResponse.body as ReadableStream<Uint8Array>;
+    const imageWebStream = imageResponse.body;
+    if (!imageWebStream) {
+        throw new Error('Failed to get image stream from ImageResponse.');
+    }
+
+    const imageNodeStream = webStreamToNodeReadable(imageWebStream);
 
     // 5. Create a sharp pipeline to compress the stream and output as JPEG
-    const sharpStream = sharp().jpeg({ quality: 100 }); // Changed to jpeg with quality 100
+    const sharpStream = sharp().jpeg({ quality: 90 });
 
     // 6. Pipe the image stream through the sharp pipeline
-    const compressedStream = (imageStream as any).pipe(sharpStream);
+    const compressedStream = imageNodeStream.pipe(sharpStream);
 
     // 7. Return the compressed stream as a new response
     return new NextResponse(compressedStream as any, {
       headers: {
-          'Content-Type': 'image/jpeg', // Changed Content-Type to image/jpeg
+          'Content-Type': 'image/jpeg',
           'Cache-Control': 'public, max-age=3600, must-revalidate',
       },
     });

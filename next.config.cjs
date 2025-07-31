@@ -34,7 +34,7 @@ const nextConfig = {
       },
     ],
   },
-  allowedDevOrigins: ['*.cluster-ubrd2huk7jh6otbgyei4h62ope.cloudworkstations.dev'],
+  allowedDevOrigins: ['**.cloudworkstations.dev'],
 };
 
 export default withBundleAnalyzer(nextConfig);
