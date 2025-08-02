@@ -187,33 +187,33 @@ export function UrlShortenerForm() {
           ) : (
             <SubmitButton disabled={isAuthLoading} />
           )}
+          </CardFooter>
+        </form>
 
-          {shortenedUrl && (
-            <div className="w-full p-3 rounded-md bg-accent/20 border border-accent flex items-center justify-between animate-in fade-in duration-500">
-              <a
-                href={shortenedUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono text-sm text-accent-foreground truncate hover:underline"
-              >
-                {shortenedUrl.replace(/^https?:\/\//, "")}
-              </a>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleCopy}
-                aria-label="Copy to clipboard"
-              >
-                {copied ? (
-                  <Check className="h-4 w-4 text-green-400" />
-                ) : (
-                  <Clipboard className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          )}
-        </CardFooter>
-      </form>
+        {shortenedUrl && (
+          <div className="w-full p-3 rounded-md bg-accent/20 border border-accent flex items-center justify-between animate-in fade-in duration-500">
+            <a
+              href={shortenedUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-sm text-accent-foreground truncate hover:underline"
+            >
+              {shortenedUrl.replace(/^https?:\/\//, "")}
+            </a>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleCopy}
+              aria-label="Copy to clipboard"
+            >
+              {copied ? (
+                <Check className="h-4 w-4 text-green-400" />
+              ) : (
+                <Clipboard className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        )}
     </Card>
   );
 }

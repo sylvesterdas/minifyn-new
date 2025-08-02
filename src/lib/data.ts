@@ -219,8 +219,8 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         twitterDescription: fetchedMetadata.twitterDescription || '',
         twitterImage: fetchedMetadata.twitterImage || '',
         canonical: fetchedMetadata.canonical || '',
-        articleAuthor: fetchedMetadata.articleAuthor,
-        articlePublishedTime: fetchedMetadata.articlePublishedTime,
+        articleAuthor: fetchedMetadata.articleAuthor || '',
+        articlePublishedTime: fetchedMetadata.articlePublishedTime || '',
     };
 
     console.log('[createShortLink] SEO data to be stored:', seoData);
