@@ -7,15 +7,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
-import { createRazorpaySubscription } from '@/app/payments/actions';
 import { useToast } from '@/hooks/use-toast';
-import Script from 'next/script';
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
-import { Switch } from './ui/switch';
-import { Label } from './ui/label';
-import { trackEvent } from '@/lib/gtag';
 
 const freeFeatures = [
     { text: '20 Links / Day', included: true },
@@ -33,12 +28,6 @@ const proFeatures = [
     { text: 'Developer API Access', included: true },
     { text: 'Custom Slugs (Coming Soon)', included: true },
 ];
-
-declare global {
-    interface Window {
-        Razorpay: any;
-    }
-}
 
 function FeatureList({ features }: { features: { text: string; included: boolean }[] }) {
     return (
@@ -59,34 +48,11 @@ function FeatureList({ features }: { features: { text: string; included: boolean
     );
 }
 
-interface PricingPageClientProps {
-    context?: 'pricingPage' | 'onboarding';
-}
-
-export function PricingPageClient({ context = 'pricingPage' }: PricingPageClientProps) {
+export function PricingPageClient() {
     const { user, isLoading: isAuthLoading } = useAuth();
-    const { toast } = useToast();
-    const [isLoading, setIsLoading] = useState(false);
-    const [planType, setPlanType] = useState<'monthly' | 'yearly'>('monthly');
     const router = useRouter();
 
-    const handleUpgrade = async () => {
-        setIsLoading(true);
-
-        const eventLabel = context === 'onboarding' ? 'upgrade_from_onboarding' : 'upgrade_from_pricing_page';
-        trackEvent({ action: 'click_upgrade', category: 'conversion', label: eventLabel, value: planType === 'monthly' ? 89 : 899 });
-
-        // If user is logged in, redirect them to the billing page to upgrade.
-        if (user && !user.isAnonymous) {
-            router.push('/dashboard/settings/billing');
-            return;
-        }
-
-        // If user is not logged in, redirect them to the signup page with params.
-        router.push(`/auth/signup?plan=pro&interval=${planType}`);
-    };
-    
-    if (isAuthLoading && context === 'pricingPage') {
+    if (isAuthLoading) {
         return (
              <div className="grid md:grid-cols-2 gap-8 items-stretch">
                 <Card className="flex flex-col"><CardHeader><Skeleton className="h-8 w-1/4" /><Skeleton className="h-4 w-3/4 mt-2" /></CardHeader><CardContent className="flex-grow space-y-4">{[...Array(6)].map((_, i) => (<Skeleton key={i} className="h-6 w-full" />))}</CardContent><CardFooter><Skeleton className="h-11 w-full" /></CardFooter></Card>
@@ -99,22 +65,6 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
 
     return (
         <>
-            <Script
-                id="razorpay-checkout-js"
-                src="https://checkout.razorpay.com/v1/checkout.js"
-            />
-            <div className="flex justify-center items-center gap-4 mb-8">
-                <Label htmlFor="plan-toggle" className={cn(planType === 'monthly' ? 'text-foreground' : 'text-muted-foreground')}>Monthly</Label>
-                <Switch
-                    id="plan-toggle"
-                    checked={planType === 'yearly'}
-                    onCheckedChange={(checked) => setPlanType(checked ? 'yearly' : 'monthly')}
-                    aria-label="Toggle between monthly and yearly billing"
-                />
-                <Label htmlFor="plan-toggle" className={cn(planType === 'yearly' ? 'text-foreground' : 'text-muted-foreground')}>
-                    Yearly <span className="text-primary font-semibold">(Save 15%)</span>
-                </Label>
-            </div>
             <div className="grid md:grid-cols-2 gap-8 items-stretch">
                 <Card className="flex flex-col">
                     <CardHeader>
@@ -141,35 +91,21 @@ export function PricingPageClient({ context = 'pricingPage' }: PricingPageClient
                     </CardFooter>
                 </Card>
 
-                <Card className="flex flex-col border-primary shadow-lg shadow-primary/10">
+                <Card className="flex flex-col border-primary/50 shadow-lg shadow-primary/10">
                     <CardHeader>
                         <CardTitle className="text-2xl">Pro</CardTitle>
                         <CardDescription>For power users and businesses who need more links and advanced analytics.</CardDescription>
                         <div className="pt-4 transition-all duration-300">
-                             {planType === 'monthly' ? (
-                                <>
-                                    <span className="text-4xl font-bold">₹89</span>
-                                    <span className="text-muted-foreground">/month</span>
-                                </>
-                             ) : (
-                                <>
-                                    <span className="text-4xl font-bold">₹899</span>
-                                    <span className="text-muted-foreground">/year</span>
-                                </>
-                             )}
+                             <span className="text-4xl font-bold">Coming Soon</span>
                         </div>
                     </CardHeader>
                     <CardContent className="flex-grow">
                         <FeatureList features={proFeatures} />
                     </CardContent>
                     <CardFooter>
-                        {userPlan === 'pro' || userPlan === 'admin' ? (
-                            <Button size="lg" className="w-full" disabled>Your Current Plan</Button>
-                        ) : (
-                            <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={isLoading || isAuthLoading}>
-                                {isLoading || isAuthLoading ? <Loader2 className="animate-spin" /> : (user && !user.isAnonymous ? 'Upgrade to Pro' : 'Get Pro')}
-                            </Button>
-                        )}
+                         <Button size="lg" className="w-full" disabled>
+                            Coming Soon
+                        </Button>
                     </CardFooter>
                 </Card>
             </div>

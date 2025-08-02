@@ -1,10 +1,11 @@
 
-import { CheckCircle, QrCode, FileQuestion, LifeBuoy, Zap, Cpu, ShieldCheck, Link as LinkIcon, Lock, Unlock } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, Zap, Cpu, ShieldCheck, Link as LinkIcon, Lock, Unlock } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import NextLink from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 
 
@@ -30,11 +31,11 @@ const proFeatures = [
     { name: "Permanent Links", description: "Your links will never expire." },
     { name: "Advanced Analytics", description: "Track referrers, geographic data, and more with 1-year data retention." },
     { name: "All Free Features", description: "Includes everything in the Free plan." },
-    { name: "Custom Slugs", description: "Personalize your links (Coming Soon)." },
+    { name: "Custom Slugs", description: "Personalize your links." },
     { name: "Priority Support", description: "Get faster help when you need it." },
 ];
 
-function FeatureCard({ title, description, isPro = false }: { title: string; description: string; isPro?: boolean }) {
+function FeatureCard({ title, description, isPro = false, isComingSoon = false }: { title: string; description: string; isPro?: boolean, isComingSoon?: boolean }) {
     return (
         <div className="relative pl-9">
             <dt className="inline font-semibold text-foreground">
@@ -45,6 +46,7 @@ function FeatureCard({ title, description, isPro = false }: { title: string; des
                     {isPro ? <Unlock className="h-4 w-4 text-primary-foreground" /> : <Lock className="h-4 w-4 text-secondary-foreground" />}
                 </div>
                 {title}
+                {isComingSoon && <Badge variant="outline" className="ml-2 border-primary/50 text-primary">Coming Soon</Badge>}
             </dt>
             <dd className="inline pl-2 text-muted-foreground">{description}</dd>
         </div>
@@ -88,12 +90,12 @@ export default function FeaturesPage() {
             <Card className="border-primary shadow-lg shadow-primary/10">
                 <CardHeader>
                     <CardTitle className="text-2xl">Pro Plan Features</CardTitle>
-                    <CardDescription>Unlock powerful tools for professionals and businesses.</CardDescription>
+                    <CardDescription>Powerful tools for professionals and businesses. <span className="font-bold text-primary">Coming Soon!</span></CardDescription>
                 </CardHeader>
                 <CardContent>
                      <dl className="space-y-6 text-base leading-7">
                         {proFeatures.map((feature) => (
-                           <FeatureCard key={feature.name} title={feature.name} description={feature.description} isPro />
+                           <FeatureCard key={feature.name} title={feature.name} description={feature.description} isPro isComingSoon={feature.name === 'Custom Slugs'} />
                         ))}
                     </dl>
                 </CardContent>

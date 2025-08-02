@@ -1,5 +1,5 @@
 
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Link as LinkIcon, BarChart3, Activity, Globe } from 'lucide-react';
 import { getDashboardStats, getAnalyticsSummary } from './actions';
 import { validateRequest } from '@/lib/auth';
@@ -7,6 +7,8 @@ import { redirect } from 'next/navigation';
 import { ClicksChart } from './analytics/clicks-chart';
 import { AnalyticsDetailCard } from './analytics/analytics-detail-card';
 import { LockedFeatureCard } from '@/components/locked-feature-card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,6 +68,10 @@ export default async function DashboardPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Clicks Overview (Last 30 Days)</CardTitle>
+                        <CardDescription>
+                            This is an overview of clicks across all your links. For detailed, link-specific analytics, please visit the{' '}
+                            <Link href="/dashboard/analytics" className="text-primary underline">Analytics</Link> page.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="pl-2">
                          <ClicksChart data={summary.clicksByDay} />
@@ -92,22 +98,38 @@ export default async function DashboardPage() {
                     </>
                  ) : (
                     <>
-                        <LockedFeatureCard title="Top Referrers" description="See which websites are sending you the most traffic.">
-                            {/* Placeholder content for layout */}
-                            <div className="space-y-4">
-                                <div className="flex items-center"><div className="w-4 h-4 mr-3 bg-muted rounded-full" /><div className="flex-1 bg-muted h-4 rounded" /></div>
-                                <div className="flex items-center"><div className="w-4 h-4 mr-3 bg-muted rounded-full" /><div className="flex-1 bg-muted h-4 rounded" /></div>
-                                <div className="flex items-center"><div className="w-4 h-4 mr-3 bg-muted rounded-full" /><div className="flex-1 bg-muted h-4 rounded" /></div>
-                            </div>
-                        </LockedFeatureCard>
-                        <LockedFeatureCard title="Clicks by Platform" description="Understand what devices your audience uses.">
-                            {/* Placeholder content for layout */}
-                             <div className="space-y-4">
-                                <div className="flex items-center"><div className="w-4 h-4 mr-3 bg-muted rounded-full" /><div className="flex-1 bg-muted h-4 rounded" /></div>
-                                <div className="flex items-center"><div className="w-4 h-4 mr-3 bg-muted rounded-full" /><div className="flex-1 bg-muted h-4 rounded" /></div>
-                                <div className="flex items-center"><div className="w-4 h-4 mr-3 bg-muted rounded-full" /><div className="flex-1 bg-muted h-4 rounded" /></div>
-                            </div>
-                        </LockedFeatureCard>
+                       <Card>
+                           <CardHeader>
+                                <CardTitle>Advanced Analytics</CardTitle>
+                                <CardDescription>Unlock detailed insights into your link performance with our Pro plan.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <ul className="space-y-2 text-sm text-muted-foreground">
+                                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> See top referrers</li>
+                                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> Analyze clicks by country, platform, and browser</li>
+                                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-primary" /> Get 1-year data retention</li>
+                                </ul>
+                            </CardContent>
+                            <CardFooter>
+                                <Button asChild variant="secondary" disabled>
+                                    <Link href="/dashboard/settings/billing">Pro Plan Coming Soon</Link>
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                         <Card>
+                           <CardHeader>
+                                <CardTitle>Permanent Links</CardTitle>
+                                <CardDescription>Ensure your links work forever by upgrading to the Pro plan.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                               <p className="text-sm text-muted-foreground">On the Free plan, links expire after 60 days. With Pro, your links are permanent and will never be deleted.</p>
+                            </CardContent>
+                             <CardFooter>
+                                <Button asChild variant="secondary" disabled>
+                                    <Link href="/dashboard/settings/billing">Pro Plan Coming Soon</Link>
+                                </Button>
+                            </CardFooter>
+                        </Card>
                     </>
                  )}
             </div>

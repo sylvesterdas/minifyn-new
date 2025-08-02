@@ -1,5 +1,4 @@
 
-
 'use client';
 
 export const dynamic = 'force-dynamic';
@@ -120,18 +119,18 @@ function AnalyticsPageComponent() {
                     <CardHeader>
                         <CardTitle className="flex items-center justify-center gap-2 text-2xl">
                            <Lock className="h-8 w-8 text-primary"/>
-                            Upgrade for Full Analytics
+                            Pro Feature
                         </CardTitle>
                         <CardDescription>
-                           Get detailed, link-specific analytics by upgrading to our Pro plan.
+                           Detailed, link-specific analytics is a Pro feature.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <p className="text-sm text-muted-foreground mb-4">
-                            Track referrers, geographic location, and more for every link you create.
+                           Our Pro plan is currently invite-only while we migrate our payment systems. Please check back soon!
                         </p>
-                        <Button asChild>
-                            <Link href="/dashboard/settings/billing">Upgrade to Pro</Link>
+                        <Button asChild variant="secondary" disabled>
+                           <Link href="/dashboard/settings/billing">Pro Plan Coming Soon</Link>
                         </Button>
                     </CardContent>
                 </Card>

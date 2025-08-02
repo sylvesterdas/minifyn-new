@@ -50,6 +50,11 @@ function NavLinks({ onLinkClick }: { onLinkClick?: () => void }) {
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
       {visibleNavItems.map(({ href, label, icon: Icon, exact }) => {
+        // Hide Analytics link for free users, even though it's in the list
+        if (label === 'Analytics' && userPlan === 'free') {
+            return null;
+        }
+
         const isActive = exact ? pathname === href : pathname.startsWith(href);
         const linkHref = href === '/dashboard/settings' ? '/dashboard/settings/profile' : href;
         return (
