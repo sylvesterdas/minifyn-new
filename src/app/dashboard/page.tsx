@@ -1,12 +1,11 @@
 
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { Link as LinkIcon, BarChart3, Activity, Globe } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
+import { Link as LinkIcon, BarChart3, CheckCircle } from 'lucide-react';
 import { getDashboardStats, getAnalyticsSummary } from './actions';
 import { validateRequest } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { ClicksChart } from './analytics/clicks-chart';
 import { AnalyticsDetailCard } from './analytics/analytics-detail-card';
-import { LockedFeatureCard } from '@/components/locked-feature-card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 

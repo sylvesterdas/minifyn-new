@@ -20,6 +20,8 @@ import { auth as firebaseClientAuth } from '@/lib/firebase';
 export interface FormState {
     error?: string;
     success?: boolean;
+    plan?: string;
+    interval?: string;
     user?: {
         uid: string;
         email: string;
