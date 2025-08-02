@@ -20,7 +20,7 @@ export default function CancellationAndRefundPolicyPage() {
             <h1 className="text-4xl font-bold">Cancellation and Refund Policy</h1>
             <p className="text-muted-foreground">Last updated: {lastUpdated}</p>
 
-            <p>This policy outlines the terms for cancellations and refunds for the MiniFyn Pro subscription service.</p>
+            <p>This policy outlines the terms for cancellations and refunds for the MiniFyn Pro subscription service. MiniFyn is a product of LJS Works, a registered Indian sole proprietorship (UDYAM-KL-12-0112903).</p>
 
             <h2 className="mt-8 text-2xl font-semibold">1. Subscription and Billing</h2>
             <p>Our Pro plan is provided on a subscription basis. We offer a free tier of service with certain limitations so you can evaluate MiniFyn before purchasing. For the Pro plan, payments are billed in advance on a recurring basis (e.g., monthly or yearly) and are non-refundable.</p>
