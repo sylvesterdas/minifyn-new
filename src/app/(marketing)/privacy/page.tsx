@@ -19,7 +19,7 @@ export default function PrivacyPage() {
             <h1 className="text-4xl font-bold">Privacy Policy</h1>
             <p className="text-muted-foreground">Last updated: {lastUpdated}</p>
 
-            <p>MiniFyn ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and services (collectively, the "Service").</p>
+            <p>MiniFyn is a product of LJS Works, a registered Indian sole proprietorship (UDYAM-KL-12-0112903). This Privacy Policy explains how MiniFyn ("we," "our," or "us") collects, uses, discloses, and safeguards your information when you use our website and services (collectively, the "Service").</p>
 
             <h2 className="mt-8 text-2xl font-semibold">1. Information We Collect</h2>
             <p>We collect information to provide and improve our services. This includes:</p>
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
             <ul>
                 <li><strong>With your consent:</strong> We will share personal information with companies, organizations or individuals outside of MiniFyn when we have your consent to do so.</li>
                 <li><strong>For external processing:</strong> We provide personal information to our affiliates or other trusted businesses or persons to process it for us, based on our instructions and in compliance with our Privacy Policy and any other appropriate confidentiality and security measures. This includes our payment processor, Razorpay.</li>
-                <li><strong>For security screening:</strong> To protect our users and prevent the spread of malicious content, we use Google's Web Risk service. When you shorten a URL, that URL is sent to Google for security analysis. This process is governed by Google's Privacy Policy.</li>
+                <li><strong>For security screening:</strong> To protect our users and prevent the spread of malicious content, we use Google's Web Risk service. When you shorten a URL via our website or API, that URL is sent to Google for security analysis. This process is governed by Google's Privacy Policy.</li>
                 <li><strong>For legal reasons:</strong> We will share personal information if we have a good-faith belief that access, use, preservation or disclosure of the information is reasonably necessary to meet any applicable law, regulation, legal process or enforceable governmental request.</li>
             </ul>
 

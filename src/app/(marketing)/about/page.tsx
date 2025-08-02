@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -16,6 +17,10 @@ export default function AboutPage() {
 
         <p className="lead text-lg mb-8">
           Welcome to MiniFyn! We are a dedicated team passionate about creating intuitive, efficient, and reliable online tools designed to simplify your digital tasks. In today's fast-paced world, we understand the need for quick and effective solutions, and that's precisely what we aim to deliver.
+        </p>
+        
+        <p className="text-md text-muted-foreground">
+            MiniFyn is a product of LJS Works, a registered Indian sole proprietorship (UDYAM-KL-12-0112903).
         </p>
 
         <h2 className="text-3xl font-semibold mt-10 mb-4">Our Mission</h2>

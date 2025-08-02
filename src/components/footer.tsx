@@ -75,7 +75,8 @@ export function Footer() {
                 <FooterColumn title="Legal" links={footerLinks.legal} />
             </div>
             <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-                &copy; {new Date().getFullYear()} MiniFyn. All rights reserved.
+                <p>&copy; {new Date().getFullYear()} MiniFyn. All rights reserved.</p>
+                <p className="mt-2">MiniFyn is a product of LJS Works, a registered Indian sole proprietorship (UDYAM-KL-12-0112903).</p>
             </div>
         </div>
     </footer>
