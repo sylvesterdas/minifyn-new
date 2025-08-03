@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { syncRazorpaySubscription, createRazorpaySubscription, cancelRazorpaySubscription } from '@/app/payments/actions';
 import { useState, useTransition, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Loader2, RefreshCw, AlertTriangle, CheckCircle, Star } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -17,7 +17,6 @@ import { cn } from '@/lib/utils';
 import Script from 'next/script';
 import { trackEvent } from '@/lib/gtag';
 import { format } from 'date-fns';
-import { Skeleton } from '@/components/ui/skeleton';
 
 declare global {
     interface Window {
@@ -26,8 +25,9 @@ declare global {
 }
 
 interface BillingClientComponentProps {
-    user: any; // Replace with actual User type
-    initialSubscription: any; // Replace with actual Subscription type
+    user: any;
+    initialSubscription: any;
+    country: string | null;
 }
 
 function RestorePurchaseButton() {
@@ -86,7 +86,7 @@ function getPlanDetails(plan: string | undefined) {
 }
 
 
-export function BillingClientComponent({ user, initialSubscription }: BillingClientComponentProps) {
+export function BillingClientComponent({ user, initialSubscription, country }: BillingClientComponentProps) {
     const [isLoadingPayment, setIsLoadingPayment] = useState(false);
     const [planType, setPlanType] = useState<'monthly' | 'yearly'>('monthly');
     const [subscription, setSubscription] = useState<any | null>(initialSubscription);
@@ -106,12 +106,12 @@ export function BillingClientComponent({ user, initialSubscription }: BillingCli
 
     const handleUpgrade = async () => {
         if (!user || user.isAnonymous) {
-            router.push(`/auth/signup?plan=pro&interval=${planType}`);
+            router.push(`/auth/signup?plan=${planType}`);
             return;
         }
 
-        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        if (userTimezone !== 'Asia/Kolkata') {
+        // Use the server-provided country code for the check
+        if (country !== 'IN') {
              toast({
                 title: "Coming Soon!",
                 description: "The Pro plan is currently available in India only. We're working on expanding to more countries soon!",
@@ -140,7 +140,6 @@ export function BillingClientComponent({ user, initialSubscription }: BillingCli
                     if (syncResult.success) {
                         toast({ title: "Upgrade Complete!", description: "Your plan has been upgraded to Pro." });
                         trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_upgrade_${planType}`, value: planType === 'monthly' ? 149 : 999 });
-                        // A hard reload is the most reliable way to ensure the session and all server components are updated with the new 'pro' claim.
                         window.location.assign('/dashboard/settings/billing');
                     } else {
                          const errorMessage = ('error' in syncResult && syncResult.error) || "An unknown error occurred during activation.";

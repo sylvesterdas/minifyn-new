@@ -49,19 +49,9 @@ function FeatureList({ features }: { features: { text: string; included: boolean
 
 export function PricingPageClient() {
     const { user, isLoading: isAuthLoading } = useAuth();
-    const { toast } = useToast();
     const router = useRouter();
 
     const handleUpgradeClick = () => {
-        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        if (userTimezone !== 'Asia/Kolkata') {
-             toast({
-                title: "Coming Soon!",
-                description: "The Pro plan is currently available in India only. We're working on expanding to more countries soon!",
-            });
-            return;
-        }
-        
         const href = user ? '/dashboard/settings/billing' : '/auth/signup?plan=pro';
         router.push(href);
     }
