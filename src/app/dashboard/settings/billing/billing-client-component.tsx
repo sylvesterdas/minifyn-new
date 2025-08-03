@@ -110,6 +110,15 @@ export function BillingClientComponent({ user, initialSubscription }: BillingCli
             return;
         }
 
+        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (userTimezone !== 'Asia/Kolkata') {
+             toast({
+                title: "Coming Soon!",
+                description: "The Pro plan is currently available in India only. We're working on expanding to more countries soon!",
+            });
+            return;
+        }
+
         setIsLoadingPayment(true);
         trackEvent({ action: 'click_upgrade', category: 'conversion', label: 'upgrade_from_billing_page', value: planType === 'monthly' ? 149 : 999 });
 

@@ -32,9 +32,9 @@ export interface FormState {
     };
 }
 
-function SubmitButton({ disabled, pending, plan }: { disabled: boolean; pending: boolean; plan: Plan; }) {
+function SubmitButton({ disabled, pending, plan, onClick }: { disabled: boolean; pending: boolean; plan: Plan; onClick: () => void; }) {
     return (
-        <Button type="submit" className="w-full" disabled={pending || disabled}>
+        <Button type="submit" className="w-full" disabled={pending || disabled} onClick={onClick}>
             {pending ? <Loader2 className="animate-spin" /> : (plan === 'pro' ? 'Proceed to Payment' : 'Create a free account')}
         </Button>
     );
@@ -146,6 +146,21 @@ export function SignUpPageComponent() {
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         return passwordRegex.test(pass);
     }
+    
+    const handleSubmitClick = () => {
+        if (selectedPlan === 'pro') {
+            const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (userTimezone !== 'Asia/Kolkata') {
+                toast({
+                    title: "Coming Soon!",
+                    description: "The Pro plan is currently available in India only. We're working on expanding to more countries soon!",
+                });
+                // Prevent form submission by throwing an error that we can catch
+                throw new Error('REGION_NOT_SUPPORTED');
+            }
+        }
+    };
+
 
     return (
         <>
@@ -159,11 +174,26 @@ export function SignUpPageComponent() {
             </CardHeader>
             <form onSubmit={async (e) => {
                 e.preventDefault();
-                setIsSigningUp(true);
-                const formData = new FormData(e.currentTarget);
-                const result = await signup(signupState, formData);
-                setSignupState(result as any);
-                setIsSigningUp(false);
+                try {
+                     if (selectedPlan === 'pro') {
+                        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                        if (userTimezone !== 'Asia/Kolkata') {
+                            toast({
+                                title: "Coming Soon!",
+                                description: "The Pro plan is currently available in India only. We're working on expanding to more countries soon!",
+                            });
+                            return; 
+                        }
+                    }
+                    setIsSigningUp(true);
+                    const formData = new FormData(e.currentTarget);
+                    const result = await signup(signupState, formData);
+                    setSignupState(result as any);
+                } catch (err) {
+                    // This will catch the REGION_NOT_SUPPORTED error and prevent state change
+                } finally {
+                    setIsSigningUp(false);
+                }
             }}>
                 <input type="hidden" name="email" value={email} />
                 <input type="hidden" name="plan" value={selectedPlan} />
@@ -234,7 +264,7 @@ export function SignUpPageComponent() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">
-                    <SubmitButton disabled={!emailVerified || !validatePassword(password) || !termsAccepted} pending={isSigningUp} plan={selectedPlan} />
+                    <SubmitButton disabled={!emailVerified || !validatePassword(password) || !termsAccepted} pending={isSigningUp} plan={selectedPlan} onClick={() => {}} />
                     <div className="text-center text-sm">
                         Already have an account?{' '}
                         <Link href="/auth/signin" className="underline">

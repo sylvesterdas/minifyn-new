@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 const freeFeatures = [
     { text: '20 Links / Day', included: true },
@@ -47,6 +49,22 @@ function FeatureList({ features }: { features: { text: string; included: boolean
 
 export function PricingPageClient() {
     const { user, isLoading: isAuthLoading } = useAuth();
+    const { toast } = useToast();
+    const router = useRouter();
+
+    const handleUpgradeClick = () => {
+        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (userTimezone !== 'Asia/Kolkata') {
+             toast({
+                title: "Coming Soon!",
+                description: "The Pro plan is currently available in India only. We're working on expanding to more countries soon!",
+            });
+            return;
+        }
+        
+        const href = user ? '/dashboard/settings/billing' : '/auth/signup?plan=pro';
+        router.push(href);
+    }
 
     if (isAuthLoading) {
         return (
@@ -103,10 +121,8 @@ export function PricingPageClient() {
                          {userPlan === 'pro' || userPlan === 'admin' ? (
                             <Button size="lg" className="w-full" disabled>Your Current Plan</Button>
                          ) : (
-                            <Button asChild size="lg" className="w-full">
-                                <Link href={user ? '/dashboard/settings/billing' : '/auth/signup?plan=pro'}>
-                                    Upgrade to Pro
-                                </Link>
+                            <Button size="lg" className="w-full" onClick={handleUpgradeClick}>
+                                Upgrade to Pro
                             </Button>
                          )}
                     </CardFooter>
