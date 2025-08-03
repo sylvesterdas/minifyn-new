@@ -31,7 +31,7 @@ const proFeatures = [
     { name: "Permanent Links", description: "Your links will never expire." },
     { name: "Advanced Analytics", description: "Track referrers, geographic data, and more with 1-year data retention." },
     { name: "All Free Features", description: "Includes everything in the Free plan." },
-    { name: "Custom Slugs", description: "Personalize your links." },
+    { name: "Custom Slugs (Coming Soon)", description: "Personalize your links." },
     { name: "Priority Support", description: "Get faster help when you need it." },
 ];
 
@@ -90,12 +90,12 @@ export default function FeaturesPage() {
             <Card className="border-primary shadow-lg shadow-primary/10">
                 <CardHeader>
                     <CardTitle className="text-2xl">Pro Plan Features</CardTitle>
-                    <CardDescription>Powerful tools for professionals and businesses. <span className="font-bold text-primary">Coming Soon!</span></CardDescription>
+                    <CardDescription>Powerful tools for professionals and businesses.</CardDescription>
                 </CardHeader>
                 <CardContent>
                      <dl className="space-y-6 text-base leading-7">
                         {proFeatures.map((feature) => (
-                           <FeatureCard key={feature.name} title={feature.name} description={feature.description} isPro isComingSoon={feature.name === 'Custom Slugs'} />
+                           <FeatureCard key={feature.name} title={feature.name} description={feature.description} isPro isComingSoon={feature.name === 'Custom Slugs (Coming Soon)'} />
                         ))}
                     </dl>
                 </CardContent>

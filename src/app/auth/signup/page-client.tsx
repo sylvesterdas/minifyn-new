@@ -16,6 +16,9 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import { cn } from '@/lib/utils';
 import { signInWithCustomToken } from 'firebase/auth';
 import { auth as firebaseClientAuth } from '@/lib/firebase';
+import { PlanSelector, Plan } from '@/components/plan-selector';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Script from 'next/script';
 
 export interface FormState {
     error?: string;
@@ -29,20 +32,23 @@ export interface FormState {
     };
 }
 
-function SubmitButton({ disabled, pending }: { disabled: boolean; pending: boolean; }) {
+function SubmitButton({ disabled, pending, plan }: { disabled: boolean; pending: boolean; plan: Plan; }) {
     return (
         <Button type="submit" className="w-full" disabled={pending || disabled}>
-            {pending ? <Loader2 className="animate-spin" /> : 'Create a free account'}
+            {pending ? <Loader2 className="animate-spin" /> : (plan === 'pro' ? 'Proceed to Payment' : 'Create a free account')}
         </Button>
     );
 }
 
 export function SignUpPageComponent() {
     const { toast } = useToast();
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [termsAccepted, setTermsAccepted] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState<Plan>((searchParams.get('plan') as Plan) || 'free');
     
     const [isOtpSending, startOtpTransition] = useTransition();
     const [otp, setOtp] = useState('');
@@ -80,9 +86,21 @@ export function SignUpPageComponent() {
         if (signupState.error) {
             toast({ title: 'Error', description: signupState.error, variant: 'destructive' });
         } else if (signupState.success && signupState.user) {
-            handleFreeSignup(signupState.user.customToken);
+            if (signupState.plan === 'free') {
+                handleFreeSignup(signupState.user.customToken);
+            } else if (signupState.plan === 'pro') {
+                // If Pro, redirect to payment page with user info
+                const interval = signupState.interval || 'monthly';
+                const query = new URLSearchParams({
+                    uid: signupState.user.uid,
+                    email: signupState.user.email,
+                    plan: interval,
+                    token: signupState.user.customToken,
+                }).toString();
+                router.push(`/payments/checkout?${query}`);
+            }
         }
-    }, [signupState, toast]);
+    }, [signupState, toast, router]);
 
 
     const handleSendOtp = () => {
@@ -130,11 +148,13 @@ export function SignUpPageComponent() {
     }
 
     return (
+        <>
+        <Script id="razorpay-checkout-js" src="https://checkout.razorpay.com/v1/checkout.js" />
         <Card className="mx-auto max-w-md mb-8">
             <CardHeader>
                 <CardTitle className="text-2xl">Create your account</CardTitle>
                 <CardDescription>
-                    Get started with a free account to manage your links and view analytics.
+                    Get started with a free account or unlock more with Pro.
                 </CardDescription>
             </CardHeader>
             <form onSubmit={async (e) => {
@@ -146,8 +166,12 @@ export function SignUpPageComponent() {
                 setIsSigningUp(false);
             }}>
                 <input type="hidden" name="email" value={email} />
-                <input type="hidden" name="plan" value="free" />
+                <input type="hidden" name="plan" value={selectedPlan} />
                 <CardContent className="grid gap-4">
+                    <div className="grid gap-2">
+                        <Label>Choose your plan</Label>
+                        <PlanSelector selectedPlan={selectedPlan} onPlanChange={setSelectedPlan} />
+                    </div>
                     <div className="grid gap-2">
                         <Label htmlFor="email">Email</Label>
                         <div className="flex gap-2">
@@ -210,7 +234,7 @@ export function SignUpPageComponent() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">
-                    <SubmitButton disabled={!emailVerified || !validatePassword(password) || !termsAccepted} pending={isSigningUp} />
+                    <SubmitButton disabled={!emailVerified || !validatePassword(password) || !termsAccepted} pending={isSigningUp} plan={selectedPlan} />
                     <div className="text-center text-sm">
                         Already have an account?{' '}
                         <Link href="/auth/signin" className="underline">
@@ -220,5 +244,6 @@ export function SignUpPageComponent() {
                 </CardFooter>
             </form>
         </Card>
+        </>
     );
 }

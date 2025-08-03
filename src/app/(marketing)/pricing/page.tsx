@@ -55,10 +55,17 @@ export default function PricingPage() {
         },
         {
             '@type': 'Offer',
-            name: 'Pro Plan',
-            price: '89.00',
+            name: 'Pro Plan Monthly',
+            price: '149.00',
             priceCurrency: 'INR',
             description: 'For power users and businesses who need more links and advanced analytics.',
+        },
+        {
+            '@type': 'Offer',
+            name: 'Pro Plan Yearly',
+            price: '999.00',
+            priceCurrency: 'INR',
+            description: 'For power users and businesses who need more links and advanced analytics, with a discount for yearly payment.',
         }
     ]
   };

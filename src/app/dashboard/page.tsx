@@ -110,8 +110,8 @@ export default async function DashboardPage() {
                                 </ul>
                             </CardContent>
                             <CardFooter>
-                                <Button asChild variant="secondary" disabled>
-                                    <Link href="/dashboard/settings/billing">Pro Plan Coming Soon</Link>
+                                <Button asChild>
+                                    <Link href="/dashboard/settings/billing">Upgrade to Pro</Link>
                                 </Button>
                             </CardFooter>
                         </Card>
@@ -124,8 +124,8 @@ export default async function DashboardPage() {
                                <p className="text-sm text-muted-foreground">On the Free plan, links expire after 60 days. With Pro, your links are permanent and will never be deleted.</p>
                             </CardContent>
                              <CardFooter>
-                                <Button asChild variant="secondary" disabled>
-                                    <Link href="/dashboard/settings/billing">Pro Plan Coming Soon</Link>
+                                <Button asChild>
+                                    <Link href="/dashboard/settings/billing">Upgrade to Pro</Link>
                                 </Button>
                             </CardFooter>
                         </Card>

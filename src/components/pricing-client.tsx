@@ -1,16 +1,13 @@
 
 'use client';
 
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/hooks/use-auth';
-import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useAuth } from '@/lib/auth-client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useRouter } from 'next/navigation';
 
 const freeFeatures = [
     { text: '20 Links / Day', included: true },
@@ -50,7 +47,6 @@ function FeatureList({ features }: { features: { text: string; included: boolean
 
 export function PricingPageClient() {
     const { user, isLoading: isAuthLoading } = useAuth();
-    const router = useRouter();
 
     if (isAuthLoading) {
         return (
@@ -85,7 +81,7 @@ export function PricingPageClient() {
                             <Button size="lg" className="w-full" disabled variant="outline">Downgrade not supported</Button>
                         ) : (
                             <Button asChild size="lg" className="w-full">
-                                <Link href="/auth/signup">Get Started for Free</Link>
+                                <Link href="/auth/signup?plan=free">Get Started for Free</Link>
                             </Button>
                         )}
                     </CardFooter>
@@ -96,16 +92,23 @@ export function PricingPageClient() {
                         <CardTitle className="text-2xl">Pro</CardTitle>
                         <CardDescription>For power users and businesses who need more links and advanced analytics.</CardDescription>
                         <div className="pt-4 transition-all duration-300">
-                             <span className="text-4xl font-bold">Coming Soon</span>
+                             <span className="text-4xl font-bold">₹149</span>
+                             <span className="text-muted-foreground">/month</span>
                         </div>
                     </CardHeader>
                     <CardContent className="flex-grow">
                         <FeatureList features={proFeatures} />
                     </CardContent>
                     <CardFooter>
-                         <Button size="lg" className="w-full" disabled>
-                            Coming Soon
-                        </Button>
+                         {userPlan === 'pro' || userPlan === 'admin' ? (
+                            <Button size="lg" className="w-full" disabled>Your Current Plan</Button>
+                         ) : (
+                            <Button asChild size="lg" className="w-full">
+                                <Link href={user ? '/dashboard/settings/billing' : '/auth/signup?plan=pro'}>
+                                    Upgrade to Pro
+                                </Link>
+                            </Button>
+                         )}
                     </CardFooter>
                 </Card>
             </div>

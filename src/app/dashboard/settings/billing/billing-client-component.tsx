@@ -1,8 +1,9 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/lib/auth-client';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { syncRazorpaySubscription, createRazorpaySubscription, cancelRazorpaySubscription } from '@/app/payments/actions';
@@ -110,7 +111,7 @@ export function BillingClientComponent({ user, initialSubscription }: BillingCli
         }
 
         setIsLoadingPayment(true);
-        trackEvent({ action: 'click_upgrade', category: 'conversion', label: 'upgrade_from_billing_page', value: planType === 'monthly' ? 89 : 899 });
+        trackEvent({ action: 'click_upgrade', category: 'conversion', label: 'upgrade_from_billing_page', value: planType === 'monthly' ? 149 : 999 });
 
         try {
             const subscriptionResult = await createRazorpaySubscription(planType);
@@ -129,7 +130,7 @@ export function BillingClientComponent({ user, initialSubscription }: BillingCli
 
                     if (syncResult.success) {
                         toast({ title: "Upgrade Complete!", description: "Your plan has been upgraded to Pro." });
-                        trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_upgrade_${planType}`, value: planType === 'monthly' ? 89 : 899 });
+                        trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_upgrade_${planType}`, value: planType === 'monthly' ? 149 : 999 });
                         // A hard reload is the most reliable way to ensure the session and all server components are updated with the new 'pro' claim.
                         window.location.assign('/dashboard/settings/billing');
                     } else {
@@ -222,14 +223,14 @@ export function BillingClientComponent({ user, initialSubscription }: BillingCli
                                     aria-label="Toggle between monthly and yearly billing"
                                 />
                                 <Label htmlFor="plan-toggle" className={cn(planType === 'yearly' ? 'text-foreground' : 'text-muted-foreground')}>
-                                    Yearly <span className="text-primary font-semibold">(Save 15%)</span>
+                                    Yearly <span className="text-primary font-semibold">(Save 40%)</span>
                                 </Label>
                             </div>
                             <div className="text-center pt-2 transition-all duration-300 text-4xl font-bold">
                                 {planType === 'monthly' ? (
-                                    <span>₹89 <span className="text-base font-normal text-muted-foreground">/month</span></span>
+                                    <span>₹149 <span className="text-base font-normal text-muted-foreground">/month</span></span>
                                 ) : (
-                                    <span>₹899 <span className="text-base font-normal text-muted-foreground">/year</span></span>
+                                    <span>₹999 <span className="text-base font-normal text-muted-foreground">/year</span></span>
                                 )}
                             </div>
                         </CardContent>
@@ -285,7 +286,7 @@ export function BillingClientComponent({ user, initialSubscription }: BillingCli
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Subscription Not Found</CardTitle>
-                                    <CardDescription>We couldn't find your subscription details, but your Pro plan is active. To manage billing, please use the restore purchase button or contact support.</CardDescription>
+                                    <CardDescription>We could not find your subscription details, but your Pro plan is active. To manage billing, please use the restore purchase button or contact support.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <RestorePurchaseButton />
