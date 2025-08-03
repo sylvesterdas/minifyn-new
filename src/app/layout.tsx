@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://minifyn.com'),
   title: 'MiniFyn - Simple URL Shortener',
   description: 'The simplest way to shorten, share, and track your links',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

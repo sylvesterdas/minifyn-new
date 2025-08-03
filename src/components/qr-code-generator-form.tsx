@@ -9,12 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { QrCode, Download } from 'lucide-react';
-import logo from './assets/logo.png'; // Import the logo
+import Logo from './logo';
 
 export function QrCodeGeneratorForm() {
     const [inputValue, setInputValue] = useState('');
     const [brandedQrImageDataUrl, setBrandedQrImageDataUrl] = useState<string | null>(null);
     const qrcodeRef = useRef<HTMLDivElement>(null);
+    const logoRef = useRef<SVGSVGElement>(null);
 
     const createBrandedQrCode = (qrCodeDataUrl: string): Promise<string> => {
         return new Promise((resolve) => {
@@ -34,9 +35,13 @@ export function QrCodeGeneratorForm() {
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Load logo and QR code images
+            // Serialize SVG to string and then to an image
+            const svgString = new XMLSerializer().serializeToString(logoRef.current!);
+            const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+
             const logoImg = new window.Image();
-            logoImg.src = logo.src;
+            logoImg.src = url;
             
             const qrImg = new window.Image();
             qrImg.src = qrCodeDataUrl;
@@ -47,7 +52,7 @@ export function QrCodeGeneratorForm() {
                 new Promise(res => qrImg.onload = res)
             ]).then(() => {
                  // Draw header (centered)
-                ctx.fillStyle = '#0f172a'; // Dark blue, matching theme
+                ctx.fillStyle = '#0f172a';
                 ctx.font = 'bold 28px Inter, sans-serif';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
@@ -70,6 +75,7 @@ export function QrCodeGeneratorForm() {
                 ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
 
                 resolve(canvas.toDataURL('image/png'));
+                URL.revokeObjectURL(url);
             });
         });
     }
@@ -120,6 +126,10 @@ export function QrCodeGeneratorForm() {
 
     return (
         <Card className="w-full max-w-md bg-card/50 backdrop-blur-sm border-border/20 shadow-2xl shadow-black/20 rounded-t-none">
+            {/* Hidden Logo SVG to be used for branding the QR code */}
+            <div style={{ position: 'absolute', left: '-9999px' }}>
+                <Logo ref={logoRef} />
+            </div>
             <CardHeader>
                 <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
                     <QrCode className="text-primary" />
