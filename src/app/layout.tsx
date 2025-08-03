@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   title: 'MiniFyn - Simple URL Shortener',
   description: 'The simplest way to shorten, share, and track your links',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/favicon.svg',
   },
 };
 
