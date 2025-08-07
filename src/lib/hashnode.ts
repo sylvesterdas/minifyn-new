@@ -1,17 +1,15 @@
 "use server";
 
-// --- START: TEMPORARY HARDCODED VALUES FOR DEBUGGING ---
-// Replace these placeholder values with your actual credentials.
-const HASHNODE_GQL_ENDPOINT = "https://gql.hashnode.com/";
-const HASHNODE_PUBLICATION_ID = "671cb196d70e912325b7ff84";
-const HASHNODE_ACCESS_TOKEN = "40334ec2-94f2-409d-9005-9c9bd6d5bb62";
-// --- END: TEMPORARY HARDCODED VALUES ---
+// Reverting to environment variables as the hardcoded test proved they are not the issue.
+const HASHNODE_GQL_ENDPOINT = process.env.HASHNODE_GQL_ENDPOINT!;
+const HASHNODE_PUBLICATION_ID = process.env.HASHNODE_PUBLICATION_ID!;
+const HASHNODE_ACCESS_TOKEN = process.env.NEXT_HASHNODE_ACCESS_TOKEN!;
 
 export interface HashnodePost {
   id: string;
   slug: string;
   title: string;
-  url: string; 
+  url: string;
   brief: string;
   publishedAt: string;
   updatedAt: string;
@@ -66,65 +64,72 @@ interface HashnodePostResponse {
 
 
 async function fetchFromHashnode<T>(query: string, variables: Record<string, any>): Promise<T> {
-    if (!HASHNODE_GQL_ENDPOINT) {
-        throw new Error('Hashnode GraphQL endpoint is not configured.');
-    }
+  if (!HASHNODE_GQL_ENDPOINT) {
+    throw new Error('Hashnode GraphQL endpoint is not configured.');
+  }
 
-    const res = await fetch(HASHNODE_GQL_ENDPOINT, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': HASHNODE_ACCESS_TOKEN,
-        },
-        body: JSON.stringify({ query, variables }),
-        // It's best to keep this to prevent any Next.js level caching
-        cache: 'no-store',
-    });
+  const res = await fetch(HASHNODE_GQL_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': HASHNODE_ACCESS_TOKEN,
+    },
+    body: JSON.stringify({ query, variables }),
+    cache: 'no-store',
+  });
 
-    if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Hashnode API Error:", errorText);
-        throw new Error(`Failed to fetch from Hashnode API. Status: ${res.status}`);
-    }
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("Hashnode API Error:", errorText);
+    throw new Error(`Failed to fetch from Hashnode API. Status: ${res.status}`);
+  }
 
-    return res.json() as Promise<T>;
+  return res.json() as Promise<T>;
 }
 
-const GET_POSTS_QUERY = `
-  query GetPosts($publicationId: ObjectId!, $first: Int!, $after: String) {
-    publication(id: $publicationId) {
-      posts(first: $first, after: $after) {
-        edges {
-          node {
-            id
-            slug
-            title
-            url
-            brief
-            publishedAt
-            updatedAt
-            readTimeInMinutes
-            author {
-                name
-                profilePicture
-            }
-            tags {
-                name
-                slug
-            }
-            coverImage {
+// --- START: ALIAS CACHE BUSTING ---
+// We generate a unique query string for every request by adding a dynamic alias
+// to a field. This forces the CDN to treat it as a new query.
+const generateGetPostsQuery = () => {
+  const cacheBusterAlias = `_cacheBuster${Date.now()}`;
+  return `
+    query GetPosts($publicationId: ObjectId!, $first: Int!, $after: String) {
+      publication(id: $publicationId) {
+        ${cacheBusterAlias}: __typename # Add a dynamic alias to a meta-field
+        posts(first: $first, after: $after) {
+          edges {
+            node {
+              id
+              slug
+              title
               url
+              brief
+              publishedAt
+              updatedAt
+              readTimeInMinutes
+              author {
+                  name
+                  profilePicture
+              }
+              tags {
+                  name
+                  slug
+              }
+              coverImage {
+                url
+              }
             }
           }
-        }
-        pageInfo {
-          hasNextPage
-          endCursor
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
         }
       }
     }
-  }
-`;
+  `;
+};
+// --- END: ALIAS CACHE BUSTING ---
 
 export async function getPosts(
   first: number = 6,
@@ -133,6 +138,7 @@ export async function getPosts(
   posts: any;
   pageInfo: PageInfo;
 }> {
+  const GET_POSTS_QUERY = generateGetPostsQuery(); // Generate a unique query
   const response = await fetchFromHashnode<HashnodePostsResponse>(
     GET_POSTS_QUERY,
     {
@@ -146,6 +152,7 @@ export async function getPosts(
   return { posts, pageInfo };
 }
 
+// The single post query is less likely to have this issue, but we'll leave it as is for now.
 const GET_POST_BY_SLUG_QUERY = `
   query GetPostBySlug($publicationId: ObjectId!, $slug: String!) {
     publication(id: $publicationId) {
@@ -190,7 +197,7 @@ export async function getPostBySlug(
       slug,
     }
   );
-  
+
   const post = response.data.publication.post;
   if (post && post.ogImage) {
     (post.ogImage as any).url = (post.ogImage as any).image;
