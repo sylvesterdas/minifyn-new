@@ -96,7 +96,7 @@ export async function createRazorpaySubscription(
     return { error: "Invalid plan type selected." };
   }
 
-  const planId = PLAN_IDS[planType];
+  const planId = planType === 'monthly' ? PLAN_IDS.monthly : PLAN_IDS.yearly;
   if (!planId) {
     console.error(
       `[Payment Action] Razorpay plan ID for '${planType}' is not configured for the current environment.`
