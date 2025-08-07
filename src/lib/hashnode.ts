@@ -132,7 +132,7 @@ const generateGetPostsQuery = () => {
 // --- END: ALIAS CACHE BUSTING ---
 
 export async function getPosts(
-  first: number = 6,
+  first: number = 12,
   after?: string | null
 ): Promise<{
   posts: any;
