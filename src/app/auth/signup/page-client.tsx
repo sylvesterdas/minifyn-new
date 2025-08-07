@@ -33,7 +33,7 @@ export interface FormState {
     error?: string;
     success?: boolean;
     plan?: string;
-    interval?: string;
+    interval?: 'monthly' | 'yearly';
     user?: {
         uid: string;
         email: string;
@@ -97,11 +97,9 @@ export function SignUpPageComponent() {
     const handleProSignup = async (user: { uid: string; email: string; customToken: string }, interval: 'monthly' | 'yearly') => {
         setIsLoadingPayment(true);
         try {
-            // First, sign in the user on the client to get an ID token
             const userCredential = await signInWithCustomToken(firebaseClientAuth, user.customToken);
             const idToken = await userCredential.user.getIdToken(true);
 
-            // Now, create the subscription with the valid ID token
             const subscriptionResult = await createRazorpaySubscription(interval, idToken);
 
             if ('error' in subscriptionResult) {
@@ -115,7 +113,7 @@ export function SignUpPageComponent() {
                 description: interval === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
                 handler: async function (response: any) {
                     toast({ title: 'Payment Successful!', description: 'Finalizing your upgrade...' });
-                    const finalIdToken = await userCredential.user.getIdToken(true); // Get a fresh token
+                    const finalIdToken = await userCredential.user.getIdToken(true);
                     const syncResult = await finalizeProSignup(finalIdToken);
 
                     if (syncResult.success) {
@@ -169,8 +167,8 @@ export function SignUpPageComponent() {
         } else if (signupState.success && signupState.user) {
             if (signupState.plan === 'free') {
                 handleFreeSignup(signupState.user.customToken);
-            } else if (signupState.plan === 'pro') {
-                handleProSignup(signupState.user, signupState.interval as 'monthly' | 'yearly');
+            } else if (signupState.plan === 'pro' && signupState.interval) {
+                handleProSignup(signupState.user, signupState.interval);
             }
         }
     }, [signupState]);
