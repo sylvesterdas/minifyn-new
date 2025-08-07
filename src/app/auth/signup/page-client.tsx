@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState, useTransition } from 'react';
-import { sendVerificationOtp, verifyOtp, signup, login } from '@/app/auth/actions';
+import { sendVerificationOtp, verifyOtp, signup, login, finalizeProSignup } from '@/app/auth/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,14 @@ import { auth as firebaseClientAuth } from '@/lib/firebase';
 import { PlanSelector, Plan } from '@/components/plan-selector';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Script from 'next/script';
+import { createRazorpaySubscription } from '@/app/payments/actions';
+
+
+declare global {
+    interface Window {
+        Razorpay: any;
+    }
+}
 
 export interface FormState {
     error?: string;
@@ -60,6 +68,8 @@ export function SignUpPageComponent() {
     
     const [signupState, setSignupState] = useState<FormState>({ success: false });
     const [isSigningUp, setIsSigningUp] = useState(false);
+    
+    const [isLoadingPayment, setIsLoadingPayment] = useState(false);
 
     const handleFreeSignup = async (customToken: string) => {
         try {
@@ -82,6 +92,69 @@ export function SignUpPageComponent() {
         }
     };
     
+    const handleProSignup = async (user: { uid: string; email: string; customToken: string }, interval: 'monthly' | 'yearly') => {
+        setIsLoadingPayment(true);
+        try {
+            const subscriptionResult = await createRazorpaySubscription(interval, user.customToken);
+
+            if ('error' in subscriptionResult) {
+                throw new Error(subscriptionResult.error);
+            }
+            
+            const options = {
+                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                subscription_id: subscriptionResult.subscriptionId,
+                name: "MiniFyn Pro",
+                description: interval === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
+                handler: async function (response: any) {
+                    toast({ title: 'Payment Successful!', description: 'Finalizing your upgrade...' });
+                    const syncResult = await finalizeProSignup(user.customToken);
+
+                    if (syncResult.success) {
+                        toast({ title: "Upgrade Complete!", description: "Your account is now Pro." });
+                        trackEvent({ action: 'purchase', category: 'conversion', label: `pro_plan_signup_${interval}`, value: interval === 'monthly' ? 149 : 999 });
+                        window.location.assign('/dashboard');
+                    } else {
+                        const errorMessage = syncResult.error || "An unknown error occurred during activation.";
+                        toast({ title: "Activation Pending", description: errorMessage, variant: 'destructive' });
+                        setIsLoadingPayment(false);
+                        setIsSigningUp(false);
+                    }
+                },
+                modal: {
+                    ondismiss: () => {
+                        setIsLoadingPayment(false)
+                        setIsSigningUp(false);
+                    }
+                },
+                prefill: {
+                    name: user.uid,
+                    email: user.email,
+                },
+                theme: {
+                    color: "#1e40af"
+                }
+            };
+            
+            const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', function (response: any) {
+                toast({ title: 'Payment Failed', description: response.error.description, variant: 'destructive' });
+                setIsLoadingPayment(false);
+                setIsSigningUp(false);
+            });
+            rzp.open();
+
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: error instanceof Error ? error.message : 'Could not initiate payment.',
+                variant: 'destructive',
+            });
+            setIsLoadingPayment(false);
+            setIsSigningUp(false);
+        }
+    }
+    
     useEffect(() => {
         if (signupState.error) {
             toast({ title: 'Error', description: signupState.error, variant: 'destructive' });
@@ -89,14 +162,7 @@ export function SignUpPageComponent() {
             if (signupState.plan === 'free') {
                 handleFreeSignup(signupState.user.customToken);
             } else if (signupState.plan === 'pro') {
-                const interval = signupState.interval || 'monthly';
-                const query = new URLSearchParams({
-                    uid: signupState.user.uid,
-                    email: signupState.user.email,
-                    plan: interval,
-                    token: signupState.user.customToken,
-                }).toString();
-                router.push(`/payments/checkout?${query}`);
+                handleProSignup(signupState.user, signupState.interval as 'monthly' | 'yearly');
             }
         }
     }, [signupState, toast, router]);
@@ -162,10 +228,12 @@ export function SignUpPageComponent() {
                 const formData = new FormData(e.currentTarget);
                 const result = await signup(signupState, formData);
                 setSignupState(result as any);
-                setIsSigningUp(false);
+                if (!result.success) {
+                    setIsSigningUp(false);
+                }
             }}>
                 <input type="hidden" name="email" value={email} />
-                <input type="hidden" name="plan" value={selectedPlan} />
+                <input type="hidden" name="plan" value={selectedPlan === 'pro' ? 'pro-monthly' : 'free'} />
                 <CardContent className="grid gap-4">
                     <div className="grid gap-2">
                         <Label>Choose your plan</Label>
@@ -233,7 +301,7 @@ export function SignUpPageComponent() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">
-                    <SubmitButton disabled={!emailVerified || !validatePassword(password) || !termsAccepted} pending={isSigningUp} plan={selectedPlan} />
+                    <SubmitButton disabled={!emailVerified || !validatePassword(password) || !termsAccepted || isLoadingPayment} pending={isSigningUp} plan={selectedPlan} />
                     <div className="text-center text-sm">
                         Already have an account?{' '}
                         <Link href="/auth/signin" className="underline">

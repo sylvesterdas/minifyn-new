@@ -56,7 +56,7 @@ export function PlanSelector({ selectedPlan, onPlanChange }: PlanSelectorProps) 
             <CardDescription className="text-xs">For power users</CardDescription>
           </CardHeader>
           <CardContent className="p-0 pt-4">
-            <span className="text-2xl font-bold">₹89</span>
+            <span className="text-2xl font-bold">₹149</span>
             <span className="text-xs text-muted-foreground">/mo</span>
           </CardContent>
         </Label>
@@ -64,4 +64,3 @@ export function PlanSelector({ selectedPlan, onPlanChange }: PlanSelectorProps) 
     </RadioGroup>
   );
 }
-
