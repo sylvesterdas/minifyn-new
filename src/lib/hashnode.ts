@@ -1,11 +1,11 @@
 "use server";
 
-const HASHNODE_GQL_ENDPOINT = (process.env.HASHNODE_GQL_ENDPOINT || "").replace(
-  /;$/,
-  ""
-);
-const HASHNODE_PUBLICATION_ID = process.env.HASHNODE_PUBLICATION_ID!;
-const HASHNODE_ACCESS_TOKEN = process.env.NEXT_HASHNODE_ACCESS_TOKEN!;
+// --- START: TEMPORARY HARDCODED VALUES FOR DEBUGGING ---
+// Replace these placeholder values with your actual credentials.
+const HASHNODE_GQL_ENDPOINT = "https://gql.hashnode.com/";
+const HASHNODE_PUBLICATION_ID = "671cb196d70e912325b7ff84";
+const HASHNODE_ACCESS_TOKEN = "40334ec2-94f2-409d-9005-9c9bd6d5bb62";
+// --- END: TEMPORARY HARDCODED VALUES ---
 
 export interface HashnodePost {
   id: string;
@@ -75,9 +75,9 @@ async function fetchFromHashnode<T>(query: string, variables: Record<string, any
         headers: {
             'Content-Type': 'application/json',
             'Authorization': HASHNODE_ACCESS_TOKEN,
-            'x-cache-bypass': Date.now().toString(),
         },
         body: JSON.stringify({ query, variables }),
+        // It's best to keep this to prevent any Next.js level caching
         cache: 'no-store',
     });
 
@@ -198,4 +198,3 @@ export async function getPostBySlug(
   }
   return post;
 }
-

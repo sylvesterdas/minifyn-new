@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
-import { generateOgImage } from '@/ai/flows/generate-og-image-flow';
+// import { generateOgImage } from '@/ai/flows/generate-og-image-flow';
 import sharp from 'sharp';
 import { Readable, Writable } from 'stream';
 
@@ -43,6 +43,11 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // AI Generation is temporarily disabled.
+    // The code will now always use the fallback logic in the catch block.
+    throw new Error('AI generation is temporarily disabled.');
+    
+    /*
     // 2. Generate the AI background image
     const imageResult = await generateOgImage({ title, tags: tags || '' });
     const { imageUrl: aiBackgroundUrl } = imageResult;
@@ -62,7 +67,7 @@ export async function GET(request: NextRequest) {
             position: 'relative',
           }}
         >
-          {/* Use the AI-generated background image */}
+          {/* Use the AI-generated background image * /}
           <img
             src={aiBackgroundUrl}
             alt=""
@@ -75,7 +80,7 @@ export async function GET(request: NextRequest) {
                 objectFit: 'cover',
             }}
           />
-          {/* Dark overlay for text readability */}
+          {/* Dark overlay for text readability * /}
            <div
             style={{
               position: 'absolute',
@@ -87,7 +92,7 @@ export async function GET(request: NextRequest) {
             }}
           />
 
-          {/* Centered content */}
+          {/* Centered content * /}
           <div
             style={{
               display: 'flex',
@@ -109,7 +114,7 @@ export async function GET(request: NextRequest) {
              </h1>
           </div>
 
-          {/* Branding */}
+          {/* Branding * /}
             <div
                 style={{
                 position: 'absolute',
@@ -155,10 +160,10 @@ export async function GET(request: NextRequest) {
           'Cache-Control': 'public, max-age=3600, must-revalidate',
       },
     });
-
+    */
 
   } catch (e: any) {
-    console.error(`Failed to generate OG image: ${e.message}`);
+    console.error(`OG Image Generation: ${e.message}`);
     // Fallback to a simple image if AI or sharp fails
      return new ImageResponse(
       (
