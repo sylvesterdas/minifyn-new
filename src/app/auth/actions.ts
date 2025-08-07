@@ -314,7 +314,7 @@ export async function finalizeProSignup(idToken: string): Promise<{ success: boo
         }
         
         // Now that the user's plan is 'pro' in the db and claims, create a session cookie.
-        // The idToken is fresh from the client after sign-in, so it's valid.
+        // The idToken is fresh from the client after payment, so it's valid.
         const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
         const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
         await setSessionCookie(sessionCookie);

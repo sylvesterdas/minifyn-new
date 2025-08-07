@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ExternalLink, Check } from 'lucide-react';
+import { Loader2, ExternalLink, Check, Star } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { trackEvent } from '@/lib/gtag';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
@@ -95,7 +95,12 @@ export function SignUpPageComponent() {
     const handleProSignup = async (user: { uid: string; email: string; customToken: string }, interval: 'monthly' | 'yearly') => {
         setIsLoadingPayment(true);
         try {
-            const subscriptionResult = await createRazorpaySubscription(interval, user.customToken);
+            // First, sign in the user on the client to get an ID token
+            const userCredential = await signInWithCustomToken(firebaseClientAuth, user.customToken);
+            const idToken = await userCredential.user.getIdToken(true);
+
+            // Now, create the subscription with the valid ID token
+            const subscriptionResult = await createRazorpaySubscription(interval, idToken);
 
             if ('error' in subscriptionResult) {
                 throw new Error(subscriptionResult.error);
@@ -108,7 +113,8 @@ export function SignUpPageComponent() {
                 description: interval === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
                 handler: async function (response: any) {
                     toast({ title: 'Payment Successful!', description: 'Finalizing your upgrade...' });
-                    const syncResult = await finalizeProSignup(user.customToken);
+                    const finalIdToken = await userCredential.user.getIdToken(true); // Get a fresh token
+                    const syncResult = await finalizeProSignup(finalIdToken);
 
                     if (syncResult.success) {
                         toast({ title: "Upgrade Complete!", description: "Your account is now Pro." });
