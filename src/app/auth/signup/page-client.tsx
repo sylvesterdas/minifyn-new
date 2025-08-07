@@ -20,6 +20,7 @@ import { PlanSelector, Plan } from '@/components/plan-selector';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Script from 'next/script';
 import { createRazorpaySubscription } from '@/app/payments/actions';
+import { Switch } from '@/components/ui/switch';
 
 
 declare global {
@@ -57,6 +58,7 @@ export function SignUpPageComponent() {
     const [password, setPassword] = useState('');
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<Plan>((searchParams.get('plan') as Plan) || 'free');
+    const [planInterval, setPlanInterval] = useState<'monthly' | 'yearly'>('monthly');
     
     const [isOtpSending, startOtpTransition] = useTransition();
     const [otp, setOtp] = useState('');
@@ -171,7 +173,7 @@ export function SignUpPageComponent() {
                 handleProSignup(signupState.user, signupState.interval as 'monthly' | 'yearly');
             }
         }
-    }, [signupState, toast, router]);
+    }, [signupState]);
 
 
     const handleSendOtp = () => {
@@ -239,12 +241,28 @@ export function SignUpPageComponent() {
                 }
             }}>
                 <input type="hidden" name="email" value={email} />
-                <input type="hidden" name="plan" value={selectedPlan === 'pro' ? 'pro-monthly' : 'free'} />
+                <input type="hidden" name="plan" value={selectedPlan === 'pro' ? `pro-${planInterval}` : 'free'} />
                 <CardContent className="grid gap-4">
                     <div className="grid gap-2">
                         <Label>Choose your plan</Label>
                         <PlanSelector selectedPlan={selectedPlan} onPlanChange={setSelectedPlan} />
                     </div>
+
+                    {selectedPlan === 'pro' && (
+                        <div className="flex justify-center items-center gap-4 animate-in fade-in duration-300">
+                           <Label htmlFor="plan-toggle" className={cn(planInterval === 'monthly' ? 'text-foreground' : 'text-muted-foreground')}>Monthly</Label>
+                           <Switch
+                               id="plan-toggle"
+                               checked={planInterval === 'yearly'}
+                               onCheckedChange={(checked) => setPlanInterval(checked ? 'yearly' : 'monthly')}
+                               aria-label="Toggle between monthly and yearly billing"
+                           />
+                           <Label htmlFor="plan-toggle" className={cn(planInterval === 'yearly' ? 'text-foreground' : 'text-muted-foreground')}>
+                               Yearly <span className="text-primary font-semibold">(Save 40%)</span>
+                           </Label>
+                       </div>
+                    )}
+
                     <div className="grid gap-2">
                         <Label htmlFor="email">Email</Label>
                         <div className="flex gap-2">

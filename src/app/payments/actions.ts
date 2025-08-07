@@ -108,7 +108,7 @@ export async function createRazorpaySubscription(
     const options = {
       plan_id: planId,
       customer_notify: true,
-      total_count: planType === "monthly" ? 36 : 3, // 36 monthly payments or 3 yearly
+      total_count: planType === "monthly" ? 12 : 5, // 12 monthly payments (1 year) or 5 yearly (5 years)
       notes: {
         userId: userData.uid,
         email: userData.email || "",
@@ -142,7 +142,8 @@ export async function createRazorpaySubscription(
       "[Payment Action] Error creating Razorpay subscription:",
       error
     );
-    return { error: "Could not create a subscription. Please try again." };
+    const errorMessage = error instanceof Error ? error.message : "Could not create a subscription. Please try again.";
+    return { error: errorMessage };
   }
 }
 
