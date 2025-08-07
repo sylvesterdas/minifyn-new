@@ -7,7 +7,6 @@ const HASHNODE_GQL_ENDPOINT = (process.env.HASHNODE_GQL_ENDPOINT || "").replace(
 const HASHNODE_PUBLICATION_ID = process.env.HASHNODE_PUBLICATION_ID!;
 const HASHNODE_ACCESS_TOKEN = process.env.NEXT_HASHNODE_ACCESS_TOKEN!;
 
-// Interfaces remain the same...
 export interface HashnodePost {
   id: string;
   slug: string;
@@ -71,21 +70,14 @@ async function fetchFromHashnode<T>(query: string, variables: Record<string, any
         throw new Error('Hashnode GraphQL endpoint is not configured.');
     }
 
-    // --- START: CORRECTED CACHE BUSTING ---
-    // We append a unique query parameter to the URL itself.
-    // This makes the request unique to any CDN without altering the GraphQL query body,
-    // thus avoiding the validation error.
-    const url = `${HASHNODE_GQL_ENDPOINT}?cacheBuster=${Date.now()}`;
-    // --- END: CORRECTED CACHE BUSTING ---
-
-    const res = await fetch(url, { // Use the new URL with the cache buster
+    const res = await fetch(HASHNODE_GQL_ENDPOINT, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': HASHNODE_ACCESS_TOKEN
+            'Authorization': HASHNODE_ACCESS_TOKEN,
+            'x-cache-bypass': Date.now().toString(),
         },
         body: JSON.stringify({ query, variables }),
-        // Keep this to ensure Next.js doesn't add its own caching layer on top.
         cache: 'no-store',
     });
 
@@ -98,7 +90,6 @@ async function fetchFromHashnode<T>(query: string, variables: Record<string, any
     return res.json() as Promise<T>;
 }
 
-// The GraphQL queries are now back to their original, clean state.
 const GET_POSTS_QUERY = `
   query GetPosts($publicationId: ObjectId!, $first: Int!, $after: String) {
     publication(id: $publicationId) {
@@ -135,7 +126,6 @@ const GET_POSTS_QUERY = `
   }
 `;
 
-// The function call no longer needs to pass the cacheBuster variable.
 export async function getPosts(
   first: number = 6,
   after?: string | null
