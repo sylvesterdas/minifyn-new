@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from './ui/dialog';
 import { Button } from './ui/button';
-import { ArrowRight, Code, Wand2 } from 'lucide-react';
+import { ArrowRight, Code, Wand2, Link as LinkIcon, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { AdsenseAd } from './adsense-ad';
 import { trackEvent } from '@/lib/gtag';
@@ -55,13 +55,18 @@ export function BlogScrollCta() {
                         </DialogHeader>
                         <div className="space-y-3 mt-4">
                            <Button asChild variant="secondary" className="w-full justify-start">
+                               <Link href="/">
+                                   <LinkIcon className="mr-2"/> URL Shortener
+                               </Link>
+                           </Button>
+                           <Button asChild variant="secondary" className="w-full justify-start">
                                <Link href="/tools/json-formatter">
                                    <Code className="mr-2"/> JSON Formatter
                                </Link>
                            </Button>
                            <Button asChild variant="secondary" className="w-full justify-start">
-                               <Link href="/tools/code-minifier">
-                                   <Code className="mr-2"/> Code Minifier
+                               <Link href="/tools/jwt-debugger">
+                                   <Shield className="mr-2"/> JWT Debugger
                                </Link>
                            </Button>
                         </div>
