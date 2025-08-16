@@ -21,6 +21,7 @@ import { getOrCreateShortUrlForPost } from '@/app/(marketing)/blog/actions';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/gtag';
 import { BlogScrollCta } from './blog-scroll-cta';
+import { AdsenseAd } from './adsense-ad';
 
 // Register languages we expect to use
 hljs.registerLanguage('javascript', javascript);
@@ -93,13 +94,13 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
     return (
         <>
             <BlogScrollCta />
-            <article className="container mx-auto px-4 py-12 md:py-24">
-                <header className="max-w-4xl mx-auto mb-12 text-center">
+            <article>
+                <header className="container mx-auto px-4 py-12 md:py-24 max-w-4xl text-center">
                     <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{post.title}</h1>
                 </header>
 
                 {finalCoverImage && (
-                    <div className="relative aspect-[1.91/1] mb-8 group max-w-6xl mx-auto">
+                    <div className="relative aspect-[1.91/1] mb-8 group max-w-6xl mx-auto px-4">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={finalCoverImage}
@@ -109,8 +110,8 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
                     </div>
                 )}
                 
-                <div className={cn("prose prose-invert mx-auto prose-lg max-w-4xl", "blog-content")} ref={contentRef}>
-                    <header className="mb-8">
+                 <div className={cn("container mx-auto px-4 prose prose-invert mx-auto prose-lg max-w-4xl", "blog-content")} ref={contentRef}>
+                    <header className="mb-8 not-prose">
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
                             <p>By {authorName}</p>
                             <span>&bull;</span>
@@ -140,10 +141,18 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
                     <div dangerouslySetInnerHTML={{ __html: post.content.html }}></div>
                 </div>
 
-                <div className="max-w-2xl mx-auto mt-12">
+                <div className="max-w-2xl mx-auto mt-12 container px-4">
                     <hr className="border-border my-8" />
                     <SocialShare url={shareUrl} title={post.title} />
-                    <hr className="border-border my-8" />
+
+                    {/* New AdSense Placement */}
+                    <div className="my-8 text-center">
+                         <p className="text-xs text-muted-foreground mb-2">Advertisement</p>
+                         <div className="mx-auto bg-muted/20 flex items-center justify-center min-h-[250px]">
+                            <AdsenseAd adClient="ca-pub-4781198854082500" adSlot="9876543210" />
+                         </div>
+                    </div>
+
                     <CtaCard />
                     <hr className="border-border my-8" />
                     <div className="text-center">
