@@ -1,3 +1,4 @@
+
 "use server";
 
 import { getPosts } from "@/lib/hashnode";
@@ -7,7 +8,7 @@ import { SUPER_USER_ID } from "@/lib/config";
 
 export async function loadMorePosts(cursor: string) {
   try {
-    const { posts, pageInfo } = await getPosts(10, cursor);
+    const { posts, pageInfo } = await getPosts(11, cursor);
     return { posts, pageInfo };
   } catch (error) {
     console.error("Failed to fetch more posts:", error);

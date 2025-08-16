@@ -107,12 +107,8 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
         const items: (Post | { type: 'ad'; id: string })[] = [];
         for (let i = 0; i < filteredPosts.length; i++) {
             items.push(filteredPosts[i]);
-            // After the 3rd post (index 2) in a 0-indexed set, insert an ad
-            if ((i + 1) % 10 === 3) {
-                items.push({ type: 'ad', id: `ad-after-post-${i}` });
-            }
-            // After the 7th post (index 6) in a 0-indexed set, insert an ad
-            if ((i + 1) % 10 === 7) {
+            // After the 3rd post of every 11 posts, insert an ad
+            if ((i + 1) % 11 === 3) {
                 items.push({ type: 'ad', id: `ad-after-post-${i}` });
             }
         }
