@@ -105,12 +105,15 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
     // Create a new array with posts and ad placeholders
     const itemsWithAds = useMemo(() => {
         const items: (Post | { type: 'ad'; id: string })[] = [];
+        const postsPerAd = 11;
+
         for (let i = 0; i < filteredPosts.length; i++) {
-            items.push(filteredPosts[i]);
-            // After the 3rd post of every 11 posts, insert an ad
-            if ((i + 1) % 11 === 3) {
-                items.push({ type: 'ad', id: `ad-after-post-${i}` });
+            // Check if we are at the position to insert an ad (position 3, 14, 25, etc.)
+            const positionInBatch = i % postsPerAd;
+            if (positionInBatch === 2) { // Insert ad as the 3rd item (index 2)
+                 items.push({ type: 'ad', id: `ad-after-post-${i}` });
             }
+            items.push(filteredPosts[i]);
         }
         return items;
     }, [filteredPosts]);
