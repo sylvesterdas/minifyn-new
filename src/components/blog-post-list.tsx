@@ -137,7 +137,7 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
                         return (
                         <Card key={post.slug} className="flex flex-col group overflow-hidden rounded-lg shadow-lg hover:shadow-primary/20 transition-all duration-300">
                              <Link href={`/blog/${post.slug}`} className="block overflow-hidden">
-                                <div className="aspect-[16/9] relative">
+                                <div className="aspect-[1.91/1] relative">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={post.coverImage?.url || 'https://placehold.co/600x400.png'}
