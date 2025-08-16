@@ -12,8 +12,8 @@ import { trackEvent } from '@/lib/gtag';
 export function BlogScrollCta() {
     const [isOpen, setIsOpen] = useState(false);
     const hasTriggered = useRef(false);
-    const adClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
-    const adSlot = process.env.NEXT_PUBLIC_ADSENSE_BLOG_ARTICLE_AD_SLOT;
+    const adClient = "ca-pub-4781198854082500";
+    const adSlot = "1558786722";
 
     const handleScroll = useCallback(() => {
         if (hasTriggered.current) return;
@@ -100,4 +100,3 @@ ModifiedDialogContent.displayName = 'DialogContent';
 
 // Overwrite the named export
 (Dialog as any).Content = ModifiedDialogContent;
-
