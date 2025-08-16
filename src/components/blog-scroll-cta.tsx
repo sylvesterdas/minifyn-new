@@ -43,10 +43,10 @@ export function BlogScrollCta() {
                 className="max-w-2xl p-0" 
                 onInteractOutside={(e) => e.preventDefault()}
                 onEscapeKeyDown={(e) => e.preventDefault()}
-                hideCloseButton={true} // A custom prop to control visibility of the default X
+                hideCloseButton={true}
             >
                 <div className="grid md:grid-cols-2">
-                    <div className="p-6 flex flex-col justify-center bg-muted/30">
+                    <div className="p-6 flex flex-col justify-center bg-muted/30 order-last md:order-first">
                         <DialogHeader>
                             <DialogTitle className="text-2xl font-bold flex items-center gap-2"><Wand2 className="text-primary"/>Liked this article?</DialogTitle>
                             <DialogDescription className="pt-2">
@@ -59,7 +59,7 @@ export function BlogScrollCta() {
                                    <LinkIcon className="mr-2"/> URL Shortener
                                </Link>
                            </Button>
-                           <Button asChild variant="secondary" className="w-full justify-start">
+                           <Button asChild variant="secondary" className="w-full justify-start hidden md:flex">
                                <Link href="/tools" target="_blank" rel="noopener noreferrer">
                                    <Code className="mr-2"/> Explore All Dev Tools
                                </Link>
@@ -71,9 +71,11 @@ export function BlogScrollCta() {
                             </Button>
                         </DialogClose>
                     </div>
-                    <div className="p-6 flex flex-col items-center justify-center border-l">
+                    <div className="p-6 flex flex-col items-center justify-center border-b md:border-b-0 md:border-l">
                          <p className="text-xs text-muted-foreground mb-2">Advertisement</p>
-                        <AdsenseAd adSlot={adSlot!} adClient={adClient!} />
+                        <div className="w-full h-[250px] md:h-full flex items-center justify-center">
+                            <AdsenseAd adSlot={adSlot!} adClient={adClient!} />
+                        </div>
                     </div>
                 </div>
             </DialogContent>
