@@ -8,6 +8,7 @@ import { ArrowRight, Code, Wand2 } from 'lucide-react';
 import Link from 'next/link';
 import { AdsenseAd } from './adsense-ad';
 import { trackEvent } from '@/lib/gtag';
+import React from 'react';
 
 export function BlogScrollCta() {
     const [isOpen, setIsOpen] = useState(false);
