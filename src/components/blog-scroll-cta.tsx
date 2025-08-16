@@ -1,0 +1,103 @@
+
+'use client';
+
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from './ui/dialog';
+import { Button } from './ui/button';
+import { ArrowRight, Code, Wand2 } from 'lucide-react';
+import Link from 'next/link';
+import { AdsenseAd } from './adsense-ad';
+import { trackEvent } from '@/lib/gtag';
+
+export function BlogScrollCta() {
+    const [isOpen, setIsOpen] = useState(false);
+    const hasTriggered = useRef(false);
+    const adClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+    const adSlot = process.env.NEXT_PUBLIC_ADSENSE_BLOG_ARTICLE_AD_SLOT;
+
+    const handleScroll = useCallback(() => {
+        if (hasTriggered.current) return;
+
+        const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+        
+        if (scrollPercentage > 25) {
+            setIsOpen(true);
+            hasTriggered.current = true;
+            trackEvent({
+                action: 'show_scroll_cta',
+                category: 'blog_engagement',
+                label: 'Scrolled past 25%'
+            });
+        }
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [handleScroll]);
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent 
+                className="max-w-2xl p-0" 
+                onInteractOutside={(e) => e.preventDefault()}
+                onEscapeKeyDown={(e) => e.preventDefault()}
+                hideCloseButton={true} // A custom prop to control visibility of the default X
+            >
+                <div className="grid md:grid-cols-2">
+                    <div className="p-6 flex flex-col justify-center bg-muted/30">
+                        <DialogHeader>
+                            <DialogTitle className="text-2xl font-bold flex items-center gap-2"><Wand2 className="text-primary"/>Liked this article?</DialogTitle>
+                            <DialogDescription className="pt-2">
+                                Check out our suite of free, privacy-first developer tools. No sign-up required.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-3 mt-4">
+                           <Button asChild variant="secondary" className="w-full justify-start">
+                               <Link href="/tools/json-formatter">
+                                   <Code className="mr-2"/> JSON Formatter
+                               </Link>
+                           </Button>
+                           <Button asChild variant="secondary" className="w-full justify-start">
+                               <Link href="/tools/code-minifier">
+                                   <Code className="mr-2"/> Code Minifier
+                               </Link>
+                           </Button>
+                        </div>
+                         <DialogClose asChild>
+                            <Button variant="link" className="text-muted-foreground mt-4">
+                                No thanks, continue reading
+                            </Button>
+                        </DialogClose>
+                    </div>
+                    <div className="p-6 flex flex-col items-center justify-center border-l">
+                         <p className="text-xs text-muted-foreground mb-2">Advertisement</p>
+                        <AdsenseAd adSlot={adSlot!} adClient={adClient!} />
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+// We need to modify the DialogContent to conditionally hide the close button
+const OriginalDialogContent = DialogContent;
+const ModifiedDialogContent = React.forwardRef<
+  React.ElementRef<typeof OriginalDialogContent>,
+  React.ComponentPropsWithoutRef<typeof OriginalDialogContent> & { hideCloseButton?: boolean }
+>(({ hideCloseButton, children, ...props }, ref) => (
+  <OriginalDialogContent ref={ref} {...props}>
+    {children}
+    {!hideCloseButton && (
+        <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+            <ArrowRight className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+        </DialogClose>
+    )}
+  </OriginalDialogContent>
+));
+ModifiedDialogContent.displayName = 'DialogContent';
+
+// Overwrite the named export
+(Dialog as any).Content = ModifiedDialogContent;
+
