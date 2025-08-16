@@ -93,13 +93,13 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
     return (
         <>
             <BlogScrollCta />
-            <article className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
-                <header className="mb-12 text-center">
+            <article className="container mx-auto px-4 py-12 md:py-24">
+                <header className="max-w-4xl mx-auto mb-12 text-center">
                     <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{post.title}</h1>
                 </header>
 
                 {finalCoverImage && (
-                    <div className="relative aspect-[16/9] mb-8 group">
+                    <div className="relative aspect-[16/9] mb-8 group max-w-6xl mx-auto">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={finalCoverImage}
@@ -109,7 +109,7 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
                     </div>
                 )}
                 
-                <div className={cn("prose prose-invert mx-auto prose-lg", "blog-content")} ref={contentRef}>
+                <div className={cn("prose prose-invert mx-auto prose-lg max-w-4xl", "blog-content")} ref={contentRef}>
                     <header className="mb-8">
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
                             <p>By {authorName}</p>
