@@ -99,7 +99,7 @@ export function BlogPostDetail({ post }: BlogPostDetailProps) {
                 </header>
 
                 {finalCoverImage && (
-                    <div className="relative aspect-[16/9] mb-8 group max-w-6xl mx-auto">
+                    <div className="relative aspect-[1.91/1] mb-8 group max-w-6xl mx-auto">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={finalCoverImage}
