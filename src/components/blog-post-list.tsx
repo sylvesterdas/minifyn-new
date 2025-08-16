@@ -154,7 +154,7 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
                             return (
                                 <Card key={item.id} className="flex flex-col justify-center items-center p-6 bg-muted/20">
                                     <p className="text-xs text-muted-foreground mb-2">Advertisement</p>
-                                    <AdsenseAd adSlot="1111111111" adClient="ca-pub-4781198854082500" />
+                                    <AdsenseAd adSlot="8167307546" adClient="ca-pub-4781198854082500" />
                                 </Card>
                             )
                         }
