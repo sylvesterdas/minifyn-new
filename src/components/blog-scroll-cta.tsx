@@ -60,13 +60,8 @@ export function BlogScrollCta() {
                                </Link>
                            </Button>
                            <Button asChild variant="secondary" className="w-full justify-start">
-                               <Link href="/tools/json-formatter">
-                                   <Code className="mr-2"/> JSON Formatter
-                               </Link>
-                           </Button>
-                           <Button asChild variant="secondary" className="w-full justify-start">
-                               <Link href="/tools/jwt-debugger">
-                                   <Shield className="mr-2"/> JWT Debugger
+                               <Link href="/tools" target="_blank" rel="noopener noreferrer">
+                                   <Code className="mr-2"/> Explore All Dev Tools
                                </Link>
                            </Button>
                         </div>
