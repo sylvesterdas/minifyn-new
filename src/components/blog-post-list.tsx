@@ -15,6 +15,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDebounce } from 'use-debounce';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { AdsenseAd } from './adsense-ad';
 
 type Post = Omit<HashnodePost, 'content' | 'ogImage'>;
 
@@ -131,56 +132,62 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
 
             {filteredPosts.length > 0 ? (
                  <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredPosts.map((post, index) => {
-                        const authorName = post.author?.name || "Sylvester Das";
-                        const authorImage = post.author?.profilePicture;
-                        return (
-                        <Card key={post.slug} className="flex flex-col group overflow-hidden rounded-lg shadow-lg hover:shadow-primary/20 transition-all duration-300">
-                             <Link href={`/blog/${post.slug}`} className="block overflow-hidden">
-                                <div className="aspect-[1.91/1] relative">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
-                                        src={post.coverImage?.url || 'https://placehold.co/600x400.png'}
-                                        alt={post.title}
-                                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                                        loading={index < 3 ? 'eager' : 'lazy'}
-                                        data-ai-hint="blog post"
-                                    />
-                                </div>
-                            </Link>
-                            <CardContent className="p-6 flex flex-col flex-grow">
-                                {post.tags && post.tags.length > 0 && (
-                                    <div className="mb-3 flex flex-wrap gap-2">
-                                        {post.tags.slice(0, 2).map(tag => (
-                                            <Badge key={tag.slug} variant="secondary" className="text-xs">{tag.name}</Badge>
-                                        ))}
+                    {filteredPosts.map((post, index) => (
+                        <React.Fragment key={post.slug}>
+                            <Card className="flex flex-col group overflow-hidden rounded-lg shadow-lg hover:shadow-primary/20 transition-all duration-300">
+                                <Link href={`/blog/${post.slug}`} className="block overflow-hidden">
+                                    <div className="aspect-[1.91/1] relative">
+                                        <img
+                                            src={post.coverImage?.url || 'https://placehold.co/600x400.png'}
+                                            alt={post.title}
+                                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                                            loading={index < 3 ? 'eager' : 'lazy'}
+                                            data-ai-hint="blog post"
+                                        />
                                     </div>
-                                )}
-                                <h2 className="text-xl font-bold mb-3 flex-grow">
-                                    <Link href={`/blog/${post.slug}`} className="hover:text-primary transition-colors">{post.title}</Link>
-                                </h2>
-                                <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
-                                    {post.brief}
-                                </p>
-                                
-                                <div className="mt-auto pt-4 border-t border-border/50">
-                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                        <div className="flex items-center gap-2">
-                                            <Avatar className="h-6 w-6">
-                                                <AvatarImage src={authorImage} alt={authorName} />
-                                                <AvatarFallback>{authorName.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            <span className="font-medium">{authorName}</span>
+                                </Link>
+                                <CardContent className="p-6 flex flex-col flex-grow">
+                                    {post.tags && post.tags.length > 0 && (
+                                        <div className="mb-3 flex flex-wrap gap-2">
+                                            {post.tags.slice(0, 2).map(tag => (
+                                                <Badge key={tag.slug} variant="secondary" className="text-xs">{tag.name}</Badge>
+                                            ))}
                                         </div>
-                                        <div className="flex items-center gap-1.5">
-                                            <Clock className="h-3 w-3" />
-                                            <span>{post.readTimeInMinutes} min read</span>
+                                    )}
+                                    <h2 className="text-xl font-bold mb-3 flex-grow">
+                                        <Link href={`/blog/${post.slug}`} className="hover:text-primary transition-colors">{post.title}</Link>
+                                    </h2>
+                                    <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
+                                        {post.brief}
+                                    </p>
+                                    
+                                    <div className="mt-auto pt-4 border-t border-border/50">
+                                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                            <div className="flex items-center gap-2">
+                                                <Avatar className="h-6 w-6">
+                                                    <AvatarImage src={post.author?.profilePicture} alt={post.author?.name || 'Author'} />
+                                                    <AvatarFallback>{(post.author?.name || 'A').charAt(0)}</AvatarFallback>
+                                                </Avatar>
+                                                <span className="font-medium">{post.author?.name || 'MiniFyn Team'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <Clock className="h-3 w-3" />
+                                                <span>{post.readTimeInMinutes} min read</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )})}
+                                </CardContent>
+                            </Card>
+
+                            {/* Ad insertion logic */}
+                            {index === 3 && (
+                                <Card className="flex flex-col justify-center items-center p-6 bg-muted/20">
+                                     <p className="text-xs text-muted-foreground mb-2">Advertisement</p>
+                                    <AdsenseAd adSlot="1234567890" adClient="ca-pub-4781198854082500" />
+                                </Card>
+                            )}
+                        </React.Fragment>
+                    ))}
                 </div>
             ) : (
                 <div className="text-center py-16">
