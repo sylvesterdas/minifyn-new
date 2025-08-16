@@ -30,6 +30,12 @@ interface BlogPostListProps {
     initialPageInfo: PageInfo;
 }
 
+// Type guard to check if an item is an ad
+function isAd(item: Post | { type: 'ad'; id: string }): item is { type: 'ad'; id: string } {
+    return 'type' in item && item.type === 'ad';
+}
+
+
 export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProps) {
     const router = useRouter();
     const pathname = usePathname();
@@ -105,12 +111,12 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
     // Create a new array with posts and ad placeholders
     const itemsWithAds = useMemo(() => {
         const items: (Post | { type: 'ad'; id: string })[] = [];
-        const postsPerAd = 11; // We have 11 posts per batch
+        const postsPerAd = 11; // We fetch 11 posts per batch
 
         for (let i = 0; i < filteredPosts.length; i++) {
-            // Check if we are at the position to insert an ad
+             // Check if we are at a position to insert an ad
             const positionInBatch = i % postsPerAd;
-            if (positionInBatch === 2) { // Insert ad as the 3rd item (index 2)
+            if (positionInBatch === 2) { // Insert ad as the 3rd item
                  items.push({ type: 'ad', id: `ad-after-post-${i}` });
             }
             items.push(filteredPosts[i]);
@@ -150,15 +156,15 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
             {itemsWithAds.length > 0 ? (
                  <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     {itemsWithAds.map((item, index) => {
-                         if (item.type === 'ad') {
+                         if (isAd(item)) {
                             return (
                                 <Card key={item.id} className="flex flex-col justify-center items-center p-6 bg-muted/20">
                                     <p className="text-xs text-muted-foreground mb-2">Advertisement</p>
-                                    <AdsenseAd adSlot="8167307546" adClient="ca-pub-4781198854082500" />
+                                    <AdsenseAd adSlot="1111111111" adClient="ca-pub-4781198854082500" />
                                 </Card>
                             )
                         }
-                        const post = item as Post;
+                        const post = item;
                         return (
                             <React.Fragment key={post.slug}>
                                 <Card className="flex flex-col group overflow-hidden rounded-lg shadow-lg hover:shadow-primary/20 transition-all duration-300">
