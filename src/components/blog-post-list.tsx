@@ -104,14 +104,17 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
     
     // Create a new array with posts and ad placeholders
     const itemsWithAds = useMemo(() => {
-        const items: (Post | { type: 'ad'; id: string })[] = [...filteredPosts];
-        // Insert ad after the 3rd post (index 3 in a 0-indexed array of 12 items)
-        if (items.length > 3) {
-            items.splice(3, 0, { type: 'ad', id: 'ad-1' });
-        }
-        // Insert ad after the 7th post (index 8 in the array now)
-        if (items.length > 8) {
-            items.splice(8, 0, { type: 'ad', id: 'ad-2' });
+        const items: (Post | { type: 'ad'; id: string })[] = [];
+        for (let i = 0; i < filteredPosts.length; i++) {
+            items.push(filteredPosts[i]);
+            // After the 3rd post (index 2) in a 0-indexed set, insert an ad
+            if ((i + 1) % 10 === 3) {
+                items.push({ type: 'ad', id: `ad-after-post-${i}` });
+            }
+            // After the 7th post (index 6) in a 0-indexed set, insert an ad
+            if ((i + 1) % 10 === 7) {
+                items.push({ type: 'ad', id: `ad-after-post-${i}` });
+            }
         }
         return items;
     }, [filteredPosts]);
@@ -158,50 +161,52 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
                         }
                         const post = item as Post;
                         return (
-                            <Card key={post.slug} className="flex flex-col group overflow-hidden rounded-lg shadow-lg hover:shadow-primary/20 transition-all duration-300">
-                                <Link href={`/blog/${post.slug}`} className="block overflow-hidden">
-                                    <div className="aspect-[1.91/1] relative">
-                                        <img
-                                            src={post.coverImage?.url || 'https://placehold.co/600x400.png'}
-                                            alt={post.title}
-                                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                                            loading={index < 3 ? 'eager' : 'lazy'}
-                                            data-ai-hint="blog post"
-                                        />
-                                    </div>
-                                </Link>
-                                <CardContent className="p-6 flex flex-col flex-grow">
-                                    {post.tags && post.tags.length > 0 && (
-                                        <div className="mb-3 flex flex-wrap gap-2">
-                                            {post.tags.slice(0, 2).map(tag => (
-                                                <Badge key={tag.slug} variant="secondary" className="text-xs">{tag.name}</Badge>
-                                            ))}
+                            <React.Fragment key={post.slug}>
+                                <Card className="flex flex-col group overflow-hidden rounded-lg shadow-lg hover:shadow-primary/20 transition-all duration-300">
+                                    <Link href={`/blog/${post.slug}`} className="block overflow-hidden">
+                                        <div className="aspect-[1.91/1] relative">
+                                            <img
+                                                src={post.coverImage?.url || 'https://placehold.co/600x400.png'}
+                                                alt={post.title}
+                                                className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                                                loading={index < 3 ? 'eager' : 'lazy'}
+                                                data-ai-hint="blog post"
+                                            />
                                         </div>
-                                    )}
-                                    <h2 className="text-xl font-bold mb-3 flex-grow">
-                                        <Link href={`/blog/${post.slug}`} className="hover:text-primary transition-colors">{post.title}</Link>
-                                    </h2>
-                                    <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
-                                        {post.brief}
-                                    </p>
-                                    
-                                    <div className="mt-auto pt-4 border-t border-border/50">
-                                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                            <div className="flex items-center gap-2">
-                                                <Avatar className="h-6 w-6">
-                                                    <AvatarImage src={post.author?.profilePicture} alt={post.author?.name || 'Author'} />
-                                                    <AvatarFallback>{(post.author?.name || 'A').charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <span className="font-medium">{post.author?.name || 'MiniFyn Team'}</span>
+                                    </Link>
+                                    <CardContent className="p-6 flex flex-col flex-grow">
+                                        {post.tags && post.tags.length > 0 && (
+                                            <div className="mb-3 flex flex-wrap gap-2">
+                                                {post.tags.slice(0, 2).map(tag => (
+                                                    <Badge key={tag.slug} variant="secondary" className="text-xs">{tag.name}</Badge>
+                                                ))}
                                             </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <Clock className="h-3 w-3" />
-                                                <span>{post.readTimeInMinutes} min read</span>
+                                        )}
+                                        <h2 className="text-xl font-bold mb-3 flex-grow">
+                                            <Link href={`/blog/${post.slug}`} className="hover:text-primary transition-colors">{post.title}</Link>
+                                        </h2>
+                                        <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
+                                            {post.brief}
+                                        </p>
+                                        
+                                        <div className="mt-auto pt-4 border-t border-border/50">
+                                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-2">
+                                                    <Avatar className="h-6 w-6">
+                                                        <AvatarImage src={post.author?.profilePicture} alt={post.author?.name || 'Author'} />
+                                                        <AvatarFallback>{(post.author?.name || 'A').charAt(0)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <span className="font-medium">{post.author?.name || 'MiniFyn Team'}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <Clock className="h-3 w-3" />
+                                                    <span>{post.readTimeInMinutes} min read</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                    </CardContent>
+                                </Card>
+                            </React.Fragment>
                         )
                     })}
                 </div>
