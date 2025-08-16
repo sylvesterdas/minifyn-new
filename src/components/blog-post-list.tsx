@@ -101,6 +101,20 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
     const handleTagClick = (tagName: string) => {
         setSelectedTag(currentTag => (currentTag === tagName ? null : tagName));
     };
+    
+    // Create a new array with posts and ad placeholders
+    const itemsWithAds = useMemo(() => {
+        const items: (Post | { type: 'ad'; id: string })[] = [...filteredPosts];
+        // Insert ad after the 3rd post (index 3 in a 0-indexed array of 12 items)
+        if (items.length > 3) {
+            items.splice(3, 0, { type: 'ad', id: 'ad-1' });
+        }
+        // Insert ad after the 7th post (index 8 in the array now)
+        if (items.length > 8) {
+            items.splice(8, 0, { type: 'ad', id: 'ad-2' });
+        }
+        return items;
+    }, [filteredPosts]);
 
     return (
         <>
@@ -131,11 +145,20 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
                 </div>
             </div>
 
-            {filteredPosts.length > 0 ? (
+            {itemsWithAds.length > 0 ? (
                  <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredPosts.map((post, index) => (
-                        <React.Fragment key={post.slug}>
-                            <Card className="flex flex-col group overflow-hidden rounded-lg shadow-lg hover:shadow-primary/20 transition-all duration-300">
+                    {itemsWithAds.map((item, index) => {
+                         if (item.type === 'ad') {
+                            return (
+                                <Card key={item.id} className="flex flex-col justify-center items-center p-6 bg-muted/20">
+                                    <p className="text-xs text-muted-foreground mb-2">Advertisement</p>
+                                    <AdsenseAd adSlot="1234567890" adClient="ca-pub-4781198854082500" />
+                                </Card>
+                            )
+                        }
+                        const post = item as Post;
+                        return (
+                            <Card key={post.slug} className="flex flex-col group overflow-hidden rounded-lg shadow-lg hover:shadow-primary/20 transition-all duration-300">
                                 <Link href={`/blog/${post.slug}`} className="block overflow-hidden">
                                     <div className="aspect-[1.91/1] relative">
                                         <img
@@ -179,16 +202,8 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
                                     </div>
                                 </CardContent>
                             </Card>
-
-                            {/* Ad insertion logic */}
-                            {index === 3 && (
-                                <Card className="flex flex-col justify-center items-center p-6 bg-muted/20">
-                                     <p className="text-xs text-muted-foreground mb-2">Advertisement</p>
-                                    <AdsenseAd adSlot="1234567890" adClient="ca-pub-4781198854082500" />
-                                </Card>
-                            )}
-                        </React.Fragment>
-                    ))}
+                        )
+                    })}
                 </div>
             ) : (
                 <div className="text-center py-16">

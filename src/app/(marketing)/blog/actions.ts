@@ -7,7 +7,7 @@ import { SUPER_USER_ID } from "@/lib/config";
 
 export async function loadMorePosts(cursor: string) {
   try {
-    const { posts, pageInfo } = await getPosts(12, cursor);
+    const { posts, pageInfo } = await getPosts(10, cursor);
     return { posts, pageInfo };
   } catch (error) {
     console.error("Failed to fetch more posts:", error);

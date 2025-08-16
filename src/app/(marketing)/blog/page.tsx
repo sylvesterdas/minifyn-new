@@ -20,8 +20,8 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogPage() {
-    // This function will now run on every page load.
-    const { posts, pageInfo } = await getPosts(12);
+    // Fetch 10 posts for the initial load
+    const { posts, pageInfo } = await getPosts(10);
 
     const jsonLd = {
       "@context": "https://schema.org",
