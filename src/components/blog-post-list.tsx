@@ -97,11 +97,6 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
             const result = await loadMorePosts(pageInfo.endCursor!);
             if (result && !result.error) {
                 setPosts(prev => [...prev, ...result.posts]);
-                try {
-                    (window.adsbygoogle = window.adsbygoogle || []).push({});
-                } catch (e) {
-                    console.error("AdSense error", e);
-                }
                 setPageInfo(result.pageInfo);
             } else {
                 console.error(result.error);
@@ -165,7 +160,7 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
                             return (
                                 <Card key={item.id} className="flex flex-col justify-center items-center p-6 bg-muted/20">
                                     <p className="text-xs text-muted-foreground mb-2">Advertisement</p>
-                                    <AdsenseAd adSlot="8167307546" adClient="ca-pub-4781198854082500" />
+                                    <AdsenseAd key={`ad-${index}`} adSlot="8167307546" adClient="ca-pub-4781198854082500" />
                                 </Card>
                             )
                         }

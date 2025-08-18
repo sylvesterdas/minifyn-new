@@ -11,6 +11,19 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self' https://google.com https://*.google.com https://*.googlesyndication.com;"
+          }
+        ],
+      },
+    ];
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
