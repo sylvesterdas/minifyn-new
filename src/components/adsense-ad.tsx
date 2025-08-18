@@ -27,7 +27,7 @@ export function AdsenseAd({ adSlot, adClient }: AdsenseAdProps) {
   return (
     <ins
       className="adsbygoogle"
-      style={{ display: 'block', width: '100%', minHeight: '250px' }}
+      style={{ display: 'block', width: '100%', minHeight: '100%' }}
       data-ad-client={adClient}
       data-ad-slot={adSlot}
       data-ad-format="auto"

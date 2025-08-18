@@ -97,6 +97,11 @@ export function BlogPostList({ initialPosts, initialPageInfo }: BlogPostListProp
             const result = await loadMorePosts(pageInfo.endCursor!);
             if (result && !result.error) {
                 setPosts(prev => [...prev, ...result.posts]);
+                try {
+                    (window.adsbygoogle = window.adsbygoogle || []).push({});
+                } catch (e) {
+                    console.error("AdSense error", e);
+                }
                 setPageInfo(result.pageInfo);
             } else {
                 console.error(result.error);
