@@ -8,6 +8,7 @@ import { ConsentManager } from '@/components/consent-manager';
 import { CookieBanner } from '@/components/cookie-banner';
 import { PageLoader } from '@/components/page-loader';
 import { Suspense } from 'react';
+import Script from 'next/script';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://minifyn.com'),
@@ -31,6 +32,10 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
+        <Script async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4781198854082500"
+          crossOrigin="anonymous">
+        </Script>
         <AuthProvider>
             <Suspense fallback={null}>
               <PageLoader />
