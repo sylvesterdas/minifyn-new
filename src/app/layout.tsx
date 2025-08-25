@@ -11,7 +11,7 @@ import { Suspense } from 'react';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://minifyn.com'),
+  metadataBase: new URL('https://www.minifyn.com'),
   title: 'MiniFyn - Simple URL Shortener',
   description: 'The simplest way to shorten, share, and track your links',
   icons: {

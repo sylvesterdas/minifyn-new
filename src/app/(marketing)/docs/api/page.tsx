@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     },
 };
 
-const curlRequest = `curl -X POST https://minifyn.com/api/shorten \\
+const curlRequest = `curl -X POST https://www.minifyn.com/api/shorten \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"url": "https://your-long-url.com"}'`;

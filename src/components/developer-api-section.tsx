@@ -9,12 +9,12 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 const snippets = {
-    curl: `curl -X POST https://minifyn.com/api/shorten \\
+    curl: `curl -X POST https://www.minifyn.com/api/shorten \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"url": "https://your-long-url.com"}'`,
     
-    javascript: `fetch('https://minifyn.com/api/shorten', {
+    javascript: `fetch('https://www.minifyn.com/api/shorten', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
@@ -41,7 +41,7 @@ headers = {
 payload = {'url': long_url}
 
 response = requests.post(
-    'https://minifyn.com/api/shorten', 
+    'https://www.minifyn.com/api/shorten', 
     headers=headers, 
     data=json.dumps(payload)
 )
@@ -55,7 +55,7 @@ else:
 $apiKey = 'YOUR_API_KEY';
 $longUrl = 'https://your-long-url.com';
 
-$ch = curl_init('https://minifyn.com/api/shorten');
+$ch = curl_init('https://www.minifyn.com/api/shorten');
 
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
