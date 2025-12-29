@@ -5,26 +5,6 @@ const BEARER_TOKEN = process.env.LINKGUARD_BEARER_TOKEN!;
 
 
 export async function POST(req: NextRequest) {
-  const authHeader = req.headers.get('Authorization');
-
-  if (!authHeader) {
-    return new NextResponse(JSON.stringify({ error: 'Authorization header missing' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  // Check if the header is in the correct "Bearer <token>" format
-  const [bearer, token] = authHeader.split(' ');
-
-  if (bearer !== 'Bearer' || !token || token !== BEARER_TOKEN) {
-    return new NextResponse(JSON.stringify({ error: 'Invalid Authorization format' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-
   let url: string;
 
   try {
