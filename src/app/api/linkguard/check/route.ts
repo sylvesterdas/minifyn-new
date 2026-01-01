@@ -63,7 +63,9 @@ export async function POST(req: NextRequest) {
 
     if (feedRes.ok) {
       const text = await feedRes.text();
-      if (text.includes(normalizedUrl)) {
+      const host = new URL(normalizedUrl).hostname;
+
+      if (text.includes(host)) {
         isHardRisk = true;
       }
     }
