@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const WEBRISK_API_KEY = process.env.LINKGUARD_WEBRISK_API_KEY!;
-const BEARER_TOKEN = process.env.LINKGUARD_BEARER_TOKEN!;
-
 
 export async function POST(req: NextRequest) {
   let url: string;
 
+  // -------------------------------
+  // Parse request
+  // -------------------------------
   try {
     const data = await req.json();
     url = String(data?.url || "").trim();
@@ -17,7 +18,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 1. Basic validation
+  // -------------------------------
+  // Basic validation
+  // -------------------------------
   if (!isValidUrl(url)) {
     return NextResponse.json({
       risk: "warning",
@@ -27,9 +30,14 @@ export async function POST(req: NextRequest) {
 
   const normalizedUrl = normalizeUrl(url);
 
-  // 2. Google Web Risk (hard signal)
+  // -------------------------------
+  // HARD SIGNALS (must win)
+  // -------------------------------
+  let isHardRisk = false;
+
+  // Google Web Risk
   try {
-    const webRiskRes = await fetch(
+    const res = await fetch(
       `https://webrisk.googleapis.com/v1/uris:search?` +
         `uri=${encodeURIComponent(normalizedUrl)}` +
         `&threatTypes=MALWARE&threatTypes=SOCIAL_ENGINEERING` +
@@ -37,21 +45,42 @@ export async function POST(req: NextRequest) {
       { cache: "no-store" }
     );
 
-    console.log(await webRiskRes.text())
-    if (webRiskRes.ok) {
-      const json = await webRiskRes.json();
+    if (res.ok) {
+      const json = await res.json();
       if (json.threat?.threatTypes?.length > 0) {
-        return NextResponse.json({
-          risk: "risky",
-          reason: "This link matches known scam reports",
-        });
+        isHardRisk = true;
       }
     }
   } catch {
-    // Fail open — do NOT block user if API fails
+    // fail open
   }
 
-  // 3. Heuristics (soft signals)
+  // OpenPhish (simple text feed)
+  try {
+    const feedRes = await fetch("https://openphish.com/feed.txt", {
+      cache: "no-store",
+    });
+
+    if (feedRes.ok) {
+      const text = await feedRes.text();
+      if (text.includes(normalizedUrl)) {
+        isHardRisk = true;
+      }
+    }
+  } catch {
+    // fail open
+  }
+
+  if (isHardRisk) {
+    return NextResponse.json({
+      risk: "risky",
+      reason: "This link matches known scam or malware reports",
+    });
+  }
+
+  // -------------------------------
+  // SOFT SIGNALS
+  // -------------------------------
   if (isShortenedUrl(normalizedUrl)) {
     return NextResponse.json({
       risk: "warning",
@@ -66,7 +95,9 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // 4. Default
+  // -------------------------------
+  // DEFAULT
+  // -------------------------------
   return NextResponse.json({
     risk: "safe",
     reason: "No known issues found",
@@ -86,7 +117,7 @@ function isValidUrl(value: string): boolean {
 
 function normalizeUrl(value: string): string {
   const u = new URL(value);
-  u.hash = ""; // remove fragment
+  u.hash = "";
   return u.toString().toLowerCase();
 }
 
