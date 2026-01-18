@@ -4,6 +4,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/context/auth-context';
 import { GoogleAnalytics } from '@/components/google-analytics';
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ConsentManager } from '@/components/consent-manager';
 import { CookieBanner } from '@/components/cookie-banner';
 import { PageLoader } from '@/components/page-loader';
@@ -47,6 +49,8 @@ export default function RootLayout({
             <CookieBanner />
           <Toaster />
         </AuthProvider>
+        <Analytics/>
+        <SpeedInsights />
       </body>
     </html>
   );
