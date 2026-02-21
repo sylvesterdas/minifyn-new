@@ -75,14 +75,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const existing = state.records.get(orderId);
-  if (!existing) {
-    return NextResponse.json(
-      { verified: false, reason: "Order not found." },
-      { status: 404 }
-    );
-  }
-
   const digest = crypto
     .createHmac("sha256", keySecret)
     .update(`${orderId}|${paymentId}`)
