@@ -349,8 +349,9 @@ function isValidUrl(value: string): boolean {
 
 function normalizeUrl(value: string): string {
   const u = new URL(value);
-  u.hash = "";
-  return u.toString().toLowerCase();
+  return new URL(
+    `${u.protocol.toLowerCase()}//${u.hostname.toLowerCase()}${u.pathname}${u.search}`
+  ).toString();
 }
 
 function isShortenedUrl(value: string): boolean {
