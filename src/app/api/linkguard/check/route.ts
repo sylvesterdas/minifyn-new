@@ -104,7 +104,8 @@ export async function POST(req: NextRequest) {
 
   const normalizedUrl = normalizeUrl(url);
   const urlHash = sha256Hex(normalizedUrl);
-  if (incomingHash && incomingHash !== urlHash) {
+  const alternateUrlHash = sha256Hex(alternateNormalizeForHash(normalizedUrl));
+  if (incomingHash && incomingHash !== urlHash && incomingHash !== alternateUrlHash) {
     return NextResponse.json(
       {
         risk: "warning",
@@ -572,4 +573,17 @@ function buildIntegrityRequestHash(normalizedUrl: string, urlHash: string): stri
   const input = `url=${normalizedUrl}&url_hash=${urlHash}`;
   const digest = crypto.createHash("sha256").update(input).digest();
   return digest.toString("base64url");
+}
+
+function alternateNormalizeForHash(normalizedUrl: string): string {
+  try {
+    const u = new URL(normalizedUrl);
+    // Flutter Uri.toString() may omit trailing "/" on root path.
+    if (u.pathname === "/" && !u.search) {
+      return `${u.protocol}//${u.host}`;
+    }
+  } catch {
+    // Keep default if URL parsing fails unexpectedly.
+  }
+  return normalizedUrl;
 }
