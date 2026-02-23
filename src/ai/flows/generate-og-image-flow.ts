@@ -22,6 +22,11 @@ const GenerateOgImageOutputSchema = z.object({
 });
 export type GenerateOgImageOutput = z.infer<typeof GenerateOgImageOutputSchema>;
 
+const IMAGE_MODELS = [
+  'googleai/gemini-2.5-flash-image',
+  'googleai/gemini-2.0-flash-exp-image-generation',
+] as const;
+
 // This is the main function that will be called from our application code.
 export async function generateOgImage(input: GenerateOgImageInput): Promise<GenerateOgImageOutput> {
   return generateOgImageFlow(input);
@@ -63,21 +68,27 @@ const generateOgImageFlow = ai.defineFlow(
     console.log(`Generated image prompt: ${imagePrompt}`);
 
     // Step 2: Use the generated prompt to create the image.
-    const {media} = await ai.generate({
-      // IMPORTANT: ONLY this model can generate images.
-      model: 'googleai/gemini-2.0-flash-preview-image-generation',
-      
-      // We use the AI-generated prompt from Step 1.
-      prompt: imagePrompt,
-      
-      config: {
-        // We must request both TEXT and IMAGE for this model to work.
-        responseModalities: ['TEXT', 'IMAGE'],
-      },
-    });
+    let media: { url?: string } | null | undefined;
+    let lastError: unknown;
 
-    if (!media || !media.url) {
-        throw new Error('Image generation failed to produce a result.');
+    for (const model of IMAGE_MODELS) {
+      try {
+        const result = await ai.generate({
+          model,
+          prompt: imagePrompt,
+          config: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          },
+        });
+        media = result.media;
+        if (media?.url) break;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    if (!media?.url) {
+        throw new Error(`Image generation failed to produce a result.${lastError ? ` Last error: ${String(lastError)}` : ''}`);
     }
     
     // The model returns a data URI, which is what we need.

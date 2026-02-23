@@ -20,6 +20,11 @@ const GenerateBlogCoverOutputSchema = z.object({
 });
 export type GenerateBlogCoverOutput = z.infer<typeof GenerateBlogCoverOutputSchema>;
 
+const IMAGE_MODELS = [
+  'googleai/gemini-2.5-flash-image',
+  'googleai/gemini-2.0-flash-exp-image-generation',
+] as const;
+
 // This is the main function that will be called from our application code.
 export async function generateBlogCover(input: GenerateBlogCoverInput): Promise<GenerateBlogCoverOutput> {
   return generateBlogCoverFlow(input);
@@ -35,21 +40,27 @@ const generateBlogCoverFlow = ai.defineFlow(
   async (input) => {
     console.log(`Generating cover image for: ${input.title}`);
     
-    const {media} = await ai.generate({
-      // IMPORTANT: ONLY this model can generate images.
-      model: 'googleai/gemini-2.0-flash-preview-image-generation',
-      
-      // We create a more descriptive prompt for the model.
-      prompt: `Generate a visually appealing, high-quality blog cover image for an article titled "${input.title}". The image should be abstract or conceptual, suitable for a tech or marketing blog. Avoid text and logos. The style should be modern and clean. Aspect ratio should be 16:9.`,
-      
-      config: {
-        // We must request both TEXT and IMAGE for this model to work.
-        responseModalities: ['TEXT', 'IMAGE'],
-      },
-    });
+    let media: { url?: string } | null | undefined;
+    let lastError: unknown;
 
-    if (!media || !media.url) {
-        throw new Error('Image generation failed to produce a result.');
+    for (const model of IMAGE_MODELS) {
+      try {
+        const result = await ai.generate({
+          model,
+          prompt: `Generate a visually appealing, high-quality blog cover image for an article titled "${input.title}". The image should be abstract or conceptual, suitable for a tech or marketing blog. Avoid text and logos. The style should be modern and clean. Aspect ratio should be 16:9.`,
+          config: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          },
+        });
+        media = result.media;
+        if (media?.url) break;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    if (!media?.url) {
+        throw new Error(`Image generation failed to produce a result.${lastError ? ` Last error: ${String(lastError)}` : ''}`);
     }
     
     // The model returns a data URI, which is what we need.
