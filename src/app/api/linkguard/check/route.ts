@@ -7,6 +7,8 @@ export const runtime = "nodejs";
 const WEBRISK_API_KEY = process.env.LINKGUARD_WEBRISK_API_KEY || "";
 const PLAY_INTEGRITY_ENABLED = process.env.LINKGUARD_PLAY_INTEGRITY_ENABLED === "true";
 const PLAY_INTEGRITY_ENFORCE = process.env.LINKGUARD_PLAY_INTEGRITY_ENFORCE === "true";
+const PLAY_INTEGRITY_DEBUG_LOGS =
+  process.env.LINKGUARD_PLAY_INTEGRITY_DEBUG_LOGS === "true";
 const PLAY_INTEGRITY_PACKAGE_NAME = process.env.LINKGUARD_PLAY_PACKAGE_NAME || "";
 const PLAY_INTEGRITY_SERVICE_ACCOUNT_JSON =
   process.env.LINKGUARD_PLAY_SERVICE_ACCOUNT_JSON || "";
@@ -120,6 +122,17 @@ export async function POST(req: NextRequest) {
       requestHash: integrityRequestHash,
       expectedRequestHash,
     });
+
+    if (PLAY_INTEGRITY_DEBUG_LOGS) {
+      console.info("[linkguard][integrity]", {
+        ok: integrityCheck.ok,
+        enforce: PLAY_INTEGRITY_ENFORCE,
+        reason: integrityCheck.reason,
+        hasToken: Boolean(integrityToken),
+        hasRequestHash: Boolean(integrityRequestHash),
+        urlHashPrefix: urlHash.slice(0, 10),
+      });
+    }
 
     if (!integrityCheck.ok && PLAY_INTEGRITY_ENFORCE) {
       return NextResponse.json(
