@@ -23,8 +23,10 @@ const GenerateOgImageOutputSchema = z.object({
 export type GenerateOgImageOutput = z.infer<typeof GenerateOgImageOutputSchema>;
 
 const IMAGE_MODELS = [
-  'googleai/gemini-2.5-flash-image',
   'googleai/gemini-2.0-flash-exp-image-generation',
+  ...(process.env.ENABLE_PREMIUM_IMAGE_MODEL === 'true'
+    ? (['googleai/gemini-2.5-flash-image'] as const)
+    : ([] as const)),
 ] as const;
 
 // This is the main function that will be called from our application code.
