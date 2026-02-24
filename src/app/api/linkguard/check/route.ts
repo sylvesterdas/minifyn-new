@@ -117,11 +117,16 @@ export async function POST(req: NextRequest) {
   }
 
   if (PLAY_INTEGRITY_ENABLED) {
-    const expectedRequestHash = buildIntegrityRequestHash(normalizedUrl, urlHash);
+    const alternateNormalizedUrl = alternateNormalizeForHash(normalizedUrl);
+    const expectedRequestHashes = new Set<string>([
+      buildIntegrityRequestHash(normalizedUrl, urlHash),
+      buildIntegrityRequestHash(alternateNormalizedUrl, alternateUrlHash),
+    ]);
+
     const integrityCheck = await verifyPlayIntegrity({
       token: integrityToken,
       requestHash: integrityRequestHash,
-      expectedRequestHash,
+      expectedRequestHashes: Array.from(expectedRequestHashes),
     });
 
     if (PLAY_INTEGRITY_DEBUG_LOGS) {
@@ -413,7 +418,7 @@ function nowSec(): number {
 type IntegrityVerificationInput = {
   token: string;
   requestHash: string;
-  expectedRequestHash: string;
+  expectedRequestHashes: string[];
 };
 
 type IntegrityVerificationResult = {
@@ -461,7 +466,7 @@ async function verifyPlayIntegrity(
     };
   }
 
-  if (input.requestHash !== input.expectedRequestHash) {
+  if (!input.expectedRequestHashes.includes(input.requestHash)) {
     return {
       ok: false,
       reason: "Play Integrity request hash mismatch.",
@@ -483,7 +488,10 @@ async function verifyPlayIntegrity(
       };
     }
 
-    if (requestDetails?.requestHash !== input.expectedRequestHash) {
+    if (
+      !requestDetails?.requestHash ||
+      !input.expectedRequestHashes.includes(requestDetails.requestHash)
+    ) {
       return {
         ok: false,
         reason: "Play Integrity token request hash mismatch.",
