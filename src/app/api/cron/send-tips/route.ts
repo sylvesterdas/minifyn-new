@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { messaging } from "@/lib/firebase-admin";
+import admin from "firebase-admin";
+
+// Initialize Firebase Admin (Ensures it's only initialized once)
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    }),
+  });
+}
 
 const TIPS = [
   "Hope you stay safe from scams today. Verify suspicious links before opening.",
@@ -52,21 +63,24 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const nowUtc = new Date();
-    const currentHourUtc = nowUtc.getUTCHours();
+    const searchParams = request.nextUrl.searchParams;
+    let topic = searchParams.get("topic");
 
-    // 2. Identify the target timezone offset
-    // Target: Morning (8:00 AM) in local time.
-    // Logic: 8 - currentHourUtc = Offset
-    // Example: If currentHourUtc is 12 (Noon), then Offset is 8 - 12 = -4.
-    // Users in UTC-4 currently have 8:00 AM.
-    const targetOffset = 8 - currentHourUtc;
+    if (!topic) {
+      const nowUtc = new Date();
+      const currentHourUtc = nowUtc.getUTCHours();
 
-    // Construct topic name matching the Flutter side logic
-    const prefix = targetOffset >= 0 ? "p" : "m";
-    const topic = `tips_offset_${prefix}${Math.abs(targetOffset)}`;
+      // Target: Morning (8:00 AM) in local time.
+      // Logic: 8 - currentHourUtc = Offset
+      const targetOffset = 8 - currentHourUtc;
+
+      // Construct topic name matching the Flutter side logic
+      const prefix = targetOffset >= 0 ? "p" : "m";
+      topic = `tips_offset_${prefix}${Math.abs(targetOffset)}`;
+    }
 
     // 3. Pick a tip based on the day of the year
+    const nowUtc = new Date();
     const dayOfYear = Math.floor(
       (nowUtc.getTime() - new Date(nowUtc.getFullYear(), 0, 0).getTime()) /
         86400000,
@@ -86,7 +100,7 @@ export async function GET(request: NextRequest) {
       topic: topic,
     };
 
-    const response = await messaging.send(payload);
+    const response = await admin.messaging().send(payload);
 
     return NextResponse.json({
       success: true,
