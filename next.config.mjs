@@ -49,7 +49,7 @@ const nextConfig = {
       },
     ],
   },
-  allowedDevOrigins: ['**.cloudworkstations.dev'],
+  allowedDevOrigins: ['10.217.12.20', '10.0.2.2', 'localhost', '**.cloudworkstations.dev'],
 };
 
 export default withBundleAnalyzer(nextConfig);

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useEffect, useState, useRef, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { useToast } from "@/hooks/use-toast";
 import { shortenUrl, type FormState } from "@/app/actions";
 import { Input } from "@/components/ui/input";
@@ -85,7 +85,7 @@ export function UrlShortenerForm() {
   }, []);
 
   const initialState: FormState = { success: false, message: "", shortUrl: "" };
-  const [state, formAction] = useFormState(
+  const [state, formAction] = useActionState(
     shortenUrl,
     initialState
   );
