@@ -58,7 +58,7 @@ const TIPS = [
 export async function GET(request: NextRequest) {
   // 1. Security Check: Only allow Vercel Cron to trigger this
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${process.env.LINKGUARD_BEARER_TOKEN}`) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
