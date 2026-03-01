@@ -1,16 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import admin from "firebase-admin";
-
-// Initialize Firebase Admin (Ensures it's only initialized once)
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-    }),
-  });
-}
+import { messaging } from "@/lib/firebase-admin";
 
 const TIPS = [
   "Hope you stay safe from scams today. Verify suspicious links before opening.",
@@ -56,7 +45,7 @@ const TIPS = [
 ];
 
 export async function GET(request: NextRequest) {
-  // 1. Security Check: Only allow Vercel Cron to trigger this
+  // Security Check: Only allow requests with the correct Bearer Token
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.LINKGUARD_BEARER_TOKEN}`) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -71,7 +60,7 @@ export async function GET(request: NextRequest) {
       const currentHourUtc = nowUtc.getUTCHours();
 
       // Target: Morning (8:00 AM) in local time.
-      // Logic: 8 - currentHourUtc = Offset
+      // Users in target timezone currently have 8:00 AM.
       const targetOffset = 8 - currentHourUtc;
 
       // Construct topic name matching the Flutter side logic
@@ -79,7 +68,7 @@ export async function GET(request: NextRequest) {
       topic = `tips_offset_${prefix}${Math.abs(targetOffset)}`;
     }
 
-    // 3. Pick a tip based on the day of the year
+    // Pick a tip based on the day of the year
     const nowUtc = new Date();
     const dayOfYear = Math.floor(
       (nowUtc.getTime() - new Date(nowUtc.getFullYear(), 0, 0).getTime()) /
@@ -88,7 +77,6 @@ export async function GET(request: NextRequest) {
     const tipIndex = dayOfYear % TIPS.length;
     const message = TIPS[tipIndex];
 
-    // 4. Send the notification
     const payload = {
       notification: {
         title: "Daily Link Safety Tip",
@@ -100,7 +88,8 @@ export async function GET(request: NextRequest) {
       topic: topic,
     };
 
-    const response = await admin.messaging().send(payload);
+    // Using your existing messaging instance from @/lib/firebase-admin
+    const response = await messaging.send(payload);
 
     return NextResponse.json({
       success: true,
