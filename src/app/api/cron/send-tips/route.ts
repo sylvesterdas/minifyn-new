@@ -45,7 +45,6 @@ const TIPS = [
 ];
 
 export async function GET(request: NextRequest) {
-  // Security Check: Only allow requests with the correct Bearer Token
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.LINKGUARD_BEARER_TOKEN}`) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -55,21 +54,17 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     let topic = searchParams.get("topic");
 
+    const nowUtc = new Date();
+    
     if (!topic) {
-      const nowUtc = new Date();
       const currentHourUtc = nowUtc.getUTCHours();
-
       // Target: Morning (8:00 AM) in local time.
-      // Users in target timezone currently have 8:00 AM.
       const targetOffset = 8 - currentHourUtc;
-
-      // Construct topic name matching the Flutter side logic
       const prefix = targetOffset >= 0 ? "p" : "m";
       topic = `tips_offset_${prefix}${Math.abs(targetOffset)}`;
     }
 
-    // Pick a tip based on the day of the year
-    const nowUtc = new Date();
+    // Pick a tip based on the day of the year (deterministic)
     const dayOfYear = Math.floor(
       (nowUtc.getTime() - new Date(nowUtc.getFullYear(), 0, 0).getTime()) /
         86400000,
@@ -83,12 +78,14 @@ export async function GET(request: NextRequest) {
         body: message,
       },
       android: {
-        priority: "high" as const,
+        priority: "normal" as const, // Normal priority is less likely to trigger sound
+        notification: {
+          channelId: "daily_safety_tips_v2", // Matches the silent channel in Flutter
+        }
       },
       topic: topic,
     };
 
-    // Using your existing messaging instance from @/lib/firebase-admin
     const response = await messaging.send(payload);
 
     return NextResponse.json({
