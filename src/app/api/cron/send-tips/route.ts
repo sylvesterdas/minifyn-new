@@ -1,16 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import admin from "firebase-admin";
-
-// Initialize Firebase Admin (Ensures it's only initialized once)
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\/g/, ""),
-    }),
-  });
-}
+import { messaging } from "@/lib/firebase-admin";
 
 const TIPS = [
   "Hope you stay safe from scams today. Verify suspicious links before opening.",
@@ -97,7 +86,7 @@ export async function GET(request: NextRequest) {
       topic: topic,
     };
 
-    const response = await admin.messaging().send(payload);
+    const response = await messaging.send(payload);
 
     return NextResponse.json({
       success: true,

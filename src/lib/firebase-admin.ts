@@ -1,6 +1,7 @@
 import { getApps, initializeApp, cert, getApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getDatabase } from 'firebase-admin/database';
+import { getMessaging } from 'firebase-admin/messaging';
 
 const getAdminApp = () => {
   if (getApps().length) {
@@ -32,3 +33,4 @@ const adminApp = getAdminApp();
 
 export const auth = getAuth(adminApp);
 export const db = getDatabase(adminApp);
+export const messaging = getMessaging(adminApp);
