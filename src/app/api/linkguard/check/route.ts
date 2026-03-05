@@ -200,8 +200,55 @@ export async function POST(req: NextRequest) {
   }
 }
 
+function hasSuspiciousChars(value: string): { reason: string } | null {
+  try {
+    const u = new URL(value);
+    const host = u.hostname;
+
+    // Check for invisible or zero-width characters.
+    // U+200B: Zero Width Space
+    // U+200C: Zero Width Non-Joiner
+    // U+200D: Zero Width Joiner
+    // U+FEFF: Zero Width No-Break Space / BOM
+    // U+00AD: Soft Hyphen
+    if (/[\u200B-\u200D\uFEFF\u00AD]/.test(host)) {
+      return { reason: "Link contains invisible characters" };
+    }
+
+    // Check for mixed scripts (e.g., Latin and Cyrillic characters).
+    // This is a strong indicator of a potential homoglyph attack.
+    const scripts: { [key: string]: RegExp } = {
+      Latin: /[a-zA-Z]/,
+      Cyrillic: /[\u0400-\u04FF]/,
+      Greek: /[\u0370-\u03FF]/,
+    };
+
+    const detectedScripts = Object.keys(scripts).filter((script) =>
+      scripts[script].test(host)
+    );
+
+    if (detectedScripts.length > 1) {
+      return {
+        reason: `Link contains mixed scripts (${detectedScripts.join(", ")})`,
+      };
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 async function computeVerdict(normalizedUrl: string): Promise<Verdict> {
   const checked_at = nowSec();
+
+  const suspiciousChars = hasSuspiciousChars(normalizedUrl);
+  if (suspiciousChars) {
+    return {
+      risk: "warning",
+      reason: suspiciousChars.reason,
+      checked_at,
+    };
+  }
 
   const [webRiskHit, openPhishHit] = await Promise.all([
     checkWebRisk(normalizedUrl),
@@ -586,9 +633,10 @@ function buildIntegrityRequestHash(normalizedUrl: string, urlHash: string): stri
 function alternateNormalizeForHash(normalizedUrl: string): string {
   try {
     const u = new URL(normalizedUrl);
-    // Flutter Uri.toString() may omit trailing "/" on root path.
-    if (u.pathname === "/" && !u.search) {
-      return `${u.protocol}//${u.host}`;
+    // Flutter Uri.toString() may omit trailing "/" on root path, including
+    // root URLs that still carry query params.
+    if (u.pathname === "/") {
+      return `${u.protocol}//${u.host}${u.search}`;
     }
   } catch {
     // Keep default if URL parsing fails unexpectedly.
