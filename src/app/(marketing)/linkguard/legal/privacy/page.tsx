@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function LinkGuardPrivacyPage() {
-  const lastUpdated = "February 21, 2026";
+  const lastUpdated = "March 12, 2026";
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
@@ -57,11 +57,14 @@ export default function LinkGuardPrivacyPage() {
             credentials on our servers.
           </li>
           <li>
-            For payment verification and audit, we store minimal transaction
-            references only: <code>order_id</code>, <code>payment_id</code>,
-            <code>status</code>, and <code>timestamp</code>.
+            LinkGuard payment verification is stateless. Our backend does not
+            maintain a long-term user payment database for Pro entitlement.
           </li>
           <li>We do not require creation of a personal account for Pro unlock.</li>
+          <li>
+            Razorpay and infrastructure providers may process and retain their own
+            operational logs/transaction records under their respective policies.
+          </li>
         </ul>
 
         <h2>On-device data</h2>
@@ -69,10 +72,21 @@ export default function LinkGuardPrivacyPage() {
           <li>Link analysis cache is stored locally on your device.</li>
           <li>Pro unlock status is stored locally on your device.</li>
           <li>
+            Recovery code and entitlement metadata are stored locally to support
+            restore flows.
+          </li>
+          <li>
             Device backup/restore behavior may depend on Android system backup
             settings.
           </li>
         </ul>
+
+        <h2>Recovery code responsibility</h2>
+        <p>
+          You are responsible for safely storing your Pro recovery code. If your
+          app data is cleared, your device is reset, or the app is reinstalled and
+          the recovery code is unavailable, Pro restore may not be possible.
+        </p>
 
         <h2>Children's privacy</h2>
         <p>

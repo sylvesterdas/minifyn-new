@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function LinkGuardTermsPage() {
-  const lastUpdated = "February 21, 2026";
+  const lastUpdated = "March 12, 2026";
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
@@ -54,8 +54,15 @@ export default function LinkGuardTermsPage() {
             terms and policies.
           </li>
           <li>
-            Pro unlock is device-local in the current implementation and may be
-            affected by reinstall/reset/backup behavior.
+            Pro unlock is device-local in the current implementation.
+          </li>
+          <li>
+            Users are responsible for saving their recovery code. If recovery code
+            is lost after uninstall/data-clear/reset, restore may not be possible.
+          </li>
+          <li>
+            LinkGuard backend operates without a user account/payment database for
+            Pro entitlement history.
           </li>
         </ul>
 
