@@ -85,6 +85,14 @@ function getPlanDetails(plan: string | undefined) {
     }
 }
 
+function formatRenewalDate(unixSeconds: unknown) {
+    const seconds = typeof unixSeconds === 'number' ? unixSeconds : Number(unixSeconds);
+    if (!Number.isFinite(seconds) || seconds <= 0) return 'Not available';
+    const date = new Date(seconds * 1000);
+    if (Number.isNaN(date.getTime())) return 'Not available';
+    return format(date, 'PPP');
+}
+
 
 export function BillingClientComponent({ user, initialSubscription, country }: BillingClientComponentProps) {
     const [isLoadingPayment, setIsLoadingPayment] = useState(false);
@@ -265,7 +273,7 @@ export function BillingClientComponent({ user, initialSubscription, country }: B
                                            <AlertTriangle className="h-5 w-5" />
                                            <div>
                                                <h4 className="font-semibold text-yellow-300">Cancellation Scheduled</h4>
-                                               <p className="text-sm">Your subscription has been cancelled. Pro features will remain active until <span className="font-bold">{format(new Date(subscription.current_end * 1000), 'PPP')}.</span></p>
+                                               <p className="text-sm">Your subscription has been cancelled. Pro features will remain active until <span className="font-bold">{formatRenewalDate(subscription.current_end)}.</span></p>
                                            </div>
                                        </div>
                                    ) : (
@@ -276,7 +284,7 @@ export function BillingClientComponent({ user, initialSubscription, country }: B
                                             </div>
                                             <div className="flex justify-between items-center text-sm">
                                                 <span className="text-muted-foreground">Renews on</span>
-                                                <span className="font-medium">{format(new Date(subscription.current_end * 1000), 'PPP')}</span>
+                                                <span className="font-medium">{formatRenewalDate(subscription.current_end)}</span>
                                             </div>
                                         </div>
                                    )}

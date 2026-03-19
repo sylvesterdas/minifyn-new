@@ -1,13 +1,17 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
-import { generateOgImage } from '@/ai/flows/generate-og-image-flow';
 import sharp from 'sharp';
 import { Readable, Writable } from 'stream';
 
 export const revalidate = 3600; // Cache for 1 hour
 
 const OG_IMAGE_SECRET = process.env.OG_IMAGE_SECRET;
+const OG_BACKGROUNDS = [
+  '/og-bg/aurora.svg',
+  '/og-bg/ember.svg',
+  '/og-bg/lagoon.svg',
+] as const;
 
 // Helper to convert a Web Stream to a Node.js Readable stream
 function webStreamToNodeReadable(webStream: ReadableStream<Uint8Array>): Readable {
@@ -43,9 +47,14 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // 2. Generate the AI background image
-    const imageResult = await generateOgImage({ title, tags: tags || '' });
-    const { imageUrl: aiBackgroundUrl } = imageResult;
+    // 2. Pick a deterministic background based on title/tags.
+    const selectionSeed = `${title}::${tags || ''}`;
+    let hash = 0;
+    for (let i = 0; i < selectionSeed.length; i++) {
+      hash = (hash * 31 + selectionSeed.charCodeAt(i)) | 0;
+    }
+    const index = Math.abs(hash) % OG_BACKGROUNDS.length;
+    const backgroundUrl = new URL(OG_BACKGROUNDS[index], request.url).toString();
 
     // 3. Use ImageResponse to composite the text and the background
     const imageResponse = new ImageResponse(
@@ -64,7 +73,7 @@ export async function GET(request: NextRequest) {
         >
           {/* Use the AI-generated background image */}
           <img
-            src={aiBackgroundUrl}
+            src={backgroundUrl}
             alt=""
             style={{
                 position: 'absolute',

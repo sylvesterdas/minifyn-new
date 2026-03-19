@@ -6,6 +6,8 @@ import { DropdownMenuItem } from "./ui/dropdown-menu";
 import { LogOut, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { signOut } from "firebase/auth";
+import { auth as firebaseAuth } from "@/lib/firebase";
 
 export function LogoutButton() {
     const [isPending, startTransition] = useTransition();
@@ -16,6 +18,7 @@ export function LogoutButton() {
         startTransition(async () => {
             const result = await logout();
             if (result.success) {
+                await signOut(firebaseAuth);
                 toast({ description: "You have been logged out." });
                 router.push('/auth/signin');
                 router.refresh(); // Ensures the server state is re-fetched

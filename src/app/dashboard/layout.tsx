@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { redirect, usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Home, Settings, Link as LinkIcon, PanelLeft, LineChart, BookText, ExternalLink } from 'lucide-react';
@@ -11,7 +11,7 @@ import { UserNav } from '@/components/user-nav';
 import { useAuth } from '@/hooks/use-auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import Logo from '@/components/logo';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const navItems = [
   { href: '/dashboard', label: 'Overview', icon: Home, plans: ['free', 'pro', 'admin'], exact: true },
@@ -26,7 +26,15 @@ const externalLinks = [
 
 function NavLinks({ onLinkClick }: { onLinkClick?: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, isLoading } = useAuth();
+  const userPlan = user?.plan || 'anonymous';
+
+  useEffect(() => {
+    if (!isLoading && userPlan === 'anonymous') {
+      router.replace('/auth/signin');
+    }
+  }, [isLoading, router, userPlan]);
   
   if (isLoading) {
     return (
@@ -38,10 +46,8 @@ function NavLinks({ onLinkClick }: { onLinkClick?: () => void }) {
     )
   }
 
-  const userPlan = user?.plan || 'anonymous';
-
   if (userPlan === 'anonymous') {
-    return redirect('/auth/signin');
+    return null;
   }
 
   const visibleNavItems = navItems.filter(item => item.plans.includes(userPlan));

@@ -15,7 +15,8 @@ export default async function BillingPage() {
         redirect('/auth/signin');
     }
     
-    const ip = headers().get('x-forwarded-for') ?? headers().get('remote-addr');
+    const hdrs = await headers();
+    const ip = hdrs.get('x-forwarded-for') ?? hdrs.get('remote-addr');
     const country = await getCountryFromIP(ip);
 
     let subscription = null;

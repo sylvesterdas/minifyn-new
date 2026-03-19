@@ -136,7 +136,7 @@ export async function signup(prevState: FormState, formData: FormData): Promise<
       termsAcceptedAt: Date.now(),
       createdAt: userRecord.metadata.creationTime,
       onboardingCompleted: false, // Onboarding is false for all new users
-      plan: isProPlan ? 'pro' : 'free',
+      plan: 'free',
     });
     
     // Clean up OTP
