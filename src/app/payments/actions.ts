@@ -6,6 +6,8 @@ import Razorpay from "razorpay";
 import { auth as adminAuth, db } from "@/lib/firebase-admin";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { isAllowedCountry, resolveCountryFromRequest } from "@/lib/geo";
 
 // Determine which set of keys and plans to use based on the environment
 const isProduction = process.env.NODE_ENV === "production";
@@ -43,6 +45,13 @@ export async function createRazorpaySubscription(
   planType: "monthly" | "yearly",
   idToken?: string
 ): Promise<{ error: string } | CreateSubscriptionResponse> {
+  const hdrs = headers();
+  const ip = hdrs.get("x-forwarded-for") ?? hdrs.get("remote-addr");
+  const country = await resolveCountryFromRequest({ headers: hdrs, ip });
+  if (!isAllowedCountry(country)) {
+    return { error: "Payments are currently available in India only." };
+  }
+
   let userData: { uid: string; email?: string; name?: string } | null = null;
   console.log("[Payment Action] Starting subscription creation...");
 

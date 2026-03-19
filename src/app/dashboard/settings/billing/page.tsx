@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { getSubscriptionDetails } from '@/app/payments/actions';
 import { BillingClientComponent } from './billing-client-component';
 import { headers } from 'next/headers';
-import { getCountryFromIP } from '@/lib/ip-to-country';
+import { resolveCountryFromRequest } from '@/lib/geo';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +17,7 @@ export default async function BillingPage() {
     
     const hdrs = await headers();
     const ip = hdrs.get('x-forwarded-for') ?? hdrs.get('remote-addr');
-    const country = await getCountryFromIP(ip);
+    const country = await resolveCountryFromRequest({ headers: hdrs, ip });
 
     let subscription = null;
     if (user.plan === 'pro') {

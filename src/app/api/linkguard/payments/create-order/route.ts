@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAllowedCountry, resolveCountryFromRequest } from "@/lib/geo";
 
 export const runtime = "nodejs";
 
@@ -11,6 +12,18 @@ const PRO_AMOUNT_PAISE = Number(process.env.LINKGUARD_PRO_AMOUNT_PAISE || 14900)
 const PRODUCT_CODE = "linkguard_pro_one_time";
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("remote-addr");
+  const country = await resolveCountryFromRequest({ headers: req.headers, ip });
+  if (!isAllowedCountry(country)) {
+    return NextResponse.json(
+      {
+        allowed: false,
+        reason: "Payments are currently available in India only.",
+      },
+      { status: 403 }
+    );
+  }
+
   const input = await parseBody(req);
   if (!input.ok) {
     return NextResponse.json({ allowed: false, reason: input.reason }, { status: 400 });
