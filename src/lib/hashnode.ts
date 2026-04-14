@@ -10,14 +10,19 @@ export interface HashnodePost {
   slug: string;
   title: string;
   url: string;
+  canonicalUrl?: string | null;
   brief: string;
   publishedAt: string;
-  updatedAt: string;
+  updatedAt?: string | null;
   readTimeInMinutes: number;
   author: {
     name: string;
     profilePicture?: string;
   };
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  } | null;
   tags: {
     name: string;
     slug: string;
@@ -43,10 +48,7 @@ interface HashnodePostsResponse {
     publication: {
       posts: {
         edges: {
-          node: Omit<
-            HashnodePost,
-            "content" | "ogImage" | "updatedAt" | "brief"
-          >;
+          node: Omit<HashnodePost, "content" | "ogImage">;
         }[];
         pageInfo: PageInfo;
       };
@@ -103,6 +105,7 @@ const generateGetPostsQuery = () => {
               slug
               title
               url
+              canonicalUrl
               brief
               publishedAt
               updatedAt
@@ -114,6 +117,10 @@ const generateGetPostsQuery = () => {
               tags {
                   name
                   slug
+              }
+              seo {
+                title
+                description
               }
               coverImage {
                 url
@@ -135,7 +142,7 @@ export async function getPosts(
   first: number = 12,
   after?: string | null
 ): Promise<{
-  posts: any;
+  posts: Omit<HashnodePost, "content" | "ogImage">[];
   pageInfo: PageInfo;
 }> {
   const GET_POSTS_QUERY = generateGetPostsQuery(); // Generate a unique query
@@ -147,7 +154,7 @@ export async function getPosts(
       after: after ?? null,
     }
   );
-  const posts = response.data.publication.posts.edges.map((edge) => edge.node) as any;
+  const posts = response.data.publication.posts.edges.map((edge) => edge.node);
   const pageInfo = response.data.publication.posts.pageInfo;
   return { posts, pageInfo };
 }
@@ -161,6 +168,7 @@ const GET_POST_BY_SLUG_QUERY = `
         slug
         title
         url
+        canonicalUrl
         brief
         publishedAt
         updatedAt
@@ -172,6 +180,10 @@ const GET_POST_BY_SLUG_QUERY = `
         tags {
             name
             slug
+        }
+        seo {
+            title
+            description
         }
         ogImage: ogMetaData {
             image

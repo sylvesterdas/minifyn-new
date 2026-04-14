@@ -54,10 +54,9 @@ export default async function BlogPage() {
                 </div>
             }>
               <BlogPostList
-                initialPosts={posts.map((post: { brief: any; updatedAt: any; }) => ({
+                initialPosts={posts.map((post) => ({
                   ...post,
                   brief: post.brief ?? '',
-                  updatedAt: post.updatedAt,
                 }))}
                 initialPageInfo={pageInfo}
               />

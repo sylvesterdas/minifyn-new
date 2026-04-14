@@ -1,4 +1,4 @@
-import { getPosts } from '@/lib/hashnode';
+import { getPosts, type HashnodePost } from '@/lib/hashnode';
 import type { MetadataRoute } from 'next';
 
 
@@ -36,14 +36,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // 2. Dynamic blog post pages
-  let allPosts: { slug: string, publishedAt: string }[] = [];
+  let allPosts: Pick<HashnodePost, 'slug' | 'publishedAt' | 'updatedAt'>[] = [];
   let hasNextPage = true;
   let cursor: string | null = null;
 
   while (hasNextPage) {
     try {
       const { posts, pageInfo } = await getPosts(50, cursor); // Fetch 50 at a time
-      const postData = posts.map((p: any) => ({ slug: p.slug, publishedAt: p.publishedAt }));
+      const postData = posts.map((post) => ({
+        slug: post.slug,
+        publishedAt: post.publishedAt,
+        updatedAt: post.updatedAt,
+      }));
       allPosts = allPosts.concat(postData);
       hasNextPage = pageInfo.hasNextPage;
       cursor = pageInfo.endCursor;
@@ -55,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const blogPostRoutes: MetadataRoute.Sitemap = allPosts.map(post => ({
     url: `${siteUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.publishedAt).toISOString(),
+    lastModified: new Date(post.updatedAt || post.publishedAt).toISOString(),
     changeFrequency: 'yearly',
     priority: 0.8,
   }));

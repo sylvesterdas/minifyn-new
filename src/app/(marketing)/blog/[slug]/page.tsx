@@ -18,19 +18,23 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
     
     const siteUrl = 'https://www.minifyn.com';
     const authorName = post.author?.name || 'Sylvester Das';
+    const seoTitle = post.seo?.title?.trim();
+    const seoDescription = post.seo?.description?.trim();
+    const metaTitle = seoTitle || post.title;
+    const metaDescription = seoDescription || post.brief;
     
     // Use the OG image if available, otherwise fall back to the cover image, then a site default.
     const finalOgImage = post.ogImage?.url || post.coverImage?.url || `${siteUrl}/og.png`;
 
     return {
-        title: `${post.title} | MiniFyn Blog`,
-        description: post.brief,
+        title: seoTitle || `${post.title} | MiniFyn Blog`,
+        description: metaDescription,
         alternates: {
             canonical: `${siteUrl}/blog/${post.slug}`,
         },
         openGraph: {
-            title: post.title,
-            description: post.brief,
+            title: metaTitle,
+            description: metaDescription,
             url: `${siteUrl}/blog/${post.slug}`,
             type: 'article',
             publishedTime: post.publishedAt,
@@ -46,8 +50,8 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
         },
         twitter: {
             card: 'summary_large_image',
-            title: post.title,
-            description: post.brief,
+            title: metaTitle,
+            description: metaDescription,
             images: finalOgImage ? [finalOgImage] : undefined,
         }
     };
@@ -62,14 +66,14 @@ export default async function PostPage({ params }: { params: any }) {
     }
     
     const authorName = post.author?.name || 'Sylvester Das';
-    const siteUrl = 'https://www.minifyn.com';
+    const seoDescription = post.seo?.description?.trim();
     const finalCoverImage = post.coverImage?.url;
 
     const jsonLd: WithContext<Article> = {
         '@context': 'https://schema.org',
         '@type': 'Article',
         headline: post.title,
-        description: post.brief,
+        description: seoDescription || post.brief,
         image: finalCoverImage,
         author: {
             '@type': 'Person',
