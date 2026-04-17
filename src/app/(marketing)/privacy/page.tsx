@@ -12,14 +12,14 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPage() {
-  const lastUpdated = "July 15, 2024";
+  const lastUpdated = "April 17, 2026";
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
         <div className="prose prose-invert mx-auto">
             <h1 className="text-4xl font-bold">Privacy Policy</h1>
             <p className="text-muted-foreground">Last updated: {lastUpdated}</p>
 
-            <p>MiniFyn is a product of LJS Works, a registered Indian sole proprietorship (UDYAM-KL-12-0112903). This Privacy Policy explains how MiniFyn ("we," "our," or "us") collects, uses, discloses, and safeguards your information when you use our website and services (collectively, the "Service").</p>
+            <p>MiniFyn is owned and operated by Sylvester Kumar Das (UDYAM-KL-12-0136086). This Privacy Policy explains how MiniFyn ("we," "our," or "us") collects, uses, discloses, and safeguards your information when you use our website and services (collectively, the "Service").</p>
 
             <h2 className="mt-8 text-2xl font-semibold">1. Information We Collect</h2>
             <p>We collect information to provide and improve our services. This includes:</p>

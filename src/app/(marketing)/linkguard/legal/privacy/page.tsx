@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function LinkGuardPrivacyPage() {
-  const lastUpdated = "March 12, 2026";
+  const lastUpdated = "April 17, 2026";
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
@@ -21,8 +21,8 @@ export default function LinkGuardPrivacyPage() {
 
         <h2>Operator identity</h2>
         <p>
-          LinkGuard is a MiniFyn product operated by <strong>LJS Works</strong>{" "}
-          (registered MSME/Udhyam entity in India).
+          LinkGuard is owned and operated by <strong>Sylvester Kumar Das</strong>{" "}
+          (UDYAM-KL-12-0136086).
         </p>
 
         <h2>What we do NOT collect</h2>

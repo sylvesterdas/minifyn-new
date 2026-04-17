@@ -20,7 +20,7 @@ export default function AboutPage() {
         </p>
         
         <p className="text-md text-muted-foreground">
-            MiniFyn is a product of LJS Works, a registered Indian sole proprietorship (UDYAM-KL-12-0112903).
+            MiniFyn is owned and operated by Sylvester Kumar Das (UDYAM-KL-12-0136086).
         </p>
 
         <h2 className="text-3xl font-semibold mt-10 mb-4">Our Mission</h2>

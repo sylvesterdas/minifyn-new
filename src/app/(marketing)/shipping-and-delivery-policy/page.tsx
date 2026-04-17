@@ -19,7 +19,7 @@ export default function ShippingAndDeliveryPolicyPage() {
             <h1 className="text-4xl font-bold">Shipping and Delivery Policy</h1>
             <p className="text-muted-foreground">Last updated: {lastUpdated}</p>
             
-            <p>MiniFyn is a product of LJS Works, a registered Indian sole proprietorship (UDYAM-KL-12-0112903).</p>
+            <p>MiniFyn is owned and operated by Sylvester Kumar Das (UDYAM-KL-12-0136086).</p>
 
             <h2 className="mt-8 text-2xl font-semibold">1. Scope of Policy</h2>
             <p>This policy outlines the terms of service delivery for MiniFyn. As a provider of purely digital services, we do not ship or deliver any physical goods. This policy clarifies how our digital services are accessed and delivered to you.</p>

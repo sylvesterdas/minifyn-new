@@ -13,14 +13,14 @@ export const metadata: Metadata = {
 };
 
 export default function TermsPage() {
-  const lastUpdated = "July 15, 2024";
+  const lastUpdated = "April 17, 2026";
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
         <div className="prose prose-invert mx-auto">
             <h1 className="text-4xl font-bold">Terms of Service</h1>
             <p className="text-muted-foreground">Last updated: {lastUpdated}</p>
 
-            <p>Please read these Terms of Service ("Terms", "Terms of Service") carefully before using the MiniFyn website (the "Service") operated by MiniFyn. MiniFyn is a product of LJS Works, a registered Indian sole proprietorship (UDYAM-KL-12-0112903), hereafter referred to as "us", "we", or "our".</p>
+            <p>Please read these Terms of Service ("Terms", "Terms of Service") carefully before using the MiniFyn website (the "Service") operated by MiniFyn. MiniFyn is owned and operated by Sylvester Kumar Das (UDYAM-KL-12-0136086), hereafter referred to as "us", "we", or "our".</p>
 
             <h2 className="mt-8 text-2xl font-semibold">1. Acceptance of Terms</h2>
             <p>By accessing or using the Service, you agree to be bound by these Terms. If you disagree with any part of the terms, then you may not access the Service. This agreement applies to all visitors, users, and others who access or use the Service.</p>

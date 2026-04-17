@@ -76,7 +76,7 @@ export function Footer() {
             </div>
             <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
                 <p>&copy; {new Date().getFullYear()} MiniFyn. All rights reserved.</p>
-                <p className="mt-2">MiniFyn is a product of LJS Works, a registered Indian sole proprietorship (UDYAM-KL-12-0112903).</p>
+                <p className="mt-2">MiniFyn is owned and operated by Sylvester Kumar Das (UDYAM-KL-12-0136086).</p>
             </div>
         </div>
     </footer>
