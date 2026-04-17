@@ -1,8 +1,9 @@
 
 import { UrlShortenerForm } from '@/components/url-shortener-form';
 import { QrCodeGeneratorForm } from '@/components/qr-code-generator-form';
+import Image from 'next/image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, Key, Zap, QrCode, Link as LinkIcon, ClipboardPaste, Wand, BarChart3 } from 'lucide-react';
+import { BarChart, Key, Zap, QrCode, Link as LinkIcon, ClipboardPaste, Wand, BarChart3, ShieldCheck, Smartphone } from 'lucide-react';
 import { DeveloperApiSection } from '@/components/developer-api-section';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -69,6 +70,13 @@ const features = [
   },
 ];
 
+const linkGuardFeatures = [
+  'Paste link to check',
+  'Quick safety result',
+  'Scam/phishing risk alerts',
+  'Easy to use',
+];
+
 export default function Home() {
     const jsonLd: WithContext<WebSite> = {
         '@context': 'https://schema.org',
@@ -125,6 +133,117 @@ export default function Home() {
                   <p className="text-xs text-muted-foreground mt-4 px-2">
                     By using our tools, you agree to our <Link href="/terms" className="underline hover:text-foreground">Terms of Service</Link> and <Link href="/acceptable-use" className="underline hover:text-foreground">Acceptable Use Policy</Link>.
                   </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="relative w-full py-12 md:py-24 lg:py-28">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="grid gap-10 rounded-3xl border bg-card/70 p-6 shadow-sm backdrop-blur sm:p-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:p-10">
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <div className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                    Android safety app
+                  </div>
+                  <div className="space-y-2">
+                    <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">LinkGuard by MiniFyn</h2>
+                    <p className="max-w-2xl text-muted-foreground md:text-lg">
+                      LinkGuard is an Android app that helps users check suspicious URLs for scam, phishing, and risky links before opening them.
+                    </p>
+                    <p className="text-sm font-medium text-foreground/90">
+                      LinkGuard helps you check suspicious links before you click.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border bg-background/70 p-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">App Name</p>
+                    <p className="mt-2 text-lg font-semibold">LinkGuard</p>
+                  </div>
+                  <div className="rounded-2xl border bg-background/70 p-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">By</p>
+                    <p className="mt-2 text-lg font-semibold">MiniFyn</p>
+                  </div>
+                  <div className="rounded-2xl border bg-background/70 p-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Purpose</p>
+                    <p className="mt-2 text-lg font-semibold">Detect suspicious links</p>
+                  </div>
+                  <div className="rounded-2xl border bg-background/70 p-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Platform</p>
+                    <p className="mt-2 flex items-center gap-2 text-lg font-semibold">
+                      <Smartphone className="h-5 w-5 text-primary" />
+                      Android
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                      <ShieldCheck className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Why LinkGuard</h3>
+                      <p className="text-sm text-muted-foreground">Simple checks for suspicious URLs before you open them.</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <p className="text-sm font-semibold text-foreground">Features</p>
+                    <ul className="mt-4 grid gap-3 text-sm text-muted-foreground">
+                      {linkGuardFeatures.map((feature) => (
+                        <li key={feature} className="flex items-start gap-3 rounded-2xl border bg-card/70 p-3">
+                          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="mt-6 rounded-2xl border border-primary/20 bg-primary/5 p-4">
+                    <p className="text-sm font-medium">Privacy focused / no unnecessary data collection</p>
+                  </div>
+                </div>
+
+              </div>
+
+              <div className="flex flex-col items-center justify-center">
+                <div className="mx-auto w-full max-w-[260px] rounded-[2.3rem] border border-zinc-800 bg-zinc-950 p-2 shadow-2xl">
+                  <div className="mx-auto mb-2 h-1.5 w-20 rounded-full bg-zinc-700" />
+                  <div className="overflow-hidden rounded-[1.9rem] border border-black/20 bg-black">
+                    <Image
+                      src="/images/linkguard-app-screenshot.jpeg"
+                      alt="LinkGuard Android app screenshot showing the URL Scanner screen"
+                      width={368}
+                      height={798}
+                      className="h-auto w-full"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-col items-center gap-3 text-center">
+                  <a
+                    href="https://play.google.com/store/apps/details?id=com.minifyn.linkguard"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex transition-transform hover:-translate-y-0.5"
+                    aria-label="Download LinkGuard on Google Play"
+                  >
+                    <Image
+                      src="/images/google-play-badge.svg"
+                      alt="Get it on Google Play"
+                      width={180}
+                      height={60}
+                      className="h-[4rem] w-auto"
+                    />
+                  </a>
+                  <p className="max-w-xs text-sm text-muted-foreground">
+                    Built by MiniFyn to help users stay safer online.
+                  </p>
+                </div>
+
               </div>
             </div>
           </div>
