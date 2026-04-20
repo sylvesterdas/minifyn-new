@@ -1,14 +1,9 @@
-import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
+import type { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
 import {
   AlertTriangle,
   BadgeCheck,
@@ -17,13 +12,13 @@ import {
   ScanSearch,
   ShieldCheck,
   Smartphone,
-} from "lucide-react";
+} from 'lucide-react';
 
-const siteUrl = "https://www.minifyn.com";
+const siteUrl = 'https://www.minifyn.com';
 const pageUrl = `${siteUrl}/linkguard`;
-const title = "LinkGuard for Android | Suspicious Link Scanner by MiniFyn";
+const title = 'LinkGuard for Android | Suspicious Link Scanner by MiniFyn';
 const description =
-  "LinkGuard is MiniFyn’s Android app for checking suspicious URLs before you open them. Scan risky links, spot phishing-style patterns, and review privacy and policy details in one place.";
+  'LinkGuard is MiniFyn’s Android app for checking suspicious URLs before you open them. Scan risky links, spot phishing-style patterns, and review privacy and policy details in one place.';
 const ogImageUrl = `${siteUrl}/og.png`;
 
 export const metadata: Metadata = {
@@ -36,19 +31,19 @@ export const metadata: Metadata = {
     title,
     description,
     url: pageUrl,
-    siteName: "MiniFyn",
-    type: "website",
+    siteName: 'MiniFyn',
+    type: 'website',
     images: [
       {
         url: ogImageUrl,
         width: 1200,
         height: 630,
-        alt: "LinkGuard by MiniFyn",
+        alt: 'LinkGuard by MiniFyn',
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: 'summary_large_image',
     title,
     description,
     images: [ogImageUrl],
@@ -57,99 +52,94 @@ export const metadata: Metadata = {
 
 const featureCards = [
   {
-    title: "Paste a suspicious URL",
-    description:
-      "Drop in a link from SMS, email, chat, or social media when something feels off.",
+    title: 'Paste a suspicious URL',
+    description: 'Drop in a link from SMS, email, chat, or social media when something feels off.',
     icon: ScanSearch,
   },
   {
-    title: "Get a quick safety read",
-    description:
-      "See a simple result that helps you decide whether the link deserves extra caution.",
+    title: 'Get a quick safety read',
+    description: 'See a simple result that helps you decide whether the link deserves extra caution.',
     icon: BadgeCheck,
   },
   {
-    title: "Spot phishing-style risk",
-    description:
-      "LinkGuard is designed to highlight scam and phishing patterns before you tap through.",
+    title: 'Spot phishing-style risk',
+    description: 'LinkGuard is designed to highlight scam and phishing patterns before you tap through.',
     icon: AlertTriangle,
   },
   {
-    title: "Keep the experience lightweight",
-    description:
-      "The app is focused, straightforward, and built around practical link safety checks.",
+    title: 'Keep the experience lightweight',
+    description: 'The app is focused, straightforward, and built around practical link safety checks.',
     icon: Lock,
   },
 ];
 
 const useCases = [
-  "Unexpected payment or delivery links in SMS",
-  "Login reset links that seem slightly off",
-  "Offer, lottery, reward, or KYC messages",
-  "Unknown URLs shared in chats or social posts",
+  'Unexpected payment or delivery links in SMS',
+  'Login reset links that seem slightly off',
+  'Offer, lottery, reward, or KYC messages',
+  'Unknown URLs shared in chats or social posts',
 ];
 
 const trustPoints = [
-  "Public product page under the main MiniFyn domain",
-  "Published privacy policy and terms for the app",
-  "Google Play listing for Android distribution",
-  "Clear product ownership and support context",
+  'Public product page under the main MiniFyn domain',
+  'Published privacy policy and terms for the app',
+  'Google Play listing for Android distribution',
+  'Clear product ownership and support context',
 ];
 
 const faqs = [
   {
-    question: "What is LinkGuard?",
+    question: 'What is LinkGuard?',
     answer:
-      "LinkGuard is an Android app by MiniFyn that helps users review suspicious URLs before opening them.",
+      'LinkGuard is an Android app by MiniFyn that helps users review suspicious URLs before opening them.',
   },
   {
-    question: "Who is LinkGuard for?",
+    question: 'Who is LinkGuard for?',
     answer:
-      "It is useful for anyone who receives unexpected links by SMS, email, chat, or social media and wants a quick safety check before clicking.",
+      'It is useful for anyone who receives unexpected links by SMS, email, chat, or social media and wants a quick safety check before clicking.',
   },
   {
-    question: "Does LinkGuard replace antivirus or browser security?",
+    question: 'Does LinkGuard replace antivirus or browser security?',
     answer:
-      "No. It is a focused link-checking tool that can add an extra layer of caution, but it should be used alongside normal device and account security practices.",
+      'No. It is a focused link-checking tool that can add an extra layer of caution, but it should be used alongside normal device and account security practices.',
   },
   {
-    question: "Where can I find LinkGuard policies?",
+    question: 'Where can I find LinkGuard policies?',
     answer:
-      "The app privacy policy and terms are published on this site so users, reviewers, and partners can access them on a stable public URL.",
+      'The app privacy policy and terms are published on this site so users, reviewers, and partners can access them on a stable public URL.',
   },
 ];
 
 export default function LinkGuardPage() {
   const softwareJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "MobileApplication",
-    name: "LinkGuard",
-    operatingSystem: "Android",
-    applicationCategory: "SecurityApplication",
+    '@context': 'https://schema.org',
+    '@type': 'MobileApplication',
+    name: 'LinkGuard',
+    operatingSystem: 'Android',
+    applicationCategory: 'SecurityApplication',
     description,
     url: pageUrl,
     publisher: {
-      "@type": "Organization",
-      name: "MiniFyn",
+      '@type': 'Organization',
+      name: 'MiniFyn',
       url: siteUrl,
     },
     offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "INR",
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'INR',
     },
-    downloadUrl:
-      "https://play.google.com/store/apps/details?id=com.minifyn.linkguard",
+    downloadUrl: 'https://play.google.com/store/apps/details?id=com.minifyn.linkguard',
   };
 
   const faqJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
     mainEntity: faqs.map((faq) => ({
-      "@type": "Question",
+      '@type': 'Question',
       name: faq.question,
       acceptedAnswer: {
-        "@type": "Answer",
+        '@type': 'Answer',
         text: faq.answer,
       },
     })),
@@ -197,78 +187,47 @@ export default function LinkGuardPage() {
                 </div>
 
                 <p className="max-w-2xl text-lg leading-8 text-muted-foreground sm:text-[1.1rem]">
-                  LinkGuard helps people review suspicious URLs from messages,
-                  emails, and chats before opening them. It gives users a simple
-                  way to pause, inspect, and avoid obvious scam or
+                  LinkGuard helps people review suspicious URLs from messages, emails, and chats before
+                  opening them. It gives users a simple way to pause, inspect, and avoid obvious scam or
                   phishing-style links.
                 </p>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                    Built By
-                  </p>
-                  <p className="mt-2 text-base font-semibold text-foreground">
-                    MiniFyn
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Built By</p>
+                  <p className="mt-2 text-base font-semibold text-foreground">MiniFyn</p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                    Platform
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Platform</p>
                   <div className="mt-2 inline-flex items-center gap-2 text-base font-semibold text-foreground">
                     <Smartphone className="h-4.5 w-4.5 text-primary" />
                     Android
                   </div>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                    Focus
-                  </p>
-                  <p className="mt-2 text-base font-semibold text-foreground">
-                    Risky URL checks
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Focus</p>
+                  <p className="mt-2 text-base font-semibold text-foreground">Risky URL checks</p>
                 </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-4">
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="rounded-full px-6"
-                >
-                  <Link href="/linkguard/legal/privacy">
-                    View Privacy Policy
-                  </Link>
+                <Button asChild size="lg" variant="outline" className="rounded-full px-6">
+                  <Link href="/linkguard/legal/privacy">View Privacy Policy</Link>
                 </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="rounded-full px-6"
-                >
+                <Button asChild size="lg" variant="outline" className="rounded-full px-6">
                   <Link href="/linkguard/legal/terms">View Terms</Link>
                 </Button>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                    Use case
-                  </p>
-                  <p className="mt-2 text-sm text-foreground">
-                    Review links before opening them
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Use case</p>
+                  <p className="mt-2 text-sm text-foreground">Review links before opening them</p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                    Availability
-                  </p>
-                  <p className="mt-2 text-sm text-foreground">
-                    Android now, iOS later
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Availability</p>
+                  <p className="mt-2 text-sm text-foreground">Android now, iOS later</p>
                 </div>
               </div>
 
@@ -288,49 +247,49 @@ export default function LinkGuardPage() {
             <div className="flex justify-center">
               <div className="relative mx-auto w-full max-w-[320px]">
                 <div className="absolute inset-x-8 bottom-6 top-8 -z-10 rounded-[3rem] bg-primary/15 blur-3xl" />
+                <div className="p-4">
+                  <div className="mb-4 flex items-center justify-between rounded-2xl border border-white/10 bg-background/65 px-4 py-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Android app</p>
+                      <p className="mt-1 text-lg font-semibold">URL Scanner</p>
+                    </div>
+                    <div className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                      MiniFyn
+                    </div>
+                  </div>
 
-                <div className="mb-4 flex items-center justify-between rounded-2xl border border-white/10 bg-background/65 px-4 py-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                      Android app
-                    </p>
-                    <p className="mt-1 text-lg font-semibold">URL Scanner</p>
+                  <div className="mx-auto w-full rounded-[2.5rem] border border-zinc-800 bg-zinc-950 p-2.5 shadow-2xl">
+                    <div className="mx-auto mb-2 h-1.5 w-20 rounded-full bg-zinc-700" />
+                    <div className="overflow-hidden rounded-[2rem] border border-black/20 bg-black">
+                      <Image
+                        src="/images/linkguard-app-screenshot.jpeg"
+                        alt="LinkGuard Android app screenshot showing the URL Scanner screen"
+                        width={368}
+                        height={798}
+                        className="h-auto w-full"
+                      />
+                    </div>
                   </div>
-                  <div className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                    MiniFyn
-                  </div>
+
                 </div>
 
-                <div className="mx-auto w-full rounded-[2.5rem] border border-zinc-800 bg-zinc-950 p-2.5 shadow-2xl">
-                  <div className="mx-auto mb-2 h-1.5 w-20 rounded-full bg-zinc-700" />
-                  <div className="overflow-hidden rounded-[2rem] border border-black/20 bg-black">
+                <div className="mt-4 flex justify-center">
+                  <Link
+                    href="https://play.google.com/store/apps/details?id=com.minifyn.linkguard"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex transition-transform hover:-translate-y-0.5"
+                    aria-label="Get LinkGuard on Google Play"
+                  >
                     <Image
-                      src="/images/linkguard-app-screenshot.jpeg"
-                      alt="LinkGuard Android app screenshot showing the URL Scanner screen"
-                      width={368}
-                      height={798}
-                      className="h-auto w-full"
+                      src="/images/google-play-badge.svg"
+                      alt="Get it on Google Play"
+                      width={180}
+                      height={60}
+                      className="h-16 w-auto"
                     />
-                  </div>
+                  </Link>
                 </div>
-              </div>
-
-              <div className="mt-4 flex justify-center">
-                <Link
-                  href="https://play.google.com/store/apps/details?id=com.minifyn.linkguard"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex transition-transform hover:-translate-y-0.5"
-                  aria-label="Get LinkGuard on Google Play"
-                >
-                  <Image
-                    src="/images/google-play-badge.svg"
-                    alt="Get it on Google Play"
-                    width={180}
-                    height={60}
-                    className="h-16 w-auto"
-                  />
-                </Link>
               </div>
             </div>
           </div>
@@ -340,13 +299,10 @@ export default function LinkGuardPage() {
       <section className="bg-card/40 py-16 md:py-24">
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Why LinkGuard exists
-            </h2>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Why LinkGuard exists</h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Most dangerous links do not look dangerous at first glance.
-              LinkGuard is built for the moment when a URL feels just suspicious
-              enough that you want a second look before tapping.
+              Most dangerous links do not look dangerous at first glance. LinkGuard is built for the
+              moment when a URL feels just suspicious enough that you want a second look before tapping.
             </p>
           </div>
 
@@ -355,19 +311,12 @@ export default function LinkGuardPage() {
               const Icon = feature.icon;
 
               return (
-                <div
-                  key={feature.title}
-                  className="rounded-3xl border bg-background/85 p-6 shadow-sm"
-                >
+                <div key={feature.title} className="rounded-3xl border bg-background/85 p-6 shadow-sm">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                     <Icon className="h-6 w-6" />
                   </div>
-                  <h3 className="mt-5 text-xl font-semibold">
-                    {feature.title}
-                  </h3>
-                  <p className="mt-2 text-muted-foreground">
-                    {feature.description}
-                  </p>
+                  <h3 className="mt-5 text-xl font-semibold">{feature.title}</h3>
+                  <p className="mt-2 text-muted-foreground">{feature.description}</p>
                 </div>
               );
             })}
@@ -379,20 +328,14 @@ export default function LinkGuardPage() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid gap-8 lg:grid-cols-2">
             <div className="rounded-3xl border bg-background/80 p-8 shadow-sm">
-              <h2 className="text-2xl font-bold sm:text-3xl">
-                When people use it
-              </h2>
+              <h2 className="text-2xl font-bold sm:text-3xl">When people use it</h2>
               <p className="mt-4 text-muted-foreground">
-                LinkGuard is designed for common, real-world situations where an
-                unfamiliar link appears unexpectedly and the safest choice is to
-                verify first.
+                LinkGuard is designed for common, real-world situations where an unfamiliar link appears
+                unexpectedly and the safest choice is to verify first.
               </p>
               <ul className="mt-6 grid gap-3">
                 {useCases.map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-start gap-3 rounded-2xl border bg-card/60 p-4"
-                  >
+                  <li key={item} className="flex items-start gap-3 rounded-2xl border bg-card/60 p-4">
                     <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                     <span className="text-muted-foreground">{item}</span>
                   </li>
@@ -401,27 +344,12 @@ export default function LinkGuardPage() {
             </div>
 
             <div className="rounded-3xl border bg-background/80 p-8 shadow-sm">
-              <h2 className="text-2xl font-bold sm:text-3xl">
-                How it fits into trust and review
-              </h2>
+              <h2 className="text-2xl font-bold sm:text-3xl">How it fits into trust and review</h2>
               <div className="mt-6 space-y-5 text-muted-foreground">
-                <p>
-                  LinkGuard has a dedicated public page under the main MiniFyn
-                  domain for product context.
-                </p>
-                <p>
-                  It also links to app-specific privacy and legal information on
-                  stable public URLs.
-                </p>
-                <p>
-                  That makes it easier for users, store reviewers, payment
-                  partners, and verification teams to confirm ownership and
-                  intent.
-                </p>
-                <p>
-                  For a focused Android product at this stage, a clean path on
-                  the main company site is usually enough.
-                </p>
+                <p>LinkGuard has a dedicated public page under the main MiniFyn domain for product context.</p>
+                <p>It also links to app-specific privacy and legal information on stable public URLs.</p>
+                <p>That makes it easier for users, store reviewers, payment partners, and verification teams to confirm ownership and intent.</p>
+                <p>For a focused Android product at this stage, a clean path on the main company site is usually enough.</p>
               </div>
             </div>
           </div>
@@ -433,13 +361,10 @@ export default function LinkGuardPage() {
           <div className="mx-auto max-w-4xl rounded-[2rem] border bg-background/85 p-8 shadow-sm md:p-10">
             <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
               <div>
-                <h2 className="text-3xl font-bold tracking-tight">
-                  Policies, ownership, and support
-                </h2>
+                <h2 className="text-3xl font-bold tracking-tight">Policies, ownership, and support</h2>
                 <p className="mt-4 text-muted-foreground">
-                  This page is intended to be a stable public home for the app.
-                  It helps connect the product name, the publisher, the Android
-                  listing, and the app’s legal documents.
+                  This page is intended to be a stable public home for the app. It helps connect the
+                  product name, the publisher, the Android listing, and the app’s legal documents.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Button asChild variant="outline">
@@ -467,9 +392,7 @@ export default function LinkGuardPage() {
               </div>
 
               <div className="rounded-3xl border bg-card/60 p-6">
-                <h3 className="text-xl font-semibold">
-                  What this page makes clear
-                </h3>
+                <h3 className="text-xl font-semibold">What this page makes clear</h3>
                 <ul className="mt-5 space-y-3 text-muted-foreground">
                   <li className="flex gap-3">
                     <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -498,12 +421,9 @@ export default function LinkGuardPage() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-4xl">
             <div className="text-center">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Frequently asked questions
-              </h2>
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Frequently asked questions</h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                Helpful context for users, reviewers, and partners checking the
-                app’s purpose and public documentation.
+                Helpful context for users, reviewers, and partners checking the app’s purpose and public documentation.
               </p>
             </div>
 
