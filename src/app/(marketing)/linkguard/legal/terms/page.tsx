@@ -21,8 +21,8 @@ export default function LinkGuardTermsPage() {
 
         <h2 className="text-2xl font-semibold mb-3">Operator identity</h2>
         <p className="mb-6">
-          LinkGuard is owned and operated by <strong>Sylvester Kumar Das</strong>{" "}
-          (UDYAM-KL-12-0136086).
+          LinkGuard is a <strong>MiniFyn</strong> product operated by{' '}
+          <strong>Sylvester Kumar Das</strong> (UDYAM-KL-12-0136086).
         </p>
 
         <h2 className="text-2xl font-semibold mb-3">Purpose of the app</h2>
