@@ -147,12 +147,12 @@ export default function Home() {
                     Android safety app
                   </div>
                   <div className="space-y-2">
-                    <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">LinkGuard by MiniFyn</h2>
+                    <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">ScamGuard: Link Checker by MiniFyn</h2>
                     <p className="max-w-2xl text-muted-foreground md:text-lg">
-                      LinkGuard is an Android app that helps users check suspicious URLs for scam, phishing, and risky links before opening them.
+                      ScamGuard: Link Checker is an Android app that helps users check suspicious URLs for scam, phishing, and risky links before opening them.
                     </p>
                     <p className="text-sm font-medium text-foreground/90">
-                      LinkGuard helps you check suspicious links before you click.
+                      ScamGuard helps you check suspicious links before you click.
                     </p>
                   </div>
                 </div>
@@ -160,7 +160,7 @@ export default function Home() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl border bg-background/70 p-4">
                     <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">App Name</p>
-                    <p className="mt-2 text-lg font-semibold">LinkGuard</p>
+                    <p className="mt-2 text-lg font-semibold">ScamGuard: Link Checker</p>
                   </div>
                   <div className="rounded-2xl border bg-background/70 p-4">
                     <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">By</p>
@@ -185,7 +185,7 @@ export default function Home() {
                       <ShieldCheck className="h-6 w-6" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold">Why LinkGuard</h3>
+                      <h3 className="text-xl font-bold">Why ScamGuard</h3>
                       <p className="text-sm text-muted-foreground">Simple checks for suspicious URLs before you open them.</p>
                     </div>
                   </div>
@@ -215,7 +215,7 @@ export default function Home() {
                   <div className="overflow-hidden rounded-[1.9rem] border border-black/20 bg-black">
                     <Image
                       src="/images/linkguard-app-screenshot.jpeg"
-                      alt="LinkGuard Android app screenshot showing the URL Scanner screen"
+                      alt="ScamGuard Android app screenshot showing the URL Scanner screen"
                       width={368}
                       height={798}
                       className="h-auto w-full"
@@ -229,7 +229,7 @@ export default function Home() {
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex transition-transform hover:-translate-y-0.5"
-                    aria-label="Download LinkGuard on Google Play"
+                    aria-label="Download ScamGuard on Google Play"
                   >
                     <Image
                       src="/images/google-play-badge.svg"
