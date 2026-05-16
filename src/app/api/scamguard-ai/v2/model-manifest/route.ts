@@ -8,6 +8,8 @@ const PLAY_PACKAGE_NAME = process.env.LINKGUARD_PLAY_PACKAGE_NAME || "";
 const PLAY_SERVICE_ACCOUNT_JSON =
   process.env.LINKGUARD_PLAY_SERVICE_ACCOUNT_JSON || "";
 const PLAY_AI_PRODUCT_ID = process.env.LINKGUARD_PLAY_AI_PRODUCT_ID || "ai_mode";
+const PLAY_INTEGRITY_ENFORCE =
+  process.env.LINKGUARD_PLAY_INTEGRITY_ENFORCE === "true";
 const GCS_MODEL_BUCKET = process.env.GCS_MODEL_BUCKET || "";
 const ACTIVE_MODEL_OBJECT =
   process.env.SCAMGUARD_AI_ACTIVE_MODEL_OBJECT ||
@@ -83,7 +85,7 @@ export async function POST(req: NextRequest) {
     requestHash: parsed.value.integrityRequestHash,
     expectedRequestHash,
   });
-  if (!integrity.ok) {
+  if (!integrity.ok && PLAY_INTEGRITY_ENFORCE) {
     return NextResponse.json({ reason: integrity.reason }, { status: 403 });
   }
 
@@ -222,34 +224,43 @@ async function verifyPlayIntegrity(input: {
     return { ok: false, reason: "Play Integrity request hash mismatch." };
   }
 
-  const decoded = await decodeIntegrityToken(input.token);
-  const external = decoded.tokenPayloadExternal;
-  const requestDetails = external?.requestDetails;
-  if (requestDetails?.requestPackageName !== PLAY_PACKAGE_NAME) {
-    return { ok: false, reason: "Package name mismatch in Play Integrity token." };
-  }
-  if (requestDetails?.requestHash !== input.expectedRequestHash) {
+  try {
+    const decoded = await decodeIntegrityToken(input.token);
+    const external = decoded.tokenPayloadExternal;
+    const requestDetails = external?.requestDetails;
+    if (requestDetails?.requestPackageName !== PLAY_PACKAGE_NAME) {
+      return { ok: false, reason: "Package name mismatch in Play Integrity token." };
+    }
+    if (requestDetails?.requestHash !== input.expectedRequestHash) {
+      return {
+        ok: false,
+        reason: "Play Integrity token request hash mismatch.",
+      };
+    }
+
+    const appVerdict = external?.appIntegrity?.appRecognitionVerdict || "";
+    if (!PLAY_ALLOWED_APP_VERDICTS.includes(appVerdict)) {
+      return {
+        ok: false,
+        reason: `Disallowed app verdict: ${appVerdict || "unknown"}.`,
+      };
+    }
+
+    const deviceVerdicts =
+      external?.deviceIntegrity?.deviceRecognitionVerdict || [];
+    const hasAllowedDeviceVerdict = deviceVerdicts.some((verdict) =>
+      PLAY_ALLOWED_DEVICE_VERDICTS.includes(verdict)
+    );
+    if (!hasAllowedDeviceVerdict) {
+      return { ok: false, reason: "Device integrity verdict is not acceptable." };
+    }
+  } catch (error) {
     return {
       ok: false,
-      reason: "Play Integrity token request hash mismatch.",
+      reason: `Play Integrity verification failed: ${
+        error instanceof Error ? error.message : "unknown"
+      }`,
     };
-  }
-
-  const appVerdict = external?.appIntegrity?.appRecognitionVerdict || "";
-  if (!PLAY_ALLOWED_APP_VERDICTS.includes(appVerdict)) {
-    return {
-      ok: false,
-      reason: `Disallowed app verdict: ${appVerdict || "unknown"}.`,
-    };
-  }
-
-  const deviceVerdicts =
-    external?.deviceIntegrity?.deviceRecognitionVerdict || [];
-  const hasAllowedDeviceVerdict = deviceVerdicts.some((verdict) =>
-    PLAY_ALLOWED_DEVICE_VERDICTS.includes(verdict)
-  );
-  if (!hasAllowedDeviceVerdict) {
-    return { ok: false, reason: "Device integrity verdict is not acceptable." };
   }
 
   return { ok: true, reason: "ok" };

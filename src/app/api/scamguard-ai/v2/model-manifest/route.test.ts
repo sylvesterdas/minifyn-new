@@ -26,6 +26,7 @@ describe("scamguard AI model manifest route", () => {
   });
 
   test("rejects requests without Play Integrity proof", async () => {
+    vi.stubEnv("LINKGUARD_PLAY_INTEGRITY_ENFORCE", "true");
     const { POST } = await import("./route");
 
     const response = await POST(
@@ -40,6 +41,7 @@ describe("scamguard AI model manifest route", () => {
   });
 
   test("rejects requests with mismatched Play Integrity request hashes", async () => {
+    vi.stubEnv("LINKGUARD_PLAY_INTEGRITY_ENFORCE", "true");
     const { POST } = await import("./route");
 
     const response = await POST(
@@ -52,6 +54,51 @@ describe("scamguard AI model manifest route", () => {
 
     expect(response.status).toBe(403);
     expect(json.reason).toContain("request hash mismatch");
+  });
+
+  test("allows active AI subscriptions when Play Integrity enforcement is disabled", async () => {
+    const purchaseToken = "purchase-token";
+    const manifest = {
+      model_version: "7",
+      feature_schema_version: "1.0.0",
+      runtime: "tensorflow-lite",
+      model_file: "model_v7.tflite",
+      download_url: "https://example.com/model_v7.tflite",
+      sha256: "a".repeat(64),
+      size_bytes: 123,
+      signature_algorithm: "ed25519",
+      signing_key_id: "prod-2026-05",
+      signature: "signed",
+    };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.startsWith("https://androidpublisher.googleapis.com/")) {
+        return Response.json({
+          subscriptionState: "SUBSCRIPTION_STATE_ACTIVE",
+          lineItems: [{ productId: "ai_mode" }],
+        });
+      }
+      if (url.startsWith("https://storage.googleapis.com/storage/v1/")) {
+        return Response.json(manifest);
+      }
+      return new Response("unexpected", { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { POST } = await import("./route");
+    const response = await POST(
+      manifestRequest({
+        body: { product_id: "ai_mode", purchase_token: purchaseToken },
+      })
+    );
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.manifest).toMatchObject(manifest);
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      expect.stringContaining("https://playintegrity.googleapis.com/"),
+      expect.any(Object)
+    );
   });
 
   test("rejects expired AI subscription tokens", async () => {
