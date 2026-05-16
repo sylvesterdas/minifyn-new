@@ -13,6 +13,20 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/blog',
+        destination: 'https://minifyn.hashnode.dev',
+        permanent: true,
+      },
+      {
+        source: '/blog/:slug*',
+        destination: 'https://minifyn.hashnode.dev/:slug*',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

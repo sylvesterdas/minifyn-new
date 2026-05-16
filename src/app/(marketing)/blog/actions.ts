@@ -11,7 +11,7 @@ export async function loadMorePosts(cursor: string) {
     const { posts, pageInfo } = await getPosts(11, cursor);
     return { posts, pageInfo };
   } catch (error) {
-    console.error("Failed to fetch more posts:", error);
+    console.warn("Failed to fetch more posts:", error);
     return {
       posts: [],
       pageInfo: { hasNextPage: false, endCursor: null },

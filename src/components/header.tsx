@@ -13,7 +13,7 @@ import { useState } from 'react';
 const navLinks = [
     { href: "/", label: "Home" },
     { href: "/scamguard", label: "ScamGuard" },
-    { href: "/blog", label: "Blog" },
+    { href: "https://minifyn.hashnode.dev", label: "Blog" },
     { href: "/features", label: "Features" },
     { href: "/pricing", label: "Pricing" },
     { href: "/docs", label: "Docs" },

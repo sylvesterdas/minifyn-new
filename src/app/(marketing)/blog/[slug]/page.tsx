@@ -1,14 +1,25 @@
 
-import { getPostBySlug, getPosts } from '@/lib/hashnode';
+import { getPostBySlug } from '@/lib/hashnode';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { Article, WithContext } from 'schema-dts';
 import { BlogPostDetail } from '@/components/blog-post-detail';
+import Link from 'next/link';
 
 
 export async function generateMetadata({ params }: { params: any }): Promise<Metadata> {
     params = await params;
-    const post = await getPostBySlug(params.slug);
+    let post;
+
+    try {
+        post = await getPostBySlug(params.slug);
+    } catch (error) {
+        console.warn('Unable to generate blog post metadata:', error);
+        return {
+            title: 'Blog Temporarily Unavailable | MiniFyn Blog',
+            description: 'MiniFyn blog content is temporarily unavailable. Please try again soon.',
+        };
+    }
     
     if (!post) {
         return {
@@ -59,7 +70,14 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
 
 export default async function PostPage({ params }: { params: any }) {
     params = await params;
-    const post = await getPostBySlug(params.slug);
+    let post;
+
+    try {
+        post = await getPostBySlug(params.slug);
+    } catch (error) {
+        console.warn('Unable to load blog post:', error);
+        return <BlogPostUnavailable />;
+    }
     
     if (!post) {
         notFound();
@@ -95,5 +113,21 @@ export default async function PostPage({ params }: { params: any }) {
             />
             <BlogPostDetail post={post} />
         </>
+    );
+}
+
+function BlogPostUnavailable() {
+    return (
+        <main className="container mx-auto max-w-3xl px-4 py-24 text-center">
+            <h1 className="text-4xl font-bold tracking-tight">Blog post temporarily unavailable</h1>
+            <p className="mt-4 text-lg text-muted-foreground">
+                The article could not be loaded from our publishing provider right now. Please try again in a few minutes.
+            </p>
+            <div className="mt-8">
+                <Link href="/blog" className="text-primary underline-offset-4 hover:underline">
+                    Back to the blog
+                </Link>
+            </div>
+        </main>
     );
 }

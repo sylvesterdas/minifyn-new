@@ -1,9 +1,8 @@
 "use server";
 
-// Reverting to environment variables as the hardcoded test proved they are not the issue.
-const HASHNODE_GQL_ENDPOINT = process.env.HASHNODE_GQL_ENDPOINT!;
-const HASHNODE_PUBLICATION_ID = process.env.HASHNODE_PUBLICATION_ID!;
-const HASHNODE_ACCESS_TOKEN = process.env.NEXT_HASHNODE_ACCESS_TOKEN!;
+const DEFAULT_HASHNODE_GQL_ENDPOINT = "https://gql.hashnode.com";
+const HASHNODE_RETRY_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+const HASHNODE_MAX_ATTEMPTS = 3;
 
 export interface HashnodePost {
   id: string;
@@ -59,34 +58,147 @@ interface HashnodePostsResponse {
 interface HashnodePostResponse {
   data: {
     publication: {
-      post: HashnodePost;
+      post: HashnodePost | null;
     };
   };
 }
 
+interface HashnodeGraphQLError {
+  message?: string;
+}
+
+interface HashnodeGraphQLResponse {
+  errors?: HashnodeGraphQLError[];
+}
+
+class HashnodeApiError extends Error {
+  status?: number;
+
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = "HashnodeApiError";
+    this.status = status;
+  }
+}
+
+function getHashnodeConfig() {
+  const configuredEndpoint = process.env.HASHNODE_GQL_ENDPOINT
+    ?.trim()
+    .replace(/^['"]|['"]$/g, "");
+  const endpoint = configuredEndpoint || DEFAULT_HASHNODE_GQL_ENDPOINT;
+
+  return {
+    endpoint: endpoint.replace(/\/$/, ""),
+    publicationId: process.env.HASHNODE_PUBLICATION_ID,
+    accessToken: process.env.NEXT_HASHNODE_ACCESS_TOKEN,
+  };
+}
+
+function getResponsePreview(text: string) {
+  return text.replace(/\s+/g, " ").trim().slice(0, 160);
+}
+
+function isJsonContentType(contentType: string) {
+  return /(^|[/+])json($|;)/i.test(contentType);
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 async function fetchFromHashnode<T>(query: string, variables: Record<string, any>): Promise<T> {
-  if (!HASHNODE_GQL_ENDPOINT) {
+  const { endpoint, accessToken } = getHashnodeConfig();
+
+  if (!endpoint) {
     throw new Error('Hashnode GraphQL endpoint is not configured.');
   }
 
-  const res = await fetch(HASHNODE_GQL_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': HASHNODE_ACCESS_TOKEN,
-    },
-    body: JSON.stringify({ query, variables }),
-    cache: 'no-store',
-  });
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
 
-  if (!res.ok) {
-    const errorText = await res.text();
-    console.error("Hashnode API Error:", errorText);
-    throw new Error(`Failed to fetch from Hashnode API. Status: ${res.status}`);
+  if (accessToken) {
+    headers.Authorization = accessToken;
   }
 
-  return res.json() as Promise<T>;
+  let res: Response | null = null;
+  let responseText = "";
+
+  for (let attempt = 1; attempt <= HASHNODE_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      res = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ query, variables }),
+        cache: 'no-store',
+        redirect: 'manual',
+      });
+      responseText = await res.text();
+    } catch (error) {
+      if (attempt === HASHNODE_MAX_ATTEMPTS) {
+        throw new HashnodeApiError("Failed to reach Hashnode API.");
+      }
+
+      await wait(150 * attempt);
+      continue;
+    }
+
+    if (!HASHNODE_RETRY_STATUSES.has(res.status) || attempt === HASHNODE_MAX_ATTEMPTS) {
+      break;
+    }
+
+    await wait(150 * attempt);
+  }
+
+  if (!res) {
+    throw new HashnodeApiError("Failed to reach Hashnode API.");
+  }
+
+  const contentType = res.headers.get('content-type') || 'unknown';
+
+  if ([301, 302, 307, 308].includes(res.status)) {
+    const location = res.headers.get('location');
+    const message = location?.includes('/announcements/graphql-api') || location?.includes('/graphql-api-paid-access')
+      ? 'Hashnode GraphQL API access now requires paid allow-listing for your publication.'
+      : `Hashnode GraphQL API redirected to ${location || 'another URL'}.`;
+    throw new HashnodeApiError(message, res.status);
+  }
+
+  if (!res.ok) {
+    console.warn("Hashnode API Error:", getResponsePreview(responseText));
+    throw new HashnodeApiError(`Failed to fetch from Hashnode API. Status: ${res.status}`, res.status);
+  }
+
+  if (!isJsonContentType(contentType)) {
+    console.error("Hashnode API returned a non-JSON response:", {
+      status: res.status,
+      contentType,
+      preview: getResponsePreview(responseText),
+    });
+    throw new HashnodeApiError(`Hashnode API returned ${contentType} instead of JSON. Check HASHNODE_GQL_ENDPOINT.`, res.status);
+  }
+
+  let json: T & HashnodeGraphQLResponse;
+  try {
+    json = JSON.parse(responseText) as T & HashnodeGraphQLResponse;
+  } catch (error) {
+    console.error("Hashnode API returned invalid JSON:", {
+      status: res.status,
+      contentType,
+      preview: getResponsePreview(responseText),
+    });
+    throw new Error("Hashnode API returned invalid JSON.");
+  }
+
+  if (json.errors?.length) {
+    const message = json.errors
+      .map((graphqlError) => graphqlError.message)
+      .filter(Boolean)
+      .join('; ');
+    throw new Error(`Hashnode API GraphQL error: ${message || 'Unknown error'}`);
+  }
+
+  return json;
 }
 
 // --- START: ALIAS CACHE BUSTING ---
@@ -145,11 +257,16 @@ export async function getPosts(
   posts: Omit<HashnodePost, "content" | "ogImage">[];
   pageInfo: PageInfo;
 }> {
+  const { publicationId } = getHashnodeConfig();
+  if (!publicationId) {
+    throw new Error('Hashnode publication ID is not configured.');
+  }
+
   const GET_POSTS_QUERY = generateGetPostsQuery(); // Generate a unique query
   const response = await fetchFromHashnode<HashnodePostsResponse>(
     GET_POSTS_QUERY,
     {
-      publicationId: HASHNODE_PUBLICATION_ID,
+      publicationId,
       first,
       after: after ?? null,
     }
@@ -202,10 +319,15 @@ const GET_POST_BY_SLUG_QUERY = `
 export async function getPostBySlug(
   slug: string
 ): Promise<HashnodePost | null> {
+  const { publicationId } = getHashnodeConfig();
+  if (!publicationId) {
+    throw new Error('Hashnode publication ID is not configured.');
+  }
+
   const response = await fetchFromHashnode<HashnodePostResponse>(
     GET_POST_BY_SLUG_QUERY,
     {
-      publicationId: HASHNODE_PUBLICATION_ID,
+      publicationId,
       slug,
     }
   );

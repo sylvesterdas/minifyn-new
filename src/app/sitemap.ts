@@ -1,4 +1,3 @@
-import { getPosts, type HashnodePost } from '@/lib/hashnode';
 import type { MetadataRoute } from 'next';
 
 
@@ -32,37 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/help`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${siteUrl}/help/faq`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${siteUrl}/help/report-abuse`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${siteUrl}/blog`, lastModified: new Date().toISOString(), changeFrequency: 'daily', priority: 0.9 },
   ];
 
-  // 2. Dynamic blog post pages
-  let allPosts: Pick<HashnodePost, 'slug' | 'publishedAt' | 'updatedAt'>[] = [];
-  let hasNextPage = true;
-  let cursor: string | null = null;
-
-  while (hasNextPage) {
-    try {
-      const { posts, pageInfo } = await getPosts(50, cursor); // Fetch 50 at a time
-      const postData = posts.map((post) => ({
-        slug: post.slug,
-        publishedAt: post.publishedAt,
-        updatedAt: post.updatedAt,
-      }));
-      allPosts = allPosts.concat(postData);
-      hasNextPage = pageInfo.hasNextPage;
-      cursor = pageInfo.endCursor;
-    } catch (error) {
-      console.error("Failed to fetch posts for sitemap, stopping pagination.", error);
-      hasNextPage = false;
-    }
-  }
-
-  const blogPostRoutes: MetadataRoute.Sitemap = allPosts.map(post => ({
-    url: `${siteUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.updatedAt || post.publishedAt).toISOString(),
-    changeFrequency: 'yearly',
-    priority: 0.8,
-  }));
-
-  return [...staticRoutes, ...blogPostRoutes];
+  return staticRoutes;
 }

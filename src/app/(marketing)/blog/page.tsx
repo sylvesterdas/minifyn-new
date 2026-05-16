@@ -21,7 +21,21 @@ export const metadata: Metadata = {
 
 export default async function BlogPage() {
     // Fetch 11 posts for the initial load
-    const { posts, pageInfo } = await getPosts(11);
+    let posts: Awaited<ReturnType<typeof getPosts>>['posts'] = [];
+    let pageInfo: Awaited<ReturnType<typeof getPosts>>['pageInfo'] = {
+      hasNextPage: false,
+      endCursor: null,
+    };
+    let loadError = false;
+
+    try {
+      const result = await getPosts(11);
+      posts = result.posts;
+      pageInfo = result.pageInfo;
+    } catch (error) {
+      loadError = true;
+      console.warn('Unable to load blog posts:', error);
+    }
 
     const jsonLd = {
       "@context": "https://schema.org",
@@ -53,13 +67,22 @@ export default async function BlogPage() {
                     <p className="text-lg font-semibold">Loading posts...</p>
                 </div>
             }>
-              <BlogPostList
-                initialPosts={posts.map((post) => ({
-                  ...post,
-                  brief: post.brief ?? '',
-                }))}
-                initialPageInfo={pageInfo}
-              />
+              {loadError ? (
+                <div className="mx-auto mb-8 max-w-2xl rounded-lg border border-border bg-muted/30 p-5 text-center">
+                  <p className="font-semibold">Blog posts are temporarily unavailable</p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Our publishing provider is having trouble responding. Please try again in a few minutes.
+                  </p>
+                </div>
+              ) : (
+                <BlogPostList
+                  initialPosts={posts.map((post) => ({
+                    ...post,
+                    brief: post.brief ?? '',
+                  }))}
+                  initialPageInfo={pageInfo}
+                />
+              )}
             </Suspense>
         </div>
     );
