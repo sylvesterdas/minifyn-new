@@ -7,7 +7,6 @@ import { BarChart, Key, Zap, QrCode, Link as LinkIcon, ClipboardPaste, Wand, Bar
 import { DeveloperApiSection } from '@/components/developer-api-section';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import type { WebSite, WithContext } from 'schema-dts';
 
 
 
@@ -78,19 +77,11 @@ const linkGuardFeatures = [
 ];
 
 export default function Home() {
-    const jsonLd: WithContext<WebSite> = {
+    const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
         url: 'https://www.minifyn.com/',
         name: 'MiniFyn',
-        potentialAction: {
-            '@type': 'SearchAction',
-            target: {
-                '@type': 'EntryPoint',
-                urlTemplate: 'https://www.minifyn.com/blog?search={search_term_string}'
-            },
-            
-        },
     };
 
   return (

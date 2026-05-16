@@ -7,7 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import {
   AlertTriangle,
   BadgeCheck,
+  BrainCircuit,
   CheckCircle2,
+  Crown,
   Lock,
   ScanSearch,
   ShieldCheck,
@@ -87,6 +89,42 @@ const trustPoints = [
   'Clear product ownership and support context',
 ];
 
+const tierCards = [
+  {
+    title: 'Free',
+    subtitle: 'Basic checks for everyday link safety.',
+    icon: ShieldCheck,
+    items: [
+      'Check suspicious links before opening them.',
+      'See clear safe, suspicious, or dangerous results.',
+      'Get basic URL, HTTPS, domain, and redirect warnings.',
+      'Keep recent scan history on this device when enabled.',
+    ],
+  },
+  {
+    title: 'Pro',
+    subtitle: 'More detailed checks for people who scan often.',
+    icon: Crown,
+    items: [
+      'Includes everything in Free.',
+      'Higher scan limits for regular use.',
+      'Structured Pro risk score: Low, Medium, or Elevated.',
+      'More detailed redirect, brand mismatch, and domain-ending checks.',
+    ],
+  },
+  {
+    title: 'AI Mode',
+    subtitle: 'Advanced guidance for harder-to-judge links.',
+    icon: BrainCircuit,
+    items: [
+      'Includes everything in Pro.',
+      'Adds AI-assisted review for suspicious patterns.',
+      'Explains why a link may be risky in plain language.',
+      'Managed as a Google Play subscription under your Play account.',
+    ],
+  },
+];
+
 const faqs = [
   {
     question: 'What is ScamGuard: Link Checker?',
@@ -102,6 +140,11 @@ const faqs = [
     question: 'Does ScamGuard: Link Checker replace antivirus or browser security?',
     answer:
       'No. It is a focused link-checking tool that can add an extra layer of caution, but it should be used alongside normal device and account security practices.',
+  },
+  {
+    question: 'What is the difference between Free, Pro, and AI Mode?',
+    answer:
+      'Free covers basic link checks, Pro adds higher limits and deeper redirect, brand, and domain checks, and AI Mode includes Pro plus AI-assisted review for harder-to-judge links.',
   },
   {
     question: 'Where can I find ScamGuard: Link Checker policies?',
@@ -161,14 +204,14 @@ export default function ScamGuardPage() {
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:26px_26px]" />
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
-            <div className="space-y-8">
+            <div className="space-y-8 text-center">
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/75 px-3 py-1.5 text-sm text-muted-foreground backdrop-blur">
                 <ShieldCheck className="h-4 w-4 text-primary" />
                 Android safety app by MiniFyn
               </div>
 
               <div className="space-y-5">
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col items-center gap-4">
                   <Image
                     src="/images/linkguard-logo.svg"
                     alt="ScamGuard: Link Checker logo"
@@ -177,7 +220,7 @@ export default function ScamGuardPage() {
                     className="h-14 w-14 rounded-2xl shadow-lg ring-1 ring-white/10"
                   />
                   <div className="min-w-0">
-                    <h1 className="text-5xl font-semibold tracking-[-0.04em] text-foreground sm:text-6xl lg:text-7xl">
+                    <h1 className="text-5xl font-semibold text-foreground sm:text-6xl lg:text-7xl">
                       ScamGuard: Link Checker
                     </h1>
                     <p className="mt-1 text-xl text-muted-foreground sm:text-2xl">
@@ -186,7 +229,7 @@ export default function ScamGuardPage() {
                   </div>
                 </div>
 
-                <p className="max-w-2xl text-lg leading-8 text-muted-foreground sm:text-[1.1rem]">
+                <p className="mx-auto max-w-2xl text-lg leading-8 text-muted-foreground sm:text-[1.1rem]">
                   ScamGuard: Link Checker helps people review suspicious URLs from messages, emails, and chats before
                   opening them. It gives users a simple way to pause, inspect, and avoid obvious scam or
                   phishing-style links.
@@ -200,7 +243,7 @@ export default function ScamGuardPage() {
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
                   <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Platform</p>
-                  <div className="mt-2 inline-flex items-center gap-2 text-base font-semibold text-foreground">
+                  <div className="mt-2 inline-flex items-center justify-center gap-2 text-base font-semibold text-foreground">
                     <Smartphone className="h-4.5 w-4.5 text-primary" />
                     Android
                   </div>
@@ -211,7 +254,7 @@ export default function ScamGuardPage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4">
+              <div className="flex flex-wrap items-center justify-center gap-4">
                 <Button asChild size="lg" variant="outline" className="rounded-full px-6">
                   <Link href="/scamguard/legal/privacy">View Privacy Policy</Link>
                 </Button>
@@ -231,7 +274,7 @@ export default function ScamGuardPage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap justify-center gap-2">
                 {trustPoints.map((point) => (
                   <Badge
                     key={point}
@@ -352,6 +395,41 @@ export default function ScamGuardPage() {
                 <p>For a focused Android product at this stage, a clean path on the main company site is usually enough.</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Free, Pro, and AI Mode</h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              ScamGuard has different protection levels depending on how often you check links and how much context you want before deciding.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-12 grid max-w-6xl gap-6 lg:grid-cols-3">
+            {tierCards.map((tier) => {
+              const Icon = tier.icon;
+
+              return (
+                <div key={tier.title} className="flex h-full flex-col rounded-3xl border bg-background/85 p-6 shadow-sm">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="mt-5 text-2xl font-semibold">{tier.title}</h3>
+                  <p className="mt-2 text-muted-foreground">{tier.subtitle}</p>
+                  <ul className="mt-6 space-y-3">
+                    {tier.items.map((item) => (
+                      <li key={item} className="flex gap-3 text-sm text-muted-foreground">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

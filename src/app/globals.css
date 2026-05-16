@@ -56,16 +56,6 @@
   body {
     @apply bg-background text-foreground;
   }
-  
-  /* Hides scrollbar for code blocks in blog posts */
-  .blog-content pre {
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* Internet Explorer 10+ */
-  }
-  .blog-content pre::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-  }
 }
 
 /* nprogress styles */
