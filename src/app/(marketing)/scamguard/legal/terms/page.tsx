@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function ScamGuardTermsPage() {
-  const lastUpdated = "April 17, 2026";
+  const lastUpdated = "May 17, 2026";
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
@@ -45,32 +45,32 @@ export default function ScamGuardTermsPage() {
           <li>You must not attempt to abuse or overload ScamGuard: Link Checker infrastructure.</li>
         </ul>
 
-        <h2 className="text-2xl font-semibold mb-3">Pro features and payments</h2>
+        <h2 className="text-2xl font-semibold mb-3">Pro, AI Mode, and payments</h2>
         <ul className="list-disc pl-5 mb-6 space-y-2">
-          <li>Pro is a one-time payment unlock (not a subscription).</li>
-          <li>Pro purchase availability may be limited by region (currently India).</li>
+          <li>Pro is a Google Play managed one-time in-app product.</li>
+          <li>AI Mode is a Google Play managed subscription and includes Pro features.</li>
+          <li>Purchase availability, pricing, taxes, renewals, and trials may vary by region and Google Play account.</li>
           <li>
-            Payments are processed by Razorpay and may be subject to Razorpay's
-            terms and policies.
+            Payments are processed by Google Play and are subject to Google Play
+            terms, policies, and billing controls.
           </li>
           <li>
-            Pro unlock is device-local in the current implementation.
+            Pro and AI Mode unlock status may be stored locally in the app and
+            restored through Google Play purchase restore flows.
           </li>
           <li>
-            Users are responsible for saving their recovery code. If recovery code
-            is lost after uninstall/data-clear/reset, restore may not be possible.
-          </li>
-          <li>
-            ScamGuard: Link Checker backend operates without a user account/payment database for
-            Pro entitlement history.
+            AI Mode subscribers receive access to AI review details and protected
+            model updates while the subscription is active.
           </li>
         </ul>
 
         <h2 className="text-2xl font-semibold mb-3">Refund and cancellation</h2>
         <p className="mb-6">
-          ScamGuard: Link Checker Pro is a one-time digital unlock. All payments are final.
-          No refunds, returns, or cancellations are offered after purchase,
-          except where required under applicable law.
+          Google Play manages purchases, subscription renewal, cancellation, and
+          refund requests. AI Mode continues until the end of the current billing
+          period after cancellation unless Google Play or applicable law provides
+          otherwise. Pro is a one-time digital unlock. Refund eligibility is
+          handled through Google Play and applicable law.
         </p>
 
         <h2 className="text-2xl font-semibold mb-3">Pricing and offers</h2>
@@ -88,7 +88,9 @@ export default function ScamGuardTermsPage() {
 
         <h2 className="text-2xl font-semibold mb-3">Service changes</h2>
         <p className="mb-6">
-          We may modify, suspend, or discontinue features at any time.
+          We may modify, suspend, or discontinue features at any time. AI-assisted
+          results, model availability, and cloud reputation checks may change as
+          safety systems are updated.
         </p>
 
         <h2 className="text-2xl font-semibold mb-3">Governing law</h2>
