@@ -17,12 +17,12 @@ const nextConfig = {
     return [
       {
         source: '/blog',
-        destination: 'https://minifyn.hashnode.dev',
+        destination: 'https://blog.minifyn.com',
         permanent: true,
       },
       {
         source: '/blog/:slug*',
-        destination: 'https://minifyn.hashnode.dev/:slug*',
+        destination: 'https://blog.minifyn.com/:slug*',
         permanent: true,
       },
     ];

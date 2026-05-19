@@ -6,7 +6,7 @@ import Logo from './logo';
 const footerLinks = {
     product: [
         { href: '/features', label: 'Features' },
-        { href: 'https://minifyn.hashnode.dev', label: 'Blog' },
+        { href: 'https://blog.minifyn.com', label: 'Blog' },
         { href: '/tools', label: 'Developer Tools' },
         { href: '/pricing', label: 'Pricing' },
     ],
