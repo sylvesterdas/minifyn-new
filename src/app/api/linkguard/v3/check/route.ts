@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { GoogleAuth } from "google-auth-library";
+import {
+  KNOWN_SHORTENER_HOSTS,
+  LINKGUARD_POLICY,
+  OFFICIAL_SAFE_DOMAINS,
+  PROTECTED_BRANDS,
+} from "../../../../../lib/generated/linkguard-policy";
 
 export const runtime = "nodejs";
 
@@ -32,24 +38,6 @@ const VERDICT_TTL_MS = 48 * 60 * 60 * 1000;
 const OPENPHISH_REFRESH_MS = 30 * 60 * 1000;
 const IP_WINDOW_MS = 60 * 60 * 1000;
 const IP_MAX_REQUESTS = 120;
-const OFFICIAL_SAFE_DOMAINS = new Set([
-  "minifyn.com",
-  "mnfy.in",
-  "sylvesterdas.com",
-]);
-const PROTECTED_BRANDS = new Set([
-  "paypal",
-  "apple",
-  "google",
-  "microsoft",
-  "amazon",
-  "netflix",
-  "instagram",
-  "facebook",
-  "whatsapp",
-  "binance",
-]);
-
 type Risk = "safe" | "warning" | "risky";
 type ReputationStatus = "hit" | "clean" | "unavailable";
 
@@ -283,6 +271,15 @@ async function computeVerdict(normalizedUrl: string, rawUrl: string): Promise<Ve
     };
   }
 
+  const brandMismatch = detectProtectedBrandMismatch(normalizedUrl);
+  if (brandMismatch) {
+    return {
+      risk: "risky",
+      reason: brandMismatch.reason,
+      checked_at,
+    };
+  }
+
   const lookalike = detectProtectedBrandLookalike(normalizedUrl);
   if (lookalike) {
     return {
@@ -482,21 +479,10 @@ function normalizeUrl(value: string): string {
 }
 
 function isShortenedUrl(value: string): boolean {
-  const shorteners = new Set([
-    "bit.ly",
-    "tinyurl.com",
-    "t.co",
-    "goo.gl",
-    "is.gd",
-    "buff.ly",
-    "ow.ly",
-    "cutt.ly",
-  ]);
-
   try {
     const u = new URL(value);
     const host = u.hostname.toLowerCase();
-    return shorteners.has(host);
+    return KNOWN_SHORTENER_HOSTS.has(host);
   } catch {
     return false;
   }
@@ -513,6 +499,73 @@ function isOfficialSafeUrl(value: string): boolean {
   } catch {
     return false;
   }
+}
+
+function detectProtectedBrandMismatch(value: string): { reason: string } | null {
+  try {
+    const host = new URL(value).hostname.toLowerCase();
+    const registrable = extractRegistrableDomain(host);
+    const labels = host.split(".");
+    const brandDomains = LINKGUARD_POLICY.official_brand_domains;
+
+    for (const brand of Object.keys(brandDomains)) {
+      const domains = brandDomains[brand as keyof typeof brandDomains] as readonly string[];
+      const found =
+        labels.some((label) => label === brand || label.includes(brand)) ||
+        domains.some((domain) => host.includes(`${domain}.`));
+      if (!found) continue;
+
+      const allowed = domains.some(
+        (domain) => registrable === domain || registrable.endsWith(`.${domain}`)
+      );
+      if (!allowed) {
+        return {
+          reason: `"${brand}" appears in host, but root domain is ${registrable}.`,
+        };
+      }
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+function extractRegistrableDomain(host: string): string {
+  const labels = host
+    .toLowerCase()
+    .split(".")
+    .filter(Boolean);
+  if (labels.length < 2) return host.toLowerCase();
+
+  const multiLabelSuffixes = new Set([
+    "co.uk",
+    "org.uk",
+    "gov.uk",
+    "ac.uk",
+    "co.in",
+    "com.au",
+    "net.au",
+    "org.au",
+    "co.nz",
+    "com.br",
+    "com.mx",
+    "com.sg",
+    "com.tr",
+    "co.jp",
+    "co.kr",
+    "com.hk",
+    "com.cn",
+  ]);
+  let suffixLength = 1;
+  for (let i = labels.length - 1; i >= 1; i -= 1) {
+    const candidate = labels.slice(labels.length - i).join(".");
+    if (multiLabelSuffixes.has(candidate)) {
+      suffixLength = i;
+      break;
+    }
+  }
+  if (labels.length <= suffixLength) return labels.join(".");
+  return labels.slice(labels.length - suffixLength - 1).join(".");
 }
 
 function detectProtectedBrandLookalike(value: string): { reason: string } | null {

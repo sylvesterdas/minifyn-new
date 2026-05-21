@@ -70,6 +70,19 @@ describe("linkguard v3 reputation checks", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  test("returns risky for official trusted domains embedded under unrelated roots", async () => {
+    const fetchMock = vi.fn(async () => new Response("https://clean.example/path\n"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { POST } = await import("./route");
+    const response = await POST(linkCheckRequest("https://mnfy.in.evil.com/"));
+    const verdict = await response.json();
+
+    expect(verdict.risk).toBe("risky");
+    expect(verdict.reason).toContain("mnfy");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   test("returns risky for unicode and punycode spoof hosts", async () => {
     const fetchMock = vi.fn(async () => new Response("https://clean.example/path\n"));
     vi.stubGlobal("fetch", fetchMock);
