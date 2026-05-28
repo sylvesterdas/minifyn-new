@@ -102,7 +102,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const expectedRequestHashes = [buildAiModeRequestHash()];
+  const expectedRequestHashes = [
+    buildApiModeRequestHash(),
+    buildAiModeRequestHash(),
+  ];
   if (parsed.value.productId && parsed.value.purchaseToken) {
     expectedRequestHashes.push(
       buildLegacyManifestRequestHash({
@@ -484,6 +487,10 @@ function buildLegacyManifestRequestHash(input: {
 
 function buildAiModeRequestHash(): string {
   return crypto.createHash("sha256").update("ai_mode=true").digest("base64url");
+}
+
+function buildApiModeRequestHash(): string {
+  return crypto.createHash("sha256").update("api_mode=true").digest("base64url");
 }
 
 function tokenHashPrefix(value: string | undefined): string | null {

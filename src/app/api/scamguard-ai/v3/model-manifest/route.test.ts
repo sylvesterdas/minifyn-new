@@ -102,7 +102,7 @@ describe("scamguard AI model manifest route", () => {
   });
 
   test("accepts AI mode claims without server-side subscription verification", async () => {
-    const requestHash = aiModeRequestHash();
+    const requestHash = apiModeRequestHash();
     const manifest = {
       model_version: "7",
       feature_schema_version: "1.0.0",
@@ -133,8 +133,8 @@ describe("scamguard AI model manifest route", () => {
     const { POST } = await import("./route");
     const response = await POST(
       manifestRequest({
-        body: { ai_mode: true },
-        aiModeQuery: true,
+        body: { api_mode: true },
+        apiModeQuery: true,
         requestHash,
       })
     );
@@ -278,9 +278,14 @@ function stubBackendConfig(): void {
 }
 
 function manifestRequest(input: {
-  body: { product_id?: string; purchase_token?: string; ai_mode?: boolean };
+  body: {
+    product_id?: string;
+    purchase_token?: string;
+    ai_mode?: boolean;
+    api_mode?: boolean;
+  };
   requestHash?: string;
-  aiModeQuery?: boolean;
+  apiModeQuery?: boolean;
 }): NextRequest {
   const headers: Record<string, string> = {
     "content-type": "application/json",
@@ -292,8 +297,8 @@ function manifestRequest(input: {
     headers["x-linkguard-play-integrity-request-hash"] = input.requestHash;
   }
 
-  const url = input.aiModeQuery
-    ? "https://www.minifyn.com/api/scamguard-ai/v3/model-manifest?ai_mode=true"
+  const url = input.apiModeQuery
+    ? "https://www.minifyn.com/api/scamguard-ai/v3/model-manifest?api_mode=true"
     : "https://www.minifyn.com/api/scamguard-ai/v3/model-manifest";
 
   return new Request(url, {
@@ -310,8 +315,8 @@ function manifestRequestHash(productId: string, purchaseToken: string): string {
     .digest("base64url");
 }
 
-function aiModeRequestHash(): string {
-  return crypto.createHash("sha256").update("ai_mode=true").digest("base64url");
+function apiModeRequestHash(): string {
+  return crypto.createHash("sha256").update("api_mode=true").digest("base64url");
 }
 
 function integrityPayload(requestHash: string) {
