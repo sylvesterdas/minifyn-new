@@ -358,7 +358,11 @@ async function readGcsJson(objectName: string): Promise<Record<string, unknown>>
     cache: "no-store",
   });
   if (!response.ok) {
-    throw new Error("AI model manifest is unavailable.");
+    const body = await response.text().catch(() => "");
+    const detail = body.trim().slice(0, 200);
+    throw new Error(
+      `Failed to read GCS object ${objectName} (${response.status})${detail ? `: ${detail}` : ""}.`
+    );
   }
   return (await response.json()) as Record<string, unknown>;
 }

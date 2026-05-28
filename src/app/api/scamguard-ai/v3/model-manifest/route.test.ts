@@ -255,6 +255,37 @@ describe("scamguard AI model manifest route", () => {
       expect.any(Object)
     );
   });
+
+  test("surfaces the failing GCS object when the active pointer cannot be read", async () => {
+    const purchaseToken = "purchase-token";
+    const requestHash = manifestRequestHash("ai_mode", purchaseToken);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.startsWith("https://playintegrity.googleapis.com/")) {
+          return Response.json(integrityPayload(requestHash));
+        }
+        if (url.includes("scamguard-ai%2Factive_model.json")) {
+          return new Response("missing", { status: 404 });
+        }
+        return new Response("unexpected", { status: 404 });
+      })
+    );
+
+    const { POST } = await import("./route");
+    const response = await POST(
+      manifestRequest({
+        body: { product_id: "ai_mode", purchase_token: purchaseToken },
+        requestHash,
+      })
+    );
+    const json = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(json.reason).toContain("scamguard-ai/active_model.json");
+    expect(json.reason).toContain("(404)");
+  });
 });
 
 function stubBackendConfig(): void {
