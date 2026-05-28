@@ -26,7 +26,10 @@ export const LINKGUARD_POLICY = {
     "facebook.com",
     "fb.com",
     "whatsapp.com",
-    "binance.com"
+    "binance.com",
+    "buymeacoffee.com",
+    "ko-fi.com",
+    "patreon.com"
   ],
   "official_brand_domains": {
     "paypal": [
@@ -120,7 +123,10 @@ export const LINKGUARD_POLICY = {
       "https://www.minifyn.com",
       "https://blog.sylvesterdas.com",
       "https://www.microsoft.com/login",
-      "https://www.google.co.in/account/reset"
+      "https://www.google.co.in/account/reset",
+      "https://buymeacoffee.com/minifyn",
+      "https://ko-fi.com/minifyn",
+      "https://www.patreon.com/minifyn"
     ],
     "risky": [
       "http://mnfy.in",
