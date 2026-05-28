@@ -61,15 +61,43 @@ type SubscriptionPurchaseV2 = {
 export async function POST(req: NextRequest) {
   const parsed = await parseRequest(req);
   if (!parsed.ok) {
+    console.warn("[scamguard-ai][model-manifest]", {
+      ok: false,
+      stage: "parse_request",
+      reason: parsed.reason,
+      platform: req.headers.get("x-linkguard-platform") || null,
+      appVersion: req.headers.get("x-linkguard-app-version") || null,
+      hasIntegrityToken: Boolean(
+        req.headers.get("x-linkguard-play-integrity-token")?.trim()
+      ),
+      hasIntegrityRequestHash: Boolean(
+        req.headers.get("x-linkguard-play-integrity-request-hash")?.trim()
+      ),
+    });
     return NextResponse.json({ reason: parsed.reason }, { status: 400 });
   }
 
   const config = validateConfig();
   if (!config.ok) {
+    console.error("[scamguard-ai][model-manifest]", {
+      ok: false,
+      stage: "config",
+      reason: config.reason,
+      productId: parsed.value.productId,
+      purchaseTokenHashPrefix: tokenHashPrefix(parsed.value.purchaseToken),
+    });
     return NextResponse.json({ reason: config.reason }, { status: 500 });
   }
 
   if (parsed.value.productId !== PLAY_AI_PRODUCT_ID) {
+    console.warn("[scamguard-ai][model-manifest]", {
+      ok: false,
+      stage: "product",
+      reason: "Unsupported AI product.",
+      productId: parsed.value.productId,
+      expectedProductId: PLAY_AI_PRODUCT_ID,
+      purchaseTokenHashPrefix: tokenHashPrefix(parsed.value.purchaseToken),
+    });
     return NextResponse.json(
       { reason: "Unsupported AI product." },
       { status: 400 }
@@ -86,7 +114,29 @@ export async function POST(req: NextRequest) {
     expectedRequestHash,
   });
   if (!integrity.ok && PLAY_INTEGRITY_ENFORCE) {
+    console.warn("[scamguard-ai][model-manifest]", {
+      ok: false,
+      stage: "integrity",
+      reason: integrity.reason,
+      enforce: PLAY_INTEGRITY_ENFORCE,
+      hasToken: Boolean(parsed.value.integrityToken),
+      hasRequestHash: Boolean(parsed.value.integrityRequestHash),
+      productId: parsed.value.productId,
+      purchaseTokenHashPrefix: tokenHashPrefix(parsed.value.purchaseToken),
+    });
     return NextResponse.json({ reason: integrity.reason }, { status: 403 });
+  }
+  if (!integrity.ok) {
+    console.warn("[scamguard-ai][model-manifest]", {
+      ok: false,
+      stage: "integrity",
+      reason: integrity.reason,
+      enforce: PLAY_INTEGRITY_ENFORCE,
+      hasToken: Boolean(parsed.value.integrityToken),
+      hasRequestHash: Boolean(parsed.value.integrityRequestHash),
+      productId: parsed.value.productId,
+      purchaseTokenHashPrefix: tokenHashPrefix(parsed.value.purchaseToken),
+    });
   }
 
   const subscription = await verifyAiSubscription({
@@ -94,6 +144,16 @@ export async function POST(req: NextRequest) {
     purchaseToken: parsed.value.purchaseToken,
   });
   if (!subscription.ok) {
+    console.warn("[scamguard-ai][model-manifest]", {
+      ok: false,
+      stage: "subscription",
+      reason: subscription.reason,
+      productId: parsed.value.productId,
+      purchaseTokenHashPrefix: tokenHashPrefix(parsed.value.purchaseToken),
+      googleStatus: subscription.googleStatus,
+      subscriptionState: subscription.subscriptionState,
+      lineItemProductIds: subscription.lineItemProductIds,
+    });
     return NextResponse.json({ reason: subscription.reason }, { status: 403 });
   }
 
@@ -115,12 +175,20 @@ export async function POST(req: NextRequest) {
       expires_at: nowSec() + expiresIn,
     });
   } catch (error) {
+    const reason =
+      error instanceof Error ? error.message : "AI model manifest is unavailable.";
+    console.error("[scamguard-ai][model-manifest]", {
+      ok: false,
+      stage: "manifest",
+      reason,
+      productId: parsed.value.productId,
+      purchaseTokenHashPrefix: tokenHashPrefix(parsed.value.purchaseToken),
+      bucketConfigured: Boolean(GCS_MODEL_BUCKET),
+      activeModelObject: ACTIVE_MODEL_OBJECT,
+    });
     return NextResponse.json(
       {
-        reason:
-          error instanceof Error
-            ? error.message
-            : "AI model manifest is unavailable.",
+        reason,
       },
       { status: 503 }
     );
@@ -173,7 +241,13 @@ function validateConfig(): { ok: true } | { ok: false; reason: string } {
 async function verifyAiSubscription(input: {
   productId: string;
   purchaseToken: string;
-}): Promise<{ ok: boolean; reason: string }> {
+}): Promise<{
+  ok: boolean;
+  reason: string;
+  googleStatus?: number;
+  subscriptionState?: string;
+  lineItemProductIds?: string[];
+}> {
   const accessToken = await googleAccessToken([
     "https://www.googleapis.com/auth/androidpublisher",
   ]);
@@ -187,10 +261,17 @@ async function verifyAiSubscription(input: {
     cache: "no-store",
   });
   if (!response.ok) {
-    return { ok: false, reason: "Unable to verify AI subscription." };
+    return {
+      ok: false,
+      reason: "Unable to verify AI subscription.",
+      googleStatus: response.status,
+    };
   }
 
   const purchase = (await response.json()) as SubscriptionPurchaseV2;
+  const lineItemProductIds = (purchase.lineItems || [])
+    .map((item) => item.productId)
+    .filter((item): item is string => Boolean(item));
   const activeStates = new Set([
     "SUBSCRIPTION_STATE_ACTIVE",
     "SUBSCRIPTION_STATE_IN_GRACE_PERIOD",
@@ -199,17 +280,30 @@ async function verifyAiSubscription(input: {
     return {
       ok: false,
       reason: `AI subscription is not active (${purchase.subscriptionState || "unknown"}).`,
+      googleStatus: response.status,
+      subscriptionState: purchase.subscriptionState || "unknown",
+      lineItemProductIds,
     };
   }
 
-  const productMatches = (purchase.lineItems || []).some(
-    (item) => item.productId === input.productId
-  );
+  const productMatches = lineItemProductIds.includes(input.productId);
   if (!productMatches) {
-    return { ok: false, reason: "AI subscription product mismatch." };
+    return {
+      ok: false,
+      reason: "AI subscription product mismatch.",
+      googleStatus: response.status,
+      subscriptionState: purchase.subscriptionState,
+      lineItemProductIds,
+    };
   }
 
-  return { ok: true, reason: "ok" };
+  return {
+    ok: true,
+    reason: "ok",
+    googleStatus: response.status,
+    subscriptionState: purchase.subscriptionState,
+    lineItemProductIds,
+  };
 }
 
 async function verifyPlayIntegrity(input: {
@@ -448,6 +542,10 @@ function buildManifestRequestHash(input: {
 }): string {
   const raw = `product_id=${input.productId}&purchase_token=${input.purchaseToken}`;
   return crypto.createHash("sha256").update(raw).digest("base64url");
+}
+
+function tokenHashPrefix(value: string): string {
+  return crypto.createHash("sha256").update(value).digest("hex").slice(0, 10);
 }
 
 function encodeGcsObjectName(objectName: string): string {
