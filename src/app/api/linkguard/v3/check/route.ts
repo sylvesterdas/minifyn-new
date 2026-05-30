@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { GoogleAuth } from "google-auth-library";
-import {
-  KNOWN_SHORTENER_HOSTS,
-  LINKGUARD_POLICY,
-  OFFICIAL_SAFE_DOMAINS,
-  PROTECTED_BRANDS,
-} from "../../../../../lib/generated/linkguard-policy";
 
 export const runtime = "nodejs";
 
@@ -190,7 +184,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const task = computeVerdict(normalizedUrl, url);
+  const task = computeVerdict(normalizedUrl);
   state.inFlightByHash.set(urlHash, task);
 
   try {
@@ -206,88 +200,8 @@ export async function POST(req: NextRequest) {
   }
 }
 
-function hasSuspiciousChars(
-  normalizedUrl: string,
-  rawUrl: string
-): { reason: string } | null {
-  try {
-    const normalizedHost = new URL(normalizedUrl).hostname.toLowerCase();
-    const rawHost = rawHostFromUrl(rawUrl) || normalizedHost;
-
-    if (normalizedHost.includes("xn--")) {
-      return { reason: "Internationalized/punycode host detected" };
-    }
-
-    // Check for invisible or zero-width characters.
-    // U+200B: Zero Width Space
-    // U+200C: Zero Width Non-Joiner
-    // U+200D: Zero Width Joiner
-    // U+FEFF: Zero Width No-Break Space / BOM
-    // U+00AD: Soft Hyphen
-    if (/[\u200B-\u200D\uFEFF\u00AD]/.test(rawHost)) {
-      return { reason: "Link contains invisible characters" };
-    }
-
-    // Check for mixed scripts (e.g., Latin and Cyrillic characters).
-    // This is a strong indicator of a potential homoglyph attack.
-    const scripts: { [key: string]: RegExp } = {
-      Latin: /[a-zA-Z]/,
-      Cyrillic: /[\u0400-\u04FF]/,
-      Greek: /[\u0370-\u03FF]/,
-    };
-
-    const detectedScripts = Object.keys(scripts).filter((script) =>
-      scripts[script].test(rawHost)
-    );
-
-    if (detectedScripts.length > 1) {
-      return {
-        reason: `Link contains mixed scripts (${detectedScripts.join(", ")})`,
-      };
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
-
-async function computeVerdict(normalizedUrl: string, rawUrl: string): Promise<Verdict> {
+async function computeVerdict(normalizedUrl: string): Promise<Verdict> {
   const checked_at = nowSec();
-
-  if (isOfficialSafeUrl(normalizedUrl)) {
-    return {
-      risk: "safe",
-      reason: "Official trusted domain",
-      checked_at,
-    };
-  }
-
-  const suspiciousChars = hasSuspiciousChars(normalizedUrl, rawUrl);
-  if (suspiciousChars) {
-    return {
-      risk: "risky",
-      reason: suspiciousChars.reason,
-      checked_at,
-    };
-  }
-
-  const brandMismatch = detectProtectedBrandMismatch(normalizedUrl);
-  if (brandMismatch) {
-    return {
-      risk: "risky",
-      reason: brandMismatch.reason,
-      checked_at,
-    };
-  }
-
-  const lookalike = detectProtectedBrandLookalike(normalizedUrl);
-  if (lookalike) {
-    return {
-      risk: "risky",
-      reason: lookalike.reason,
-      checked_at,
-    };
-  }
 
   const [webRiskStatus, openPhishStatus] = await Promise.all([
     checkWebRisk(normalizedUrl),
@@ -306,22 +220,6 @@ async function computeVerdict(normalizedUrl: string, rawUrl: string): Promise<Ve
     return {
       risk: "warning",
       reason: "Reputation checks are unavailable right now. Treat this link with caution.",
-      checked_at,
-    };
-  }
-
-  if (isShortenedUrl(normalizedUrl)) {
-    return {
-      risk: "warning",
-      reason: "Shortened links can hide the final destination",
-      checked_at,
-    };
-  }
-
-  if (!normalizedUrl.startsWith("https://")) {
-    return {
-      risk: "warning",
-      reason: "This link does not use a secure connection",
       checked_at,
     };
   }
@@ -478,197 +376,20 @@ function normalizeUrl(value: string): string {
   ).toString();
 }
 
-function isShortenedUrl(value: string): boolean {
-  try {
-    const u = new URL(value);
-    const host = u.hostname.toLowerCase();
-    return KNOWN_SHORTENER_HOSTS.has(host);
-  } catch {
-    return false;
-  }
-}
-
-function isOfficialSafeUrl(value: string): boolean {
-  try {
-    const u = new URL(value);
-    if (u.protocol !== "https:" || u.username || u.password) return false;
-    const host = u.hostname.toLowerCase();
-    return Array.from(OFFICIAL_SAFE_DOMAINS).some(
-      (domain) => host === domain || host.endsWith(`.${domain}`)
-    );
-  } catch {
-    return false;
-  }
-}
-
-function detectProtectedBrandMismatch(value: string): { reason: string } | null {
-  try {
-    const host = new URL(value).hostname.toLowerCase();
-    const registrable = extractRegistrableDomain(host);
-    const labels = host.split(".");
-    const brandDomains = LINKGUARD_POLICY.official_brand_domains;
-
-    for (const brand of Object.keys(brandDomains)) {
-      const domains = brandDomains[brand as keyof typeof brandDomains] as readonly string[];
-      const found =
-        labels.some((label) => label === brand || label.includes(brand)) ||
-        domains.some((domain) => host.includes(`${domain}.`));
-      if (!found) continue;
-
-      const allowed = domains.some(
-        (domain) => registrable === domain || registrable.endsWith(`.${domain}`)
-      );
-      if (!allowed) {
-        return {
-          reason: `"${brand}" appears in host, but root domain is ${registrable}.`,
-        };
-      }
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
-
-function extractRegistrableDomain(host: string): string {
-  const labels = host
-    .toLowerCase()
-    .split(".")
-    .filter(Boolean);
-  if (labels.length < 2) return host.toLowerCase();
-
-  const multiLabelSuffixes = new Set([
-    "co.uk",
-    "org.uk",
-    "gov.uk",
-    "ac.uk",
-    "co.in",
-    "com.au",
-    "net.au",
-    "org.au",
-    "co.nz",
-    "com.br",
-    "com.mx",
-    "com.sg",
-    "com.tr",
-    "co.jp",
-    "co.kr",
-    "com.hk",
-    "com.cn",
-  ]);
-  let suffixLength = 1;
-  for (let i = labels.length - 1; i >= 1; i -= 1) {
-    const candidate = labels.slice(labels.length - i).join(".");
-    if (multiLabelSuffixes.has(candidate)) {
-      suffixLength = i;
-      break;
-    }
-  }
-  if (labels.length <= suffixLength) return labels.join(".");
-  return labels.slice(labels.length - suffixLength - 1).join(".");
-}
-
-function detectProtectedBrandLookalike(value: string): { reason: string } | null {
-  try {
-    const host = new URL(value).hostname.toLowerCase();
-    const rootLabel = extractRootLabel(host);
-    const rootSkeleton = brandSkeleton(rootLabel);
-
-    for (const brand of PROTECTED_BRANDS) {
-      if (rootLabel === brand) continue;
-      if (
-        rootSkeleton === brand ||
-        levenshtein(rootLabel, brand) <= 1 ||
-        levenshtein(rootSkeleton, brand) <= 1
-      ) {
-        return { reason: `Domain looks like a fake ${brand} lookalike` };
-      }
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
-
-function rawHostFromUrl(value: string): string {
-  const trimmed = value.trim();
-  const withoutScheme = trimmed.replace(/^[a-z][a-z0-9+.-]*:\/\//i, "");
-  const authority = withoutScheme.split(/[/?#]/, 1)[0] || "";
-  const withoutUserinfo = authority.includes("@")
-    ? authority.slice(authority.lastIndexOf("@") + 1)
-    : authority;
-  return withoutUserinfo.replace(/:\d+$/, "").toLowerCase();
-}
-
-function extractRootLabel(host: string): string {
-  const labels = host.split(".").filter(Boolean);
-  return labels.length < 2 ? host : labels[labels.length - 2];
-}
-
-function brandSkeleton(value: string): string {
-  const mapped = Array.from(value.toLowerCase())
-    .map((char) => {
-      switch (char) {
-        case "а":
-        case "α":
-          return "a";
-        case "с":
-        case "ϲ":
-          return "c";
-        case "е":
-        case "ε":
-          return "e";
-        case "і":
-        case "ι":
-          return "i";
-        case "о":
-        case "ο":
-          return "o";
-        case "р":
-        case "ρ":
-          return "p";
-        case "ѕ":
-          return "s";
-        case "х":
-        case "χ":
-          return "x";
-        case "у":
-          return "y";
-        default:
-          return char;
-      }
-    })
-    .join("");
-  return mapped.replaceAll("rn", "m");
-}
-
-function levenshtein(a: string, b: string): number {
-  if (a === b) return 0;
-  if (!a) return b.length;
-  if (!b) return a.length;
-  const rows = Array.from({ length: b.length + 1 }, (_, index) => index);
-  for (let i = 1; i <= a.length; i += 1) {
-    let prev = rows[0];
-    rows[0] = i;
-    for (let j = 1; j <= b.length; j += 1) {
-      const temp = rows[j];
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      rows[j] = Math.min(rows[j] + 1, rows[j - 1] + 1, prev + cost);
-      prev = temp;
-    }
-  }
-  return rows[b.length];
-}
-
 function sha256Hex(value: string): string {
   return crypto.createHash("sha256").update(value).digest("hex");
 }
 
-async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
+async function fetchWithTimeout(
+  url: string,
+  timeoutMs: number,
+  init: RequestInit = {}
+): Promise<Response> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     return await fetch(url, {
+      ...init,
       cache: "no-store",
       signal: ctrl.signal,
     });

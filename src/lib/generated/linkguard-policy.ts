@@ -8,6 +8,10 @@ export const LINKGUARD_POLICY = {
     "Official safe domains require manual review before changes.",
     "Risky regression cases should be reviewed before model or app release."
   ],
+  "official_safe_tlds": [
+    "google",
+    "apple"
+  ],
   "official_safe_domains": [
     "minifyn.com",
     "mnfy.in",
@@ -30,6 +34,9 @@ export const LINKGUARD_POLICY = {
     "buymeacoffee.com",
     "ko-fi.com",
     "patreon.com"
+  ],
+  "official_safe_domain_exceptions": [
+    "share.google"
   ],
   "official_brand_domains": {
     "paypal": [
@@ -103,6 +110,9 @@ export const LINKGUARD_POLICY = {
     "rebrand.ly",
     "buff.ly"
   ],
+  "trusted_brand_shortener_hosts": [
+    "share.google"
+  ],
   "suspicious_tlds": [
     "zip",
     "top",
@@ -124,6 +134,7 @@ export const LINKGUARD_POLICY = {
       "https://blog.sylvesterdas.com",
       "https://www.microsoft.com/login",
       "https://www.google.co.in/account/reset",
+      "https://docs.google/account/reset",
       "https://buymeacoffee.com/minifyn",
       "https://ko-fi.com/minifyn",
       "https://www.patreon.com/minifyn"
@@ -136,11 +147,45 @@ export const LINKGUARD_POLICY = {
       "https://rnicrosoft.com/login",
       "https://mісrosoft.com/login",
       "https://xn--80ak6aa92e.com/login",
-      "https://mini​fyn.com/login"
+      "https://mini​fyn.com/login",
+      "https://google.com.evil.example/login"
     ]
-  }
+  },
+  "source_manifests": [
+    {
+      "name": "iana-root-zone-google",
+      "url": "https://www.iana.org/domains/root/db/google.html",
+      "fetched_at": "2026-05-29T00:00:00Z",
+      "sha256": "",
+      "reason": ".google is delegated to Google's registry."
+    },
+    {
+      "name": "google-registry-policy",
+      "url": "https://www.registry.google/policies/registration/google/",
+      "fetched_at": "2026-05-29T00:00:00Z",
+      "sha256": "",
+      "reason": ".google registrations are limited to Google and affiliates."
+    },
+    {
+      "name": "share-google",
+      "url": "https://share.google/index.html",
+      "fetched_at": "2026-05-29T00:00:00Z",
+      "sha256": "",
+      "reason": "share.google is Google-owned but operates as a shortlink service."
+    },
+    {
+      "name": "apple-tld-policy",
+      "url": "https://www.apple.com/ca/legal/intellectual-property/tld/",
+      "fetched_at": "2026-05-29T00:00:00Z",
+      "sha256": "",
+      "reason": ".apple is Apple-owned and restricted for Apple use."
+    }
+  ]
 } as const;
 export const OFFICIAL_SAFE_DOMAINS = new Set<string>(LINKGUARD_POLICY.official_safe_domains);
+export const OFFICIAL_SAFE_TLDS = new Set<string>(LINKGUARD_POLICY.official_safe_tlds);
+export const OFFICIAL_SAFE_DOMAIN_EXCEPTIONS = new Set<string>(LINKGUARD_POLICY.official_safe_domain_exceptions);
 export const PROTECTED_BRANDS = new Set<string>(LINKGUARD_POLICY.protected_brands);
 export const KNOWN_SHORTENER_HOSTS = new Set<string>(LINKGUARD_POLICY.known_shortener_hosts);
+export const TRUSTED_BRAND_SHORTENER_HOSTS = new Set<string>(LINKGUARD_POLICY.trusted_brand_shortener_hosts);
 export const SUSPICIOUS_TLDS = new Set<string>(LINKGUARD_POLICY.suspicious_tlds);

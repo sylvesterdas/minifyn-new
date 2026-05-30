@@ -30,74 +30,33 @@ describe("linkguard v3 reputation checks", () => {
     expect(verdict.reason).toContain("Reputation checks are unavailable");
   });
 
-  test("returns safe for official trusted HTTPS domains when providers are unavailable", async () => {
+  test("does not safe-list official trusted domains inside the reputation endpoint", async () => {
     const fetchMock = vi.fn(async () => new Response("unavailable", { status: 503 }));
     vi.stubGlobal("fetch", fetchMock);
 
     const { POST } = await import("./route");
-    const response = await POST(linkCheckRequest("https://www.minifyn.com/login"));
-    const verdict = await response.json();
-
-    expect(verdict.risk).toBe("safe");
-    expect(verdict.reason).toContain("Official trusted domain");
-    expect(fetchMock).not.toHaveBeenCalled();
-  });
-
-  test("does not safe-list non-HTTPS official domains", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => new Response("unavailable", { status: 503 }))
-    );
-
-    const { POST } = await import("./route");
-    const response = await POST(linkCheckRequest("http://minifyn.com/login"));
+    const response = await POST(linkCheckRequest("https://docs.google/account"));
     const verdict = await response.json();
 
     expect(verdict.risk).toBe("warning");
     expect(verdict.reason).toContain("Reputation checks are unavailable");
+    expect(fetchMock).toHaveBeenCalled();
   });
 
-  test("returns risky for protected brand lookalikes", async () => {
+  test("does not resolve trusted brand shorteners", async () => {
+    vi.stubEnv("LINKGUARD_WEBRISK_API_KEY", "");
     const fetchMock = vi.fn(async () => new Response("https://clean.example/path\n"));
     vi.stubGlobal("fetch", fetchMock);
 
     const { POST } = await import("./route");
-    const response = await POST(linkCheckRequest("https://rnicrosoft.com/"));
+    const response = await POST(linkCheckRequest("https://share.google/abc123"));
     const verdict = await response.json();
 
-    expect(verdict.risk).toBe("risky");
-    expect(verdict.reason).toContain("microsoft");
-    expect(fetchMock).not.toHaveBeenCalled();
-  });
-
-  test("returns risky for official trusted domains embedded under unrelated roots", async () => {
-    const fetchMock = vi.fn(async () => new Response("https://clean.example/path\n"));
-    vi.stubGlobal("fetch", fetchMock);
-
-    const { POST } = await import("./route");
-    const response = await POST(linkCheckRequest("https://mnfy.in.evil.com/"));
-    const verdict = await response.json();
-
-    expect(verdict.risk).toBe("risky");
-    expect(verdict.reason).toContain("mnfy");
-    expect(fetchMock).not.toHaveBeenCalled();
-  });
-
-  test("returns risky for unicode and punycode spoof hosts", async () => {
-    const fetchMock = vi.fn(async () => new Response("https://clean.example/path\n"));
-    vi.stubGlobal("fetch", fetchMock);
-
-    const { POST } = await import("./route");
-    const unicodeResponse = await POST(linkCheckRequest("https://mісrosoft.com/"));
-    const unicodeVerdict = await unicodeResponse.json();
-    const punycodeResponse = await POST(
-      linkCheckRequest("https://xn--80ak6aa92e.com/")
-    );
-    const punycodeVerdict = await punycodeResponse.json();
-
-    expect(unicodeVerdict.risk).toBe("risky");
-    expect(punycodeVerdict.risk).toBe("risky");
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(verdict.risk).toBe("safe");
+    expect(verdict.reason).toContain("No known issues found");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const calls = fetchMock.mock.calls as unknown as [RequestInfo | URL][];
+    expect(String(calls[0][0])).toBe("https://openphish.com/feed.txt");
   });
 
   test("returns risky when Web Risk reports a hit", async () => {
