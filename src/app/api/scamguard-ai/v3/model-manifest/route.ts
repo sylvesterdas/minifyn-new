@@ -14,6 +14,7 @@ const GCS_MODEL_BUCKET = process.env.GCS_MODEL_BUCKET || "";
 const ACTIVE_MODEL_OBJECT =
   process.env.SCAMGUARD_AI_ACTIVE_MODEL_OBJECT ||
   "scamguard-ai/active_model.json";
+const V3_MAX_MODEL_VERSION = 13;
 const DOWNLOAD_TTL_SECONDS = Number(
   process.env.SCAMGUARD_AI_DOWNLOAD_TTL_SECONDS || "900"
 );
@@ -148,7 +149,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const manifest = await readActiveManifest();
+    const manifest = await readActiveManifest(maxModelVersionForRequest(req));
     const modelObject = modelObjectFromManifest(manifest);
     const expiresIn = Number.isFinite(DOWNLOAD_TTL_SECONDS)
       ? Math.max(60, Math.min(DOWNLOAD_TTL_SECONDS, 15 * 60))
@@ -323,27 +324,82 @@ async function decodeIntegrityToken(
   return (await response.json()) as DecodedIntegrityPayload;
 }
 
-async function readActiveManifest(): Promise<Record<string, unknown>> {
+async function readActiveManifest(
+  maxModelVersion?: number
+): Promise<Record<string, unknown>> {
   const active = await readGcsJson(ACTIVE_MODEL_OBJECT);
   if (active.manifest && typeof active.manifest === "object") {
-    return active.manifest as Record<string, unknown>;
+    return readCappedManifestIfNeeded(
+      active.manifest as Record<string, unknown>,
+      maxModelVersion
+    );
   }
   if (isManifest(active)) {
-    return active;
+    return readCappedManifestIfNeeded(active, maxModelVersion);
   }
 
   const manifestPath = String(active.manifest_path || "").trim();
   if (!isSafeGcsObjectPath(manifestPath)) {
     throw new Error("AI model manifest pointer is invalid.");
   }
-  const manifest = await readGcsJson(manifestPath);
+  const requestedManifestPath = cappedManifestPath({
+    manifestPath,
+    activeVersion: modelVersionNumber(active.active_version),
+    maxModelVersion,
+  });
+  const manifest = await readGcsJson(requestedManifestPath);
   if (manifest.manifest && typeof manifest.manifest === "object") {
-    return manifest.manifest as Record<string, unknown>;
+    return readCappedManifestIfNeeded(
+      manifest.manifest as Record<string, unknown>,
+      maxModelVersion
+    );
   }
   if (!isManifest(manifest)) {
     throw new Error("AI model manifest is invalid.");
   }
-  return manifest;
+  return readCappedManifestIfNeeded(manifest, maxModelVersion);
+}
+
+async function readCappedManifestIfNeeded(
+  manifest: Record<string, unknown>,
+  maxModelVersion?: number
+): Promise<Record<string, unknown>> {
+  if (maxModelVersion === undefined) {
+    return manifest;
+  }
+  const modelVersion = modelVersionNumber(manifest.model_version);
+  if (modelVersion === null || modelVersion <= maxModelVersion) {
+    return manifest;
+  }
+  const cappedManifest = await readGcsJson(versionedManifestPath(maxModelVersion));
+  if (cappedManifest.manifest && typeof cappedManifest.manifest === "object") {
+    return cappedManifest.manifest as Record<string, unknown>;
+  }
+  if (!isManifest(cappedManifest)) {
+    throw new Error("AI model manifest is invalid.");
+  }
+  return cappedManifest;
+}
+
+function cappedManifestPath(input: {
+  manifestPath: string;
+  activeVersion: number | null;
+  maxModelVersion?: number;
+}): string {
+  const pathVersion =
+    input.activeVersion ?? modelVersionFromManifestPath(input.manifestPath);
+  if (
+    input.maxModelVersion !== undefined &&
+    pathVersion !== null &&
+    pathVersion > input.maxModelVersion
+  ) {
+    return versionedManifestPath(input.maxModelVersion);
+  }
+  return input.manifestPath;
+}
+
+function versionedManifestPath(version: number): string {
+  return `scamguard-ai/v${version}/model_manifest.json`;
 }
 
 async function readGcsJson(objectName: string): Promise<Record<string, unknown>> {
@@ -395,6 +451,24 @@ function modelObjectFromManifest(manifest: Record<string, unknown>): string {
     throw new Error("AI model manifest has invalid model file metadata.");
   }
   return `scamguard-ai/v${version}/${file}`;
+}
+
+function maxModelVersionForRequest(req: NextRequest): number | undefined {
+  const path = req.nextUrl?.pathname || new URL(req.url).pathname;
+  return path.includes("/api/scamguard-ai/v3/") ? V3_MAX_MODEL_VERSION : undefined;
+}
+
+function modelVersionNumber(value: unknown): number | null {
+  const raw = String(value || "").trim().replace(/^v/i, "");
+  if (!/^\d+$/.test(raw)) return null;
+  const parsed = Number(raw);
+  return Number.isSafeInteger(parsed) ? parsed : null;
+}
+
+function modelVersionFromManifestPath(path: string): number | null {
+  const match = path.match(/(?:^|\/)v(\d+)\/model_manifest\.json$/i);
+  if (!match) return null;
+  return modelVersionNumber(match[1]);
 }
 
 function signGcsReadUrl(input: {
