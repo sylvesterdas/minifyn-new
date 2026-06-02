@@ -3,11 +3,13 @@ import type { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 vi.mock("google-auth-library", () => ({
-  GoogleAuth: vi.fn().mockImplementation(() => ({
-    getClient: async () => ({
-      getAccessToken: async () => ({ token: "access-token" }),
-    }),
-  })),
+  GoogleAuth: vi.fn().mockImplementation(function GoogleAuth() {
+    return {
+      getClient: async () => ({
+        getAccessToken: async () => ({ token: "access-token" }),
+      }),
+    };
+  }),
 }));
 
 describe("scamguard AI model manifest route", () => {
