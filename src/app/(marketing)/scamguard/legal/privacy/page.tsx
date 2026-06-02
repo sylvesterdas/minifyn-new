@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function ScamGuardPrivacyPage() {
-  const lastUpdated = "May 17, 2026";
+  const lastUpdated = "June 2, 2026";
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
@@ -49,10 +49,29 @@ export default function ScamGuardPrivacyPage() {
             processed transiently for abuse prevention, reliability, and security.
           </li>
           <li>
-            AI Mode subscribers may request model manifest metadata and signed
-            model download URLs from <code>minifyn.com/api/scamguard-ai/*</code>.
-            These requests include Google Play purchase proof and Play Integrity
-            proof so the backend can verify subscription access.
+            The app may request AI model manifest metadata and signed model
+            download URLs from <code>minifyn.com/api/scamguard-ai/*</code> to
+            support AI-assisted risk analysis. These requests may include app
+            version, platform, API mode or AI Mode claims, and Play Integrity
+            proof. AI Mode controls access to full AI review details and
+            subscriber features.
+          </li>
+        </ul>
+
+        <h2>Native Android link protection</h2>
+        <ul>
+          <li>
+            If you configure ScamGuard: Link Checker for Android quick checks,
+            the app may inspect a link locally before handing it to your chosen
+            browser.
+          </li>
+          <li>
+            Preferred browser settings and trusted quick-check domains are
+            stored locally when you choose to configure them.
+          </li>
+          <li>
+            Links may be submitted to MiniFyn for analysis only when the app
+            performs a link check.
           </li>
         </ul>
 
@@ -107,6 +126,7 @@ export default function ScamGuardPrivacyPage() {
           <li>Optional link history is stored locally on your device when enabled.</li>
           <li>Pro and AI Mode unlock status are stored locally on your device.</li>
           <li>AI model metadata and downloaded model files may be cached locally.</li>
+          <li>Preferred browser and trusted quick-check domain settings are stored locally when configured.</li>
           <li>
             Device backup/restore behavior may depend on Android system backup
             settings.
