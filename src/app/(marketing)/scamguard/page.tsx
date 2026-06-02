@@ -5,22 +5,24 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import {
-  AlertTriangle,
   BadgeCheck,
   BrainCircuit,
   CheckCircle2,
   Crown,
   Lock,
+  QrCode,
   ScanSearch,
+  Settings,
   ShieldCheck,
   Smartphone,
 } from 'lucide-react';
 
 const siteUrl = 'https://www.minifyn.com';
 const pageUrl = `/scamguard`;
-const title = 'ScamGuard: Link Checker for Android | Suspicious Link Scanner by MiniFyn';
+const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.minifyn.linkguard';
+const title = 'ScamGuard: Link Checker for Android | AI-Assisted Suspicious Link Scanner';
 const description =
-  'ScamGuard: Link Checker is MiniFyn’s Android app for checking suspicious URLs before you open them. Scan risky links, spot phishing-style patterns, and review privacy and policy details in one place.';
+  'ScamGuard: Link Checker is MiniFyn’s Android app for checking suspicious URLs, QR links, and browser handoffs before you open them, with Free, Pro, and AI Mode protection.';
 const ogImageUrl = `${siteUrl}/og.png`;
 
 export const metadata: Metadata = {
@@ -32,7 +34,7 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description,
-    url: pageUrl,
+    url: `${siteUrl}${pageUrl}`,
     siteName: 'MiniFyn',
     type: 'website',
     images: [
@@ -54,39 +56,78 @@ export const metadata: Metadata = {
 
 const featureCards = [
   {
-    title: 'Paste a suspicious URL',
-    description: 'Drop in a link from SMS, email, chat, or social media when something feels off.',
+    title: 'Check links before opening',
+    description: 'Paste a URL from SMS, email, chat, or social media and get a clear safety read before you tap through.',
     icon: ScanSearch,
   },
   {
-    title: 'Get a quick safety read',
-    description: 'See a simple result that helps you decide whether the link deserves extra caution.',
+    title: 'Scan QR codes safely',
+    description: 'Use the camera only when you choose to scan a QR code, then review the discovered link before opening it.',
+    icon: QrCode,
+  },
+  {
+    title: 'Use Android quick checks',
+    description: 'Set ScamGuard as part of your Android link flow to inspect links locally before handing them to a browser.',
+    icon: Smartphone,
+  },
+  {
+    title: 'See AI-assisted signals',
+    description: 'A bundled AI baseline and signed model updates help surface suspicious patterns, with full details in AI Mode.',
+    icon: BrainCircuit,
+  },
+  {
+    title: 'Follow signed safety policy',
+    description: 'Safety lists and domain rules are loaded through signed policy updates so checks can improve over time.',
     icon: BadgeCheck,
   },
   {
-    title: 'Spot phishing-style risk',
-    description: 'ScamGuard: Link Checker is designed to highlight scam and phishing patterns before you tap through.',
-    icon: AlertTriangle,
-  },
-  {
-    title: 'Keep the experience lightweight',
-    description: 'The app is focused, straightforward, and built around practical link safety checks.',
+    title: 'Stay in control',
+    description: 'History, reminders, announcements, trusted domains, and diagnostics are managed from app settings.',
     icon: Lock,
   },
 ];
 
 const useCases = [
   'Unexpected payment or delivery links in SMS',
+  'QR codes on posters, packages, or messages',
   'Login reset links that seem slightly off',
   'Offer, lottery, reward, or KYC messages',
-  'Unknown URLs shared in chats or social posts',
+  'Unknown links shared in chats or social posts',
+  'Browser handoffs where you want a quick local warning',
 ];
 
 const trustPoints = [
-  'Public product page under the main MiniFyn domain',
-  'Published privacy policy and terms for the app',
-  'Google Play listing for Android distribution',
-  'Clear product ownership and support context',
+  'Android package: com.minifyn.linkguard',
+  'Production checks use /api/linkguard/v3/check',
+  'AI model metadata uses /api/scamguard-ai/v4/model-manifest',
+  'Published app privacy policy and terms',
+];
+
+const currentCapabilities = [
+  {
+    title: 'Layered link analysis',
+    description:
+      'Local URL structure, HTTPS, domain, homoglyph, typosquatting, suspicious keyword, shortener, reputation, redirect, and AI-assisted checks work together.',
+    icon: ShieldCheck,
+  },
+  {
+    title: 'Native Android protection',
+    description:
+      'Quick-check handoff, preferred browser selection, and trusted quick-check domains help users review links before opening them.',
+    icon: Smartphone,
+  },
+  {
+    title: 'Private controls',
+    description:
+      'Optional on-device history, local cache, daily safety reminders, app announcements, and diagnostics stay visible and manageable.',
+    icon: Settings,
+  },
+  {
+    title: 'Model and policy updates',
+    description:
+      'The app includes a bundled AI model baseline and can fetch signed policy and model updates from MiniFyn infrastructure.',
+    icon: BrainCircuit,
+  },
 ];
 
 const tierCards = [
@@ -96,9 +137,9 @@ const tierCards = [
     icon: ShieldCheck,
     items: [
       'Check suspicious links before opening them.',
-      'See clear safe, suspicious, or dangerous results.',
-      'Get basic URL, HTTPS, domain, and redirect warnings.',
-      'Keep recent scan history on this device when enabled.',
+      'Scan QR codes and inspect discovered links.',
+      'See URL, HTTPS, domain, spoofing, and local AI baseline signals.',
+      'Use optional local history and daily safety reminders.',
     ],
   },
   {
@@ -107,9 +148,9 @@ const tierCards = [
     icon: Crown,
     items: [
       'Includes everything in Free.',
-      'Higher scan limits for regular use.',
+      'Cloud reputation checks for regular use.',
       'Structured Pro risk score: Low, Medium, or Elevated.',
-      'More detailed redirect, brand mismatch, and domain-ending checks.',
+      'Redirect, cross-domain, brand mismatch, and domain-ending checks.',
     ],
   },
   {
@@ -118,8 +159,9 @@ const tierCards = [
     icon: BrainCircuit,
     items: [
       'Includes everything in Pro.',
-      'Adds AI-assisted review for suspicious patterns.',
-      'Explains why a link may be risky in plain language.',
+      'Unlocks full AI review details for suspicious patterns.',
+      'Shows plain-language model reasoning and risk context.',
+      'Uses signed AI model metadata and protected model updates.',
       'Managed as a Google Play subscription under your Play account.',
     ],
   },
@@ -129,12 +171,12 @@ const faqs = [
   {
     question: 'What is ScamGuard: Link Checker?',
     answer:
-      'ScamGuard: Link Checker is an Android app by MiniFyn that helps users review suspicious URLs before opening them.',
+      'ScamGuard: Link Checker is an Android app by MiniFyn that helps users review suspicious URLs, QR links, and Android link handoffs before opening them.',
   },
   {
     question: 'Who is ScamGuard: Link Checker for?',
     answer:
-      'It is useful for anyone who receives unexpected links by SMS, email, chat, or social media and wants a quick safety check before clicking.',
+      'It is useful for anyone who receives unexpected links by SMS, email, QR code, chat, or social media and wants a quick safety check before clicking.',
   },
   {
     question: 'Does ScamGuard: Link Checker replace antivirus or browser security?',
@@ -144,7 +186,12 @@ const faqs = [
   {
     question: 'What is the difference between Free, Pro, and AI Mode?',
     answer:
-      'Free covers basic link checks, Pro adds higher limits and deeper redirect, brand, and domain checks, and AI Mode includes Pro plus AI-assisted review for harder-to-judge links.',
+      'Free covers local link checks, QR scanning, reminders, and baseline AI-assisted signals. Pro adds cloud reputation and deeper redirect, brand, and domain checks. AI Mode includes Pro plus full AI review details for harder-to-judge links.',
+  },
+  {
+    question: 'Does ScamGuard send every opened link to MiniFyn?',
+    answer:
+      'No. The app is designed around user-initiated checks and local controls. Links may be submitted for analysis when you choose to check them, while local history and trusted-domain settings stay on the device.',
   },
   {
     question: 'Where can I find ScamGuard: Link Checker policies?',
@@ -161,7 +208,7 @@ export default function ScamGuardPage() {
     operatingSystem: 'Android',
     applicationCategory: 'SecurityApplication',
     description,
-    url: pageUrl,
+    url: `${siteUrl}${pageUrl}`,
     publisher: {
       '@type': 'Organization',
       name: 'MiniFyn',
@@ -172,7 +219,18 @@ export default function ScamGuardPage() {
       price: '0',
       priceCurrency: 'INR',
     },
-    downloadUrl: 'https://play.google.com/store/apps/details?id=com.minifyn.linkguard',
+    downloadUrl: playStoreUrl,
+    softwareVersion: '2.1.7',
+    featureList: [
+      'Suspicious URL checks',
+      'QR code link scanning',
+      'Android quick-check link protection',
+      'Free, Pro, and AI Mode tiers',
+      'AI-assisted risk analysis',
+      'Daily safety reminders',
+      'App announcements',
+    ],
+    sameAs: playStoreUrl,
   };
 
   const faqJsonLd = {
@@ -230,9 +288,9 @@ export default function ScamGuardPage() {
                 </div>
 
                 <p className="mx-auto max-w-2xl text-lg leading-8 text-muted-foreground sm:text-[1.1rem]">
-                  ScamGuard: Link Checker helps people review suspicious URLs from messages, emails, and chats before
-                  opening them. It gives users a simple way to pause, inspect, and avoid obvious scam or
-                  phishing-style links.
+                  ScamGuard: Link Checker helps people review suspicious URLs from messages, emails, QR codes,
+                  chats, and Android link handoffs before opening them. It gives users a practical way to pause,
+                  inspect, and spot scam or phishing-style risk signals.
                 </p>
               </div>
 
@@ -250,7 +308,7 @@ export default function ScamGuardPage() {
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
                   <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Focus</p>
-                  <p className="mt-2 text-base font-semibold text-foreground">Risky URL checks</p>
+                  <p className="mt-2 text-base font-semibold text-foreground">Link risk checks</p>
                 </div>
               </div>
 
@@ -266,11 +324,11 @@ export default function ScamGuardPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
                   <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Use case</p>
-                  <p className="mt-2 text-sm text-foreground">Review links before opening them</p>
+                  <p className="mt-2 text-sm text-foreground">Review links and QR destinations first</p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
                   <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Availability</p>
-                  <p className="mt-2 text-sm text-foreground">Android now, iOS later</p>
+                  <p className="mt-2 text-sm text-foreground">Android on Google Play</p>
                 </div>
               </div>
 
@@ -318,7 +376,7 @@ export default function ScamGuardPage() {
 
                 <div className="mt-4 flex justify-center">
                   <Link
-                    href="https://play.google.com/store/apps/details?id=com.minifyn.linkguard"
+                    href={playStoreUrl}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex transition-transform hover:-translate-y-0.5"
@@ -344,8 +402,8 @@ export default function ScamGuardPage() {
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Why ScamGuard: Link Checker exists</h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Most dangerous links do not look dangerous at first glance. ScamGuard: Link Checker is built for the
-              moment when a URL feels just suspicious enough that you want a second look before tapping.
+              Most dangerous links do not look dangerous at first glance. ScamGuard is built for the moment when
+              a URL, QR code, or browser handoff feels just suspicious enough that you want a second look first.
             </p>
           </div>
 
@@ -369,12 +427,40 @@ export default function ScamGuardPage() {
 
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 md:px-6">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Current protection set</h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              The current app combines local checks, cloud reputation, signed safety policy, and AI-assisted review
+              so users can understand risk without needing a security background.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-12 grid max-w-6xl gap-6 md:grid-cols-2">
+            {currentCapabilities.map((capability) => {
+              const Icon = capability.icon;
+
+              return (
+                <div key={capability.title} className="rounded-3xl border bg-background/80 p-6 shadow-sm">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="mt-5 text-xl font-semibold">{capability.title}</h3>
+                  <p className="mt-2 text-muted-foreground">{capability.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-card/40 py-16 md:py-24">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="grid gap-8 lg:grid-cols-2">
             <div className="rounded-3xl border bg-background/80 p-8 shadow-sm">
               <h2 className="text-2xl font-bold sm:text-3xl">When people use it</h2>
               <p className="mt-4 text-muted-foreground">
-                ScamGuard: Link Checker is designed for common, real-world situations where an unfamiliar link appears
-                unexpectedly and the safest choice is to verify first.
+                ScamGuard is designed for common, real-world situations where an unfamiliar link appears unexpectedly
+                and the safest choice is to verify first.
               </p>
               <ul className="mt-6 grid gap-3">
                 {useCases.map((item) => (
@@ -387,12 +473,12 @@ export default function ScamGuardPage() {
             </div>
 
             <div className="rounded-3xl border bg-background/80 p-8 shadow-sm">
-              <h2 className="text-2xl font-bold sm:text-3xl">How it fits into trust and review</h2>
+              <h2 className="text-2xl font-bold sm:text-3xl">What users can manage</h2>
               <div className="mt-6 space-y-5 text-muted-foreground">
-                <p>ScamGuard: Link Checker has a dedicated public page under the main MiniFyn domain for product context.</p>
-                <p>It also links to app-specific privacy and legal information on stable public URLs.</p>
-                <p>That makes it easier for users, store reviewers, payment partners, and verification teams to confirm ownership and intent.</p>
-                <p>For a focused Android product at this stage, a clean path on the main company site is usually enough.</p>
+                <p>History is optional and stored on device when enabled.</p>
+                <p>Daily safety reminders and app announcements can be turned off in settings.</p>
+                <p>Trusted quick-check domains and preferred browser handoff settings can be managed from the app.</p>
+                <p>Diagnostics show app version, active plan, and AI analysis version for easier support and review.</p>
               </div>
             </div>
           </div>
@@ -404,7 +490,8 @@ export default function ScamGuardPage() {
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Free, Pro, and AI Mode</h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              ScamGuard has different protection levels depending on how often you check links and how much context you want before deciding.
+              ScamGuard has different protection levels depending on how often you check links and how much context
+              you want before deciding.
             </p>
           </div>
 
@@ -442,7 +529,7 @@ export default function ScamGuardPage() {
                 <h2 className="text-3xl font-bold tracking-tight">Policies, ownership, and support</h2>
                 <p className="mt-4 text-muted-foreground">
                   This page is intended to be a stable public home for the app. It helps connect the
-                  product name, the publisher, the Android listing, and the app’s legal documents.
+                  product name, the publisher, the Android listing, the package id, and the app’s legal documents.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Button asChild variant="outline">
@@ -452,7 +539,7 @@ export default function ScamGuardPage() {
                     <Link href="/scamguard/legal/terms">Terms of Use</Link>
                   </Button>
                   <Link
-                    href="https://play.google.com/store/apps/details?id=com.minifyn.linkguard"
+                    href={playStoreUrl}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex transition-transform hover:-translate-y-0.5"
@@ -487,6 +574,10 @@ export default function ScamGuardPage() {
                   <li className="flex gap-3">
                     <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                     Public policy URLs are available for review.
+                  </li>
+                  <li className="flex gap-3">
+                    <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                    The app uses MiniFyn link-check and AI-model API routes.
                   </li>
                 </ul>
               </div>

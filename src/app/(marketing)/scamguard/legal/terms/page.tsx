@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function ScamGuardTermsPage() {
-  const lastUpdated = "May 17, 2026";
+  const lastUpdated = "June 2, 2026";
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
@@ -27,9 +27,10 @@ export default function ScamGuardTermsPage() {
 
         <h2 className="text-2xl font-semibold mb-3">Purpose of the app</h2>
         <p className="mb-6">
-          ScamGuard: Link Checker provides informational URL risk analysis. Results are
-          heuristic/security signals and not a guarantee that any link is safe or
-          unsafe.
+          ScamGuard: Link Checker provides informational URL risk analysis for
+          links, QR-code destinations, and Android link handoffs. Results are
+          heuristic, reputation, policy, and AI-assisted signals and are not a
+          guarantee that any link is safe or unsafe.
         </p>
 
         <h2 className="text-2xl font-semibold mb-3">No guarantees</h2>
@@ -59,8 +60,9 @@ export default function ScamGuardTermsPage() {
             restored through Google Play purchase restore flows.
           </li>
           <li>
-            AI Mode subscribers receive access to AI review details and protected
-            model updates while the subscription is active.
+            Baseline model-assisted checks may run in the app. AI Mode
+            subscribers receive access to full AI review details and subscriber
+            features while the subscription is active.
           </li>
         </ul>
 

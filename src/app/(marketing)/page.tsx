@@ -140,7 +140,7 @@ export default function Home() {
                   <div className="space-y-2">
                     <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">ScamGuard: Link Checker by MiniFyn</h2>
                     <p className="max-w-2xl text-muted-foreground md:text-lg">
-                      ScamGuard: Link Checker is an Android app that helps users check suspicious URLs for scam, phishing, and risky links before opening them.
+                      ScamGuard: Link Checker is an Android app that helps users check suspicious URLs, QR links, and Android link handoffs before opening them.
                     </p>
                     <p className="text-sm font-medium text-foreground/90">
                       ScamGuard helps you check suspicious links before you click.
@@ -159,7 +159,7 @@ export default function Home() {
                   </div>
                   <div className="rounded-2xl border bg-background/70 p-4">
                     <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Purpose</p>
-                    <p className="mt-2 text-lg font-semibold">Detect suspicious links</p>
+                    <p className="mt-2 text-lg font-semibold">Detect risky links and QR codes</p>
                   </div>
                   <div className="rounded-2xl border bg-background/70 p-4">
                     <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Platform</p>
@@ -177,7 +177,7 @@ export default function Home() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold">Why ScamGuard</h3>
-                      <p className="text-sm text-muted-foreground">Simple checks for suspicious URLs before you open them.</p>
+                      <p className="text-sm text-muted-foreground">Simple checks for suspicious links, QR codes, and browser handoffs before you open them.</p>
                     </div>
                   </div>
 
@@ -194,7 +194,7 @@ export default function Home() {
                   </div>
 
                   <div className="mt-6 rounded-2xl border border-primary/20 bg-primary/5 p-4">
-                    <p className="text-sm font-medium">Privacy focused / no unnecessary data collection</p>
+                    <p className="text-sm font-medium">Privacy focused, with local history and trusted-domain controls</p>
                   </div>
                 </div>
 

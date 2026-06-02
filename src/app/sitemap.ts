@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = 'https://www.minifyn.com';
   const lastModifiedStatic = new Date('2024-01-01').toISOString();
+  const lastModifiedScamGuard = new Date('2026-06-02').toISOString();
 
   // 1. Static pages
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -31,6 +32,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/help`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${siteUrl}/help/faq`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${siteUrl}/help/report-abuse`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${siteUrl}/scamguard`, lastModified: lastModifiedScamGuard, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${siteUrl}/scamguard/legal/privacy`, lastModified: lastModifiedScamGuard, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${siteUrl}/scamguard/legal/terms`, lastModified: lastModifiedScamGuard, changeFrequency: 'yearly', priority: 0.3 },
   ];
 
   return staticRoutes;
