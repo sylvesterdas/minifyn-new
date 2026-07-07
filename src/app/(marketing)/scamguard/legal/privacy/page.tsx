@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function ScamGuardPrivacyPage() {
-  const lastUpdated = "June 2, 2026";
+  const lastUpdated = "July 7, 2026";
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
@@ -58,7 +58,7 @@ export default function ScamGuardPrivacyPage() {
           </li>
         </ul>
 
-        <h2>Native Android link protection</h2>
+        <h2>Native Android quick checks</h2>
         <ul>
           <li>
             If you configure ScamGuard: Link Checker for Android quick checks,

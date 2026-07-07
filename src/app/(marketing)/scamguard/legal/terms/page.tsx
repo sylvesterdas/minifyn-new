@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function ScamGuardTermsPage() {
-  const lastUpdated = "June 2, 2026";
+  const lastUpdated = "July 7, 2026";
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
@@ -29,19 +29,33 @@ export default function ScamGuardTermsPage() {
         <p className="mb-6">
           ScamGuard: Link Checker provides informational URL risk analysis for
           links, QR-code destinations, and Android link handoffs. Results are
-          heuristic, reputation, policy, and AI-assisted signals and are not a
-          guarantee that any link is safe or unsafe.
+          heuristic, reputation, policy, and AI-assisted signals. They are not
+          professional security, legal, financial, banking, or fraud-response advice
+          and are not a guarantee that any link is safe, unsafe, fraudulent, or legitimate.
         </p>
 
         <h2 className="text-2xl font-semibold mb-3">No guarantees</h2>
         <p className="mb-6">
           ScamGuard: Link Checker is provided "as is" and "as available." We make no warranty
-          on uninterrupted operation or perfect detection accuracy.
+          on uninterrupted operation, complete link coverage, perfect detection
+          accuracy, or prevention of scams, phishing, malware, account compromise,
+          payment loss, identity misuse, or other harm. False positives and false
+          negatives can occur.
+        </p>
+
+        <h2 className="text-2xl font-semibold mb-3">Not a bank or recovery service</h2>
+        <p className="mb-6">
+          ScamGuard: Link Checker does not hold funds, initiate payments, monitor
+          bank accounts, investigate fraud claims, provide reimbursement, or replace
+          your bank, payment provider, browser, antivirus, device security controls,
+          or official support channels.
         </p>
 
         <h2 className="text-2xl font-semibold mb-3">User responsibilities</h2>
         <ul className="list-disc pl-5 mb-6 space-y-2">
           <li>You are responsible for your own online decisions and actions.</li>
+          <li>Do not enter passwords, OTPs, payment details, identity details, or recovery codes based only on a ScamGuard result.</li>
+          <li>For banking, payments, account recovery, tax, delivery, or identity requests, verify through the official app, website, phone number, or support channel.</li>
           <li>You must not use ScamGuard: Link Checker for unlawful, abusive, or malicious activity.</li>
           <li>You must not attempt to abuse or overload ScamGuard: Link Checker infrastructure.</li>
         </ul>
@@ -85,7 +99,7 @@ export default function ScamGuardTermsPage() {
         <p className="mb-6">
           To the maximum extent permitted by law, ScamGuard: Link Checker and its operators are
           not liable for direct, indirect, incidental, or consequential damages
-          arising from use of the app or reliance on its output.
+          arising from use of the app, inability to use the app, or reliance on its output.
         </p>
 
         <h2 className="text-2xl font-semibold mb-3">Service changes</h2>
