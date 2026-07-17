@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function ScamGuardPrivacyPage() {
-  const lastUpdated = "July 7, 2026";
+  const lastUpdated = "July 17, 2026";
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-24 max-w-4xl">
@@ -25,12 +25,56 @@ export default function ScamGuardPrivacyPage() {
           <strong>Sylvester Kumar Das</strong> (UDYAM-KL-12-0136086).
         </p>
 
-        <h2>What we do NOT collect</h2>
+        <h2>Data we do not ask you to provide</h2>
         <ul>
           <li>No user accounts are required or created.</li>
-          <li>No advertising identifiers are used.</li>
-          <li>No third-party advertising or analytics SDKs are integrated in the app.</li>
-          <li>We do not build user profiles.</li>
+          <li>
+            We do not ask for your name, email address, phone number, contacts,
+            precise location, or government identifiers.
+          </li>
+          <li>
+            We do not collect the Android Advertising ID, show third-party ads,
+            or use analytics data for advertising or ad personalization.
+          </li>
+          <li>We do not create advertising profiles or sell personal information.</li>
+        </ul>
+
+        <h2>Firebase Analytics</h2>
+        <p>
+          We use Google Analytics for Firebase to understand app reliability,
+          feature usage, and purchase-flow performance. Analytics collection is
+          enabled automatically and is not currently optional in the app.
+        </p>
+        <ul>
+          <li>
+            Firebase may automatically process an app-instance identifier, app
+            version, device model and operating-system information, app lifecycle
+            events, sessions, screen interactions, notification interactions,
+            purchase and subscription events, and coarse region derived by Google
+            from a masked IP address.
+          </li>
+          <li>
+            ScamGuard also records limited events such as whether a link check
+            completed, whether an upgrade prompt or checkout was shown, purchase
+            status, subscription tier, a broad scan-count range, and whether a
+            reminder is enabled.
+          </li>
+          <li>
+            We do not send submitted URLs, message text, QR-code contents, link
+            history, names, email addresses, phone numbers, or a developer-defined
+            user ID to Firebase Analytics.
+          </li>
+          <li>
+            Advertising-ID collection and ad-personalization signals are disabled
+            in the Android app. We do not link Firebase Analytics to advertising
+            products for personalized advertising.
+          </li>
+          <li>
+            Google processes Analytics data as our service provider. User- and
+            event-level data is retained for no longer than 14 months under the
+            GA4 property retention setting. Aggregated reporting data may be kept
+            longer by Google.
+          </li>
         </ul>
 
         <h2>How ScamGuard: Link Checker works</h2>
@@ -41,12 +85,20 @@ export default function ScamGuardPrivacyPage() {
           </li>
           <li>
             Requests are sent to <code>minifyn.com/api/linkguard/*</code> for
-            link analysis. The request may include the submitted URL or URL hash,
-            app version, platform, and Play Integrity proof.
+            cloud link analysis when that feature is used. The request may include
+            the submitted URL, a URL hash, app version, platform, and Play Integrity
+            proof.
           </li>
           <li>
-            Temporary technical data (such as IP and request metadata) may be
-            processed transiently for abuse prevention, reliability, and security.
+            The cloud reputation service checks submitted URLs against Google Web
+            Risk. OpenPhish threat-feed data is downloaded to our server; submitted
+            URLs are not sent to OpenPhish.
+          </li>
+          <li>
+            Our service keeps reputation verdicts under a one-way URL hash in
+            memory for up to 48 hours. IP addresses used for in-memory rate limiting
+            expire after approximately one hour. Hosting and security providers may
+            retain ordinary request logs under their own retention schedules.
           </li>
           <li>
             The app may request AI model manifest metadata and signed model
@@ -70,8 +122,30 @@ export default function ScamGuardPrivacyPage() {
             stored locally when you choose to configure them.
           </li>
           <li>
-            Links may be submitted to MiniFyn for analysis only when the app
-            performs a link check.
+            Redirect inspection may connect directly from your device to the
+            submitted website and each redirect destination. Those websites receive
+            ordinary network information such as your IP address and request headers.
+          </li>
+          <li>
+            Cloud reputation checks submit a URL to MiniFyn only when that check is
+            performed. Local heuristic and AI model checks remain on the device.
+          </li>
+        </ul>
+
+        <h2>Play Integrity and security</h2>
+        <ul>
+          <li>
+            ScamGuard uses the Google Play Integrity API to protect cloud checks,
+            model downloads, and paid features from abuse.
+          </li>
+          <li>
+            Google may process an app-provided request hash, app package and version,
+            signing-certificate information, Play license status, and device-attestation
+            information. MiniFyn receives the resulting integrity token and verdict.
+          </li>
+          <li>
+            This information is used only for fraud prevention, security, licensing,
+            and service integrity.
           </li>
         </ul>
 
@@ -93,6 +167,12 @@ export default function ScamGuardPrivacyPage() {
             own operational logs and transaction records under their respective
             policies.
           </li>
+          <li>
+            The app receives product, purchase-status, price, currency, and purchase-token
+            information needed to provide and restore entitlements. Purchase tokens and
+            entitlement status are stored locally; purchase events are reported to Firebase
+            Analytics without payment-card or bank-account details.
+          </li>
         </ul>
 
         <h2>Notifications</h2>
@@ -100,6 +180,11 @@ export default function ScamGuardPrivacyPage() {
           <li>
             If you grant notification permission, Firebase Cloud Messaging may be
             used for daily safety tips and app announcements.
+          </li>
+          <li>
+            Firebase Cloud Messaging uses a per-installation identifier and registration
+            token, app version, device/app metadata, topic subscriptions, and notification
+            interaction events to deliver and measure messages.
           </li>
           <li>
             Topic subscriptions may include coarse delivery groups such as timezone
@@ -130,6 +215,18 @@ export default function ScamGuardPrivacyPage() {
           <li>
             Device backup/restore behavior may depend on Android system backup
             settings.
+          </li>
+        </ul>
+
+        <h2>Your controls</h2>
+        <ul>
+          <li>You can deny or revoke camera and notification permissions in Android settings.</li>
+          <li>You can disable daily reminders, app announcements, and optional link history in the app.</li>
+          <li>You can clear locally stored history, settings, caches, and entitlement state by clearing the app's data or uninstalling it.</li>
+          <li>
+            ScamGuard does not currently provide an in-app switch for Firebase Analytics,
+            so analytics data is treated as required rather than optional in our Google Play
+            Data Safety disclosure.
           </li>
         </ul>
 
