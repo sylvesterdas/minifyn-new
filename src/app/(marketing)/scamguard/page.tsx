@@ -23,7 +23,12 @@ const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.minifyn.
 const title = 'ScamGuard: Link Checker for Android | AI-Assisted Suspicious Link Scanner';
 const description =
   'ScamGuard: Link Checker is MiniFyn’s Android app for reviewing suspicious URLs, QR links, and browser handoffs before you open them, with Free, Pro, and AI Mode checks.';
-const ogImageUrl = `${siteUrl}/og.png`;
+const socialImageBase = `${siteUrl}/images/scamguard-social`;
+const ogImageUrl = `${socialImageBase}/scamguard-og-1200x630.png`;
+const twitterImageUrl = `${socialImageBase}/scamguard-twitter-1600x900.png`;
+const squareImageUrl = `${socialImageBase}/scamguard-square-1200x1200.png`;
+const fourThreeImageUrl = `${socialImageBase}/scamguard-social-1200x900.png`;
+const socialImageAlt = 'ScamGuard Link Checker showing AI Mode analysis on Android';
 
 export const metadata: Metadata = {
   title,
@@ -42,7 +47,8 @@ export const metadata: Metadata = {
         url: ogImageUrl,
         width: 1200,
         height: 630,
-        alt: 'ScamGuard: Link Checker by MiniFyn',
+        type: 'image/png',
+        alt: socialImageAlt,
       },
     ],
   },
@@ -50,7 +56,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title,
     description,
-    images: [ogImageUrl],
+    images: [{ url: twitterImageUrl, alt: socialImageAlt }],
   },
 };
 
@@ -209,6 +215,7 @@ export default function ScamGuardPage() {
     applicationCategory: 'SecurityApplication',
     description,
     url: `${siteUrl}${pageUrl}`,
+    image: [ogImageUrl, squareImageUrl, fourThreeImageUrl, twitterImageUrl],
     publisher: {
       '@type': 'Organization',
       name: 'MiniFyn',
@@ -220,7 +227,7 @@ export default function ScamGuardPage() {
       priceCurrency: 'INR',
     },
     downloadUrl: playStoreUrl,
-    softwareVersion: '2.1.7',
+    softwareVersion: '2.4.2',
     featureList: [
       'Suspicious URL checks',
       'QR code link scanning',
@@ -363,10 +370,10 @@ export default function ScamGuardPage() {
                     <div className="mx-auto mb-2 h-1.5 w-20 rounded-full bg-zinc-700" />
                     <div className="overflow-hidden rounded-[2rem] border border-black/20 bg-black">
                       <Image
-                        src="/images/linkguard-app-screenshot.jpeg"
-                        alt="ScamGuard: Link Checker Android app screenshot showing the URL Scanner screen"
-                        width={368}
-                        height={798}
+                        src="/images/scamguard-link-checker-ai.png"
+                        alt="ScamGuard Link Checker URL Scanner in AI Mode on Android"
+                        width={1080}
+                        height={2400}
                         className="h-auto w-full"
                       />
                     </div>
