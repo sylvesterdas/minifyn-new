@@ -20,7 +20,7 @@ import {
 const siteUrl = 'https://www.minifyn.com';
 const pageUrl = `/scamguard`;
 const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.minifyn.linkguard';
-const title = 'ScamGuard: Link Checker for Android | AI-Assisted Suspicious Link Scanner';
+const title = 'ScamGuard: AI Link Checker for Android | MiniFyn';
 const description =
   'ScamGuard: Link Checker is MiniFyn’s Android app for reviewing suspicious URLs, QR links, and browser handoffs before you open them, with Free, Pro, and AI Mode checks.';
 const socialImageBase = `${siteUrl}/images/scamguard-social`;
