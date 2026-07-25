@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { TrackedPlayCta } from '@/components/scamguard/TrackedPlayCta';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
@@ -382,21 +383,7 @@ export default function ScamGuardPage() {
                 </div>
 
                 <div className="mt-4 flex justify-center">
-                  <Link
-                    href={playStoreUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex transition-transform hover:-translate-y-0.5"
-                    aria-label="Get ScamGuard: Link Checker on Google Play"
-                  >
-                    <Image
-                      src="/images/google-play-badge.svg"
-                      alt="Get it on Google Play"
-                      width={180}
-                      height={60}
-                      className="h-16 w-auto"
-                    />
-                  </Link>
+                  <TrackedPlayCta placement="hero" />
                 </div>
               </div>
             </div>
@@ -545,21 +532,7 @@ export default function ScamGuardPage() {
                   <Button asChild variant="outline">
                     <Link href="/scamguard/legal/terms">Terms of Use</Link>
                   </Button>
-                  <Link
-                    href={playStoreUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex transition-transform hover:-translate-y-0.5"
-                    aria-label="View ScamGuard: Link Checker on Google Play"
-                  >
-                    <Image
-                      src="/images/google-play-badge.svg"
-                      alt="Get it on Google Play"
-                      width={180}
-                      height={60}
-                      className="h-14 w-auto"
-                    />
-                  </Link>
+                  <TrackedPlayCta placement="footer" />
                 </div>
               </div>
 
