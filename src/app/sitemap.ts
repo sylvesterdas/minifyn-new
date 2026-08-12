@@ -8,6 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = 'https://www.minifyn.com';
   const lastModifiedStatic = new Date('2024-01-01').toISOString();
   const lastModifiedScamGuard = new Date('2026-06-02').toISOString();
+  const lastModifiedClipFyn = new Date('2026-08-12').toISOString();
 
   // 1. Static pages
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -35,6 +36,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/scamguard`, lastModified: lastModifiedScamGuard, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${siteUrl}/scamguard/legal/privacy`, lastModified: lastModifiedScamGuard, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${siteUrl}/scamguard/legal/terms`, lastModified: lastModifiedScamGuard, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${siteUrl}/clipfyn`, lastModified: lastModifiedClipFyn, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${siteUrl}/clipfyn/legal/privacy`, lastModified: lastModifiedClipFyn, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${siteUrl}/clipfyn/legal/terms`, lastModified: lastModifiedClipFyn, changeFrequency: 'yearly', priority: 0.3 },
   ];
 
   return staticRoutes;
