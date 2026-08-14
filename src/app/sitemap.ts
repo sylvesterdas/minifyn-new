@@ -8,7 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = 'https://www.minifyn.com';
   const lastModifiedStatic = new Date('2024-01-01').toISOString();
   const lastModifiedScamGuard = new Date('2026-06-02').toISOString();
-  const lastModifiedClipFyn = new Date('2026-08-12').toISOString();
+  const lastModifiedClipFyn = new Date('2026-08-14').toISOString();
 
   // 1. Static pages
   const staticRoutes: MetadataRoute.Sitemap = [
