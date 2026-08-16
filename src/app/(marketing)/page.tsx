@@ -218,12 +218,12 @@ export default function Home() {
               <div className="group relative flex flex-col justify-between rounded-3xl border bg-background p-6 shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className="relative h-14 w-14 overflow-hidden rounded-2xl border bg-card p-1 shadow-sm">
+                    <div className="relative h-14 w-14 overflow-hidden rounded-2xl border shadow-sm bg-[#004f7a]">
                       <Image
                         src="/images/scamguard-logo.png"
                         alt="ScamGuard icon"
                         fill
-                        className="object-contain p-0.5"
+                        className="object-cover scale-110"
                       />
                     </div>
                     <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
