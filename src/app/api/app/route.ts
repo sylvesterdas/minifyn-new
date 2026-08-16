@@ -9,6 +9,7 @@ export interface AppMetadata {
   webUrl: string;
   playstoreURL: string | null;
   appstoreURL: string | null;
+  logoUrl: string;
   published: boolean;
 }
 
@@ -19,6 +20,7 @@ const APPS: AppMetadata[] = [
     webUrl: "https://www.minifyn.com/scamguard",
     playstoreURL: "https://play.google.com/store/apps/details?id=com.minifyn.linkguard",
     appstoreURL: null,
+    logoUrl: "https://www.minifyn.com/images/scamguard-logo.png",
     published: true,
   },
   {
@@ -27,6 +29,7 @@ const APPS: AppMetadata[] = [
     webUrl: "https://www.minifyn.com/censorfyn",
     playstoreURL: "https://play.google.com/store/apps/details?id=com.minifyn.censorfyn",
     appstoreURL: null,
+    logoUrl: "https://www.minifyn.com/images/censorfyn/logo_transparent.png",
     published: false,
   },
   {
@@ -35,6 +38,7 @@ const APPS: AppMetadata[] = [
     webUrl: "https://www.minifyn.com/clipfyn",
     playstoreURL: "https://play.google.com/store/apps/details?id=com.minifyn.clipfyn",
     appstoreURL: null,
+    logoUrl: "https://www.minifyn.com/images/clipfyn/logo.png",
     published: false,
   },
 ];
