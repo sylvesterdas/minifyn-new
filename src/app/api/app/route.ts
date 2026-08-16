@@ -5,6 +5,8 @@ export const revalidate = 3600; // Cache for 1 hour
 
 export interface AppMetadata {
   name: string;
+  tagline: string;
+  description: string;
   packageId: string;
   webUrl: string;
   playstoreURL: string | null;
@@ -15,7 +17,9 @@ export interface AppMetadata {
 
 const APPS: AppMetadata[] = [
   {
-    name: "ScamGuard: URL Checker",
+    name: "ScamGuard: Link Checker",
+    tagline: "Link & QR Threat Checker",
+    description: "Inspect suspicious links, QR codes, and redirect chains before opening them to safeguard against phishing and malicious links.",
     packageId: "com.minifyn.linkguard",
     webUrl: "https://www.minifyn.com/scamguard",
     playstoreURL: "https://play.google.com/store/apps/details?id=com.minifyn.linkguard",
@@ -25,6 +29,8 @@ const APPS: AppMetadata[] = [
   },
   {
     name: "CensorFyn: Offline Media Redact",
+    tagline: "100% Offline Media Redaction",
+    description: "Auto-detect and irreversibly redact faces, passports, credit cards, PII text, and QR codes with true pixel destruction.",
     packageId: "com.minifyn.censorfyn",
     webUrl: "https://www.minifyn.com/censorfyn",
     playstoreURL: "https://play.google.com/store/apps/details?id=com.minifyn.censorfyn",
@@ -34,6 +40,8 @@ const APPS: AppMetadata[] = [
   },
   {
     name: "ClipFyn: Video Preparation",
+    tagline: "On-Device Video Preparation",
+    description: "Inspect, crop, fit, and prepare videos locally on Android for broadly compatible sharing without quality degradation or server uploads.",
     packageId: "com.minifyn.clipfyn",
     webUrl: "https://www.minifyn.com/clipfyn",
     playstoreURL: "https://play.google.com/store/apps/details?id=com.minifyn.clipfyn",
