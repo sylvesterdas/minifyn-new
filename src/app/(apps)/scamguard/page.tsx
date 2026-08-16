@@ -278,13 +278,15 @@ export default function ScamGuardPage() {
 
               <div className="space-y-5">
                 <div className="flex flex-col items-center gap-4">
-                  <Image
-                    src="/images/linkguard-logo.svg"
-                    alt="ScamGuard: Link Checker logo"
-                    width={64}
-                    height={64}
-                    className="h-14 w-14 rounded-2xl shadow-lg ring-1 ring-white/10"
-                  />
+                  <div className="relative h-16 w-16 overflow-hidden rounded-2xl border shadow-lg bg-[#004f7a] ring-1 ring-white/10">
+                    <Image
+                      src="/images/scamguard-logo.png"
+                      alt="ScamGuard: Link Checker logo"
+                      fill
+                      className="object-cover scale-110"
+                      priority
+                    />
+                  </div>
                   <div className="min-w-0">
                     <h1 className="text-5xl font-semibold text-foreground sm:text-6xl lg:text-7xl">
                       ScamGuard: Link Checker

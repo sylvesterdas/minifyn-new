@@ -139,7 +139,10 @@ export default function Home() {
 
             <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
               {/* App 1: CensorFyn */}
-              <div className="group relative flex flex-col justify-between rounded-3xl border bg-background p-6 shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+              <Link
+                href="/censorfyn"
+                className="group relative flex flex-col justify-between rounded-3xl border bg-background p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl"
+              >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="relative h-14 w-14 overflow-hidden rounded-2xl border bg-card p-1 shadow-sm">
@@ -147,7 +150,7 @@ export default function Home() {
                         src="/images/censorfyn/logo_transparent.png"
                         alt="CensorFyn icon"
                         fill
-                        className="object-cover p-0.5"
+                        className="object-contain p-0.5"
                       />
                     </div>
                     <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
@@ -156,7 +159,7 @@ export default function Home() {
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-bold text-foreground">CensorFyn</h3>
+                    <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">CensorFyn</h3>
                     <p className="text-xs font-medium text-primary mt-0.5">Media Redaction &amp; Privacy</p>
                   </div>
 
@@ -166,18 +169,18 @@ export default function Home() {
                 </div>
 
                 <div className="pt-6 border-t mt-6">
-                  <Link
-                    href="/censorfyn"
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all group-hover:gap-2.5"
-                  >
-                    <span>Learn more about CensorFyn</span>
+                  <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all group-hover:gap-2.5">
+                    <span>Explore CensorFyn</span>
                     <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  </div>
                 </div>
-              </div>
+              </Link>
 
               {/* App 2: ClipFyn */}
-              <div className="group relative flex flex-col justify-between rounded-3xl border bg-background p-6 shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+              <Link
+                href="/clipfyn"
+                className="group relative flex flex-col justify-between rounded-3xl border bg-background p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl"
+              >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="relative h-14 w-14 overflow-hidden rounded-2xl border bg-card p-1 shadow-sm">
@@ -194,7 +197,7 @@ export default function Home() {
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-bold text-foreground">ClipFyn</h3>
+                    <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">ClipFyn</h3>
                     <p className="text-xs font-medium text-primary mt-0.5">Video Preparation for Sharing</p>
                   </div>
 
@@ -204,18 +207,18 @@ export default function Home() {
                 </div>
 
                 <div className="pt-6 border-t mt-6">
-                  <Link
-                    href="/clipfyn"
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all group-hover:gap-2.5"
-                  >
-                    <span>Learn more about ClipFyn</span>
+                  <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all group-hover:gap-2.5">
+                    <span>Explore ClipFyn</span>
                     <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  </div>
                 </div>
-              </div>
+              </Link>
 
               {/* App 3: ScamGuard */}
-              <div className="group relative flex flex-col justify-between rounded-3xl border bg-background p-6 shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+              <Link
+                href="/scamguard"
+                className="group relative flex flex-col justify-between rounded-3xl border bg-background p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl"
+              >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="relative h-14 w-14 overflow-hidden rounded-2xl border shadow-sm bg-[#004f7a]">
@@ -232,7 +235,7 @@ export default function Home() {
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-bold text-foreground">ScamGuard</h3>
+                    <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">ScamGuard</h3>
                     <p className="text-xs font-medium text-primary mt-0.5">Link &amp; QR Threat Checker</p>
                   </div>
 
@@ -242,15 +245,12 @@ export default function Home() {
                 </div>
 
                 <div className="pt-6 border-t mt-6">
-                  <Link
-                    href="/scamguard"
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all group-hover:gap-2.5"
-                  >
-                    <span>Learn more about ScamGuard</span>
+                  <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all group-hover:gap-2.5">
+                    <span>Explore ScamGuard</span>
                     <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  </div>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
         </section>
