@@ -11,37 +11,40 @@ import {
   Sparkles,
   CheckCircle2,
   Share2,
-  Hash,
-  Download,
-  ArrowRight,
   Fingerprint,
+  Layers,
+  SlidersHorizontal,
+  Settings,
+  HelpCircle,
+  BadgeCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const siteUrl = "https://www.minifyn.com";
 const pageUrl = "/censorfyn";
 const visualBase = "/images/censorfyn";
+const playStoreUrl = "https://play.google.com/store/apps/details?id=com.minifyn.censorfyn";
 const title = "CensorFyn: 100% Offline Media Redaction & Privacy App | MiniFyn";
 const description =
   "CensorFyn is an offline, privacy-first Android app by MiniFyn that automatically detects and irreversibly redacts faces, passports, credit cards, PII text, and QR codes with true pixel destruction.";
-
-const playStoreUrl = "https://play.google.com/store/apps/details?id=com.minifyn.censorfyn";
 
 const screenshots = [
   {
     src: `${visualBase}/screenshot_1_welcome.png`,
     title: "1. Instant Local Import",
-    description: "Select from gallery or share directly into CensorFyn. Processing starts 100% offline.",
+    description: "Select photos or share directly from Gallery. Processing runs 100% offline with zero server uploads.",
   },
   {
     src: `${visualBase}/screenshot_2_editor.png`,
     title: "2. Dual AI Detection",
-    description: "Detects faces, passports, IDs, credit cards, phone numbers, and QR codes instantly.",
+    description: "Combines BlazeFace & Vision OCR to detect faces, passports, credit cards, phone numbers, and QR codes.",
   },
   {
     src: `${visualBase}/screenshot_3_toolbar.png`,
     title: "3. Precision Masking",
-    description: "Switch between Blur, Mosaic Pixelate, and Solid Color blocks or draw manual masks.",
+    description: "Switch between Blur, Mosaic Pixelate, and Solid Color masks, or draw manual freehand boxes.",
   },
   {
     src: `${visualBase}/screenshot_4_export_options.png`,
@@ -51,7 +54,70 @@ const screenshots = [
   {
     src: `${visualBase}/screenshot_5_export_success.png`,
     title: "5. Safe to Share",
-    description: "Irreversibly destructs raw image pixels so redactions can never be unmasked.",
+    description: "Irreversibly destructs raw image pixels so sensitive data can never be unmasked or recovered.",
+  },
+];
+
+const whyCards = [
+  {
+    title: "Visual Privacy by Default",
+    description: "Sharing photos on social media or messaging apps often leaks sensitive IDs, home addresses, license plates, or background faces without you noticing.",
+    icon: EyeOff,
+  },
+  {
+    title: "True Pixel Destruction",
+    description: "Unlike basic markup tools that add removable vector layers, CensorFyn irreversibly overwrites the underlying raster pixel bytes before export.",
+    icon: Lock,
+  },
+  {
+    title: "100% On-Device AI",
+    description: "Face recognition, OCR text scanning, and QR parsing run strictly on your phone's processor using background Dart isolates.",
+    icon: ScanFace,
+  },
+  {
+    title: "Legal Chain of Custody",
+    description: "Optional Audit Mode generates tamper-evident SHA-256 hashes and timestamp manifests for legal compliance and court discovery.",
+    icon: FileText,
+  },
+];
+
+const useCases = [
+  "Selling items online (masking serial numbers, shipping labels & home addresses)",
+  "Sharing IDs or documents (hiding government numbers, CVVs & signatures)",
+  "Social media photos (blurring background bystanders and children's faces)",
+  "Screenshots of chats & apps (masking phone numbers, emails & account balances)",
+  "Vehicle photos (redacting license plate numbers)",
+  "Legal & compliance media (tamper-evident audit logging for discovery)",
+];
+
+const trustPoints = [
+  "Package: com.minifyn.censorfyn",
+  "100% On-Device / Zero Cloud Uploads",
+  "BlazeFace & VisionKit OCR",
+  "Automatic GPS / EXIF Scrubbing",
+  "Publisher: MiniFyn (UDYAM-KL-12-0136086)",
+];
+
+const faqs = [
+  {
+    question: "Does CensorFyn upload my photos to any server?",
+    answer: "No. CensorFyn operates 100% on-device and offline. Your photos, documents, and media never leave your phone. All face detection, OCR text parsing, and pixel-level blurring happen locally on your device's processor.",
+  },
+  {
+    question: "Can someone undo or remove the redaction on exported photos?",
+    answer: "No. CensorFyn applies true destructive redaction. When an image is exported, the underlying raw pixel bytes are permanently overwritten with Gaussian blur, mosaic pixels, or solid black/white color. There are no vector layers, hidden masks, or alpha channels to inspect underneath.",
+  },
+  {
+    question: "What sensitive information does CensorFyn automatically detect?",
+    answer: "CensorFyn uses on-device Google ML Kit (BlazeFace and Vision OCR) combined with local regex parsers to detect: human faces, passport numbers, credit/debit card numbers, driver's licenses, national ID formats, phone numbers, email addresses, vehicle plates, and QR/barcodes.",
+  },
+  {
+    question: "What is Audit Mode?",
+    answer: "Audit Mode is an optional export feature designed for legal, compliance, and investigative workflows. When enabled, CensorFyn exports the sanitized media alongside a companion SHA-256 cryptographic hash manifest and timestamp, allowing parties to verify data integrity without revealing the redacted content.",
+  },
+  {
+    question: "Does CensorFyn remove EXIF and GPS location metadata?",
+    answer: "Yes. By default, CensorFyn strips all camera metadata, device serials, capture timestamps, and precise GPS location coordinates from exported images to prevent secondary location tracking.",
   },
 ];
 
@@ -102,6 +168,7 @@ export default function CensorFynPage() {
       price: "0",
       priceCurrency: "INR",
     },
+    downloadUrl: playStoreUrl,
     featureList: [
       "100% On-device offline processing",
       "Auto-detect faces, passports, driver's licenses, and credit cards",
@@ -110,6 +177,20 @@ export default function CensorFynPage() {
       "Automatic EXIF & GPS metadata stripping",
       "Optional Audit Mode for legal chain of custody SHA-256 manifest",
     ],
+    sameAs: playStoreUrl,
+  };
+
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
   };
 
   return (
@@ -118,9 +199,13 @@ export default function CensorFynPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-background via-card/50 to-background py-16 md:py-28">
+      <section className="relative overflow-hidden border-b bg-gradient-to-b from-background via-card/50 to-background py-16 md:py-24">
         <div className="container mx-auto grid max-w-6xl gap-12 px-4 sm:px-6 md:grid-cols-12 md:items-center">
           
           {/* Left Text */}
@@ -151,32 +236,50 @@ export default function CensorFynPage() {
               Irreversible media redaction on Android. Automatically detect and permanently destroy sensitive faces, passports, credit card numbers, and PII text.
             </p>
 
-            {/* Badges */}
-            <div className="flex flex-wrap gap-2.5 pt-2 text-xs font-medium">
-              <span className="inline-flex items-center gap-1.5 rounded-lg border bg-card/80 px-3 py-1.5 shadow-sm">
-                <Smartphone className="h-3.5 w-3.5 text-primary" /> Android App
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg border bg-card/80 px-3 py-1.5 shadow-sm">
-                <Lock className="h-3.5 w-3.5 text-emerald-500" /> Zero Cloud Uploads
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg border bg-card/80 px-3 py-1.5 shadow-sm">
-                <EyeOff className="h-3.5 w-3.5 text-blue-500" /> True Pixel Destruction
-              </span>
+            {/* Quick Specs Grid */}
+            <div className="grid gap-3 sm:grid-cols-3 pt-2">
+              <div className="rounded-2xl border bg-background/70 px-4 py-3">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Built By</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">MiniFyn</p>
+              </div>
+              <div className="rounded-2xl border bg-background/70 px-4 py-3">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Platform</p>
+                <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                  <Smartphone className="h-4 w-4 text-primary" /> Android 5.0+
+                </p>
+              </div>
+              <div className="rounded-2xl border bg-background/70 px-4 py-3">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Privacy</p>
+                <p className="mt-1 text-sm font-semibold text-emerald-500">100% On-Device</p>
+              </div>
             </div>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
+            <div className="flex flex-wrap items-center gap-4 pt-2">
               <Button asChild size="lg" className="gap-2 font-semibold shadow-md">
                 <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
                   <Smartphone className="h-5 w-5" />
                   <span>Get on Google Play</span>
                 </a>
               </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/censorfyn/legal/privacy">Privacy Policy</Link>
+              </Button>
             </div>
-            
-            <p className="text-xs text-muted-foreground">
-              Available for Android 5.0+ (API 21+). 100% offline.
-            </p>
+
+            {/* Trust Badges */}
+            <div className="flex flex-wrap gap-2 pt-2">
+              {trustPoints.map((point) => (
+                <Badge
+                  key={point}
+                  variant="outline"
+                  className="rounded-full border-primary/20 bg-background/60 px-3 py-1 text-xs text-foreground/85"
+                >
+                  <CheckCircle2 className="mr-1.5 h-3 w-3 text-primary" />
+                  {point}
+                </Badge>
+              ))}
+            </div>
           </div>
 
           {/* Right Mockup */}
@@ -198,18 +301,45 @@ export default function CensorFynPage() {
         </div>
       </section>
 
+      {/* Why CensorFyn Exists */}
+      <section className="border-b bg-card/40 py-16 md:py-24">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Why CensorFyn Exists</h2>
+            <p className="text-muted-foreground text-base sm:text-lg">
+              Most photo editing apps either upload your images to cloud servers or simply overlay colored boxes that can easily be stripped away. CensorFyn was built to solve both problems completely.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-2">
+            {whyCards.map((card) => {
+              const Icon = card.icon;
+              return (
+                <div key={card.title} className="rounded-3xl border bg-background/85 p-6 shadow-sm space-y-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground">{card.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{card.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Screenshot Showcase Section */}
-      <section id="screenshots" className="border-b bg-card/30 py-20">
+      <section id="screenshots" className="border-b bg-background py-20">
         <div className="container mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <span className="text-xs font-semibold uppercase tracking-widest text-primary">
               App Walkthrough
             </span>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
-              How CensorFyn Protects Your Data
+              A Smooth 5-Step Sanitization Flow
             </h2>
             <p className="text-sm text-muted-foreground sm:text-base">
-              A frictionless 5-step flow from photo import to sanitized, metadata-clean export.
+              From photo import to sanitized, metadata-clean export with zero hassle.
             </p>
           </div>
 
@@ -218,7 +348,7 @@ export default function CensorFynPage() {
             {screenshots.map((s, idx) => (
               <div
                 key={idx}
-                className="group flex flex-col overflow-hidden rounded-2xl border bg-background transition-all hover:border-primary/50 hover:shadow-lg"
+                className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition-all hover:border-primary/50 hover:shadow-lg"
               >
                 <div className="relative aspect-[9/18] w-full overflow-hidden bg-muted/40">
                   <Image
@@ -241,154 +371,149 @@ export default function CensorFynPage() {
         </div>
       </section>
 
-      {/* Core Features Grid */}
-      <section id="features" className="border-b py-20 bg-background">
+      {/* Real-World Use Cases & User Controls */}
+      <section className="border-b bg-card/40 py-16 md:py-24">
         <div className="container mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <span className="text-xs font-semibold uppercase tracking-widest text-primary">
-              Features
-            </span>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Engineered for True Data Destruction
-            </h2>
-            <p className="text-sm text-muted-foreground sm:text-base">
-              Unlike ordinary photo editors that apply cosmetic vector overlays, CensorFyn physically rewrites the image raster bytes.
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
-            {/* Feature 1 */}
-            <div className="rounded-2xl border bg-card p-6 shadow-sm space-y-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <ScanFace className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-semibold">Dual AI &amp; Regex Engine</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Combines Google ML Kit BlazeFace &amp; Vision OCR with local regex classifiers to automatically flag faces, credit card numbers, passports, driver&apos;s licenses, phone numbers, and QR codes.
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div className="rounded-3xl border bg-background p-8 shadow-sm space-y-4">
+              <h2 className="text-2xl font-bold sm:text-3xl">When People Use CensorFyn</h2>
+              <p className="text-sm text-muted-foreground">
+                Built for everyday scenarios where you need to share a photo or document without exposing identity or sensitive numbers.
               </p>
+              <ul className="mt-6 grid gap-3">
+                {useCases.map((item) => (
+                  <li key={item} className="flex items-start gap-3 rounded-2xl border bg-card/60 p-3.5 text-sm">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span className="text-muted-foreground">{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            {/* Feature 2 */}
-            <div className="rounded-2xl border bg-card p-6 shadow-sm space-y-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
-                <Lock className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-semibold">Irreversible Pixel Destruction</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Underlying pixel bytes are permanently overwritten using Gaussian Blur, Mosaic Pixelate, or Solid Color blocks. No vector layers exist that can be unmasked or recovered.
+            <div className="rounded-3xl border bg-background p-8 shadow-sm space-y-5">
+              <h2 className="text-2xl font-bold sm:text-3xl">What You Can Customize</h2>
+              <p className="text-sm text-muted-foreground">
+                Take full control over how your media is processed and exported.
               </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="rounded-2xl border bg-card p-6 shadow-sm space-y-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-                <Fingerprint className="h-6 w-6" />
+              <div className="space-y-4 text-sm text-muted-foreground">
+                <div className="flex items-start gap-3 rounded-xl border bg-card p-3.5">
+                  <SlidersHorizontal className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-foreground block font-medium">3 Redaction Styles:</strong>
+                    Choose between Gaussian Blur (soft natural aesthetic), Mosaic Pixelate (classic privacy), or Solid Color blocks.
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-xl border bg-card p-3.5">
+                  <Layers className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-foreground block font-medium">Manual Gestures &amp; Box Tools:</strong>
+                    Draw custom freehand masks or drag rectangular boxes for any background details AI missed.
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-xl border bg-card p-3.5">
+                  <Fingerprint className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-foreground block font-medium">Automatic EXIF Stripping:</strong>
+                    Removes GPS coordinates, camera model, and timestamps automatically before saving.
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-xl border bg-card p-3.5">
+                  <FileText className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-foreground block font-medium">Optional Legal Audit Mode:</strong>
+                    Embeds a tamper-evident SHA-256 hash manifest for legal proof and compliance.
+                  </div>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold">EXIF &amp; GPS Sanitization</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Prevents accidental location tracking by stripping camera model info, GPS coordinates, capture timestamps, and hardware serials from all exported media.
-              </p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="rounded-2xl border bg-card p-6 shadow-sm space-y-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
-                <FileText className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-semibold">Legal &amp; Audit Mode</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Export sanitized evidence with an optional tamper-evident SHA-256 cryptographic hash manifest and timestamp, perfect for legal discovery and chain of custody.
-              </p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="rounded-2xl border bg-card p-6 shadow-sm space-y-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500">
-                <Share2 className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-semibold">System Share-Sheet Integration</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Directly share photos from your Android Gallery, Google Photos, WhatsApp, or Telegram into CensorFyn for instant redaction without manual file picking.
-              </p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="rounded-2xl border bg-card p-6 shadow-sm space-y-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-500/10 text-rose-500">
-                <ShieldCheck className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-semibold">Zero Account / Zero Cloud</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                No login, no registration, no tracking IDs. The app runs completely offline and requires zero network access for core image redactions.
-              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Security & Offline Architecture */}
-      <section id="security" className="border-b bg-card/40 py-20">
+      {/* Transparency, Policies, & Support Box */}
+      <section className="border-b py-16 md:py-24 bg-background">
         <div className="container mx-auto max-w-4xl px-4 sm:px-6">
-          <div className="rounded-3xl border bg-background p-8 md:p-12 shadow-sm space-y-6">
-            <div className="flex items-center gap-3">
-              <ShieldCheck className="h-8 w-8 text-emerald-500" />
-              <h2 className="text-2xl sm:text-3xl font-bold">100% On-Device Privacy Architecture</h2>
-            </div>
-            
-            <p className="text-muted-foreground leading-relaxed">
-              When handling sensitive photos like passports, tax filings, medical records, or family pictures, sending images to cloud servers creates unnecessary risk.
-            </p>
-
-            <div className="grid gap-4 sm:grid-cols-2 pt-2">
-              <div className="flex items-start gap-3 rounded-xl border bg-card p-4">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <strong className="text-foreground block mb-0.5">Isolated Background Isolates</strong>
-                  <span className="text-muted-foreground">All heavy OCR and pixel modifications run in local Dart isolates.</span>
+          <div className="rounded-3xl border bg-card/60 p-8 md:p-10 shadow-sm">
+            <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+              <div className="space-y-4">
+                <h2 className="text-3xl font-bold tracking-tight">Policies, Ownership &amp; Support</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  This page serves as the verified public home for CensorFyn, connecting the product identity, the publisher, the Google Play listing, and the official legal policies.
+                </p>
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <Button asChild variant="outline">
+                    <Link href="/censorfyn/legal/privacy">Privacy Policy</Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/censorfyn/legal/terms">Terms of Use</Link>
+                  </Button>
+                  <Button asChild>
+                    <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
+                      <Smartphone className="mr-2 h-4 w-4" />
+                      Google Play
+                    </a>
+                  </Button>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 rounded-xl border bg-card p-4">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <strong className="text-foreground block mb-0.5">Zero Image Uploads</strong>
-                  <span className="text-muted-foreground">No telemetry or image data is ever transmitted over network sockets.</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 rounded-xl border bg-card p-4">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <strong className="text-foreground block mb-0.5">Strict Metadata Scrubbing</strong>
-                  <span className="text-muted-foreground">Cleans GPS latitude/longitude, altitude, camera serials, and timestamps.</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 rounded-xl border bg-card p-4">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <strong className="text-foreground block mb-0.5">Temporary Sandbox Cleaning</strong>
-                  <span className="text-muted-foreground">Working frame buffers are cleared immediately upon export or app exit.</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
-              <span>Read our complete transparency commitment:</span>
-              <div className="flex items-center gap-4">
-                <Link href="/censorfyn/legal/privacy" className="font-semibold text-primary hover:underline">
-                  Privacy Policy →
-                </Link>
-                <Link href="/censorfyn/legal/terms" className="font-semibold text-primary hover:underline">
-                  Terms of Use →
-                </Link>
+              <div className="rounded-2xl border bg-background p-6 space-y-3">
+                <h3 className="font-semibold text-base text-foreground">Verified Publisher Details</h3>
+                <ul className="space-y-2.5 text-xs text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+                    <span><strong>App Name:</strong> CensorFyn</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+                    <span><strong>Package ID:</strong> com.minifyn.censorfyn</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+                    <span><strong>Publisher:</strong> Sylvester Kumar Das (UDYAM-KL-12-0136086)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+                    <span><strong>Contact Email:</strong> sylvesterdas.dev@gmail.com</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA / Download Section */}
+      {/* Frequently Asked Questions */}
+      <section className="py-16 md:py-24 bg-card/30 border-b">
+        <div className="container mx-auto max-w-4xl px-4 sm:px-6">
+          <div className="text-center space-y-3">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Frequently Asked Questions</h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Clear answers regarding privacy, data destruction, and device compatibility.
+            </p>
+          </div>
+
+          <div className="mt-10 rounded-3xl border bg-background px-6 shadow-sm">
+            <Accordion type="single" collapsible className="w-full">
+              {faqs.map((faq, index) => (
+                <AccordionItem
+                  key={faq.question}
+                  value={`faq-${index}`}
+                  className="border-border/60 last:border-b-0"
+                >
+                  <AccordionTrigger className="py-6 text-left text-lg font-semibold text-foreground hover:no-underline">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-6 text-base leading-7 text-muted-foreground">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </div>
+      </section>
+
+      {/* Final Download CTA */}
       <section className="py-20 bg-gradient-to-t from-card/60 to-background">
         <div className="container mx-auto max-w-4xl px-4 sm:px-6 text-center space-y-6">
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
