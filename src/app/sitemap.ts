@@ -9,6 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModifiedStatic = new Date('2024-01-01').toISOString();
   const lastModifiedScamGuard = new Date('2026-06-02').toISOString();
   const lastModifiedClipFyn = new Date('2026-08-14').toISOString();
+  const lastModifiedCensorFyn = new Date('2026-08-16').toISOString();
 
   // 1. Static pages
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -39,6 +40,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/clipfyn`, lastModified: lastModifiedClipFyn, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${siteUrl}/clipfyn/legal/privacy`, lastModified: lastModifiedClipFyn, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${siteUrl}/clipfyn/legal/terms`, lastModified: lastModifiedClipFyn, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${siteUrl}/censorfyn`, lastModified: lastModifiedCensorFyn, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${siteUrl}/censorfyn/legal/privacy`, lastModified: lastModifiedCensorFyn, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${siteUrl}/censorfyn/legal/terms`, lastModified: lastModifiedCensorFyn, changeFrequency: 'yearly', priority: 0.3 },
   ];
 
   return staticRoutes;
