@@ -193,6 +193,25 @@ export default function CensorFynPage() {
           </div>
         </div>
       </section>
+
+      {/* Legal & Policy Links */}
+      <section className="border-t bg-card/40">
+        <div className="prose prose-invert mx-auto max-w-3xl px-4 py-12 text-center text-sm text-muted-foreground">
+          <p>
+            <Link href="/censorfyn/legal/privacy" className="hover:text-foreground">
+              Privacy Policy
+            </Link>
+            {" · "}
+            <Link href="/censorfyn/legal/terms" className="hover:text-foreground">
+              Terms of Use
+            </Link>
+            {" · "}
+            <Link href="/contact" className="hover:text-foreground">
+              Contact MiniFyn
+            </Link>
+          </p>
+        </div>
+      </section>
     </main>
   );
 }
