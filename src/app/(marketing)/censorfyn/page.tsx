@@ -206,9 +206,9 @@ export default function CensorFynPage() {
               Terms of Use
             </Link>
             {" · "}
-            <Link href="/contact" className="hover:text-foreground">
-              Contact MiniFyn
-            </Link>
+            <a href="mailto:sylvesterdas.dev@gmail.com" className="hover:text-foreground">
+              Contact (sylvesterdas.dev@gmail.com)
+            </a>
           </p>
         </div>
       </section>

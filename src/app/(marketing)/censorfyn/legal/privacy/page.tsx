@@ -82,8 +82,11 @@ export default function CensorFynPrivacyPage() {
 
         <h2>Contact</h2>
         <p>
-          If you have questions about this Privacy Policy or CensorFyn&apos;s privacy practices, please contact us via the{" "}
-          <Link href="/contact">MiniFyn contact page</Link>.
+          If you have questions about this Privacy Policy or CensorFyn&apos;s privacy practices, please contact us at{" "}
+          <a href="mailto:sylvesterdas.dev@gmail.com" className="underline">
+            sylvesterdas.dev@gmail.com
+          </a>{" "}
+          or visit <Link href="/censorfyn">minifyn.com/censorfyn</Link>.
         </p>
       </article>
     </main>

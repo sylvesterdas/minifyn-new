@@ -62,8 +62,11 @@ export default function CensorFynTermsPage() {
 
         <h2>6. Contact</h2>
         <p>
-          For questions regarding these Terms of Use, please reach out through the{" "}
-          <Link href="/contact">MiniFyn contact page</Link>.
+          For questions regarding these Terms of Use, please reach out via email to{" "}
+          <a href="mailto:sylvesterdas.dev@gmail.com" className="underline">
+            sylvesterdas.dev@gmail.com
+          </a>{" "}
+          or visit <Link href="/censorfyn">minifyn.com/censorfyn</Link>.
         </p>
       </article>
     </main>
