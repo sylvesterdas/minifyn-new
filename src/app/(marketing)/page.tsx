@@ -3,7 +3,7 @@ import { UrlShortenerForm } from '@/components/url-shortener-form';
 import { QrCodeGeneratorForm } from '@/components/qr-code-generator-form';
 import Image from 'next/image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, Key, Zap, QrCode, Link as LinkIcon, ClipboardPaste, Wand, BarChart3, ShieldCheck, Smartphone } from 'lucide-react';
+import { BarChart, Key, Zap, QrCode, Link as LinkIcon, ClipboardPaste, Wand, BarChart3, ShieldCheck, Smartphone, ArrowRight } from 'lucide-react';
 import { DeveloperApiSection } from '@/components/developer-api-section';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -69,13 +69,6 @@ const features = [
   },
 ];
 
-const linkGuardFeatures = [
-  'Paste link to check',
-  'Quick safety result',
-  'Scam/phishing risk alerts',
-  'Easy to use',
-];
-
 export default function Home() {
     const jsonLd = {
         '@context': 'https://schema.org',
@@ -129,112 +122,134 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="relative w-full py-12 md:py-24 lg:py-28">
+        {/* Mobile & Privacy Apps Suite Section */}
+        <section className="relative w-full py-16 md:py-24 border-t bg-card/40">
           <div className="container mx-auto px-4 md:px-6">
-            <div className="grid gap-10 rounded-3xl border bg-card/70 p-6 shadow-sm backdrop-blur sm:p-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:p-10">
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <div className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                    Android safety app
-                  </div>
-                  <div className="space-y-2">
-                    <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">ScamGuard: Link Checker by MiniFyn</h2>
-                    <p className="max-w-2xl text-muted-foreground md:text-lg">
-                      ScamGuard: Link Checker is an Android app that helps users check suspicious URLs, QR links, and Android link handoffs before opening them.
-                    </p>
-                    <p className="text-sm font-medium text-foreground/90">
-                      ScamGuard helps you check suspicious links before you click.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border bg-background/70 p-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">App Name</p>
-                    <p className="mt-2 text-lg font-semibold">ScamGuard: Link Checker</p>
-                  </div>
-                  <div className="rounded-2xl border bg-background/70 p-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">By</p>
-                    <p className="mt-2 text-lg font-semibold">MiniFyn</p>
-                  </div>
-                  <div className="rounded-2xl border bg-background/70 p-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Purpose</p>
-                    <p className="mt-2 text-lg font-semibold">Detect risky links and QR codes</p>
-                  </div>
-                  <div className="rounded-2xl border bg-background/70 p-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Platform</p>
-                    <p className="mt-2 flex items-center gap-2 text-lg font-semibold">
-                      <Smartphone className="h-5 w-5 text-primary" />
-                      Android
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                      <ShieldCheck className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold">Why ScamGuard</h3>
-                      <p className="text-sm text-muted-foreground">Simple checks for suspicious links, QR codes, and browser handoffs before you open them.</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-6">
-                    <p className="text-sm font-semibold text-foreground">Features</p>
-                    <ul className="mt-4 grid gap-3 text-sm text-muted-foreground">
-                      {linkGuardFeatures.map((feature) => (
-                        <li key={feature} className="flex items-start gap-3 rounded-2xl border bg-card/70 p-3">
-                          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="mt-6 rounded-2xl border border-primary/20 bg-primary/5 p-4">
-                    <p className="text-sm font-medium">Privacy focused, with local history and trusted-domain controls</p>
-                  </div>
-                </div>
-
+            <div className="flex flex-col items-center justify-center space-y-3 text-center mb-12">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+                <Smartphone className="h-3.5 w-3.5" /> Mobile Apps &amp; Privacy Tools
               </div>
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                Explore the MiniFyn Product Family
+              </h2>
+              <p className="max-w-2xl text-muted-foreground text-sm sm:text-base">
+                Discover our dedicated Android utilities built for on-device privacy, media preparation, and link security.
+              </p>
+            </div>
 
-              <div className="flex flex-col items-center justify-center">
-                <div className="mx-auto w-full max-w-[260px] rounded-[2.3rem] border border-zinc-800 bg-zinc-950 p-2 shadow-2xl">
-                  <div className="mx-auto mb-2 h-1.5 w-20 rounded-full bg-zinc-700" />
-                  <div className="overflow-hidden rounded-[1.9rem] border border-black/20 bg-black">
-                    <Image
-                      src="/images/linkguard-app-screenshot.jpeg"
-                      alt="ScamGuard Android app screenshot showing the URL Scanner screen"
-                      width={368}
-                      height={798}
-                      className="h-auto w-full"
-                    />
+            <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
+              {/* App 1: CensorFyn */}
+              <div className="group relative flex flex-col justify-between rounded-3xl border bg-background p-6 shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="relative h-14 w-14 overflow-hidden rounded-2xl border bg-card p-1 shadow-sm">
+                      <Image
+                        src="/images/censorfyn/logo_transparent.png"
+                        alt="CensorFyn icon"
+                        fill
+                        className="object-cover p-0.5"
+                      />
+                    </div>
+                    <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                      100% Offline AI
+                    </span>
                   </div>
-                </div>
 
-                <div className="mt-6 flex flex-col items-center gap-3 text-center">
-                  <a
-                    href="https://play.google.com/store/apps/details?id=com.minifyn.linkguard"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex transition-transform hover:-translate-y-0.5"
-                    aria-label="Download ScamGuard on Google Play"
-                  >
-                    <Image
-                      src="/images/google-play-badge.svg"
-                      alt="Get it on Google Play"
-                      width={180}
-                      height={60}
-                      className="h-[4rem] w-auto"
-                    />
-                  </a>
-                  <p className="max-w-xs text-sm text-muted-foreground">
-                    Built by MiniFyn to help users stay safer online.
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground">CensorFyn</h3>
+                    <p className="text-xs font-medium text-primary mt-0.5">Media Redaction &amp; Privacy</p>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Auto-detect and irreversibly redact faces, passports, credit cards, PII text, and QR codes directly on your device with true pixel destruction.
                   </p>
                 </div>
 
+                <div className="pt-6 border-t mt-6">
+                  <Link
+                    href="/censorfyn"
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all group-hover:gap-2.5"
+                  >
+                    <span>Learn more about CensorFyn</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* App 2: ClipFyn */}
+              <div className="group relative flex flex-col justify-between rounded-3xl border bg-background p-6 shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="relative h-14 w-14 overflow-hidden rounded-2xl border bg-card p-1 shadow-sm">
+                      <Image
+                        src="/images/clipfyn/logo.png"
+                        alt="ClipFyn icon"
+                        fill
+                        className="object-contain p-0.5"
+                      />
+                    </div>
+                    <span className="rounded-full bg-blue-500/10 px-2.5 py-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+                      On-Device Video
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground">ClipFyn</h3>
+                    <p className="text-xs font-medium text-primary mt-0.5">Video Preparation for Sharing</p>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Inspect, crop, fit, and prepare videos locally on Android for broadly compatible sharing without quality degradation or server uploads.
+                  </p>
+                </div>
+
+                <div className="pt-6 border-t mt-6">
+                  <Link
+                    href="/clipfyn"
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all group-hover:gap-2.5"
+                  >
+                    <span>Learn more about ClipFyn</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* App 3: ScamGuard */}
+              <div className="group relative flex flex-col justify-between rounded-3xl border bg-background p-6 shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="relative h-14 w-14 overflow-hidden rounded-2xl border bg-card p-1 shadow-sm">
+                      <Image
+                        src="/images/scamguard-logo.png"
+                        alt="ScamGuard icon"
+                        fill
+                        className="object-contain p-0.5"
+                      />
+                    </div>
+                    <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                      Threat Protection
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground">ScamGuard</h3>
+                    <p className="text-xs font-medium text-primary mt-0.5">Link &amp; QR Threat Checker</p>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Check suspicious URLs, QR code links, and redirect chains before opening them to safeguard against phishing and malicious links.
+                  </p>
+                </div>
+
+                <div className="pt-6 border-t mt-6">
+                  <Link
+                    href="/scamguard"
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all group-hover:gap-2.5"
+                  >
+                    <span>Learn more about ScamGuard</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

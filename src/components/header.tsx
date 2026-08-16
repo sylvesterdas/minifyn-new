@@ -12,7 +12,6 @@ import { useState } from 'react';
 
 const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/scamguard", label: "ScamGuard" },
     { href: "https://blog.minifyn.com", label: "Blog" },
     { href: "/features", label: "Features" },
     { href: "/pricing", label: "Pricing" },
