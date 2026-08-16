@@ -9,6 +9,7 @@ export interface AppMetadata {
   webUrl: string;
   playstoreURL: string | null;
   appstoreURL: string | null;
+  published: boolean;
 }
 
 const APPS: AppMetadata[] = [
@@ -18,6 +19,7 @@ const APPS: AppMetadata[] = [
     webUrl: "https://www.minifyn.com/scamguard",
     playstoreURL: "https://play.google.com/store/apps/details?id=com.minifyn.linkguard",
     appstoreURL: null,
+    published: true,
   },
   {
     name: "CensorFyn: Offline Media Redact",
@@ -25,6 +27,7 @@ const APPS: AppMetadata[] = [
     webUrl: "https://www.minifyn.com/censorfyn",
     playstoreURL: "https://play.google.com/store/apps/details?id=com.minifyn.censorfyn",
     appstoreURL: null,
+    published: false,
   },
   {
     name: "ClipFyn: Video Preparation",
@@ -32,6 +35,7 @@ const APPS: AppMetadata[] = [
     webUrl: "https://www.minifyn.com/clipfyn",
     playstoreURL: "https://play.google.com/store/apps/details?id=com.minifyn.clipfyn",
     appstoreURL: null,
+    published: false,
   },
 ];
 
