@@ -27,8 +27,13 @@ export function AppFooter({
           {/* Brand Col */}
           <div className="md:col-span-2 space-y-4">
             <Link href={`/${appSlug}`} className="flex items-center gap-2.5">
-              <div className="relative h-8 w-8 overflow-hidden rounded-lg bg-card border">
-                <Image src={logoSrc} alt={`${appName} logo`} fill className="object-cover p-0.5" />
+              <div className={`relative h-8 w-8 overflow-hidden rounded-lg border shadow-sm ${appSlug === 'scamguard' ? 'bg-[#004f7a]' : 'bg-card'}`}>
+                <Image
+                  src={logoSrc}
+                  alt={`${appName} logo`}
+                  fill
+                  className={`object-cover ${appSlug === 'scamguard' ? 'scale-110' : 'p-0.5'}`}
+                />
               </div>
               <span className="font-bold text-lg">{appName}</span>
             </Link>

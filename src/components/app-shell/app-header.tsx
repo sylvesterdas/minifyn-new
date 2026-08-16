@@ -26,12 +26,12 @@ export function AppHeader({
         {/* Brand */}
         <div className="flex items-center gap-3">
           <Link href={`/${appSlug}`} className="flex items-center gap-2.5 transition-opacity hover:opacity-90">
-            <div className="relative h-9 w-9 overflow-hidden rounded-xl bg-card border shadow-sm">
+            <div className={`relative h-9 w-9 overflow-hidden rounded-xl border shadow-sm ${appSlug === 'scamguard' ? 'bg-[#004f7a]' : 'bg-card'}`}>
               <Image
                 src={logoSrc}
                 alt={`${appName} logo`}
                 fill
-                className="object-cover p-0.5"
+                className={`object-cover ${appSlug === 'scamguard' ? 'scale-110' : 'p-0.5'}`}
                 priority
               />
             </div>
