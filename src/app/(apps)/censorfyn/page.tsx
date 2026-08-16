@@ -26,7 +26,6 @@ const description =
   "CensorFyn is an offline, privacy-first Android app by MiniFyn that automatically detects and irreversibly redacts faces, passports, credit cards, PII text, and QR codes with true pixel destruction.";
 
 const playStoreUrl = "https://play.google.com/store/apps/details?id=com.minifyn.censorfyn";
-const closedTestUrl = "https://play.google.com/apps/testing/com.minifyn.censorfyn";
 
 const screenshots = [
   {
@@ -168,21 +167,15 @@ export default function CensorFynPage() {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
               <Button asChild size="lg" className="gap-2 font-semibold shadow-md">
-                <a href={closedTestUrl} target="_blank" rel="noopener noreferrer">
-                  <Download className="h-5 w-5" />
-                  <span>Join Closed Testing</span>
-                </a>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="gap-2">
                 <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
-                  <Smartphone className="h-5 w-5 text-muted-foreground" />
-                  <span>View on Google Play</span>
+                  <Smartphone className="h-5 w-5" />
+                  <span>Get on Google Play</span>
                 </a>
               </Button>
             </div>
             
             <p className="text-xs text-muted-foreground">
-              Currently in active Google Play closed testing. Requires Android 5.0+ (API 21+).
+              Available for Android 5.0+ (API 21+). 100% offline.
             </p>
           </div>
 
@@ -402,20 +395,14 @@ export default function CensorFynPage() {
             Ready to Protect Your Visual Privacy?
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-base sm:text-lg">
-            Join the CensorFyn closed testing track on Google Play today. Redact sensitive data safely before sharing.
+            Download CensorFyn for Android and redact sensitive data safely before sharing.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+          <div className="flex items-center justify-center pt-2">
             <Button asChild size="lg" className="gap-2 font-semibold shadow-lg">
-              <a href={closedTestUrl} target="_blank" rel="noopener noreferrer">
-                <Download className="h-5 w-5" />
-                <span>Join Closed Testing</span>
-              </a>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="gap-2">
               <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
                 <Smartphone className="h-5 w-5" />
-                <span>Google Play Listing</span>
+                <span>Get on Google Play</span>
               </a>
             </Button>
           </div>

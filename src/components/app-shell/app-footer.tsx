@@ -8,7 +8,6 @@ interface AppFooterProps {
   tagline: string;
   supportEmail?: string;
   playStoreUrl?: string;
-  closedTestUrl?: string;
 }
 
 export function AppFooter({
@@ -18,7 +17,6 @@ export function AppFooter({
   tagline,
   supportEmail = 'sylvesterdas.dev@gmail.com',
   playStoreUrl,
-  closedTestUrl,
 }: AppFooterProps) {
   const currentYear = new Date().getFullYear();
 
@@ -84,18 +82,6 @@ export function AppFooter({
                   ScamGuard (Link Checker)
                 </Link>
               </li>
-              {closedTestUrl && (
-                <li className="pt-2">
-                  <a
-                    href={closedTestUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
-                  >
-                    Join Closed Testing →
-                  </a>
-                </li>
-              )}
             </ul>
           </div>
         </div>

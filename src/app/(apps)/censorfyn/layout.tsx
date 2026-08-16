@@ -18,7 +18,7 @@ export default function CensorFynLayout({
           { label: "Screenshots", href: "/censorfyn#screenshots" },
           { label: "Privacy & Security", href: "/censorfyn#security" },
         ]}
-        playStoreUrl="https://play.google.com/apps/testing/com.minifyn.censorfyn"
+        playStoreUrl="https://play.google.com/store/apps/details?id=com.minifyn.censorfyn"
       />
       <main className="flex-1 flex flex-col">{children}</main>
       <AppFooter
@@ -28,7 +28,6 @@ export default function CensorFynLayout({
         tagline="100% Offline, on-device AI media redaction and sanitization app. Overwrites pixels with zero server uploads."
         supportEmail="sylvesterdas.dev@gmail.com"
         playStoreUrl="https://play.google.com/store/apps/details?id=com.minifyn.censorfyn"
-        closedTestUrl="https://play.google.com/apps/testing/com.minifyn.censorfyn"
       />
     </div>
   );
