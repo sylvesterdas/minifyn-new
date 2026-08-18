@@ -1,10 +1,9 @@
 
 
-import { db } from './firebase-admin';
+import { db, auth } from './firebase-admin';
 import type { DataSnapshot } from 'firebase-admin/database';
 import { fetchMetadata, type Metadata } from './scraper';
 import { format, addDays } from 'date-fns';
-import { auth } from 'firebase-admin';
 import type { UserRecord } from 'firebase-admin/auth';
 import { SUPER_USER_ID } from './config';
 import type { UserProfile } from '@/app/dashboard/settings/actions';
@@ -34,11 +33,11 @@ const FREE_USER_DAILY_LIMIT = 20;
 const PRO_USER_DAILY_LIMIT = 100;
 const API_REQUEST_INTERVAL = 1000; // 1 second in milliseconds
 
-async function getUserPlan(userId: string): Promise<UserPlan> {
+export async function getUserPlan(userId: string): Promise<UserPlan> {
     if (userId === SUPER_USER_ID) return 'admin';
     
     try {
-        const user = await auth().getUser(userId);
+        const user = await auth.getUser(userId);
         const userProfileRef = db.ref(`user_profiles/${userId}`);
         const snapshot = await userProfileRef.once('value');
 
@@ -60,8 +59,8 @@ async function getUserPlan(userId: string): Promise<UserPlan> {
                     plan: 'free',
                     subscription: null,
                 });
-                await auth().setCustomUserClaims(userId, { plan: 'free' });
-                await auth().revokeRefreshTokens(userId);
+                await auth.setCustomUserClaims(userId, { plan: 'free' });
+                await auth.revokeRefreshTokens(userId);
 
                 return 'free';
             }
@@ -78,6 +77,7 @@ async function getUserPlan(userId: string): Promise<UserPlan> {
         return 'anonymous';
     }
 }
+
 
 
 /**
@@ -303,7 +303,7 @@ export const validateApiKey = async (apiKey: string): Promise<UserRecord | null>
             return null;
         }
 
-        const user = await auth().getUser(uid);
+        const user = await auth.getUser(uid);
         
         // API key is only valid if the user's email is verified
         if (user.emailVerified) {

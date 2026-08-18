@@ -1,10 +1,10 @@
-import { getApps, initializeApp, cert, getApp } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import { getDatabase } from 'firebase-admin/database';
-import { getMessaging } from 'firebase-admin/messaging';
+import { getApps, initializeApp, cert, getApp, type App } from 'firebase-admin/app';
+import { getAuth, type Auth } from 'firebase-admin/auth';
+import { getDatabase, type Database } from 'firebase-admin/database';
+import { getMessaging, type Messaging } from 'firebase-admin/messaging';
 
-const getAdminApp = () => {
-  if (getApps().length) {
+export const getAdminApp = (): App => {
+  if (getApps().length > 0) {
     return getApp();
   }
 
@@ -29,8 +29,17 @@ const getAdminApp = () => {
   });
 };
 
-const adminApp = getAdminApp();
+function createLazyProxy<T extends object>(getter: () => T): T {
+  return new Proxy({} as T, {
+    get(_target, prop, receiver) {
+      const instance = getter();
+      const value = Reflect.get(instance, prop, receiver);
+      return typeof value === 'function' ? value.bind(instance) : value;
+    },
+  });
+}
 
-export const auth = getAuth(adminApp);
-export const db = getDatabase(adminApp);
-export const messaging = getMessaging(adminApp);
+export const auth: Auth = createLazyProxy(() => getAuth(getAdminApp()));
+export const db: Database = createLazyProxy(() => getDatabase(getAdminApp()));
+export const messaging: Messaging = createLazyProxy(() => getMessaging(getAdminApp()));
+

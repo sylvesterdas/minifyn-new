@@ -14,7 +14,7 @@ const privateIpRanges = [
 ];
 
 function ipToLong(ip: string): number {
-    return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0);
+    return (ip.split('.').reduce((acc, octet) => (acc * 256) + parseInt(octet, 10), 0)) >>> 0;
 }
 
 function isPrivateIp(ip: string): boolean {

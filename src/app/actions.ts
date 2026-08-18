@@ -5,32 +5,19 @@ import {
   checkRateLimit,
   createShortLink,
   incrementUsage,
+  getUserPlan,
   type UserPlan,
 } from "@/lib/data";
-import { auth } from "firebase-admin";
-import type { UserRecord } from "firebase-admin/auth";
+import { validateRequest } from "@/lib/auth";
 import { triggerMaintenance } from "@/lib/maintenance";
 import { revalidatePath } from "next/cache";
-import { SUPER_USER_ID } from "@/lib/config";
+import { headers } from "next/headers";
 
 export interface FormState {
   success: boolean;
   message: string;
   shortUrl: string;
   errorCode?: "ANON_LIMIT_REACHED";
-}
-
-async function getUserPlan(userId: string): Promise<UserPlan> {
-  if (userId === SUPER_USER_ID) return "admin";
-  try {
-    const user = await auth().getUser(userId);
-    if (!user.emailVerified) return "anonymous";
-    // You might have a 'plan' field in your user's custom claims or DB profile
-    // For now, we'll assume verified users are on the 'free' plan.
-    return "free";
-  } catch (error) {
-    return "anonymous";
-  }
 }
 
 export async function shortenUrl(
@@ -40,28 +27,37 @@ export async function shortenUrl(
   // Trigger maintenance task in the background (fire and forget)
   triggerMaintenance();
 
-  const userId = formData.get("userId");
-  if (typeof userId !== "string" || !userId) {
-    // This should ideally not happen if the client-side sends the UID correctly.
-    return {
-      success: false,
-      message: "Authentication context is missing. Please refresh the page.",
-      shortUrl: "",
-    };
+  // Securely resolve user identity on the server instead of trusting client form data
+  const { user } = await validateRequest();
+
+  let userId: string;
+  let plan: UserPlan;
+
+  if (user) {
+    userId = user.uid;
+    plan = user.plan || "free";
+  } else {
+    // For unauthenticated/guest users, derive a rate-limiting key from the client IP
+    const reqHeaders = await headers();
+    const forwarded = reqHeaders.get("x-forwarded-for") || reqHeaders.get("remote-addr") || "unknown";
+    const rawIp = forwarded.split(",")[0].trim();
+    const sanitizedIp = rawIp.replace(/[^a-zA-Z0-9_-]/g, "_") || "guest";
+    userId = `anon_${sanitizedIp}`;
+    plan = "anonymous";
   }
 
-  // Check rate limit first
+  // Check rate limit
   const isAllowed = await checkRateLimit(userId);
   if (!isAllowed) {
-    const plan = await getUserPlan(userId);
-    if (plan === "free" || plan === "pro") {
+    const resolvedPlan = await getUserPlan(userId);
+    if (resolvedPlan === "free" || resolvedPlan === "pro") {
       return {
         success: false,
         message: "Your daily link creation limit has been reached.",
         shortUrl: "",
       };
     }
-    if (plan === "anonymous") {
+    if (resolvedPlan === "anonymous" || plan === "anonymous") {
       return {
         success: false,
         message: "Daily limit of 3 URLs reached for guests.",
@@ -112,3 +108,4 @@ export async function shortenUrl(
     };
   }
 }
+

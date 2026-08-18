@@ -12,18 +12,30 @@ import { isAllowedCountry, resolveCountryFromRequest } from "@/lib/geo";
 // Determine which set of keys and plans to use based on the environment
 const isProduction = process.env.NODE_ENV === "production";
 
-const RAZORPAY_KEY_ID = isProduction
-  ? process.env.RAZORPAY_KEY_ID
-  : process.env.RAZORPAY_TEST_KEY_ID;
+function getRazorpayCredentials() {
+  const keyId = isProduction
+    ? process.env.RAZORPAY_KEY_ID
+    : process.env.RAZORPAY_TEST_KEY_ID;
 
-const RAZORPAY_KEY_SECRET = isProduction
-  ? process.env.RAZORPAY_KEY_SECRET
-  : process.env.RAZORPAY_TEST_KEY_SECRET;
+  const keySecret = isProduction
+    ? process.env.RAZORPAY_KEY_SECRET
+    : process.env.RAZORPAY_TEST_KEY_SECRET;
 
-const razorpay = new Razorpay({
-  key_id: RAZORPAY_KEY_ID!,
-  key_secret: RAZORPAY_KEY_SECRET!,
-});
+  return { keyId, keySecret };
+}
+
+function getRazorpayClient(): Razorpay {
+  const { keyId, keySecret } = getRazorpayCredentials();
+
+  if (!keyId || !keySecret) {
+    throw new Error("Razorpay credentials are not configured.");
+  }
+
+  return new Razorpay({
+    key_id: keyId,
+    key_secret: keySecret,
+  });
+}
 
 // These IDs would be created on the Razorpay Dashboard for both test and live modes
 const PLAN_IDS = {
@@ -66,25 +78,28 @@ export async function createRazorpaySubscription(
         name: decodedToken.name,
       };
       console.log(
-        `[Payment Action] Verified user via ID token: ${userData.uid}`
+        `[Payment Action] User authenticated via ID token: ${userData.uid}`
       );
-    } catch (e) {
+    } catch (error) {
       console.error(
-        "[Payment Action] Failed to verify ID token during subscription:",
-        e
+        "[Payment Action] Failed to verify ID token:",
+        error
       );
-      return { error: "Invalid authentication token provided." };
+      return { error: "Invalid authentication token." };
     }
   } else {
+    // Fallback to session cookie
     const { user } = await validateRequest();
-    if (!user) {
-      console.warn("[Payment Action] User must be logged in to subscribe.");
-      return { error: "You must be logged in to subscribe." };
+    if (user) {
+      userData = {
+        uid: user.uid,
+        email: user.email,
+        name: user.name,
+      };
+      console.log(
+        `[Payment Action] User authenticated via session: ${userData.uid}`
+      );
     }
-    userData = { uid: user.uid, email: user.email, name: user.name };
-    console.log(
-      `[Payment Action] Verified user via session cookie: ${userData.uid}`
-    );
   }
 
   if (!userData) {
@@ -94,7 +109,8 @@ export async function createRazorpaySubscription(
     return { error: "Authentication failed." };
   }
 
-  if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+  const { keyId, keySecret } = getRazorpayCredentials();
+  if (!keyId || !keySecret) {
     console.error(
       "[Payment Action] Razorpay keys are not configured for the current environment."
     );
@@ -128,8 +144,8 @@ export async function createRazorpaySubscription(
     console.log(
       `[Payment Action] Creating Razorpay subscription for user ${userData.uid} with plan ${planId}.`
     );
-    const subscription = await razorpay.subscriptions.create(options);
-    const planDetails = await razorpay.plans.fetch(planId);
+    const subscription = await getRazorpayClient().subscriptions.create(options);
+    const planDetails = await getRazorpayClient().plans.fetch(planId);
 
     // **Store the subscription ID in our database immediately.**
     await db.ref(`user_profiles/${userData.uid}/subscription`).set({
@@ -215,7 +231,7 @@ export async function syncRazorpaySubscription(
     const retryDelay = 2000; // 2 seconds
 
     for (let i = 0; i < maxRetries; i++) {
-      const tempSubDetails = await razorpay.subscriptions.fetch(subscriptionId);
+      const tempSubDetails = await getRazorpayClient().subscriptions.fetch(subscriptionId);
       const validStatuses = ["active", "completed"];
 
       console.log(
@@ -349,7 +365,7 @@ export async function cancelRazorpaySubscription(): Promise<{
     console.log(
       `[CancelSub] Sending cancellation request to Razorpay for subscription ${subData.id}`
     );
-    const cancelledSubscription = await razorpay.subscriptions.cancel(
+    const cancelledSubscription = await getRazorpayClient().subscriptions.cancel(
       subData.id,
       true
     );

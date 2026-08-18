@@ -167,7 +167,6 @@ export function UrlShortenerForm() {
               required
               type="url"
             />
-            <input type="hidden" name="userId" value={currentUser?.uid ?? ""} />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">

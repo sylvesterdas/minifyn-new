@@ -98,7 +98,6 @@ export async function POST(req: NextRequest) {
 
     const event = JSON.parse(body);
     const eventType = event.event;
-    const payloadEntity = event.payload.subscription.entity;
 
     // Handle all subscription-related events
     const relevantEvents = [
@@ -109,7 +108,10 @@ export async function POST(req: NextRequest) {
     ];
 
     if (relevantEvents.includes(eventType)) {
-      await handleSubscriptionEvent(payloadEntity, eventType);
+      const payloadEntity = event.payload?.subscription?.entity;
+      if (payloadEntity) {
+        await handleSubscriptionEvent(payloadEntity, eventType);
+      }
     }
 
     return NextResponse.json({ status: "ok" });
