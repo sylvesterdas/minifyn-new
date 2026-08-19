@@ -7,14 +7,24 @@ export async function GET(
   request: NextRequest,
   props: { params: Promise<{ slug: string }> }
 ) {
-  const { slug } = await props.params;
+  const { slug: rawSlug } = await props.params;
 
-  if (!slug) {
+  if (!rawSlug) {
     return NextResponse.redirect(new URL("/not-found", request.url));
+  }
+
+  // Support link inspection preview via '+' suffix (e.g. mnfy.in/abc+ or mnfy.in/abc%2B)
+  const isInfoRequest = rawSlug.endsWith("+") || rawSlug.endsWith("%2B");
+  const slug = isInfoRequest ? rawSlug.replace(/\+$/, "").replace(/%2B$/, "") : rawSlug;
+
+  if (isInfoRequest) {
+    const infoUrl = new URL(`/info/${slug}`, request.url);
+    return NextResponse.redirect(infoUrl, 307);
   }
 
   try {
     const link = await getLinkBySlug(slug);
+
 
     if (!link || !link.longUrl) {
       return NextResponse.redirect(new URL("/not-found", request.url));

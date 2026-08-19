@@ -9,7 +9,7 @@ import UAParser from "ua-parser-js";
 
 import type { UpdateProfileResult } from "@/types/dashboard";
 
-export interface UserLink extends Omit<Link, "seo" | "expiresAt" | "userId"> {}
+export interface UserLink extends Omit<Link, "seo" | "userId"> {}
 
 export async function getUserLinks(limit?: number): Promise<UserLink[]> {
   const { user } = await validateRequest();
@@ -34,6 +34,7 @@ export async function getUserLinks(limit?: number): Promise<UserLink[]> {
           id,
           longUrl: link.longUrl,
           createdAt: link.createdAt,
+          expiresAt: link.expiresAt ?? -1,
           clickCount: link.clickCount || 0,
           title: link.title,
           description: link.description,
@@ -41,6 +42,7 @@ export async function getUserLinks(limit?: number): Promise<UserLink[]> {
         };
       })
       .sort((a, b) => b.createdAt - a.createdAt); // Sort by most recent
+
 
     if (limit) {
       userLinks = userLinks.slice(0, limit);

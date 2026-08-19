@@ -83,12 +83,41 @@ export const columns: ColumnDef<UserLink>[] = [
     header: 'Link',
     cell: ({ row }) => {
       const link = row.original;
+      const isPermanent = link.expiresAt === -1 || link.plan === 'pro';
+      const daysLeft = !isPermanent && link.expiresAt
+        ? Math.max(0, Math.ceil((link.expiresAt - Date.now()) / (1000 * 60 * 60 * 24)))
+        : null;
+
       return (
-        <div className="font-medium">
-            <a href={`https://mnfy.in/${link.id}`} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline text-primary inline-flex items-center gap-1">mnfy.in/{link.id} <ExternalLink className="h-3 w-3" /></a>
-            <p className="text-sm text-muted-foreground truncate max-w-[200px] md:max-w-md">
+        <div className="font-medium space-y-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href={`https://mnfy.in/${link.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium hover:underline text-primary inline-flex items-center gap-1 font-mono text-sm"
+            >
+              mnfy.in/{link.id} <ExternalLink className="h-3 w-3" />
+            </a>
+            {isPermanent ? (
+              <Badge variant="outline" className="text-[10px] py-0 px-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-medium">
+                Permanent
+              </Badge>
+            ) : daysLeft !== null && daysLeft > 0 ? (
+              <Link href="/dashboard/settings/billing" className="inline-flex">
+                <Badge variant="outline" className="text-[10px] py-0 px-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 hover:bg-amber-500/20 transition-colors font-medium cursor-pointer">
+                  Expires in {daysLeft}d • Upgrade
+                </Badge>
+              </Link>
+            ) : (
+              <Badge variant="destructive" className="text-[10px] py-0 px-1.5">
+                Expired
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground truncate max-w-[200px] md:max-w-md">
             {link.longUrl}
-            </p>
+          </p>
         </div>
       );
     },

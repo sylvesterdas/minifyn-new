@@ -17,6 +17,7 @@ const freeFeatures = [
   { text: 'Links Expire in 60 Days', included: true },
   { text: 'Basic Clicks (7-day history)', included: true },
   { text: 'Developer API Access', included: true },
+  { text: '100% Ad-Free Experience', included: false },
   { text: 'Advanced Analytics', included: false },
   { text: 'Links Never Expire', included: false },
 ];
@@ -24,10 +25,12 @@ const freeFeatures = [
 const proFeatures = [
   { text: '100 Links / Day', included: true },
   { text: 'Links Never Expire', included: true },
+  { text: '100% Ad-Free Clean UI', included: true },
   { text: 'Advanced (Geo & Referrers, 1-year history)', included: true },
   { text: 'Developer API Access', included: true },
   { text: 'Custom Slugs (Coming Soon)', included: true },
 ];
+
 
 function FeatureList({ features }: { features: { text: string; included: boolean }[] }) {
   return (
