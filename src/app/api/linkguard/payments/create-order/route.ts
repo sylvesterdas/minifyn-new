@@ -4,10 +4,10 @@ import { isAllowedCountry, resolveCountryFromRequest } from "@/lib/geo";
 export const runtime = "nodejs";
 
 const PAYMENT_MODE = (process.env.LINKGUARD_PAYMENT_MODE || "live").toLowerCase();
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "";
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "";
-const RAZORPAY_TEST_KEY_ID = process.env.RAZORPAY_TEST_KEY_ID || "";
-const RAZORPAY_TEST_KEY_SECRET = process.env.RAZORPAY_TEST_KEY_SECRET || "";
+const RAZORPAY_KEY_ID =
+  process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_TEST_KEY_ID || "";
+const RAZORPAY_KEY_SECRET =
+  process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_TEST_KEY_SECRET || "";
 const PRO_AMOUNT_PAISE = Number(process.env.LINKGUARD_PRO_AMOUNT_PAISE || 14900);
 const PRODUCT_CODE = "linkguard_pro_one_time";
 
@@ -117,13 +117,6 @@ async function parseBody(
 }
 
 function resolveRazorpayCredentials(): { keyId: string; keySecret: string } {
-  const useTest = PAYMENT_MODE === "test";
-  if (useTest) {
-    return {
-      keyId: RAZORPAY_TEST_KEY_ID,
-      keySecret: RAZORPAY_TEST_KEY_SECRET,
-    };
-  }
   return {
     keyId: RAZORPAY_KEY_ID,
     keySecret: RAZORPAY_KEY_SECRET,

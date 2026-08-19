@@ -4,10 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 
 const PAYMENT_MODE = (process.env.LINKGUARD_PAYMENT_MODE || "live").toLowerCase();
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "";
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "";
-const RAZORPAY_TEST_KEY_ID = process.env.RAZORPAY_TEST_KEY_ID || "";
-const RAZORPAY_TEST_KEY_SECRET = process.env.RAZORPAY_TEST_KEY_SECRET || "";
+const RAZORPAY_KEY_ID =
+  process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_TEST_KEY_ID || "";
+const RAZORPAY_KEY_SECRET =
+  process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_TEST_KEY_SECRET || "";
 const RECOVERY_SIGNING_SECRET = process.env.LINKGUARD_RECOVERY_SIGNING_SECRET || "";
 const ENTITLEMENT_SIGNING_SECRET = process.env.LINKGUARD_ENTITLEMENT_SIGNING_SECRET || "";
 const PRODUCT_CODE = "linkguard_pro_one_time";
@@ -114,13 +114,6 @@ async function parseBody(
 }
 
 function resolveRazorpayCredentials(): { keyId: string; keySecret: string } {
-  const useTest = PAYMENT_MODE === "test";
-  if (useTest) {
-    return {
-      keyId: RAZORPAY_TEST_KEY_ID,
-      keySecret: RAZORPAY_TEST_KEY_SECRET,
-    };
-  }
   return {
     keyId: RAZORPAY_KEY_ID,
     keySecret: RAZORPAY_KEY_SECRET,

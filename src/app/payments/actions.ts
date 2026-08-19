@@ -9,17 +9,11 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { isAllowedCountry, resolveCountryFromRequest } from "@/lib/geo";
 
-// Determine which set of keys and plans to use based on the environment
-const isProduction = process.env.NODE_ENV === "production";
-
 function getRazorpayCredentials() {
-  const keyId = isProduction
-    ? process.env.RAZORPAY_KEY_ID
-    : process.env.RAZORPAY_TEST_KEY_ID;
-
-  const keySecret = isProduction
-    ? process.env.RAZORPAY_KEY_SECRET
-    : process.env.RAZORPAY_TEST_KEY_SECRET;
+  const keyId =
+    process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_TEST_KEY_ID;
+  const keySecret =
+    process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_TEST_KEY_SECRET;
 
   return { keyId, keySecret };
 }
@@ -37,14 +31,13 @@ function getRazorpayClient(): Razorpay {
   });
 }
 
-// These IDs would be created on the Razorpay Dashboard for both test and live modes
 const PLAN_IDS = {
-  monthly: isProduction
-    ? process.env.RAZORPAY_MONTHLY_PLAN_ID
-    : process.env.RAZORPAY_TEST_MONTHLY_PLAN_ID,
-  yearly: isProduction
-    ? process.env.RAZORPAY_YEARLY_PLAN_ID
-    : process.env.RAZORPAY_TEST_YEARLY_PLAN_ID,
+  monthly:
+    process.env.RAZORPAY_MONTHLY_PLAN_ID ||
+    process.env.RAZORPAY_TEST_MONTHLY_PLAN_ID,
+  yearly:
+    process.env.RAZORPAY_YEARLY_PLAN_ID ||
+    process.env.RAZORPAY_TEST_YEARLY_PLAN_ID,
 };
 
 interface CreateSubscriptionResponse {

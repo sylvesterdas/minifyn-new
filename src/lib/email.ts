@@ -2,60 +2,29 @@
 
 import nodemailer from "nodemailer";
 
-const {
-  SMTP_HOST,
-  SMTP_PORT,
-  SMTP_USER,
-  SMTP_PASS,
-  SMTP_FROM,
-  MAILTRAP_HOST,
-  MAILTRAP_PORT,
-  MAILTRAP_USER,
-  MAILTRAP_PASS,
-} = process.env;
-
-const isProduction = process.env.NODE_ENV === "production";
-
-const isProdEmailConfigured =
-  SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS && SMTP_FROM;
-const isDevEmailConfigured =
-  MAILTRAP_HOST && MAILTRAP_PORT && MAILTRAP_USER && MAILTRAP_PASS;
+const host = process.env.SMTP_HOST || process.env.MAILTRAP_HOST;
+const portStr = process.env.SMTP_PORT || process.env.MAILTRAP_PORT;
+const user = process.env.SMTP_USER || process.env.MAILTRAP_USER;
+const pass = process.env.SMTP_PASS || process.env.MAILTRAP_PASS;
+const from = process.env.SMTP_FROM || "MiniFyn <noreply@minifyn.com>";
 
 let transporter: nodemailer.Transporter | null = null;
 
-if (isProduction) {
-  if (isProdEmailConfigured) {
-    transporter = nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: parseInt(SMTP_PORT!, 10),
-      secure: parseInt(SMTP_PORT!, 10) === 465,
-      auth: {
-        user: SMTP_USER,
-        pass: SMTP_PASS,
-      },
-    });
-  } else {
-    console.error(
-      "CRITICAL: SMTP service is not configured in a production environment. Emails will not be sent."
-    );
-  }
+if (host && portStr && user && pass) {
+  const port = parseInt(portStr, 10);
+  transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: {
+      user,
+      pass,
+    },
+  });
 } else {
-  // Development environment
-  if (isDevEmailConfigured) {
-    transporter = nodemailer.createTransport({
-      host: MAILTRAP_HOST,
-      port: parseInt(MAILTRAP_PORT!, 10),
-      auth: {
-        user: MAILTRAP_USER,
-        pass: MAILTRAP_PASS,
-      },
-    });
-    console.log("Using Mailtrap for development email sending.");
-  } else {
-    console.log(
-      "Mailtrap not configured. Email sending will be logged to the console."
-    );
-  }
+  console.log(
+    "SMTP service is not configured. Email sending will be logged to the console."
+  );
 }
 
 interface EmailOptions {
@@ -71,8 +40,10 @@ export async function sendEmail({
 }: EmailOptions): Promise<
   { success: true } | { success: false; error: string }
 > {
+  const isProduction = process.env.NODE_ENV === "production";
+
   // --- DEVELOPMENT CONSOLE FALLBACK ---
-  // If in development and no transporter is configured (i.e., Mailtrap vars are missing),
+  // If in development and no transporter is configured,
   // log the email to the console instead of sending it.
   if (!isProduction && !transporter) {
     console.log("--- DEVELOPMENT EMAIL (CONSOLE FALLBACK) ---");
@@ -98,7 +69,7 @@ export async function sendEmail({
 
   try {
     const info = await transporter.sendMail({
-      from: isProduction ? SMTP_FROM : '"MiniFyn Dev" <dev@minifyn.com>',
+      from,
       to,
       subject,
       html,
