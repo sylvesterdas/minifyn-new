@@ -14,16 +14,27 @@ export async function GET(
   }
 
   // Support link inspection preview via '+' suffix (e.g. mnfy.in/abc+ or mnfy.in/abc%2B)
-  const isInfoRequest = rawSlug.endsWith("+") || rawSlug.endsWith("%2B");
-  const slug = isInfoRequest ? rawSlug.replace(/\+$/, "").replace(/%2B$/, "") : rawSlug;
+  const pathname = request.nextUrl?.pathname || "";
+  const isInfoRequest =
+    pathname.endsWith("+") ||
+    pathname.endsWith("%2B") ||
+    rawSlug.endsWith("+") ||
+    rawSlug.endsWith("%2B") ||
+    rawSlug.endsWith(" ");
 
-  if (isInfoRequest) {
+  const slug = isInfoRequest
+    ? (rawSlug.trim().replace(/\+$/, "").replace(/%2B$/, "") || pathname.replace(/^\//, "").replace(/\+$/, "").replace(/%2B$/, "").trim())
+    : rawSlug.trim();
+
+  if (isInfoRequest && slug) {
     const infoUrl = new URL(`/info/${slug}`, request.url);
     return NextResponse.redirect(infoUrl, 307);
   }
 
   try {
     const link = await getLinkBySlug(slug);
+
+
 
 
     if (!link || !link.longUrl) {
