@@ -1,17 +1,20 @@
 import { execSync } from "child_process";
 
 const obsoleteVars = [
-  "RAZORPAY_TEST_KEY_ID",
-  "RAZORPAY_TEST_KEY_SECRET",
-  "RAZORPAY_TEST_MONTHLY_PLAN_ID",
-  "RAZORPAY_TEST_YEARLY_PLAN_ID",
-  "MAILTRAP_HOST",
-  "MAILTRAP_PORT",
-  "MAILTRAP_USER",
-  "MAILTRAP_PASS",
+  "HASHNODE_ACCESS_TOKEN",
+  "NEXT_HASHNODE_ACCESS_TOKEN",
+  "HASHNODE_GQL_ENDPOINT",
+  "HASHNODE_HOST",
+  "HASHNODE_PUBLICATION_ID",
+  "SPONSORSHIP_ADMIN_EMAILS",
+  "SPONSORSHIP_PUBLIC_ORIGIN",
+  "SPONSORSHIP_SESSION_SECRET",
+  "OG_IMAGE_SECRET",
+  "GEMINI_API_KEY",
+  "VERCEL_OIDC_TOKEN",
 ];
 
-console.log("🧹 Removing obsolete environment variables from Vercel...\n");
+console.log("🧹 Removing 11 unused/obsolete environment variables from Vercel...\n");
 
 for (const varName of obsoleteVars) {
   console.log(`🗑️ Removing ${varName} from Vercel...`);
@@ -27,4 +30,4 @@ for (const varName of obsoleteVars) {
   }
 }
 
-console.log("\n✨ Cleanup of obsolete variables completed!");
+console.log("\n✨ Cleanup of 11 obsolete variables completed!");
