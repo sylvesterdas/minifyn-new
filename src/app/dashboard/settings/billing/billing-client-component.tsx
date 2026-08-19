@@ -137,7 +137,7 @@ export function BillingClientComponent({ user, initialSubscription, country }: B
             }
             
             const options = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                key: subscriptionResult.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
                 subscription_id: subscriptionResult.subscriptionId,
                 name: "MiniFyn Pro",
                 description: planType === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',

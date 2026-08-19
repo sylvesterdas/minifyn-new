@@ -51,6 +51,7 @@ interface CreateSubscriptionResponse {
   subscriptionId: string;
   amount: string | number;
   currency: string;
+  keyId: string;
 }
 
 export async function createRazorpaySubscription(
@@ -161,6 +162,7 @@ export async function createRazorpaySubscription(
       subscriptionId: subscription.id,
       amount: planDetails.item.amount,
       currency: planDetails.item.currency,
+      keyId,
     };
   } catch (error) {
     console.error(

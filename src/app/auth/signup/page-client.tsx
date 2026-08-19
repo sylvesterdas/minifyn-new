@@ -107,7 +107,7 @@ export function SignUpPageComponent() {
             }
             
             const options = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                key: subscriptionResult.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
                 subscription_id: subscriptionResult.subscriptionId,
                 name: "MiniFyn Pro",
                 description: interval === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription',
