@@ -40,7 +40,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 
-export default function PricingPage() {
+import { headers } from 'next/headers';
+import { resolveCountryFromRequest } from '@/lib/geo';
+
+export default async function PricingPage() {
+  const hdrs = await headers();
+  const ip = hdrs.get('x-forwarded-for') ?? hdrs.get('remote-addr');
+  const country = await resolveCountryFromRequest({ headers: hdrs, ip });
+
   const jsonLd: WithContext<OfferCatalog> = {
     '@context': 'https://schema.org',
     '@type': 'OfferCatalog',
@@ -83,7 +90,7 @@ export default function PricingPage() {
               Whether you're just starting out or scaling up, we have a plan that fits your needs.
             </p>
           </div>
-          <PricingPageClient />
+          <PricingPageClient initialCountry={country} />
         </div>
     </>
   );

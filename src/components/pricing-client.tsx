@@ -48,9 +48,11 @@ function FeatureList({ features }: { features: { text: string; included: boolean
   );
 }
 
-export function PricingPageClient() {
+export function PricingPageClient({ initialCountry }: { initialCountry?: string | null }) {
   const { user, isLoading: isAuthLoading } = useAuth();
-  const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
+  const [currency, setCurrency] = useState<'INR' | 'USD'>(
+    initialCountry && initialCountry !== 'IN' ? 'USD' : 'INR'
+  );
   const [interval, setInterval] = useState<'monthly' | 'yearly'>('monthly');
   const router = useRouter();
 
