@@ -25,12 +25,13 @@ export async function resolveCountryFromRequest(params: {
 }
 
 export function isAllowedCountry(country: string | null): boolean {
-  const allowRaw = (process.env.LINKGUARD_ALLOWED_COUNTRY || "IN").trim();
+  const allowRaw = (process.env.LINKGUARD_ALLOWED_COUNTRY || "*").trim();
+  if (allowRaw === "*" || !allowRaw) return true;
   const allowList = allowRaw
     .split(",")
     .map((entry) => entry.trim().toUpperCase())
     .filter(Boolean);
 
-  if (!country) return false;
+  if (!country) return true;
   return allowList.includes(country.toUpperCase());
 }

@@ -51,13 +51,6 @@ export async function createRazorpaySubscription(
   planType: "monthly" | "yearly",
   idToken?: string
 ): Promise<{ error: string } | CreateSubscriptionResponse> {
-  const hdrs = await headers();
-  const ip = hdrs.get("x-forwarded-for") ?? hdrs.get("remote-addr");
-  const country = await resolveCountryFromRequest({ headers: hdrs, ip });
-  if (!isAllowedCountry(country)) {
-    return { error: "Payments are currently available in India only." };
-  }
-
   let userData: { uid: string; email?: string; name?: string } | null = null;
   console.log("[Payment Action] Starting subscription creation...");
 
