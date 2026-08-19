@@ -24,11 +24,22 @@ export async function shortenUrl(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  // Honeypot check for automated bots
+  const honeypot = formData.get("bot_field_hp");
+  if (honeypot && typeof honeypot === "string" && honeypot.trim().length > 0) {
+    return {
+      success: false,
+      message: "Invalid submission.",
+      shortUrl: "",
+    };
+  }
+
   // Trigger maintenance task in the background (fire and forget)
   triggerMaintenance();
 
   // Securely resolve user identity on the server instead of trusting client form data
   const { user } = await validateRequest();
+
 
   let userId: string;
   let plan: UserPlan;

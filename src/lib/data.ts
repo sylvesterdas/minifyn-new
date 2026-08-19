@@ -155,6 +155,61 @@ export const incrementUsage = async (userId: string, isApiCall: boolean = false)
 };
 
 
+export function encodeRtdbKey(key: string): string {
+    if (!key) return 'unknown';
+    return key
+        .replace(/%/g, '%25')
+        .replace(/\./g, '%2E')
+        .replace(/#/g, '%23')
+        .replace(/\$/g, '%24')
+        .replace(/\[/g, '%5B')
+        .replace(/\]/g, '%5D')
+        .replace(/\//g, '%2F');
+}
+
+export function decodeRtdbKey(key: string): string {
+    if (!key) return '';
+    return key
+        .replace(/%2F/g, '/')
+        .replace(/%5D/g, ']')
+        .replace(/%5B/g, '[')
+        .replace(/%24/g, '$')
+        .replace(/%23/g, '#')
+        .replace(/%2E/g, '.')
+        .replace(/%25/g, '%');
+}
+
+export function parseClientInfo(ua: string | null | undefined): { browser: string; platform: string } {
+    if (!ua || ua === 'unknown') return { browser: 'Direct / Unknown', platform: 'Unknown' };
+    
+    let platform = 'Other';
+    if (/iPhone|iPad|iPod/i.test(ua)) platform = 'iOS';
+    else if (/Android/i.test(ua)) platform = 'Android';
+    else if (/Macintosh|Mac OS X/i.test(ua)) platform = 'macOS';
+    else if (/Windows NT|Windows/i.test(ua)) platform = 'Windows';
+    else if (/Linux/i.test(ua)) platform = 'Linux';
+    
+    let browser = 'Other';
+    if (/Edg\//i.test(ua)) browser = 'Edge';
+    else if (/Chrome|CriOS/i.test(ua)) browser = 'Chrome';
+    else if (/Safari/i.test(ua) && !/Chrome|CriOS/i.test(ua)) browser = 'Safari';
+    else if (/Firefox|FxiOS/i.test(ua)) browser = 'Firefox';
+    else if (/Opera|OPR\//i.test(ua)) browser = 'Opera';
+    else if (/SamsungBrowser/i.test(ua)) browser = 'Samsung Internet';
+
+    return { browser, platform };
+}
+
+export function getCleanReferrer(ref: string | null | undefined): string {
+    if (!ref || ref === 'direct' || ref === 'unknown') return 'Direct';
+    try {
+        const url = new URL(ref);
+        return url.hostname.replace(/^www\./, '') || 'Direct';
+    } catch {
+        return ref.replace(/^https?:\/\//, '').split('/')[0] || 'Direct';
+    }
+}
+
 const generateShortCode = (length = 6): string => {
     const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
@@ -206,24 +261,14 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
     const primaryTitle = fetchedMetadata.title || fetchedMetadata.ogTitle || fetchedMetadata.twitterTitle || "Link via mnfy.in";
     const primaryDescription = fetchedMetadata.description || fetchedMetadata.ogDescription || fetchedMetadata.twitterDescription || "A shortened link created with MiniFyn.";
 
-    const seoData: Metadata = {
-        title: primaryTitle,
-        description: primaryDescription,
-        ogTitle: fetchedMetadata.ogTitle || '',
-        ogDescription: fetchedMetadata.ogDescription || '',
-        ogImage: fetchedMetadata.ogImage || '',
-        ogType: fetchedMetadata.ogType || '',
-        ogUrl: fetchedMetadata.ogUrl || '',
-        twitterCard: fetchedMetadata.twitterCard || '',
-        twitterTitle: fetchedMetadata.twitterTitle || '',
-        twitterDescription: fetchedMetadata.twitterDescription || '',
-        twitterImage: fetchedMetadata.twitterImage || '',
-        canonical: fetchedMetadata.canonical || '',
-        articleAuthor: fetchedMetadata.articleAuthor || '',
-        articlePublishedTime: fetchedMetadata.articlePublishedTime || '',
-    };
-
-    console.log('[createShortLink] SEO data to be stored:', seoData);
+    // Strip empty / redundant fields to keep DB footprint minimal
+    const cleanSeo: Record<string, string> = {};
+    if (fetchedMetadata.ogImage) cleanSeo.ogImage = fetchedMetadata.ogImage;
+    if (fetchedMetadata.twitterImage) cleanSeo.twitterImage = fetchedMetadata.twitterImage;
+    if (fetchedMetadata.ogTitle && fetchedMetadata.ogTitle !== primaryTitle) cleanSeo.ogTitle = fetchedMetadata.ogTitle;
+    if (fetchedMetadata.ogDescription && fetchedMetadata.ogDescription !== primaryDescription) cleanSeo.ogDescription = fetchedMetadata.ogDescription;
+    if (fetchedMetadata.ogType) cleanSeo.ogType = fetchedMetadata.ogType;
+    if (fetchedMetadata.canonical) cleanSeo.canonical = fetchedMetadata.canonical;
 
     const newLinkData: any = {
         longUrl,
@@ -233,9 +278,12 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         clickCount: 0,
         title: primaryTitle,
         description: primaryDescription,
-        seo: seoData,
         plan: plan,
     };
+
+    if (Object.keys(cleanSeo).length > 0) {
+        newLinkData.seo = cleanSeo;
+    }
 
     if (fetchedMetadata.ogType === 'article') {
         if (fetchedMetadata.articleAuthor) {
@@ -246,10 +294,9 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
         }
     }
 
-
     await db.ref(`urls/${slug}`).set(newLinkData);
     
-    return { ...newLinkData, id: slug };
+    return { ...newLinkData, seo: cleanSeo as Metadata, id: slug };
 }
 
 export const getLinkBySlug = async (slug: string): Promise<Link | null> => {
@@ -272,12 +319,12 @@ export const getLinkBySlug = async (slug: string): Promise<Link | null> => {
         createdAt: linkData.createdAt,
         expiresAt: linkData.expiresAt,
         userId: linkData.userId,
-        clickCount: linkData.clickCount,
+        clickCount: linkData.clickCount || 0,
         title: linkData.title || linkData.seo?.title,
         description: linkData.description || linkData.seo?.description,
         ogImage: linkData.seo?.ogImage,
         twitterImage: linkData.seo?.twitterImage,
-        seo: linkData.seo,
+        seo: linkData.seo || {},
         plan: linkData.plan || 'anonymous',
         articleAuthor: linkData.articleAuthor,
         articlePublishedTime: linkData.articlePublishedTime,
@@ -318,26 +365,57 @@ export const validateApiKey = async (apiKey: string): Promise<UserRecord | null>
     }
 }
 
-interface ClickData {
-    userAgent: string;
-    ip: string;
-    referer: string;
-    language: string;
+export interface ClickData {
+    userAgent?: string;
+    ip?: string;
+    referer?: string;
+    language?: string;
+    country?: string | null;
+    browser?: string;
+    platform?: string;
 }
 
 export const recordClick = async (slug: string, clickData: ClickData): Promise<void> => {
-    const linkRef = db.ref(`urls/${slug}`);
-    
     try {
-        // Increment click count atomically
-        await linkRef.child('clickCount').transaction((currentValue) => (currentValue || 0) + 1);
+        const today = format(new Date(), 'yyyy-MM-dd');
+        const linkRef = db.ref(`urls/${slug}`);
+        const summaryRef = db.ref(`analytics_summary/${slug}/${today}`);
 
-        // Add detailed analytics data
-        const analyticsRef = db.ref(`analytics/${slug}`).push();
-        await analyticsRef.set({
-            ...clickData,
-            timestamp: Date.now(),
-        });
+        const { browser, platform } = (clickData.browser && clickData.platform)
+            ? { browser: clickData.browser, platform: clickData.platform }
+            : parseClientInfo(clickData.userAgent);
+
+        const country = clickData.country || (clickData.ip ? await getCountryFromIP(clickData.ip) : null) || 'Unknown';
+        const referrer = getCleanReferrer(clickData.referer);
+
+        const encodedReferrer = encodeRtdbKey(referrer);
+        const encodedBrowser = encodeRtdbKey(browser);
+        const encodedPlatform = encodeRtdbKey(platform);
+        const encodedCountry = encodeRtdbKey(country);
+
+        // Update overall clickCount and daily summary bucket concurrently
+        await Promise.all([
+            linkRef.child('clickCount').transaction((count) => (count || 0) + 1),
+            summaryRef.transaction((current) => {
+                const data = current || {
+                    clicks: 0,
+                    referrers: {},
+                    browsers: {},
+                    platforms: {},
+                    countries: {},
+                };
+                data.clicks = (data.clicks || 0) + 1;
+                data.referrers = data.referrers || {};
+                data.referrers[encodedReferrer] = (data.referrers[encodedReferrer] || 0) + 1;
+                data.browsers = data.browsers || {};
+                data.browsers[encodedBrowser] = (data.browsers[encodedBrowser] || 0) + 1;
+                data.platforms = data.platforms || {};
+                data.platforms[encodedPlatform] = (data.platforms[encodedPlatform] || 0) + 1;
+                data.countries = data.countries || {};
+                data.countries[encodedCountry] = (data.countries[encodedCountry] || 0) + 1;
+                return data;
+            }),
+        ]);
     } catch (error) {
         console.error(`Failed to record click for slug ${slug}:`, error);
     }
@@ -358,3 +436,4 @@ export async function hasCompletedOnboarding(uid: string): Promise<boolean> {
         return true;
     }
 }
+

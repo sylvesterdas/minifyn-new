@@ -116,6 +116,8 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   }
 }
 
+import { decodeRtdbKey } from "@/lib/data";
+
 interface ClickEvent {
   timestamp: number;
   referer: string;
@@ -148,47 +150,43 @@ function parseUserAgent(ua: string | null): {
   };
 }
 
-async function getClickEvents(
+async function getLegacyClickEvents(
   dateRange: { from: Date; to: Date },
   linkId?: string
 ): Promise<ClickEvent[]> {
   const { user } = await validateRequest();
   if (!user || !linkId) return [];
 
-  let linkIdsToFetch: string[] = [linkId];
-
-  // Firebase Realtime DB doesn't support complex 'OR' queries across different parents efficiently.
-  // So we fetch data for each linkId within the date range.
-  const clickPromises = linkIdsToFetch.map((id) =>
-    db
-      .ref(`analytics/${id}`)
+  try {
+    const snapshot = await db
+      .ref(`analytics/${linkId}`)
       .orderByChild("timestamp")
       .startAt(dateRange.from.getTime())
       .endAt(dateRange.to.getTime())
-      .once("value")
-  );
+      .once("value");
 
-  const snapshots = await Promise.all(clickPromises);
-  const allClicks: ClickEvent[] = [];
+    if (!snapshot.exists()) return [];
 
-  for (const snapshot of snapshots) {
-    if (snapshot.exists()) {
-      const clicks = snapshot.val();
-      for (const click of Object.values(clicks)) {
-        const userAgentInfo = parseUserAgent((click as any).userAgent);
-        const country = await getCountryFromIP((click as any).ip);
-        allClicks.push({
-          timestamp: (click as any).timestamp,
-          referer: getHostname((click as any).referer),
-          platform: userAgentInfo.platform,
-          browser: userAgentInfo.browser,
-          country: country,
-        });
-      }
+    const clicks = snapshot.val();
+    const allClicks: ClickEvent[] = [];
+
+    for (const click of Object.values(clicks)) {
+      const userAgentInfo = parseUserAgent((click as any).userAgent);
+      const country = await getCountryFromIP((click as any).ip);
+      allClicks.push({
+        timestamp: (click as any).timestamp,
+        referer: getHostname((click as any).referer),
+        platform: userAgentInfo.platform,
+        browser: userAgentInfo.browser,
+        country: country,
+      });
     }
-  }
 
-  return allClicks;
+    return allClicks;
+  } catch (err) {
+    console.error("Error fetching legacy click events:", err);
+    return [];
+  }
 }
 
 export interface AnalyticsSummary {
@@ -274,9 +272,21 @@ export async function getAnalyticsSummary(
     ? endOfDay(new Date(dateRange.to))
     : endOfDay(new Date());
 
+  // Initialize day map for the entire range
+  const clicksByDayMap = new Map<string, number>();
+  const dateToKeyMap = new Map<string, string>(); // 'yyyy-MM-dd' -> 'MMM d'
+  let currentDate = fromDate;
+  while (currentDate <= toDate) {
+    const displayKey = format(currentDate, "MMM d");
+    const isoKey = format(currentDate, "yyyy-MM-dd");
+    clicksByDayMap.set(displayKey, 0);
+    dateToKeyMap.set(isoKey, displayKey);
+    currentDate = addDays(currentDate, 1);
+  }
+
   if (!linkId) {
     return {
-      clicksByDay: [],
+      clicksByDay: Array.from(clicksByDayMap, ([date, clicks]) => ({ date, clicks })),
       referrers: [],
       platforms: [],
       browsers: [],
@@ -285,117 +295,137 @@ export async function getAnalyticsSummary(
     };
   }
 
-  const clicks = await getClickEvents({ from: fromDate, to: toDate }, linkId);
-
-  // Clicks by Day
-  const clicksByDayMap = new Map<string, number>();
-  let currentDate = fromDate;
-  while (currentDate <= toDate) {
-    const dateKey = format(currentDate, "MMM d");
-    clicksByDayMap.set(dateKey, 0);
-    currentDate = addDays(currentDate, 1);
-  }
-  clicks.forEach((click) => {
-    const dateKey = format(new Date(click.timestamp), "MMM d");
-    if (clicksByDayMap.has(dateKey)) {
-      clicksByDayMap.set(dateKey, (clicksByDayMap.get(dateKey) || 0) + 1);
-    }
-  });
-  const clicksByDay = Array.from(clicksByDayMap, ([date, clicks]) => ({
-    date,
-    clicks,
-  }));
-
-  const aggregate = (key: keyof Omit<ClickEvent, "timestamp">) => {
-    const map = new Map<string, number>();
-    clicks.forEach((click) => {
-      const value = click[key];
-      if (typeof value === "string" && value) {
-        map.set(value, (map.get(value) || 0) + 1);
-      }
-    });
-    return Array.from(map, ([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 7);
-  };
-
-  return {
-    clicksByDay,
-    referrers: aggregate("referer"),
-    platforms: aggregate("platform"),
-    browsers: aggregate("browser"),
-    countries: aggregate("country"),
-    totalClicks: clicks.length,
-  };
-}
-
-export async function generateApiKey(): Promise<{
-  key?: string;
-  error?: string;
-}> {
-  const { user } = await validateRequest();
-  if (!user) {
-    return { error: "Unauthorized" };
-  }
+  const fromDateStr = format(fromDate, "yyyy-MM-dd");
+  const toDateStr = format(toDate, "yyyy-MM-dd");
 
   try {
-    // Check if an API key already exists for the user
-    const existingKeySnapshot = await db
-      .ref(`apiKeys/${user.uid}`)
+    const summarySnap = await db
+      .ref(`analytics_summary/${linkId}`)
+      .orderByKey()
+      .startAt(fromDateStr)
+      .endAt(toDateStr)
       .once("value");
-    if (existingKeySnapshot.exists()) {
+
+    if (summarySnap.exists()) {
+      const summaryData = summarySnap.val();
+      let totalClicks = 0;
+
+      const referrersMap = new Map<string, number>();
+      const platformsMap = new Map<string, number>();
+      const browsersMap = new Map<string, number>();
+      const countriesMap = new Map<string, number>();
+
+      const mergeCounters = (target: Map<string, number>, source?: Record<string, number>) => {
+        if (!source) return;
+        for (const [key, count] of Object.entries(source)) {
+          if (typeof count === "number") {
+            const decoded = decodeRtdbKey(key) || "Direct";
+            target.set(decoded, (target.get(decoded) || 0) + count);
+          }
+        }
+      };
+
+      for (const [dayKey, dayData] of Object.entries(summaryData) as [string, any][]) {
+        const displayDate = dateToKeyMap.get(dayKey) || format(new Date(dayKey), "MMM d");
+        const dayClicks = typeof dayData.clicks === "number" ? dayData.clicks : 0;
+        
+        totalClicks += dayClicks;
+        if (clicksByDayMap.has(displayDate)) {
+          clicksByDayMap.set(displayDate, (clicksByDayMap.get(displayDate) || 0) + dayClicks);
+        }
+
+        mergeCounters(referrersMap, dayData.referrers);
+        mergeCounters(platformsMap, dayData.platforms);
+        mergeCounters(browsersMap, dayData.browsers);
+        mergeCounters(countriesMap, dayData.countries);
+      }
+
+      const toSortedList = (map: Map<string, number>) =>
+        Array.from(map, ([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 7);
+
       return {
-        error:
-          "An API key already exists for this user. Please revoke the existing key before generating a new one.",
+        clicksByDay: Array.from(clicksByDayMap, ([date, clicks]) => ({ date, clicks })),
+        referrers: toSortedList(referrersMap),
+        platforms: toSortedList(platformsMap),
+        browsers: toSortedList(browsersMap),
+        countries: toSortedList(countriesMap),
+        totalClicks,
       };
     }
 
-    // Generate a new API key (simple random string for demonstration)
-    const newKey = `mk_${
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15)
-    }`;
+    // Fallback to legacy raw click events for historical backward compatibility
+    const legacyClicks = await getLegacyClickEvents({ from: fromDate, to: toDate }, linkId);
+    if (legacyClicks.length > 0) {
+      legacyClicks.forEach((click) => {
+        const dateKey = format(new Date(click.timestamp), "MMM d");
+        if (clicksByDayMap.has(dateKey)) {
+          clicksByDayMap.set(dateKey, (clicksByDayMap.get(dateKey) || 0) + 1);
+        }
+      });
 
-    // Store the new key in the database
-    await db.ref(`apiKeys/${user.uid}`).set({
-      key: newKey,
-      createdAt: Date.now(),
-    });
+      const aggregateLegacy = (key: keyof Omit<ClickEvent, "timestamp">) => {
+        const map = new Map<string, number>();
+        legacyClicks.forEach((click) => {
+          const value = click[key];
+          if (typeof value === "string" && value) {
+            map.set(value, (map.get(value) || 0) + 1);
+          }
+        });
+        return Array.from(map, ([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 7);
+      };
 
-    return { key: newKey };
-  } catch (error: any) {
-    console.error("Error generating API key:", error);
-    return { error: error.message || "Failed to generate API key." };
+      return {
+        clicksByDay: Array.from(clicksByDayMap, ([date, clicks]) => ({ date, clicks })),
+        referrers: aggregateLegacy("referer"),
+        platforms: aggregateLegacy("platform"),
+        browsers: aggregateLegacy("browser"),
+        countries: aggregateLegacy("country"),
+        totalClicks: legacyClicks.length,
+      };
+    }
+
+    return {
+      clicksByDay: Array.from(clicksByDayMap, ([date, clicks]) => ({ date, clicks })),
+      referrers: [],
+      platforms: [],
+      browsers: [],
+      countries: [],
+      totalClicks: 0,
+    };
+  } catch (error) {
+    console.error(`Failed to fetch analytics summary for ${linkId}:`, error);
+    return {
+      clicksByDay: Array.from(clicksByDayMap, ([date, clicks]) => ({ date, clicks })),
+      referrers: [],
+      platforms: [],
+      browsers: [],
+      countries: [],
+      totalClicks: 0,
+    };
   }
 }
 
-export async function revokeApiKey(): Promise<{
-  success?: boolean;
-  error?: string;
-}> {
-  const { user } = await validateRequest();
-  if (!user) {
-    return { error: "Unauthorized" };
-  }
 
-  try {
-    await db.ref(`apiKeys/${user.uid}`).remove();
-    return { success: true };
-  } catch (error: any) {
-    console.error("Error revoking API key:", error);
-    return { error: error.message || "Failed to revoke API key." };
-  }
+import {
+  generateApiKey as generateKey,
+  revokeApiKey as revokeKey,
+  getApiKeyForUser as getKeyForUser,
+} from "@/app/dashboard/settings/actions";
+
+export async function generateApiKey(): Promise<{ key?: string; error?: string }> {
+  return generateKey();
+}
+
+export async function revokeApiKey(): Promise<{ success?: boolean; error?: string }> {
+  return revokeKey();
 }
 
 export async function getApiKeyForUser(userId: string): Promise<string | null> {
-  try {
-    const snapshot = await db.ref(`apiKeys/${userId}`).once("value");
-    if (snapshot.exists()) {
-      return snapshot.val().key;
-    }
-    return null;
-  } catch (error) {
-    console.error("Error fetching API key:", error);
-    return null;
-  }
+  return getKeyForUser(userId);
 }
+
+

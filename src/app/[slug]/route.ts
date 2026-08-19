@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getLinkBySlug, recordClick } from "@/lib/data";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   request: NextRequest,
   props: { params: Promise<{ slug: string }> }
@@ -18,14 +20,16 @@ export async function GET(
       return NextResponse.redirect(new URL("/not-found", request.url));
     }
 
+    // Extract headers efficiently
     const forwarded = request.headers.get("x-forwarded-for");
     const ip = forwarded ? forwarded.split(",")[0].trim() : request.headers.get("remote-addr") || "unknown";
     const userAgent = request.headers.get("user-agent") || "unknown";
     const referer = request.headers.get("referer") || "direct";
     const language = request.headers.get("accept-language") || "unknown";
-
+    // Zero-overhead edge geolocation provided by Vercel / Cloudflare
     const country = request.headers.get("x-vercel-ip-country") || request.headers.get("cf-ipcountry") || null;
 
+    // Fire and forget click recording to avoid blocking the redirect response
     recordClick(slug, {
       ip,
       userAgent,
@@ -33,7 +37,7 @@ export async function GET(
       language,
       country,
     }).catch((err) => {
-      console.error(`[Go Route] Failed to record click for ${slug}:`, err);
+      console.error(`[Redirect Route] Failed to record click for ${slug}:`, err);
     });
 
     let destinationUrl: URL;
@@ -54,8 +58,7 @@ export async function GET(
     response.headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
     return response;
   } catch (error) {
-    console.error(`[Go Route] Error resolving slug '${slug}':`, error);
+    console.error(`[Redirect Route] Error resolving slug '${slug}':`, error);
     return NextResponse.redirect(new URL("/not-found", request.url));
   }
 }
-

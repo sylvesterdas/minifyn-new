@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { getCountryFromIP } from "../ip-to-country";
 import { fetchMetadata } from "../scraper";
+import { urlSchema } from "../schema";
 
 describe("IP Geolocation - ipToLong & getCountryFromIP", () => {
   it("correctly identifies US for IPs >= 128.0.0.0 without signed integer overflow", async () => {
@@ -50,3 +51,40 @@ describe("Scraper SSRF Protection", () => {
     expect(ftpRes).toEqual({});
   });
 });
+
+describe("URL Schema Validation & Protocol Enforcement", () => {
+  it("accepts valid HTTP and HTTPS URLs", async () => {
+    const res1 = await urlSchema.safeParseAsync({ longUrl: "https://example.com/page" });
+    expect(res1.success).toBe(true);
+
+    const res2 = await urlSchema.safeParseAsync({ longUrl: "http://example.org/path?q=1" });
+    expect(res2.success).toBe(true);
+  });
+
+  it("rejects dangerous or non-HTTP protocols", async () => {
+    const jsRes = await urlSchema.safeParseAsync({ longUrl: "javascript:alert(1)" });
+    expect(jsRes.success).toBe(false);
+
+    const dataRes = await urlSchema.safeParseAsync({ longUrl: "data:text/html,<script>alert(1)</script>" });
+    expect(dataRes.success).toBe(false);
+
+    const fileRes = await urlSchema.safeParseAsync({ longUrl: "file:///etc/passwd" });
+    expect(fileRes.success).toBe(false);
+  });
+
+  it("rejects direct links to dangerous executable files", async () => {
+    const exeRes = await urlSchema.safeParseAsync({ longUrl: "https://example.com/downloads/setup.exe" });
+    expect(exeRes.success).toBe(false);
+
+    const apkRes = await urlSchema.safeParseAsync({ longUrl: "https://example.com/app.apk" });
+    expect(apkRes.success).toBe(false);
+
+    const batRes = await urlSchema.safeParseAsync({ longUrl: "https://example.com/run.bat" });
+    expect(batRes.success).toBe(false);
+
+    const msiRes = await urlSchema.safeParseAsync({ longUrl: "https://example.com/installer.msi" });
+    expect(msiRes.success).toBe(false);
+  });
+});
+
+

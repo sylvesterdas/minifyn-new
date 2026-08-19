@@ -157,6 +157,14 @@ export function UrlShortenerForm() {
         </CardDescription>
       </CardHeader>
       <form ref={formRef} action={formAction}>
+        <div className="opacity-0 absolute -left-[9999px] -top-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true" tabIndex={-1}>
+          <input
+            type="text"
+            name="bot_field_hp"
+            tabIndex={-1}
+            autoComplete="off"
+          />
+        </div>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="longUrl">URL to shorten</Label>
