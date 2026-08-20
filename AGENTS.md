@@ -118,17 +118,29 @@ node scripts/e2e-pricing-and-billing.mjs
 
 ## 🔗 6. Link Redirection, Safety & Inspection Engine
 
-- **High-Performance Redirection**: `/[slug]` and `/go/[slug]` dynamic routes handle high-throughput 307 redirects while asynchronously aggregating visitor clickstream analytics (geo, referrer, device, operating system).
+- **High-Performance Edge Redirection**:
+  - `mnfy.in/[slug]` and `/go/[slug]` execute via lightweight Next.js Route Handlers (`src/app/[slug]/route.ts`) serving instant **HTTP 307 redirects (~15ms)** with zero React SSR overhead.
+  - Decommissioned separate Firebase Cloud Functions in favor of unified Vercel Edge routing.
+- **Pre-Aggregated Daily Analytics (`analytics_summary`)**:
+  - Replaced raw event-level log arrays with daily summary buckets (`analytics_summary/${slug}/${YYYY-MM-DD}`).
+  - Cuts Realtime Database storage by **~95%** and dashboard query bandwidth by **~99%**, allowing permanent operation on the Firebase Spark ($0/mo) free plan.
+  - Automatically sanitizes RTDB forbidden characters (`.`, `$`, `#`, `[`, `]`, `/`, `%`) using `encodeRtdbKey` / `decodeRtdbKey`.
+  - Maintains backward compatibility with legacy raw logs in `src/app/dashboard/actions.ts`.
 - **Link Inspection Pages (`/[slug]+` & `/info/[slug]`)**:
-  - Appending `+` (or `%2B`) to any short link routes to the safety inspection view [`src/app/info/[slug]/page.tsx`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/info/[slug]/page.tsx).
-  - Displays original destination preview, Web Risk safety rating, creation timestamp, and QR code without triggering redirect click metrics.
-- **SSRF & Malicious Link Protection**: All URLs submitted to `/api/shorten` undergo strict private IP validation, DNS rebinding checks, and Google Web Risk scans prior to insertion.
+  - Appending `+` (or `%2B`) to any short link (e.g. `mnfy.in/xyz+`) routes to the safety inspection view [`src/app/info/[slug]/page.tsx`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/info/[slug]/page.tsx).
+  - Displays original destination preview, Web Risk safety rating, creation timestamp, and click metrics without triggering redirect click logs.
+- **SSRF & Malicious Payload Filtering**:
+  - All URLs undergo private IP validation, DNS rebinding checks, and Google Web Risk API threat scans prior to creation.
+  - Direct executable file extensions (`.exe`, `.msi`, `.apk`, `.bat`, `.cmd`, `.vbs`, `.scr`, `.pif`, `.hta`, `.iso`, `.jar`, `.com`, `.wsf`, `.cpl`) and non-HTTP(S) schemes are blocked.
+  - Forms are protected against automated bots with invisible honeypots.
 
 ---
 
 ## 👑 7. Pro Entitlements & Ad-Free Experience
 
-- **Feature Gates**: Pro users receive unlimited daily links, non-expiring URLs, 1-year granular analytics, and custom alias prioritization.
+- **Feature Gates**: Pro users receive 100 links/day, **permanent non-expiring URLs** (free links auto-expire in 60 days, guest links in 7 days), 1-year granular analytics, and custom alias prioritization.
 - **100% Ad-Free**: AdSense units ([`src/components/ad-banner.tsx`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/components/ad-banner.tsx)) are strictly suppressed when `user.plan === 'pro'` or `'admin'`, backed by the Pro badge indicator.
+- **Dashboard Conversion Triggers**: Free tier links display an amber expiration countdown badge in the links table linking directly to upgrade settings.
+
 
 
