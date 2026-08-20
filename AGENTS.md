@@ -29,13 +29,15 @@ MiniFyn is a high-performance URL shortener, link management platform, developer
 
 MiniFyn uses a **Dual Payment Gateway** model to maximize conversion and minimize transaction fees:
 
-### 🇮🇳 Domestic India (INR) — Razorpay
+### 🇮🇳 Domestic India (INR) & Global Cards — Razorpay
+- **Merchant Account**: `sylvester.das@minifyn.com`
 - **Plans**: Monthly (₹149/mo), Yearly (₹999/yr)
-- **Payment Methods**: UPI, RuPay, Domestic Cards, Netbanking
+- **Payment Methods**: UPI, RuPay, Domestic Cards, Netbanking, International Cards (Enabled / Active)
 - **Engine**: [`src/app/payments/actions.ts`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/payments/actions.ts)
 - **Webhook**: [`/api/payment/webhook`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/api/payment/webhook/route.ts)
 
 ### 🌍 Global / International (USD) — PayPal Subscriptions
+- **Merchant Account**: `minifyncom@gmail.com` (Personal admin fallback: `sylvester.das@gmail.com`)
 - **Plans**: Monthly ($2.00 USD/mo), Yearly ($15.00 USD/yr)
 - **Payment Methods**: PayPal Balance, International Credit/Debit Cards
 - **Engine**: [`src/lib/paypal.ts`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/lib/paypal.ts) & [`src/app/payments/paypal-actions.ts`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/payments/paypal-actions.ts)
