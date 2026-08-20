@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { getPlanPricingForCountry, getPlanPricing } from '@/lib/plans';
 
 const freeFeatures = [
   { text: '20 Links / Day', included: true },
@@ -30,7 +31,6 @@ const proFeatures = [
   { text: 'Developer API Access', included: true },
   { text: 'Custom Slugs (Coming Soon)', included: true },
 ];
-
 
 function FeatureList({ features }: { features: { text: string; included: boolean }[] }) {
   return (
@@ -53,11 +53,15 @@ function FeatureList({ features }: { features: { text: string; included: boolean
 
 export function PricingPageClient({ initialCountry }: { initialCountry?: string | null }) {
   const { user, isLoading: isAuthLoading } = useAuth();
+  const countryPricing = getPlanPricingForCountry(initialCountry);
+
   const [currency, setCurrency] = useState<'INR' | 'USD'>(
     initialCountry && initialCountry !== 'IN' ? 'USD' : 'INR'
   );
   const [interval, setInterval] = useState<'monthly' | 'yearly'>('monthly');
   const router = useRouter();
+
+  const activePricing = currency === 'INR' ? getPlanPricing('in') : countryPricing;
 
   const handleUpgradeClick = () => {
     const href = user ? '/dashboard/settings/billing' : `/auth/signup?plan=pro`;
@@ -147,7 +151,10 @@ export function PricingPageClient({ initialCountry }: { initialCountry?: string 
             htmlFor="pricing-interval"
             className={cn('text-sm cursor-pointer', interval === 'yearly' ? 'text-foreground font-medium' : 'text-muted-foreground')}
           >
-            Yearly <span className="text-primary font-semibold">{currency === 'USD' ? '(Save 37.5%)' : '(Save 44%)'}</span>
+            Yearly{' '}
+            <span className="text-primary font-semibold">
+              (Save {activePricing.yearlySavingsPercentage}%)
+            </span>
           </Label>
         </div>
       </div>
@@ -189,34 +196,26 @@ export function PricingPageClient({ initialCountry }: { initialCountry?: string 
             <div className="flex items-center justify-between">
               <CardTitle className="text-2xl">Pro</CardTitle>
               <span className="text-xs px-2.5 py-1 bg-primary/10 text-primary font-semibold rounded-full">
-                {currency === 'INR' ? 'Razorpay UPI & Cards' : 'PayPal & Cards'}
+                {currency === 'INR' ? 'UPI, Cards & Netbanking' : 'Cards & PayPal'}
               </span>
             </div>
             <CardDescription>
               For power users and businesses who need more links and advanced analytics.
             </CardDescription>
             <div className="pt-4 transition-all duration-300">
-              {currency === 'INR' ? (
-                interval === 'monthly' ? (
-                  <div>
-                    <span className="text-4xl font-bold">₹149</span>
-                    <span className="text-muted-foreground">/month</span>
-                  </div>
-                ) : (
-                  <div>
-                    <span className="text-4xl font-bold">₹999</span>
-                    <span className="text-muted-foreground">/year</span>
-                  </div>
-                )
-              ) : interval === 'monthly' ? (
+              {interval === 'monthly' ? (
                 <div>
-                  <span className="text-4xl font-bold">$2.00</span>
-                  <span className="text-muted-foreground"> USD /month</span>
+                  <span className="text-4xl font-bold">{activePricing.monthlyFormatted}</span>
+                  <span className="text-muted-foreground">
+                    {activePricing.currency === 'USD' ? ' USD' : ''} /month
+                  </span>
                 </div>
               ) : (
                 <div>
-                  <span className="text-4xl font-bold">$15.00</span>
-                  <span className="text-muted-foreground"> USD /year</span>
+                  <span className="text-4xl font-bold">{activePricing.yearlyFormatted}</span>
+                  <span className="text-muted-foreground">
+                    {activePricing.currency === 'USD' ? ' USD' : ''} /year
+                  </span>
                 </div>
               )}
             </div>

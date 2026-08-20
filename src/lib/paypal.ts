@@ -1,4 +1,5 @@
 import { db } from "@/lib/firebase-admin";
+import { getPlanPricing, type PricingTier } from "@/lib/plans";
 
 export function getPayPalBaseUrl(): string {
   const env = (process.env.PAYPAL_ENVIRONMENT || "sandbox").toLowerCase();
@@ -57,15 +58,18 @@ export interface PayPalPlanConfig {
 }
 
 /**
- * Ensures a PayPal catalog product and standard Monthly ($2) and Yearly ($15) billing plans exist.
+ * Ensures a PayPal catalog product and regional billing plans (Tier 1/2/3) exist.
  * Caches plan IDs in Firebase RTDB metadata so we don't recreate them repeatedly.
  */
-export async function getOrCreatePayPalPlans(): Promise<PayPalPlanConfig> {
+export async function getOrCreatePayPalPlans(tier: PricingTier = 'tier1'): Promise<PayPalPlanConfig> {
+  const safeTier: PricingTier = tier === 'in' ? 'tier3' : tier;
+  const pricing = getPlanPricing(safeTier);
+
   const token = await getPayPalAccessToken();
   const baseUrl = getPayPalBaseUrl();
   const env = (process.env.PAYPAL_ENVIRONMENT || "sandbox").toLowerCase();
 
-  const configRef = db.ref(`system_config/paypal_plans_${env}`);
+  const configRef = db.ref(`system_config/paypal_plans_${env}_${safeTier}`);
   const snapshot = await configRef.get();
   if (snapshot.exists()) {
     const val = snapshot.val() as PayPalPlanConfig;
@@ -103,7 +107,7 @@ export async function getOrCreatePayPalPlans(): Promise<PayPalPlanConfig> {
     console.warn("[PayPal] Product creation notice:", e);
   }
 
-  // 2. Create Monthly Plan ($2.00 USD / month)
+  // 2. Create Monthly Plan
   const monthlyRes = await fetch(`${baseUrl}/v1/billing/plans`, {
     method: "POST",
     headers: {
@@ -112,8 +116,8 @@ export async function getOrCreatePayPalPlans(): Promise<PayPalPlanConfig> {
     },
     body: JSON.stringify({
       product_id: productId,
-      name: "MiniFyn Pro Monthly",
-      description: "MiniFyn Pro Monthly Subscription ($2/mo)",
+      name: `MiniFyn Pro Monthly (${pricing.monthlyFormatted}/mo)`,
+      description: `MiniFyn Pro Monthly Subscription (${pricing.monthlyFormatted}/mo)`,
       status: "ACTIVE",
       billing_cycles: [
         {
@@ -126,7 +130,7 @@ export async function getOrCreatePayPalPlans(): Promise<PayPalPlanConfig> {
           total_cycles: 0, // Infinite recurring
           pricing_scheme: {
             fixed_price: {
-              value: "2.00",
+              value: pricing.monthlyPrice.toFixed(2),
               currency_code: "USD",
             },
           },
@@ -147,7 +151,7 @@ export async function getOrCreatePayPalPlans(): Promise<PayPalPlanConfig> {
   const monthlyData = await monthlyRes.json();
   const monthlyPlanId = monthlyData.id as string;
 
-  // 3. Create Yearly Plan ($15.00 USD / year)
+  // 3. Create Yearly Plan
   const yearlyRes = await fetch(`${baseUrl}/v1/billing/plans`, {
     method: "POST",
     headers: {
@@ -156,8 +160,8 @@ export async function getOrCreatePayPalPlans(): Promise<PayPalPlanConfig> {
     },
     body: JSON.stringify({
       product_id: productId,
-      name: "MiniFyn Pro Yearly",
-      description: "MiniFyn Pro Yearly Subscription ($15/yr)",
+      name: `MiniFyn Pro Yearly (${pricing.yearlyFormatted}/yr)`,
+      description: `MiniFyn Pro Yearly Subscription (${pricing.yearlyFormatted}/yr)`,
       status: "ACTIVE",
       billing_cycles: [
         {
@@ -170,7 +174,7 @@ export async function getOrCreatePayPalPlans(): Promise<PayPalPlanConfig> {
           total_cycles: 0,
           pricing_scheme: {
             fixed_price: {
-              value: "15.00",
+              value: pricing.yearlyPrice.toFixed(2),
               currency_code: "USD",
             },
           },

@@ -27,27 +27,31 @@ MiniFyn is a high-performance URL shortener, link management platform, developer
 
 ## 💳 2. Payment & Monetization Architecture
 
-MiniFyn uses a **Dual Payment Gateway** model to maximize conversion and minimize transaction fees:
+MiniFyn uses a **Dual Payment Gateway + Purchasing Power Parity (PPP) Regional Model** to maximize conversion, preserve equity, and minimize transaction fees:
 
 ### 🇮🇳 Domestic India (INR) & Global Cards — Razorpay
 - **Merchant Account**: `sylvester.das@minifyn.com`
-- **Plans**: Monthly (₹149/mo), Yearly (₹999/yr)
-- **Payment Methods**: UPI, RuPay, Domestic Cards, Netbanking, International Cards (Enabled / Active)
+- **India Plans**: Monthly (₹149/mo), Yearly (₹999/yr)
+- **Payment Methods**: UPI, RuPay, Domestic Cards, Netbanking, International Credit/Debit Cards (Active)
 - **Engine**: [`src/app/payments/actions.ts`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/payments/actions.ts)
 - **Webhook**: [`/api/payment/webhook`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/api/payment/webhook/route.ts)
 
-### 🌍 Global / International (USD) — PayPal Subscriptions
-- **Merchant Account**: `minifyncom@gmail.com` (Personal admin fallback: `sylvester.das@gmail.com`)
-- **Plans**: Monthly ($2.00 USD/mo), Yearly ($15.00 USD/yr)
-- **Payment Methods**: PayPal Balance, International Credit/Debit Cards
+### 🌍 Global Regional PPP Tiers (USD) — Automated Provisioning
+Pricing is automatically resolved based on visitor country via [`src/lib/plans.ts`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/lib/plans.ts) without exposing tier classifications to users:
+- **Tier 1 (High Income - US, GB, CA, AU, DE, FR, JP, etc.)**: $4.99/mo, $39.00/yr
+- **Tier 2 (Upper-Middle - BR, MX, PL, TR, MY, ZA, etc.)**: $2.99/mo, $24.00/yr
+- **Tier 3 (Developing - NP, BD, PK, LK, EG, NG, etc.)**: $1.49/mo, $12.00/yr
+- **Checkout Routing**:
+  - **Primary**: Razorpay Credit/Debit Card (~5.5% effective take rate).
+  - **Secondary**: PayPal Subscriptions (for buyers preferring PayPal wallet).
 - **Engine**: [`src/lib/paypal.ts`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/lib/paypal.ts) & [`src/app/payments/paypal-actions.ts`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/payments/paypal-actions.ts)
 - **Webhook**: [`/api/payment/paypal/webhook`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/api/payment/paypal/webhook/route.ts)
 
 ### 🌐 Smart Edge Geolocation
-- Resolves visitor country via `x-vercel-ip-country` header ([`src/lib/geo.ts`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/lib/geo.ts)).
-- **India (`IN`)**: Automatically serves INR (₹) with Razorpay default.
-- **Rest of World (`!IN`)**: Automatically serves USD ($) with PayPal default.
-- Users can manually toggle between currencies and gateways on [`/pricing`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/(marketing)/pricing/page.tsx) and [`/dashboard/settings/billing`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/dashboard/settings/billing/billing-client-component.tsx).
+- Resolves visitor country at the edge via `x-vercel-ip-country` header ([`src/lib/geo.ts`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/lib/geo.ts)).
+- **India (`IN`)**: Serves INR (₹) with Razorpay UPI/Cards default.
+- **Rest of World (`!IN`)**: Serves USD ($) at the exact localized regional tier price.
+- Users can switch currency if needed on [`/pricing`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/(marketing)/pricing/page.tsx).
 
 ---
 

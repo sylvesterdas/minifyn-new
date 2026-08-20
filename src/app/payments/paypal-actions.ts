@@ -4,11 +4,14 @@ import { validateRequest } from "@/lib/auth";
 import { auth as adminAuth, db } from "@/lib/firebase-admin";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { resolveCountryFromRequest } from "@/lib/geo";
 import {
   getOrCreatePayPalPlans,
   getPayPalSubscriptionDetails,
   cancelPayPalSubscription,
 } from "@/lib/paypal";
+import { resolvePricingTier } from "@/lib/plans";
 
 const PAYPAL_ENVIRONMENT = (process.env.PAYPAL_ENVIRONMENT || "sandbox").toLowerCase();
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || "";
@@ -18,20 +21,27 @@ export interface PayPalConfigResponse {
   environment: string;
   monthlyPlanId: string;
   yearlyPlanId: string;
+  tier: string;
 }
 
-export async function getPayPalConfig(): Promise<{ error?: string; config?: PayPalConfigResponse }> {
+export async function getPayPalConfig(countryHint?: string | null): Promise<{ error?: string; config?: PayPalConfigResponse }> {
   try {
     if (!PAYPAL_CLIENT_ID) {
       return { error: "PayPal Client ID is not configured." };
     }
-    const plans = await getOrCreatePayPalPlans();
+    // Server-side tamper-proof geo resolution (fallback to countryHint only if headers unresolvable)
+    const hdrs = await headers();
+    const ip = hdrs.get("x-forwarded-for") ?? hdrs.get("remote-addr");
+    const detectedCountry = (await resolveCountryFromRequest({ headers: hdrs, ip })) || countryHint;
+    const tier = resolvePricingTier(detectedCountry);
+    const plans = await getOrCreatePayPalPlans(tier);
     return {
       config: {
         clientId: PAYPAL_CLIENT_ID,
         environment: PAYPAL_ENVIRONMENT,
         monthlyPlanId: plans.monthlyPlanId,
         yearlyPlanId: plans.yearlyPlanId,
+        tier,
       },
     };
   } catch (err) {
@@ -42,6 +52,7 @@ export async function getPayPalConfig(): Promise<{ error?: string; config?: PayP
 
 export async function initiatePayPalSubscription(
   planType: "monthly" | "yearly",
+  countryHint?: string | null,
   idToken?: string
 ): Promise<{ error?: string; planId?: string }> {
   let userData: { uid: string; email?: string; name?: string } | null = null;
@@ -65,7 +76,11 @@ export async function initiatePayPalSubscription(
   }
 
   try {
-    const plans = await getOrCreatePayPalPlans();
+    const hdrs = await headers();
+    const ip = hdrs.get("x-forwarded-for") ?? hdrs.get("remote-addr");
+    const detectedCountry = (await resolveCountryFromRequest({ headers: hdrs, ip })) || countryHint;
+    const tier = resolvePricingTier(detectedCountry);
+    const plans = await getOrCreatePayPalPlans(tier);
     const planId = planType === "monthly" ? plans.monthlyPlanId : plans.yearlyPlanId;
     return { planId };
   } catch (err) {

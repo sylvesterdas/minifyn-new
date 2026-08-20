@@ -18,6 +18,8 @@ import Script from 'next/script';
 import { trackEvent } from '@/lib/gtag';
 import { format } from 'date-fns';
 
+import { getPlanPricingForCountry, getPlanPricing } from '@/lib/plans';
+
 declare global {
   interface Window {
     Razorpay: any;
@@ -98,14 +100,14 @@ function formatRenewalDate(unixSeconds: unknown) {
 export function BillingClientComponent({ user, initialSubscription, country }: BillingClientComponentProps) {
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
   const [planType, setPlanType] = useState<'monthly' | 'yearly'>('monthly');
-  // Auto-default payment provider based on country: India -> Razorpay, Others -> PayPal
-  const [paymentProvider, setPaymentProvider] = useState<'razorpay' | 'paypal'>(
-    country === 'IN' ? 'razorpay' : 'paypal'
-  );
+  const [selectedMethod, setSelectedMethod] = useState<'card' | 'paypal'>('card');
   const [subscription, setSubscription] = useState<any | null>(initialSubscription);
   const [isCancelling, startCancelTransition] = useTransition();
   const { toast } = useToast();
   const router = useRouter();
+
+  const isIndia = country === 'IN';
+  const pricing = getPlanPricingForCountry(country);
 
   useEffect(() => {
     setSubscription(initialSubscription);
@@ -126,12 +128,12 @@ export function BillingClientComponent({ user, initialSubscription, country }: B
     trackEvent({
       action: 'click_upgrade',
       category: 'conversion',
-      label: 'upgrade_from_billing_page_rzp',
-      value: planType === 'monthly' ? 149 : 999,
+      label: `upgrade_from_billing_${isIndia ? 'rzp_inr' : 'rzp_card'}_${planType}`,
+      value: planType === 'monthly' ? pricing.monthlyPrice : pricing.yearlyPrice,
     });
 
     try {
-      const subscriptionResult = await createRazorpaySubscription(planType);
+      const subscriptionResult = await createRazorpaySubscription(planType, country);
       if ('error' in subscriptionResult) {
         throw new Error(subscriptionResult.error);
       }
@@ -140,7 +142,10 @@ export function BillingClientComponent({ user, initialSubscription, country }: B
         key: subscriptionResult.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         subscription_id: subscriptionResult.subscriptionId,
         name: 'MiniFyn Pro',
-        description: planType === 'monthly' ? 'Monthly Subscription (₹149/mo)' : 'Yearly Subscription (₹999/yr)',
+        description:
+          planType === 'monthly'
+            ? `Monthly Subscription (${pricing.monthlyFormatted}/mo)`
+            : `Yearly Subscription (${pricing.yearlyFormatted}/yr)`,
         handler: async function (response: any) {
           toast({ title: 'Payment Successful!', description: 'Finalizing your upgrade...' });
           const syncResult = await syncRazorpaySubscription();
@@ -151,7 +156,7 @@ export function BillingClientComponent({ user, initialSubscription, country }: B
               action: 'purchase',
               category: 'conversion',
               label: `pro_plan_upgrade_${planType}`,
-              value: planType === 'monthly' ? 149 : 999,
+              value: planType === 'monthly' ? pricing.monthlyPrice : pricing.yearlyPrice,
             });
             window.location.assign('/dashboard/settings/billing');
           } else {
@@ -249,33 +254,6 @@ export function BillingClientComponent({ user, initialSubscription, country }: B
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Payment Method Switcher */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3 bg-muted/30 rounded-lg border">
-                <div className="text-sm font-medium">Payment Method & Currency</div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={paymentProvider === 'razorpay' ? 'default' : 'outline'}
-                    onClick={() => setPaymentProvider('razorpay')}
-                    className="gap-1.5 text-xs"
-                  >
-                    <CreditCard className="h-3.5 w-3.5" />
-                    Razorpay (INR ₹)
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={paymentProvider === 'paypal' ? 'default' : 'outline'}
-                    onClick={() => setPaymentProvider('paypal')}
-                    className="gap-1.5 text-xs"
-                  >
-                    <Globe className="h-3.5 w-3.5" />
-                    PayPal (USD $)
-                  </Button>
-                </div>
-              </div>
-
               {/* Billing Cycle Toggle */}
               <div className="flex justify-center items-center gap-4">
                 <Label
@@ -296,50 +274,79 @@ export function BillingClientComponent({ user, initialSubscription, country }: B
                 >
                   Yearly{' '}
                   <span className="text-primary font-semibold">
-                    {paymentProvider === 'paypal' ? '(Save 37.5%)' : '(Save 44%)'}
+                    (Save {pricing.yearlySavingsPercentage}%)
                   </span>
                 </Label>
               </div>
 
               {/* Price Display */}
               <div className="text-center pt-2 transition-all duration-300 text-4xl font-bold">
-                {paymentProvider === 'razorpay' ? (
-                  planType === 'monthly' ? (
-                    <span>
-                      ₹149 <span className="text-base font-normal text-muted-foreground">/month</span>
-                    </span>
-                  ) : (
-                    <span>
-                      ₹999 <span className="text-base font-normal text-muted-foreground">/year</span>
-                    </span>
-                  )
-                ) : planType === 'monthly' ? (
+                {planType === 'monthly' ? (
                   <span>
-                    $2.00 <span className="text-base font-normal text-muted-foreground">USD /month</span>
+                    {pricing.monthlyFormatted}
+                    <span className="text-base font-normal text-muted-foreground">
+                      {pricing.currency === 'USD' ? ' USD' : ''} /month
+                    </span>
                   </span>
                 ) : (
                   <span>
-                    $15.00 <span className="text-base font-normal text-muted-foreground">USD /year</span>
+                    {pricing.yearlyFormatted}
+                    <span className="text-base font-normal text-muted-foreground">
+                      {pricing.currency === 'USD' ? ' USD' : ''} /year
+                    </span>
                   </span>
                 )}
               </div>
+
+              {/* Global Payment Method Selector (Card vs PayPal) */}
+              {!isIndia && (
+                <div className="flex items-center justify-center gap-3 pt-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={selectedMethod === 'card' ? 'default' : 'outline'}
+                    onClick={() => setSelectedMethod('card')}
+                    className="gap-1.5 text-xs"
+                  >
+                    <CreditCard className="h-3.5 w-3.5" />
+                    Credit / Debit Card
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={selectedMethod === 'paypal' ? 'default' : 'outline'}
+                    onClick={() => setSelectedMethod('paypal')}
+                    className="gap-1.5 text-xs"
+                  >
+                    <Globe className="h-3.5 w-3.5" />
+                    PayPal
+                  </Button>
+                </div>
+              )}
             </CardContent>
             <CardFooter>
-              {paymentProvider === 'razorpay' ? (
+              {isIndia || selectedMethod === 'card' ? (
                 <Button size="lg" className="w-full" onClick={handleRazorpayUpgrade} disabled={isLoadingPayment}>
-                  {isLoadingPayment ? <Loader2 className="animate-spin" /> : 'Pay with Razorpay (UPI / Cards)'}
+                  {isLoadingPayment ? (
+                    <Loader2 className="animate-spin" />
+                  ) : isIndia ? (
+                    'Pay with UPI / Cards / Netbanking'
+                  ) : (
+                    'Pay with Credit / Debit Card'
+                  )}
                 </Button>
               ) : (
                 <div className="w-full">
                   <PayPalSubscriptionButton
                     planType={planType}
+                    country={country}
                     onSuccess={() => {
                       toast({ title: 'Upgrade Complete!', description: 'Your plan is now Pro.' });
                       trackEvent({
                         action: 'purchase',
                         category: 'conversion',
                         label: `pro_plan_upgrade_paypal_${planType}`,
-                        value: planType === 'monthly' ? 2 : 15,
+                        value: planType === 'monthly' ? pricing.monthlyPrice : pricing.yearlyPrice,
                       });
                       window.location.assign('/dashboard/settings/billing');
                     }}

@@ -12,6 +12,7 @@ declare global {
 
 interface PayPalSubscriptionButtonProps {
   planType: "monthly" | "yearly";
+  country?: string | null;
   onSuccess: () => void;
   onError: (error: string) => void;
   onCancel?: () => void;
@@ -20,6 +21,7 @@ interface PayPalSubscriptionButtonProps {
 
 export function PayPalSubscriptionButton({
   planType,
+  country,
   onSuccess,
   onError,
   onCancel,
@@ -37,7 +39,7 @@ export function PayPalSubscriptionButton({
         setLoading(true);
         setErrorMessage(null);
 
-        const res = await getPayPalConfig();
+        const res = await getPayPalConfig(country);
         if (res.error || !res.config) {
           throw new Error(res.error || "Failed to retrieve PayPal configuration");
         }
@@ -128,7 +130,7 @@ export function PayPalSubscriptionButton({
     return () => {
       isMounted = false;
     };
-  }, [planType, idToken]);
+  }, [planType, country, idToken]);
 
   return (
     <div className="w-full">

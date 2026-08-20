@@ -8,6 +8,7 @@ import type { DecodedIdToken } from "firebase-admin/auth";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { isAllowedCountry, resolveCountryFromRequest } from "@/lib/geo";
+import { getPlanPricing, resolvePricingTier, type PricingTier } from "@/lib/plans";
 
 function getRazorpayCredentials() {
   const keyId =
@@ -47,8 +48,50 @@ interface CreateSubscriptionResponse {
   keyId: string;
 }
 
+export async function getOrCreateRazorpayPlanId(
+  planType: "monthly" | "yearly",
+  tier: PricingTier
+): Promise<string> {
+  const env = (process.env.NODE_ENV === "production" ? "live" : "test");
+
+  // For India, use standard env plan ID if configured
+  if (tier === "in") {
+    const envPlanId = planType === "monthly" ? PLAN_IDS.monthly : PLAN_IDS.yearly;
+    if (envPlanId) return envPlanId;
+  }
+
+  // Check RTDB cache for the tier's plan
+  const planRef = db.ref(`system_config/razorpay_plans_${env}_${tier}/${planType}`);
+  const snap = await planRef.get();
+  if (snap.exists() && snap.val()) {
+    return snap.val() as string;
+  }
+
+  const pricing = getPlanPricing(tier);
+  const isUSD = pricing.currency === "USD";
+  const amount = isUSD
+    ? Math.round((planType === "monthly" ? pricing.monthlyPrice : pricing.yearlyPrice) * 100)
+    : Math.round((planType === "monthly" ? pricing.monthlyPrice : pricing.yearlyPrice) * 100);
+
+  const rzp = getRazorpayClient();
+  const createdPlan = await rzp.plans.create({
+    period: planType === "monthly" ? "monthly" : "yearly",
+    interval: 1,
+    item: {
+      name: `MiniFyn Pro ${planType === "monthly" ? "Monthly" : "Yearly"} (${pricing.symbol}${planType === "monthly" ? pricing.monthlyPrice : pricing.yearlyPrice})`,
+      amount,
+      currency: pricing.currency,
+      description: `MiniFyn Pro ${planType} subscription for ${tier}`,
+    },
+  });
+
+  await planRef.set(createdPlan.id);
+  return createdPlan.id;
+}
+
 export async function createRazorpaySubscription(
   planType: "monthly" | "yearly",
+  country?: string | null,
   idToken?: string
 ): Promise<{ error: string } | CreateSubscriptionResponse> {
   let userData: { uid: string; email?: string; name?: string } | null = null;
@@ -108,15 +151,21 @@ export async function createRazorpaySubscription(
     return { error: "Invalid plan type selected." };
   }
 
-  const planId = planType === 'monthly' ? PLAN_IDS.monthly : PLAN_IDS.yearly;
-  if (!planId) {
-    console.error(
-      `[Payment Action] Razorpay plan ID for '${planType}' is not configured for the current environment.`
-    );
-    return { error: "The selected plan is currently unavailable." };
-  }
+  // Server-side tamper-proof country resolution (never trust client parameter)
+  const hdrs = await headers();
+  const ip = hdrs.get("x-forwarded-for") ?? hdrs.get("remote-addr");
+  const detectedCountry = await resolveCountryFromRequest({ headers: hdrs, ip });
+  const tier = resolvePricingTier(detectedCountry);
 
   try {
+    const planId = await getOrCreateRazorpayPlanId(planType, tier);
+    if (!planId) {
+      console.error(
+        `[Payment Action] Razorpay plan ID for '${planType}' (${tier}) could not be resolved.`
+      );
+      return { error: "The selected plan is currently unavailable." };
+    }
+
     const options = {
       plan_id: planId,
       customer_notify: true,
@@ -125,11 +174,12 @@ export async function createRazorpaySubscription(
         userId: userData.uid,
         email: userData.email || "",
         name: userData.name || "",
+        tier,
       },
     };
 
     console.log(
-      `[Payment Action] Creating Razorpay subscription for user ${userData.uid} with plan ${planId}.`
+      `[Payment Action] Creating Razorpay subscription for user ${userData.uid} with plan ${planId} (tier: ${tier}).`
     );
     const subscription = await getRazorpayClient().subscriptions.create(options);
     const planDetails = await getRazorpayClient().plans.fetch(planId);
