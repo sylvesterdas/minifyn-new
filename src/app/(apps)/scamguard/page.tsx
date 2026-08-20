@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   title,
   description,
   alternates: {
-    canonical: pageUrl,
+    canonical: `${siteUrl}${pageUrl}`,
   },
   openGraph: {
     title,
@@ -254,6 +254,31 @@ export default function ScamGuardPage() {
     })),
   };
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: siteUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Apps',
+        item: `${siteUrl}/#apps`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'ScamGuard: Link Checker',
+        item: `${siteUrl}${pageUrl}`,
+      },
+    ],
+  };
+
   return (
     <>
       <script
@@ -263,6 +288,10 @@ export default function ScamGuardPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       <section className="relative overflow-hidden py-14 md:py-20">

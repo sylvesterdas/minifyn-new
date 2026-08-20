@@ -14,6 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 1. Static pages
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${siteUrl}/`, lastModified: new Date().toISOString(), changeFrequency: 'weekly', priority: 1.0 },
+    { url: `${siteUrl}/pricing`, lastModified: new Date().toISOString(), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${siteUrl}/features`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${siteUrl}/contact`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${siteUrl}/about`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.6 },
@@ -34,13 +35,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/help`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${siteUrl}/help/faq`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${siteUrl}/help/report-abuse`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${siteUrl}/scamguard`, lastModified: lastModifiedScamGuard, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${siteUrl}/scamguard`, lastModified: lastModifiedScamGuard, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${siteUrl}/scamguard/legal/privacy`, lastModified: lastModifiedScamGuard, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${siteUrl}/scamguard/legal/terms`, lastModified: lastModifiedScamGuard, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${siteUrl}/clipfyn`, lastModified: lastModifiedClipFyn, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${siteUrl}/clipfyn`, lastModified: lastModifiedClipFyn, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${siteUrl}/clipfyn/legal/privacy`, lastModified: lastModifiedClipFyn, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${siteUrl}/clipfyn/legal/terms`, lastModified: lastModifiedClipFyn, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${siteUrl}/censorfyn`, lastModified: lastModifiedCensorFyn, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${siteUrl}/censorfyn`, lastModified: lastModifiedCensorFyn, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${siteUrl}/censorfyn/legal/privacy`, lastModified: lastModifiedCensorFyn, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${siteUrl}/censorfyn/legal/terms`, lastModified: lastModifiedCensorFyn, changeFrequency: 'yearly', priority: 0.3 },
   ];

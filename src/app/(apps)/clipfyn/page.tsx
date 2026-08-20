@@ -111,7 +111,7 @@ const faqs = [
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: pageUrl },
+  alternates: { canonical: `${siteUrl}${pageUrl}` },
   openGraph: {
     title,
     description,
@@ -177,6 +177,31 @@ export default function ClipFynPage() {
     })),
   };
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Apps",
+        item: `${siteUrl}/#apps`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: "ClipFyn",
+        item: `${siteUrl}${pageUrl}`,
+      },
+    ],
+  };
+
   return (
     <div className="flex flex-col">
       <script
@@ -186,6 +211,10 @@ export default function ClipFynPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       {/* Hero Section */}
