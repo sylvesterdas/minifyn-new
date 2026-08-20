@@ -101,3 +101,16 @@ npm run dev -- --port 9002
 node scripts/e2e-geo-verification.mjs
 node scripts/e2e-pricing-and-billing.mjs
 ```
+
+---
+
+## 📱 5. SEO, App Routing & Mobile API Security
+
+- **App Suite Canonical URLs**:
+  - ScamGuard: [`/scamguard`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/(apps)/scamguard/page.tsx)
+  - ClipFyn: [`/clipfyn`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/(apps)/clipfyn/page.tsx)
+  - CensorFyn: [`/censorfyn`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/(apps)/censorfyn/page.tsx)
+- **Marketing Case Redirects**: All CamelCase variations (`/ScamGuard`, `/ClipFyn`, `/CensorFyn`) and legacy `/LinkGuard` are 301-redirected in [`next.config.mjs`](file:///Users/sylvester/Projects/personal/minifyn/backend/next.config.mjs) to their canonical lowercase endpoints to preserve SEO authority.
+- **Rich Structured Data**: Every app landing page contains Google JSON-LD schema for `MobileApplication`, `FAQPage`, and `BreadcrumbList`.
+- **Mobile Backend Protection**: `/api/linkguard/*` endpoints are strictly reserved for Google Play Integrity verified mobile clients and must not be called directly by public unauthenticated web widgets.
+
