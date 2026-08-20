@@ -114,3 +114,21 @@ node scripts/e2e-pricing-and-billing.mjs
 - **Rich Structured Data**: Every app landing page contains Google JSON-LD schema for `MobileApplication`, `FAQPage`, and `BreadcrumbList`.
 - **Mobile Backend Protection**: `/api/linkguard/*` endpoints are strictly reserved for Google Play Integrity verified mobile clients and must not be called directly by public unauthenticated web widgets.
 
+---
+
+## 🔗 6. Link Redirection, Safety & Inspection Engine
+
+- **High-Performance Redirection**: `/[slug]` and `/go/[slug]` dynamic routes handle high-throughput 307 redirects while asynchronously aggregating visitor clickstream analytics (geo, referrer, device, operating system).
+- **Link Inspection Pages (`/[slug]+` & `/info/[slug]`)**:
+  - Appending `+` (or `%2B`) to any short link routes to the safety inspection view [`src/app/info/[slug]/page.tsx`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/info/[slug]/page.tsx).
+  - Displays original destination preview, Web Risk safety rating, creation timestamp, and QR code without triggering redirect click metrics.
+- **SSRF & Malicious Link Protection**: All URLs submitted to `/api/shorten` undergo strict private IP validation, DNS rebinding checks, and Google Web Risk scans prior to insertion.
+
+---
+
+## 👑 7. Pro Entitlements & Ad-Free Experience
+
+- **Feature Gates**: Pro users receive unlimited daily links, non-expiring URLs, 1-year granular analytics, and custom alias prioritization.
+- **100% Ad-Free**: AdSense units ([`src/components/ad-banner.tsx`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/components/ad-banner.tsx)) are strictly suppressed when `user.plan === 'pro'` or `'admin'`, backed by the Pro badge indicator.
+
+
