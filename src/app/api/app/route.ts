@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 
-export const dynamic = 'force-static';
-export const revalidate = 3600; // Cache for 1 hour
+export const dynamic = 'force-dynamic';
 
 export interface AppMetadata {
   name: string;
@@ -51,14 +51,30 @@ const APPS: AppMetadata[] = [
   },
 ];
 
-export async function GET() {
+const APPS_JSON = JSON.stringify(APPS);
+const APPS_ETAG = `"${crypto.createHash('md5').update(APPS_JSON).digest('hex')}"`;
+
+export async function GET(request: NextRequest) {
+  const clientEtag = request.headers.get('if-none-match');
+
+  const headers = {
+    'ETag': APPS_ETAG,
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, If-None-Match',
+    'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+    'Vary': 'Accept-Encoding, If-None-Match',
+  };
+
+  if (clientEtag && clientEtag === APPS_ETAG) {
+    return new NextResponse(null, {
+      status: 304,
+      headers,
+    });
+  }
+
   return NextResponse.json(APPS, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
-    },
+    headers,
   });
 }
 
@@ -68,7 +84,7 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Headers': 'Content-Type, If-None-Match',
     },
   });
 }
