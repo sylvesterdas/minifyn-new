@@ -23,6 +23,44 @@ export default function ClipFynPrivacyPage() {
           <li>A video leaves app-controlled storage only when you save it or share it to an app you choose.</li>
         </ul>
 
+        <h2>Firebase Analytics</h2>
+        <p>
+          We use Google Analytics for Firebase to understand app performance, feature usage, notification
+          engagement, and companion app discovery across the MiniFyn suite.
+        </p>
+        <ul>
+          <li>
+            Firebase automatically processes an app-instance identifier, device model, operating system version,
+            session duration, screen views, notification interactions, and coarse region derived from a masked IP address.
+          </li>
+          <li>
+            ClipFyn logs limited functional events such as video import format, selected export aspect ratio,
+            export completion status, Reels share actions, and outbound companion app links.
+          </li>
+          <li>
+            We do <strong>not</strong> send your video files, video titles, thumbnail frames, names, email addresses,
+            or contact lists to Firebase Analytics.
+          </li>
+          <li>
+            Google processes analytics data as our service provider under standard Google Analytics data protection terms.
+          </li>
+        </ul>
+
+        <h2>Notifications and Cloud Messaging</h2>
+        <p>
+          If you grant notification permission, Firebase Cloud Messaging (FCM) is used to deliver occasional creator tips,
+          format updates, and announcements regarding the MiniFyn ecosystem.
+        </p>
+        <ul>
+          <li>
+            FCM uses a per-installation token, topic subscriptions (such as general announcements and creator updates),
+            and notification interaction events to deliver and measure messages.
+          </li>
+          <li>
+            You can disable notifications at any time in your Android system settings or within the app's settings.
+          </li>
+        </ul>
+
         <h2>Advertising and consent</h2>
         <p>
           The free app uses Google AdMob. Where required, Google's consent flow is shown before ads can be
