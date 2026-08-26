@@ -35,7 +35,7 @@ const APPS: AppMetadata[] = [
     webUrl: "https://www.minifyn.com",
     playstoreURL: null,
     appstoreURL: null,
-    logoUrl: "https://www.minifyn.com/images/scamguard-logo.png",
+    logoUrl: "https://www.minifyn.com/images/minifyn-logo.png",
     published: true,
   },
   {
@@ -68,7 +68,7 @@ const APPS: AppMetadata[] = [
     webUrl: "https://www.minifyn.com",
     playstoreURL: null,
     appstoreURL: null,
-    logoUrl: "https://www.minifyn.com/images/scamguard-logo.png",
+    logoUrl: "https://www.minifyn.com/images/studio-logo.png",
     published: false,
   },
 ];
