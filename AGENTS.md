@@ -53,12 +53,6 @@ Pricing is automatically resolved based on visitor country via [`src/lib/plans.t
 - **Rest of World (`!IN`)**: Serves USD ($) at the exact localized regional tier price.
 - Users can switch currency if needed on [`/pricing`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/(marketing)/pricing/page.tsx).
 
-### 💖 Solo Indie Developer & Bootstrapped Value Proposition
-When writing or updating purchase CTAs, upgrade dialogs, or pricing copy across MiniFyn and companion app landing pages:
-- **Solo Indie Developer Support:** Frame purchases as directly supporting an independent solo developer.
-- **Bootstrapped & Self-Funded:** Transparently convey that MiniFyn is built without VC backing, paying for server infrastructure and on-device AI tools out of pocket.
-- **Authentic Connection:** Reinforce the direct impact each subscription has on sustaining independent, privacy-first software development to increase user goodwill and conversion.
-
 ---
 
 ## 🔐 3. Environment Variables Standard
