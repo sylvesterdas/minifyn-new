@@ -21,65 +21,15 @@ const nextConfig = {
         destination: 'https://blog.minifyn.com/:slug*',
         permanent: true,
       },
-      // App Case Variations -> Canonical Lowercase
-      {
-        source: '/ScamGuard',
-        destination: '/scamguard',
-        permanent: true,
-      },
-      {
-        source: '/Scamguard',
-        destination: '/scamguard',
-        permanent: true,
-      },
-      {
-        source: '/SCAMGUARD',
-        destination: '/scamguard',
-        permanent: true,
-      },
-      {
-        source: '/LinkGuard',
-        destination: '/scamguard',
-        permanent: true,
-      },
+      // Legacy LinkGuard -> ScamGuard Redirect
       {
         source: '/linkguard',
         destination: '/scamguard',
         permanent: true,
       },
       {
-        source: '/LINKGUARD',
-        destination: '/scamguard',
-        permanent: true,
-      },
-      {
-        source: '/ClipFyn',
-        destination: '/clipfyn',
-        permanent: true,
-      },
-      {
-        source: '/Clipfyn',
-        destination: '/clipfyn',
-        permanent: true,
-      },
-      {
-        source: '/CLIPFYN',
-        destination: '/clipfyn',
-        permanent: true,
-      },
-      {
-        source: '/CensorFyn',
-        destination: '/censorfyn',
-        permanent: true,
-      },
-      {
-        source: '/Censorfyn',
-        destination: '/censorfyn',
-        permanent: true,
-      },
-      {
-        source: '/CENSORFYN',
-        destination: '/censorfyn',
+        source: '/linkguard/:path*',
+        destination: '/scamguard/:path*',
         permanent: true,
       },
     ];
