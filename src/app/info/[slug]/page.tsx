@@ -123,8 +123,35 @@ export default async function LinkInfoPage(props: Props) {
               </div>
             </div>
 
+            {/* ScamGuard Trust & Protection Banner */}
+            <div className="p-4 rounded-xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-semibold text-foreground">
+                    Inspect links automatically on your device
+                  </p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Protect against phishing, suspicious SMS, and malicious URLs with <strong>ScamGuard for Android</strong>.
+                  </p>
+                </div>
+              </div>
+              <Button asChild size="sm" variant="outline" className="border-amber-500/30 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10 shrink-0 font-medium text-xs">
+                <a
+                  href="https://play.google.com/store/apps/details?id=com.minifyn.linkguard"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Get ScamGuard
+                  <ExternalLink className="ml-1.5 h-3 w-3" />
+                </a>
+              </Button>
+            </div>
+
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-3 pt-1">
               <Button asChild size="lg" className="flex-1 font-semibold">
                 <a href={destination} rel="noopener noreferrer">
                   Proceed to Destination

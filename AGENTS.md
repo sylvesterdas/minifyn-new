@@ -146,30 +146,52 @@ node scripts/e2e-pricing-and-billing.mjs
 
 ## 🚀 8. Product Growth, Marketing & Strategic Roadmap
 
-A comprehensive, low-overhead growth strategy to scale MiniFyn's link shortener, developer tools, and the 3 Android mobile apps:
+### Current Implementation & Roadmap Status
 
-### 1. 🔄 Product-Led Cross-Pollination (Zero-Cost Traffic Bridge)
-- **Shortener Success Bridge**: When a user creates a short link on [`/`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/(marketing)/page.tsx) or the dashboard, display a subtle media privacy badge:
-  > *"Sharing an image or video? Redact sensitive IDs with [CensorFyn](/censorfyn) or prepare 9:16 vertical crops with [ClipFyn](/clipfyn)."*
-- **Inspection Safety Bridge**: On the safety preview page [`src/app/info/[slug]/page.tsx`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/info/[slug]/page.tsx) (`/[slug]+`), embed a verified trust banner:
-  > *"🛡️ Protect your device automatically on WhatsApp & SMS — [Get ScamGuard for Android](https://play.google.com/store/apps/details?id=com.minifyn.linkguard)."*
+#### ✅ Completed & Live
+1. **ScamGuard**:
+   - On-device TFLite model evaluation + fallback cloud checks (`WebRisk + OpenPhish`).
+   - Play Integrity verification (`/api/linkguard/v3/check`) & privacy-preserving FCM topic announcements.
+   - Daily silent security tip rotation (8:30 AM local) & zero-PII categorical analytics.
+   - Automated AAB/IPA release publishing pipelines.
+   - **Multi-Language Play Store Listings Published**: `en-US`, `en-GB`, `es-419`, `es-ES`, `pt-BR`, `de-DE`, `fr-FR`, `hi-IN`.
+2. **ClipFyn**:
+   - AndroidX Media3 hardware encoding with 9:16 vertical safe-zone centering.
+   - Aspect ratio modes (Fill & Crop, Gaussian Blur Letterbox, Original).
+   - Google AdMob UMP integration and lifetime Pro billing.
+   - 14-day closed testing completed (pending production access review).
+3. **CensorFyn**:
+   - 100% On-device image redaction (BlazeFace, OCR PII parsing, Barcode/QR, Freehand gesture drawing).
+   - Destructive raster pixel modifications (Gaussian blur, Mosaic pixelation, Solid blackout) & EXIF/GPS stripping.
+   - SHA-256 legal audit manifest generator.
+   - **Multi-Language Play Store Listings Published**: `en-US`, `en-GB`, `es-419`, `es-ES`, `pt-BR`, `de-DE`, `fr-FR`, `hi-IN`.
+4. **MiniFyn Web Platform**:
+   - Next.js 16 Edge Route Handlers (`~15ms` 307 redirects).
+   - Aggregated daily click metrics (`analytics_summary`) saving 95%+ DB footprint.
+   - Dual-gateway payments (Razorpay + PayPal PPP regional tiers).
+   - Web utilities: Code Minifier, JSON Formatter, JWT Debugger.
+5. **Marketing Cockpit (`scamguard-studio`)**:
+   - Multi-tenant Fastify/React operational dashboard.
+   - AES-256 BYO credentials vault and Gemini Flash AI batch composer.
+   - Buffer integration and safety heuristics engine.
 
-### 2. 🧲 High-Volume Free Web Tools (Organic Search Inflow)
-- **Custom QR Code Generator (`/tools/qr-generator`)**: High-demand web utility allowing custom colors, logos, and instant SVG/PNG exports, naturally funneling users into MiniFyn short links.
-- **Universal Link Expander & Hop Tracer (`/tools/link-expander`)**: Expands Bitly, TinyURL, and t.co links to show redirect chains without visiting suspicious sites.
+---
 
-### 3. 📱 Google Play Store ASO & Localization
-- **Keyword Optimization**:
-  - ScamGuard: `ScamGuard: AI Link & Scam Check` (Target: *Phishing detector, QR safety, SMS link check*).
-  - CensorFyn: `CensorFyn: Photo Privacy & Blur` (Target: *Blur faces, Redact PII, Remove EXIF GPS*).
-  - ClipFyn: `ClipFyn: Video Crop & Fit 9:16` (Target: *Reels, Shorts, Video Formatter*).
-- **Multi-Language Listings**: Localize Play Store descriptions into **Spanish, Portuguese (Brazil), German, French, and Hindi** to boost organic downloads in Tier 1 and Tier 2 PPP regions.
-- **High-Contrast Screenshots**: Feature bold benefit callout headers (*"100% Offline"*, *"True Pixel Destruction"*, *"Zero Video Uploads"*).
+### ⏳ Upcoming Focus & Active Priorities
 
-### 4. 🌐 Privacy & Developer Community Launchpad
-- **Reddit Showcases**: Post technical deep dives on **r/privacy**, **r/androidapps**, and **r/selfhosted** focusing on CensorFyn's irreversible raster pixel destruction vs standard removable vector masks.
-- **Hacker News (Show HN)**: Launch CensorFyn (*100% on-device image redaction*) and MiniFyn (*Next.js 16 Edge Link Shortener*).
-- **Product Hunt**: Schedule staggered launches for each standalone tool to capture featured badges.
+1. **CensorFyn Enhancements**:
+   - **Auto Screenshot Cropper**: 1-tap automated physical cropping to remove top status bar (clock/battery) and bottom navigation bar.
+   - **Video Redaction Engine**: Hardware decoding via AndroidX Media3 / OpenGL surface pipeline with keyframe ML Kit inference + object tracking (Kalman / ByteTrack).
+   - **Batch Processing**: Multi-file media picker and parallel background isolate export.
 
-### 5. 🧩 Lightweight Browser Extension (Future Expansion)
-- Build a lightweight **MiniFyn + ScamGuard Chrome Extension** with 1-click URL shortening and inline link safety warnings on desktop.
+2. **MiniFyn Web & Free Tools**:
+   - **Inspection Trust Banner**: Embed ScamGuard Play Store CTA directly on `mnfy.in/[slug]+` inspection views.
+   - **Custom QR Code Generator (`/tools/qr-generator`)**: High-demand web utility with custom brand colors, logos, and instant SVG/PNG exports.
+   - **Universal Link Expander & Hop Tracer (`/tools/link-expander`)**: Expands shortened redirect chains safely without executing target scripts.
+
+3. **Store Creatives & ClipFyn Review**:
+   - **Listing Creatives**: Refresh high-contrast screenshot assets with benefit-first headers.
+   - **ClipFyn Promotion**: Update metadata/ASO once Google Play production access review concludes.
+
+4. **Desktop Extension**:
+   - Build a lightweight **MiniFyn + ScamGuard Chrome Extension** with 1-click URL shortening and inline link safety warnings on desktop.
