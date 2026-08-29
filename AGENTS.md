@@ -112,7 +112,7 @@ node scripts/e2e-pricing-and-billing.mjs
   - CensorFyn: [`/censorfyn`](file:///Users/sylvester/Projects/personal/minifyn/backend/src/app/(apps)/censorfyn/page.tsx)
 - **Marketing Case Redirects**: All CamelCase variations (`/ScamGuard`, `/ClipFyn`, `/CensorFyn`) and legacy `/LinkGuard` are 301-redirected in [`next.config.mjs`](file:///Users/sylvester/Projects/personal/minifyn/backend/next.config.mjs) to their canonical lowercase endpoints to preserve SEO authority.
 - **Rich Structured Data**: Every app landing page contains Google JSON-LD schema for `MobileApplication`, `FAQPage`, and `BreadcrumbList`.
-- **Mobile Backend Protection**: `/api/linkguard/*` endpoints are strictly reserved for Google Play Integrity verified mobile clients and must not be called directly by public unauthenticated web widgets.
+- **Mobile Backend Protection**: `/api/scamguard/v1/*` endpoints are strictly reserved for Google Play Integrity verified mobile clients and must not be called directly by public unauthenticated web widgets. Legacy `/api/linkguard/*` and `/api/scamguard-ai/*` routes remain compatibility-only.
 
 ---
 
@@ -150,10 +150,11 @@ node scripts/e2e-pricing-and-billing.mjs
 
 #### ✅ Completed & Live
 1. **ScamGuard**:
+   - Production App `v2.5.0+77` with bundled on-device AI Model `v22` (41 features + 256 char sequence).
+   - Canonical `/api/scamguard/v1/*` endpoints (`check`, `policy`, `model-manifest`, `announcements/send`) with Play Integrity verification and backward-compatibility preservation.
    - On-device TFLite model evaluation + fallback cloud checks (`WebRisk + OpenPhish`).
-   - Play Integrity verification (`/api/linkguard/v3/check`) & privacy-preserving FCM topic announcements.
    - Daily silent security tip rotation (8:30 AM local) & zero-PII categorical analytics.
-   - Automated AAB/IPA release publishing pipelines.
+   - Automated AAB/IPA release publishing pipelines supporting multi-track (`internal`, `production`).
    - **Multi-Language Play Store Listings Published**: `en-US`, `en-GB`, `es-419`, `es-ES`, `pt-BR`, `de-DE`, `fr-FR`, `hi-IN`.
 2. **ClipFyn**:
    - AndroidX Media3 hardware encoding with 9:16 vertical safe-zone centering.
@@ -169,7 +170,8 @@ node scripts/e2e-pricing-and-billing.mjs
    - Next.js 16 Edge Route Handlers (`~15ms` 307 redirects).
    - Aggregated daily click metrics (`analytics_summary`) saving 95%+ DB footprint.
    - Dual-gateway payments (Razorpay + PayPal PPP regional tiers).
-   - Web utilities: Code Minifier, JSON Formatter, JWT Debugger.
+   - Web utilities: Code Minifier, JSON Formatter, JWT Debugger, and Branded QR Code Generator.
+   - ScamGuard Trust & Inspection Banner embedded on `mnfy.in/[slug]+` inspection views.
 5. **Marketing Cockpit (`scamguard-studio`)**:
    - Multi-tenant Fastify/React operational dashboard.
    - AES-256 BYO credentials vault and Gemini Flash AI batch composer.
@@ -185,8 +187,6 @@ node scripts/e2e-pricing-and-billing.mjs
    - **Batch Processing**: Multi-file media picker and parallel background isolate export.
 
 2. **MiniFyn Web & Free Tools**:
-   - **Inspection Trust Banner**: Embed ScamGuard Play Store CTA directly on `mnfy.in/[slug]+` inspection views.
-   - **Custom QR Code Generator (`/tools/qr-generator`)**: High-demand web utility with custom brand colors, logos, and instant SVG/PNG exports.
    - **Universal Link Expander & Hop Tracer (`/tools/link-expander`)**: Expands shortened redirect chains safely without executing target scripts.
 
 3. **Store Creatives & ClipFyn Review**:
