@@ -314,14 +314,14 @@ describe("scamguard AI model manifest route", () => {
     );
   });
 
-  test("v4 follows active model versions above v13", async () => {
+  test("caps v4 active model updates to v21", async () => {
     const requestHash = apiModeRequestHash();
-    const manifestV14 = {
-      model_version: "14",
+    const manifestV21 = {
+      model_version: "21",
       feature_schema_version: "1.2.0",
       runtime: "tensorflow-lite",
-      model_file: "model_v14.tflite",
-      download_url: "gs://linkguard-models/scamguard-ai/v14/model_v14.tflite",
+      model_file: "model_v21.tflite",
+      download_url: "gs://linkguard-models/scamguard-ai/v21/model_v21.tflite",
       sha256: "d".repeat(64),
       size_bytes: 789,
       signature_algorithm: "ed25519",
@@ -335,13 +335,13 @@ describe("scamguard AI model manifest route", () => {
       }
       if (url.includes("scamguard-ai%2Factive_model.json")) {
         return Response.json({
-          active_version: "14",
-          manifest_path: "scamguard-ai/v14/model_manifest.json",
+          active_version: "22",
+          manifest_path: "scamguard-ai/v22/model_manifest.json",
           updated_at: "2026-05-30T00:00:00Z",
         });
       }
-      if (url.includes("scamguard-ai%2Fv14%2Fmodel_manifest.json")) {
-        return Response.json(manifestV14);
+      if (url.includes("scamguard-ai%2Fv21%2Fmodel_manifest.json")) {
+        return Response.json(manifestV21);
       }
       return new Response("unexpected", { status: 404 });
     });
@@ -359,12 +359,96 @@ describe("scamguard AI model manifest route", () => {
     const json = await response.json();
 
     expect(response.status).toBe(200);
-    expect(json.manifest).toMatchObject(manifestV14);
-    expect(json.download_url).toContain("/linkguard-models/scamguard-ai/v14/model_v14.tflite");
+    expect(json.manifest).toMatchObject(manifestV21);
+    expect(json.download_url).toContain("/linkguard-models/scamguard-ai/v21/model_v21.tflite");
     expect(fetchMock).toHaveBeenCalledWith(
-      expect.stringContaining("scamguard-ai%2Fv14%2Fmodel_manifest.json"),
+      expect.stringContaining("scamguard-ai%2Fv21%2Fmodel_manifest.json"),
       expect.any(Object)
     );
+  });
+
+  test("rejects active models below v22 on scamguard v1", async () => {
+    const requestHash = apiModeRequestHash();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.startsWith("https://playintegrity.googleapis.com/")) {
+          return Response.json(integrityPayload(requestHash));
+        }
+        if (url.includes("scamguard-ai%2Factive_model.json")) {
+          return Response.json({
+            active_version: "21",
+            manifest_path: "scamguard-ai/v21/model_manifest.json",
+          });
+        }
+        return new Response("unexpected", { status: 404 });
+      })
+    );
+
+    const { POST } = await import("../../../scamguard/v1/model-manifest/route");
+    const response = await POST(
+      manifestRequest({
+        body: { api_mode: true },
+        apiModeQuery: true,
+        requestHash,
+        apiVersion: "scamguard-v1",
+      })
+    );
+    const json = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(json.reason).toContain("v22 or newer is required");
+  });
+
+  test("scamguard v1 follows active models from v22 onward", async () => {
+    const requestHash = apiModeRequestHash();
+    const manifestV22 = {
+      model_version: "22",
+      feature_schema_version: "2.0.0",
+      runtime: "tensorflow-lite",
+      model_file: "model_v22.tflite",
+      download_url: "gs://linkguard-models/scamguard-ai/v22/model_v22.tflite",
+      sha256: "e".repeat(64),
+      size_bytes: 987,
+      signature_algorithm: "ed25519",
+      signing_key_id: "prod-2026-05",
+      signature: "signed",
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.startsWith("https://playintegrity.googleapis.com/")) {
+          return Response.json(integrityPayload(requestHash));
+        }
+        if (url.includes("scamguard-ai%2Factive_model.json")) {
+          return Response.json({
+            active_version: "22",
+            manifest_path: "scamguard-ai/v22/model_manifest.json",
+          });
+        }
+        if (url.includes("scamguard-ai%2Fv22%2Fmodel_manifest.json")) {
+          return Response.json(manifestV22);
+        }
+        return new Response("unexpected", { status: 404 });
+      })
+    );
+
+    const { POST } = await import("../../../scamguard/v1/model-manifest/route");
+    const response = await POST(
+      manifestRequest({
+        body: { api_mode: true },
+        apiModeQuery: true,
+        requestHash,
+        apiVersion: "scamguard-v1",
+      })
+    );
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.manifest).toMatchObject(manifestV22);
+    expect(json.download_url).toContain("/linkguard-models/scamguard-ai/v22/model_v22.tflite");
   });
 
   test("surfaces the failing GCS object when the active pointer cannot be read", async () => {
@@ -428,7 +512,7 @@ function manifestRequest(input: {
   };
   requestHash?: string;
   apiModeQuery?: boolean;
-  apiVersion?: "v3" | "v4";
+  apiVersion?: "v3" | "v4" | "scamguard-v1";
 }): NextRequest {
   const headers: Record<string, string> = {
     "content-type": "application/json",
@@ -441,9 +525,13 @@ function manifestRequest(input: {
   }
 
   const apiVersion = input.apiVersion || "v3";
+  const basePath =
+    apiVersion === "scamguard-v1"
+      ? "/api/scamguard/v1/model-manifest"
+      : `/api/scamguard-ai/${apiVersion}/model-manifest`;
   const url = input.apiModeQuery
-    ? `https://www.minifyn.com/api/scamguard-ai/${apiVersion}/model-manifest?api_mode=true`
-    : `https://www.minifyn.com/api/scamguard-ai/${apiVersion}/model-manifest`;
+    ? `https://www.minifyn.com${basePath}?api_mode=true`
+    : `https://www.minifyn.com${basePath}`;
 
   return new Request(url, {
     method: "POST",
@@ -475,6 +563,9 @@ function integrityPayload(requestHash: string) {
       },
       deviceIntegrity: {
         deviceRecognitionVerdict: ["MEETS_DEVICE_INTEGRITY"],
+      },
+      accountDetails: {
+        appLicensingVerdict: "LICENSED",
       },
     },
   };

@@ -15,6 +15,8 @@ const ACTIVE_MODEL_OBJECT =
   process.env.SCAMGUARD_AI_ACTIVE_MODEL_OBJECT ||
   "scamguard-ai/active_model.json";
 const V3_MAX_MODEL_VERSION = 13;
+const V4_MAX_MODEL_VERSION = 21;
+const SCAMGUARD_V1_MIN_MODEL_VERSION = 22;
 const DOWNLOAD_TTL_SECONDS = Number(
   process.env.SCAMGUARD_AI_DOWNLOAD_TTL_SECONDS || "900"
 );
@@ -31,6 +33,8 @@ const PLAY_ALLOWED_DEVICE_VERDICTS = (
   .split(",")
   .map((item) => item.trim())
   .filter(Boolean);
+const PLAY_REQUIRE_LICENSED =
+  (process.env.LINKGUARD_PLAY_REQUIRE_LICENSED || "true") === "true";
 
 type ManifestRequest = {
   productId: string;
@@ -51,6 +55,9 @@ type DecodedIntegrityPayload = {
     };
     deviceIntegrity?: {
       deviceRecognitionVerdict?: string[];
+    };
+    accountDetails?: {
+      appLicensingVerdict?: string;
     };
   };
 };
@@ -149,7 +156,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const manifest = await readActiveManifest(maxModelVersionForRequest(req));
+    const manifest = await readActiveManifest(modelVersionRangeForRequest(req));
     const modelObject = modelObjectFromManifest(manifest);
     const expiresIn = Number.isFinite(DOWNLOAD_TTL_SECONDS)
       ? Math.max(60, Math.min(DOWNLOAD_TTL_SECONDS, 15 * 60))
@@ -290,6 +297,12 @@ async function verifyPlayIntegrity(input: {
     if (!hasAllowedDeviceVerdict) {
       return { ok: false, reason: "Device integrity verdict is not acceptable." };
     }
+    if (
+      PLAY_REQUIRE_LICENSED &&
+      external?.accountDetails?.appLicensingVerdict !== "LICENSED"
+    ) {
+      return { ok: false, reason: "App licensing verdict is not LICENSED." };
+    }
   } catch (error) {
     return {
       ok: false,
@@ -324,54 +337,77 @@ async function decodeIntegrityToken(
   return (await response.json()) as DecodedIntegrityPayload;
 }
 
+type ModelVersionRange = {
+  min?: number;
+  max?: number;
+};
+
 async function readActiveManifest(
-  maxModelVersion?: number
+  range: ModelVersionRange
 ): Promise<Record<string, unknown>> {
   const active = await readGcsJson(ACTIVE_MODEL_OBJECT);
   if (active.manifest && typeof active.manifest === "object") {
-    return readCappedManifestIfNeeded(
+    return readCompatibleManifest(
       active.manifest as Record<string, unknown>,
-      maxModelVersion
+      range
     );
   }
   if (isManifest(active)) {
-    return readCappedManifestIfNeeded(active, maxModelVersion);
+    return readCompatibleManifest(active, range);
   }
 
   const manifestPath = String(active.manifest_path || "").trim();
   if (!isSafeGcsObjectPath(manifestPath)) {
     throw new Error("AI model manifest pointer is invalid.");
   }
+  const activeVersion = modelVersionNumber(active.active_version);
+  if (
+    range.min !== undefined &&
+    activeVersion !== null &&
+    activeVersion < range.min
+  ) {
+    throw new Error(
+      `No compatible ScamGuard model is active; v${range.min} or newer is required.`
+    );
+  }
   const requestedManifestPath = cappedManifestPath({
     manifestPath,
-    activeVersion: modelVersionNumber(active.active_version),
-    maxModelVersion,
+    activeVersion,
+    maxModelVersion: range.max,
   });
   const manifest = await readGcsJson(requestedManifestPath);
   if (manifest.manifest && typeof manifest.manifest === "object") {
-    return readCappedManifestIfNeeded(
+    return readCompatibleManifest(
       manifest.manifest as Record<string, unknown>,
-      maxModelVersion
+      range
     );
   }
   if (!isManifest(manifest)) {
     throw new Error("AI model manifest is invalid.");
   }
-  return readCappedManifestIfNeeded(manifest, maxModelVersion);
+  return readCompatibleManifest(manifest, range);
 }
 
-async function readCappedManifestIfNeeded(
+async function readCompatibleManifest(
   manifest: Record<string, unknown>,
-  maxModelVersion?: number
+  range: ModelVersionRange
 ): Promise<Record<string, unknown>> {
-  if (maxModelVersion === undefined) {
-    return manifest;
-  }
   const modelVersion = modelVersionNumber(manifest.model_version);
-  if (modelVersion === null || modelVersion <= maxModelVersion) {
+  if (
+    range.min !== undefined &&
+    (modelVersion === null || modelVersion < range.min)
+  ) {
+    throw new Error(
+      `No compatible ScamGuard model is active; v${range.min} or newer is required.`
+    );
+  }
+  if (range.max === undefined) {
     return manifest;
   }
-  const cappedManifest = await readGcsJson(versionedManifestPath(maxModelVersion));
+  if (modelVersion === null || modelVersion <= range.max) {
+    return manifest;
+  }
+  const cappedManifest = await readGcsJson(versionedManifestPath(range.max));
   if (cappedManifest.manifest && typeof cappedManifest.manifest === "object") {
     return cappedManifest.manifest as Record<string, unknown>;
   }
@@ -453,9 +489,18 @@ function modelObjectFromManifest(manifest: Record<string, unknown>): string {
   return `scamguard-ai/v${version}/${file}`;
 }
 
-function maxModelVersionForRequest(req: NextRequest): number | undefined {
+function modelVersionRangeForRequest(req: NextRequest): ModelVersionRange {
   const path = req.nextUrl?.pathname || new URL(req.url).pathname;
-  return path.includes("/api/scamguard-ai/v3/") ? V3_MAX_MODEL_VERSION : undefined;
+  if (path.includes("/api/scamguard-ai/v3/")) {
+    return { max: V3_MAX_MODEL_VERSION };
+  }
+  if (path.includes("/api/scamguard-ai/v4/")) {
+    return { max: V4_MAX_MODEL_VERSION };
+  }
+  if (path.includes("/api/scamguard/v1/")) {
+    return { min: SCAMGUARD_V1_MIN_MODEL_VERSION };
+  }
+  return {};
 }
 
 function modelVersionNumber(value: unknown): number | null {

@@ -105,8 +105,8 @@ const useCases = [
 
 const trustPoints = [
   'Android package: com.minifyn.linkguard',
-  'Production checks use /api/linkguard/v3/check',
-  'AI model metadata uses /api/scamguard-ai/v4/model-manifest',
+  'Production checks use /api/scamguard/v1/check',
+  'AI model metadata uses /api/scamguard/v1/model-manifest',
   'Published app privacy policy and terms',
 ];
 

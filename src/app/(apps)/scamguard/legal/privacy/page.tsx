@@ -84,7 +84,7 @@ export default function ScamGuardPrivacyPage() {
             reputation signals, redirect behavior, and AI-assisted risk signals.
           </li>
           <li>
-            Requests are sent to <code>minifyn.com/api/linkguard/*</code> for
+            Requests are sent to <code>minifyn.com/api/scamguard/v1/*</code> for
             cloud link analysis when that feature is used. The request may include
             the submitted URL, a URL hash, app version, platform, and Play Integrity
             proof.
@@ -102,7 +102,7 @@ export default function ScamGuardPrivacyPage() {
           </li>
           <li>
             The app may request AI model manifest metadata and signed model
-            download URLs from <code>minifyn.com/api/scamguard-ai/*</code> to
+            download URLs from <code>minifyn.com/api/scamguard/v1/model-manifest</code> to
             support AI-assisted risk analysis. These requests may include app
             version, platform, API mode or AI Mode claims, and Play Integrity
             proof. AI Mode controls access to full AI review details and
