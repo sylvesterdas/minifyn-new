@@ -163,6 +163,9 @@ node scripts/e2e-pricing-and-billing.mjs
    - 14-day closed testing completed (pending production access review).
 3. **CensorFyn**:
    - 100% On-device image redaction (BlazeFace, OCR PII parsing, Barcode/QR, Freehand gesture drawing).
+   - Auto screenshot cropping (`ScreenshotCropService`) for status bar and navigation bar removal.
+   - Batch media redaction & background isolate export coordinator (`BatchExportCoordinator`).
+   - Video Redaction Engine (AndroidX Media3 Transformer + custom OpenGL ES shader raster masks).
    - Destructive raster pixel modifications (Gaussian blur, Mosaic pixelation, Solid blackout) & EXIF/GPS stripping.
    - SHA-256 legal audit manifest generator.
    - **Multi-Language Play Store Listings Published**: `en-US`, `en-GB`, `es-419`, `es-ES`, `pt-BR`, `de-DE`, `fr-FR`, `hi-IN`.
@@ -181,17 +184,12 @@ node scripts/e2e-pricing-and-billing.mjs
 
 ### ⏳ Upcoming Focus & Active Priorities
 
-1. **CensorFyn Enhancements**:
-   - **Auto Screenshot Cropper**: 1-tap automated physical cropping to remove top status bar (clock/battery) and bottom navigation bar.
-   - **Video Redaction Engine**: Hardware decoding via AndroidX Media3 / OpenGL surface pipeline with keyframe ML Kit inference + object tracking (Kalman / ByteTrack).
-   - **Batch Processing**: Multi-file media picker and parallel background isolate export.
-
-2. **MiniFyn Web & Free Tools**:
+1. **MiniFyn Web & Free Tools**:
    - **Universal Link Expander & Hop Tracer (`/tools/link-expander`)**: Expands shortened redirect chains safely without executing target scripts.
 
-3. **Store Creatives & ClipFyn Review**:
+2. **Store Creatives & ClipFyn Review**:
    - **Listing Creatives**: Refresh high-contrast screenshot assets with benefit-first headers.
    - **ClipFyn Promotion**: Update metadata/ASO once Google Play production access review concludes.
 
-4. **Desktop Extension**:
+3. **Desktop Extension**:
    - Build a lightweight **MiniFyn + ScamGuard Chrome Extension** with 1-click URL shortening and inline link safety warnings on desktop.
