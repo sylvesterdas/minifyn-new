@@ -4,6 +4,7 @@ import { Disclaimer } from '@/components/disclaimer';
 import { RelatedTools } from '@/components/related-tools';
 import type { Metadata } from 'next';
 import { AdsenseAd } from '@/components/adsense-ad';
+import { ToolSeo } from '@/components/tool-seo';
 
 export const metadata: Metadata = {
     title: 'JSON Formatter & Validator | MiniFyn Tools',
@@ -11,6 +12,8 @@ export const metadata: Metadata = {
     alternates: {
         canonical: 'https://www.minifyn.com/tools/json-formatter',
     },
+    openGraph: { title: 'JSON Formatter & Validator Online | MiniFyn', description: 'Format and validate JSON locally in your browser.', url: 'https://www.minifyn.com/tools/json-formatter', type: 'website', images: ['/og.png'] },
+    twitter: { card: 'summary_large_image', title: 'JSON Formatter & Validator | MiniFyn', description: 'Format JSON locally in your browser.', images: ['/og.png'] },
 };
 
 export default function JsonFormatterPage() {
@@ -25,6 +28,7 @@ export default function JsonFormatterPage() {
                 </div>
                 
                 <JsonFormatter />
+                <ToolSeo title="JSON Formatter" description="Need to share an endpoint or payload? Create a trackable MiniFyn short link for your documentation or team." cta="Turn your finished work into a shareable link" href="/" />
             </div>
 
             <div className="container mx-auto px-4">

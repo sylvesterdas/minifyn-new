@@ -37,6 +37,14 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: "/api/linkguard/:path*",
+        headers: [
+          { key: "Deprecation", value: "true" },
+          { key: "Sunset", value: "2027-01-01" },
+          { key: "Link", value: '</api/scamguard/v1/check>; rel="successor-version"' },
+        ],
+      },
+      {
         source: "/(.*)",
         headers: [
           {

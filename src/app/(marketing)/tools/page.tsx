@@ -1,5 +1,5 @@
 
-import { Code, Wand2, ArrowRight, Shield } from 'lucide-react';
+import { Code, Wand2, ArrowRight, Shield, Route } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -17,6 +17,7 @@ export const metadata: Metadata = {
 };
 
 const toolSections = [
+    { href: '/tools/link-expander', icon: <Route className="h-8 w-8 text-primary" />, title: 'Link Expander & Hop Tracer', description: 'Safely inspect shortened URLs and their redirect chains.' },
     {
         href: '/tools/code-minifier',
         icon: <Code className="h-8 w-8 text-primary" />,
@@ -71,7 +72,7 @@ export default function ToolsPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Developer Tools</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-            A collection of free, fast, and secure tools that run entirely in your browser. No data is ever sent to our servers.
+            A collection of free, fast, and secure tools. Most tools run entirely in your browser; Link Expander securely checks redirect chains on our server without loading destination pages.
           </p>
         </div>
 

@@ -272,7 +272,7 @@ export default function ClipFynPage() {
               <Button asChild size="lg" className="gap-2 font-semibold shadow-md">
                 <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
                   <Smartphone className="h-5 w-5" />
-                  <span>Get on Google Play</span>
+                  <span>Join ClipFyn’s Google Play review</span>
                 </a>
               </Button>
               <Button asChild variant="outline" size="lg">
@@ -533,14 +533,14 @@ export default function ClipFynPage() {
             Prepare Your Videos on Android with ClipFyn
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-base sm:text-lg">
-            Download ClipFyn on Google Play to crop, format, and review video framing before sharing.
+            ClipFyn is currently undergoing Google Play production-access review. Follow the listing for availability updates.
           </p>
 
           <div className="flex items-center justify-center pt-2">
             <Button asChild size="lg" className="gap-2 font-semibold shadow-lg">
               <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
                 <Smartphone className="h-5 w-5" />
-                <span>Get on Google Play</span>
+                <span>Follow Google Play review</span>
               </a>
             </Button>
           </div>

@@ -4,6 +4,7 @@ import { Disclaimer } from '@/components/disclaimer';
 import { RelatedTools } from '@/components/related-tools';
 import type { Metadata } from 'next';
 import { AdsenseAd } from '@/components/adsense-ad';
+import { ToolSeo } from '@/components/tool-seo';
 
 export const metadata: Metadata = {
     title: 'JWT Debugger | MiniFyn Tools',
@@ -11,6 +12,8 @@ export const metadata: Metadata = {
     alternates: {
         canonical: 'https://www.minifyn.com/tools/jwt-debugger',
     },
+    openGraph: { title: 'JWT Debugger Online | MiniFyn', description: 'Decode JWT headers and payloads locally without uploading tokens.', url: 'https://www.minifyn.com/tools/jwt-debugger', type: 'website', images: ['/og.png'] },
+    twitter: { card: 'summary_large_image', title: 'JWT Debugger | MiniFyn', description: 'Decode JWTs locally and safely.', images: ['/og.png'] },
 };
 
 export default function JwtDebuggerPage() {
@@ -25,6 +28,7 @@ export default function JwtDebuggerPage() {
                 </div>
                 
                 <JwtDebugger />
+                <ToolSeo title="JWT Debugger" description="When your integration is ready, use the MiniFyn developer API to create short links programmatically." cta="Connect your tools with the MiniFyn API" href="/docs/api" />
             </div>
 
             <div className="container mx-auto px-4">

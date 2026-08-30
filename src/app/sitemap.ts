@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = 'https://www.minifyn.com';
-  const lastModifiedStatic = new Date('2024-01-01').toISOString();
+  const lastModifiedStatic = new Date('2026-08-30').toISOString();
   const lastModifiedScamGuard = new Date('2026-06-02').toISOString();
   const lastModifiedClipFyn = new Date('2026-08-14').toISOString();
   const lastModifiedCensorFyn = new Date('2026-08-16').toISOString();
@@ -29,6 +29,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/tools/code-minifier`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${siteUrl}/tools/json-formatter`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${siteUrl}/tools/jwt-debugger`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${siteUrl}/tools/link-expander`, lastModified: new Date().toISOString(), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${siteUrl}/docs/guides/check-shortened-link`, lastModified: new Date().toISOString(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${siteUrl}/docs/guides/prepare-video-for-reels`, lastModified: new Date().toISOString(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${siteUrl}/docs/guides/redact-personal-information`, lastModified: new Date().toISOString(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${siteUrl}/docs/guides/remove-image-metadata`, lastModified: new Date().toISOString(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${siteUrl}/docs/guides/debug-jwt-online`, lastModified: new Date().toISOString(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${siteUrl}/docs/guides/format-json-online`, lastModified: new Date().toISOString(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/docs`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/docs/api`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/docs/guides`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.7 },
