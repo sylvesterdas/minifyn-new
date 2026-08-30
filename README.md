@@ -87,6 +87,24 @@ pnpm test
 pnpm build
 ```
 
+### ClipFyn marketing creatives
+
+Generate the five Google Play screenshot variants from the sibling ClipFyn project:
+
+```bash
+node generate_clipfyn_marketing.cjs
+```
+
+Override locations when working from another checkout:
+
+```bash
+CLIPFYN_SCREENSHOT_DIR=/path/to/screenshots \
+CLIPFYN_MARKETING_OUTPUT_DIR=/path/to/output \
+node generate_clipfyn_marketing.cjs
+```
+
+The CI workflow runs `pnpm audit --prod`, typechecking, tests, and a production build on pushes and pull requests.
+
 ---
 
 ## 📄 License

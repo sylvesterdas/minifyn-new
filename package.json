@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.vitest.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "audit:overrides": "node scripts/audit-overrides.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
