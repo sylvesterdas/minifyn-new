@@ -25,19 +25,21 @@ function DecodedSection({ title, data }: { title: string; data: object | null })
 
 export function JwtDebugger() {
     const [token, setToken] = useState('');
+    const [debouncedToken, setDebouncedToken] = useState('');
+    useEffect(() => { const timer = window.setTimeout(() => setDebouncedToken(token), 250); return () => window.clearTimeout(timer); }, [token]);
 
     const { decodedHeader, decodedPayload, error } = useMemo(() => {
-        if (!token.trim()) {
+        if (!debouncedToken.trim()) {
             return { decodedHeader: null, decodedPayload: null, error: null };
         }
         try {
-            const header = jwtDecode(token, { header: true });
-            const payload = jwtDecode<JwtPayload>(token);
+            const header = jwtDecode(debouncedToken, { header: true });
+            const payload = jwtDecode<JwtPayload>(debouncedToken);
             return { decodedHeader: header, decodedPayload: payload, error: null };
         } catch (e: any) {
             return { decodedHeader: null, decodedPayload: null, error: e.message || 'Invalid token' };
         }
-    }, [token]);
+    }, [debouncedToken]);
     
     useEffect(() => {
         if (decodedPayload && !error) {
@@ -72,7 +74,7 @@ export function JwtDebugger() {
                     </div>
                      {token && (
                         <Badge variant="secondary" className={getStatusColor()}>
-                            {error ? 'Invalid Token' : isExpired ? 'Expired' : 'Valid Signature'}
+                            {error ? 'Invalid Token' : isExpired ? 'Expired' : 'Decoded — signature not verified'}
                         </Badge>
                      )}
                 </div>

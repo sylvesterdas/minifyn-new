@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from './ui/card';
-import { ArrowRight, Code, Wand2, Shield } from 'lucide-react';
+import { ArrowRight, Code, Wand2, Shield, Route } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { UrlShortenerCard } from './url-shortener-card';
 
@@ -15,6 +15,7 @@ interface ToolInfo {
 }
 
 const allTools: ToolInfo[] = [
+    { href: '/tools/link-expander', icon: <Route className="h-8 w-8 text-primary" />, title: 'Link Expander & Hop Tracer', description: 'Safely inspect shortened URLs and their redirect chains.' },
     {
         href: '/tools/code-minifier',
         icon: <Code className="h-8 w-8 text-primary" />,

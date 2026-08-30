@@ -51,9 +51,12 @@ const minifyCss = (cssCode: string): string => {
 };
 
 const minifyHtml = (htmlCode: string): string => {
-  let minified = htmlCode.replace(/<!--[\s\S]*?-->/g, ""); // Remove comments
-  minified = minified.replace(/\s+/g, " "); // Collapse whitespace
-  minified = minified.replace(/> </g, "><"); // Remove space between tags
+  let minified = htmlCode.replace(/<!--[\s\S]*?-->/g, "");
+  // Preserve text-sensitive elements while reducing markup whitespace.
+  const preserved: string[] = [];
+  minified = minified.replace(/<(pre|textarea|script|style)\b[\s\S]*?<\/\1>/gi, (block) => { preserved.push(block); return `___MINIFY_PRESERVE_${preserved.length - 1}___`; });
+  minified = minified.replace(/\s+/g, " ").replace(/> </g, "><").trim();
+  minified = minified.replace(/___MINIFY_PRESERVE_(\d+)___/g, (_, index) => preserved[Number(index)]);
   return minified.trim();
 };
 
@@ -118,6 +121,9 @@ function JavascriptOptions({
   );
 }
 
+const MAX_FILES = 20;
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
+
 function BulkMinifier({ mangleJs }: { mangleJs: boolean }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isZipping, startZipTransition] = useTransition();
@@ -126,6 +132,7 @@ function BulkMinifier({ mangleJs }: { mangleJs: boolean }) {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
+    if (files.length > MAX_FILES) { toast({ title: "Too many files", description: `Select up to ${MAX_FILES} files at a time.`, variant: "destructive" }); return; }
 
     startZipTransition(async () => {
       const JSZip = (await import("jszip")).default;
@@ -144,6 +151,7 @@ function BulkMinifier({ mangleJs }: { mangleJs: boolean }) {
         }
 
         const content = await file.text();
+        if (file.size > MAX_FILE_BYTES) { toast({ title: "File too large", description: `'${file.name}' exceeds the 5 MB limit.`, variant: "destructive" }); return; }
         let minifiedContent: string;
         try {
           if (extension === "js") {
@@ -258,6 +266,7 @@ function SinglePasteMinifier({ mangleJs }: { mangleJs: boolean }) {
   const [outputCode, setOutputCode] = useState("");
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
+  const [language, setLanguage] = useState<Language | "auto">("auto");
   const { toast } = useToast();
 
   const inputSize = new Blob([inputCode]).size;
@@ -271,7 +280,7 @@ function SinglePasteMinifier({ mangleJs }: { mangleJs: boolean }) {
       return;
     }
 
-    const detectedLang = detectLanguage(inputCode);
+    const detectedLang = language === "auto" ? detectLanguage(inputCode) : language;
     if (!detectedLang) {
       toast({
         title: "Detection Failed",
@@ -320,12 +329,13 @@ function SinglePasteMinifier({ mangleJs }: { mangleJs: boolean }) {
         });
       }
     });
-  }, [inputCode, toast, mangleJs]);
+  }, [inputCode, toast, mangleJs, language]);
 
   const handleCopy = () => {
     if (outputCode) {
       navigator.clipboard.writeText(outputCode).then(() => {
         setCopied(true);
+        toast({ title: "Copied", description: "Minified code copied to clipboard." });
         setTimeout(() => setCopied(false), 2000);
       });
     }
@@ -400,6 +410,7 @@ function SinglePasteMinifier({ mangleJs }: { mangleJs: boolean }) {
               className="h-80 font-mono text-xs"
               aria-label="Code Input"
             />
+            <div className="space-y-2"><Label htmlFor="minifier-language">Language</Label><select id="minifier-language" value={language} onChange={(event) => setLanguage(event.target.value as Language | "auto")} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"><option value="auto">Auto-detect</option><option value="javascript">JavaScript</option><option value="css">CSS</option><option value="html">HTML</option><option value="json">JSON</option></select></div>
             <Button
               onClick={handleMinify}
               disabled={isPending || !inputCode}

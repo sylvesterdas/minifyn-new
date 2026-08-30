@@ -17,8 +17,11 @@ export async function triggerMaintenance(): Promise<void> {
     const lastRun = snapshot.val() || 0;
 
     if (Date.now() - lastRun > MAINTENANCE_INTERVAL) {
-      // Update the timestamp first to prevent race conditions
-      await lastRunRef.set(Date.now());
+      const claimed = await lastRunRef.transaction((value) => {
+        const previous = typeof value === 'number' ? value : 0;
+        return Date.now() - previous > MAINTENANCE_INTERVAL ? Date.now() : undefined;
+      });
+      if (!claimed.committed) return;
       console.log('Maintenance interval passed. Running cleanup tasks.');
       
       // Run maintenance tasks asynchronously

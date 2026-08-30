@@ -39,7 +39,8 @@ export function JsonFormatter() {
                 setOutputJson('');
                 setStatus('error');
                 // Provide a more user-friendly error message
-                const message = error.message.replace(/at position \d+/, (match: string) => `near ${match}`);
+                const position = typeof error?.message === 'string' ? error.message.match(/position (\d+)/)?.[1] : undefined;
+                const message = error.message.replace(/at position \d+/, position ? `at character ${position}` : '');
                 setErrorMessage(`Invalid JSON: ${message}`);
             }
         });
