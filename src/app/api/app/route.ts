@@ -58,7 +58,7 @@ const APPS: AppMetadata[] = [
     playstoreURL: "https://play.google.com/store/apps/details?id=com.minifyn.clipfyn",
     appstoreURL: null,
     logoUrl: "https://www.minifyn.com/images/clipfyn/logo.png",
-    published: false,
+    published: true,
   },
   {
     name: "Marketing Studio",
