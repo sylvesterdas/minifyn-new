@@ -30,19 +30,34 @@ const description =
 
 const screenshots = [
   {
-    src: `${visualBase}/home.png`,
-    title: "1. Source Inspection",
-    description: "Inspect video resolution, codec, and framerate before preparing.",
+    src: `${visualBase}/screenshot_1_welcome.jpg`,
+    title: "1. Instant Import & Diagnostics",
+    description: "Inspect resolution, rotation, frame cadence, and hardware encoder capabilities.",
   },
   {
-    src: `${visualBase}/format-options.png`,
-    title: "2. Layout & Aspect Ratio",
-    description: "Choose 9:16 vertical crop, blurred-background fit, or original framing.",
+    src: `${visualBase}/screenshot_2_aspect_modes.jpg`,
+    title: "2. Smart 9:16 Aspect Modes",
+    description: "Choose Fill & Crop, Blurred Letterbox, or Original Aspect Ratio preservation.",
   },
   {
-    src: `${visualBase}/crop-comparison.png`,
-    title: "3. Before/After Preview",
-    description: "Compare source and prepared video frames before exporting.",
+    src: `${visualBase}/screenshot_3_comparison_preview.jpg`,
+    title: "3. Side-by-Side Clarity Preview",
+    description: "Split-screen comparison slider to inspect video framing and clarity before saving.",
+  },
+  {
+    src: `${visualBase}/screenshot_4_export_standards.jpg`,
+    title: "4. Standardized Output Checks",
+    description: "Verify 1080p, 30 FPS CFR, BT.709 SDR, and share directly via Android share sheet.",
+  },
+  {
+    src: `${visualBase}/screenshot_5_hardware_profile.jpg`,
+    title: "5. Hardware Profile & Engine",
+    description: "Dedicated SoC hardware encoder details and background performance controls.",
+  },
+  {
+    src: `${visualBase}/screenshot_6_minifyn_suite.jpg`,
+    title: "6. MiniFyn Suite Integration",
+    description: "Seamlessly access companion offline utilities including ScamGuard and CensorFyn.",
   },
 ];
 
@@ -272,7 +287,7 @@ export default function ClipFynPage() {
               <Button asChild size="lg" className="gap-2 font-semibold shadow-md">
                 <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
                   <Smartphone className="h-5 w-5" />
-                  <span>Join ClipFyn’s Google Play review</span>
+                  <span>Get it on Google Play</span>
                 </a>
               </Button>
               <Button asChild variant="outline" size="lg">
@@ -301,7 +316,7 @@ export default function ClipFynPage() {
               <div className="absolute top-0 left-1/2 -translate-x-1/2 h-4 w-28 bg-black rounded-b-xl z-20" />
               <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-[2rem] bg-card">
                 <Image
-                  src={`${visualBase}/home.png`}
+                  src={`${visualBase}/screenshot_1_welcome.jpg`}
                   alt="ClipFyn Home Interface"
                   fill
                   className="object-cover"
@@ -357,7 +372,7 @@ export default function ClipFynPage() {
           </div>
 
           {/* Screenshot Cards */}
-          <div className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {screenshots.map((s, idx) => (
               <div
                 key={idx}
