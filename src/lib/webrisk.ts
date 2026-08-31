@@ -14,17 +14,22 @@ const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
  * @returns A promise that resolves to true if the URL is safe, false otherwise.
  */
 export async function isUrlSafe(url: string): Promise<boolean> {
-    console.log(`[WebRisk] Checking URL: ${url}`);
+    const isTest = process.env.NODE_ENV === 'test';
+    if (!isTest) {
+        console.log(`[WebRisk] Checking URL: ${url}`);
+    }
     
     const cachedEntry = safeUrlCache.get(url);
     if (cachedEntry && (Date.now() - cachedEntry.timestamp < CACHE_TTL)) {
-        console.log(`[WebRisk] Cache hit for URL: ${url}`);
+        if (!isTest) console.log(`[WebRisk] Cache hit for URL: ${url}`);
         return true;
     }
 
     const apiKey = process.env.WEBRISK_API_KEY;
     if (!apiKey) {
-        console.error("[WebRisk] WEBRISK_API_KEY is not configured. Cannot use Web Risk API. Failing open.");
+        if (!isTest) {
+            console.warn("[WebRisk] WEBRISK_API_KEY is not configured. Failing open.");
+        }
         return true; // Fail open if the service is misconfigured.
     }
     
