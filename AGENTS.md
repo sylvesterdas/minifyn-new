@@ -193,3 +193,15 @@ node scripts/e2e-pricing-and-billing.mjs
 
 3. **Desktop Extension**:
    - Build a lightweight **MiniFyn + ScamGuard Chrome Extension** with 1-click URL shortening and inline link safety warnings on desktop.
+
+4. **Universal How-To & Guided Usefulness Program (All Products)**:
+   - Create plain-language, task-first how-tos for every app, tool, major feature, setting, permission, export flow, and paid capability across ScamGuard, ClipFyn, CensorFyn, MiniFyn Web, and Marketing Studio.
+   - Write for a first-time user with no technical knowledge: explain what a control does, when to use it, what will happen next, what the result means, and how to recover from common mistakes. Prefer short steps, examples, screenshots/video walkthroughs, contextual help, empty-state guidance, and searchable troubleshooting over assumed knowledge or jargon.
+   - Add an in-product help entry point and a matching public support/how-to hub. Keep documentation versioned with releases and verify it against the real UI on Android, web, and Studio before marking it complete.
+   - Measure comprehension and task success (for example, support searches, repeated failed actions, abandonment, and optional usability tests) without collecting unnecessary personal data.
+
+5. **Ethical Behavioral Design & Marketing Experimentation (All Products)**:
+   - Research how visual context, copy, defaults, sequencing, perceived effort, trust cues, progress feedback, social proof, color, imagery, sound, and pricing presentation affect comprehension, confidence, activation, retention, and ethical conversion for each product.
+   - Brainstorm and test hypotheses for product UX and marketing graphics, including calm versus urgent safety framing for ScamGuard, privacy/control versus transformation outcomes for CensorFyn, before/after and creator-confidence framing for ClipFyn, clarity/speed/trust framing for MiniFyn tools, and reliability/operational-control framing for Marketing Studio.
+   - Treat examples such as clouds-versus-coins backgrounds as hypotheses, not universal rules: run controlled A/B or sequential tests with a defined primary metric, guardrail metrics, audience/context, sample-size rationale, and stop criteria. Record the result and confidence level in an experiment log.
+   - Use behavioral psychology to reduce confusion and help users make informed choices—not dark patterns. No fabricated scarcity, deceptive urgency, disguised ads, coercive defaults, manipulative consent flows, exploitative vulnerability targeting, or unsubstantiated claims. Respect privacy, accessibility, cultural context, and the existing app-specific ad/payment rules.
