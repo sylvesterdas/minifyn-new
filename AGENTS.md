@@ -195,9 +195,12 @@ node scripts/e2e-pricing-and-billing.mjs
    - Build a lightweight **MiniFyn + ScamGuard Chrome Extension** with 1-click URL shortening and inline link safety warnings on desktop.
 
 4. **Universal How-To & Guided Usefulness Program (All Products)**:
-   - Create plain-language, task-first how-tos for every app, tool, major feature, setting, permission, export flow, and paid capability across ScamGuard, ClipFyn, CensorFyn, MiniFyn Web, and Marketing Studio.
-   - Write for a first-time user with no technical knowledge: explain what a control does, when to use it, what will happen next, what the result means, and how to recover from common mistakes. Prefer short steps, examples, screenshots/video walkthroughs, contextual help, empty-state guidance, and searchable troubleshooting over assumed knowledge or jargon.
-   - Add an in-product help entry point and a matching public support/how-to hub. Keep documentation versioned with releases and verify it against the real UI on Android, web, and Studio before marking it complete.
+   - **Started/completed for the current rollout**: public MiniFyn Help Center and documentation hub at `/help` and `/docs`, with product guides under `/docs/guides/*` for MiniFyn, ScamGuard, ClipFyn, CensorFyn, and Marketing Studio.
+   - **Started/completed for the current rollout**: ScamGuard native Help Center, ClipFyn native Help Center from Settings, and Marketing Studio Help & Support dashboard page.
+   - **Deferred**: CensorFyn in-product help and contextual UI changes remain deferred while the app is in Google Play production-access review; public CensorFyn documentation may continue to be maintained.
+   - Continue adding plain-language, task-first how-tos for every major feature, setting, permission, export flow, and paid capability. Write for first-time users: explain purpose, prerequisites, next steps, expected results, privacy implications, recovery from mistakes, and troubleshooting.
+   - Add contextual links from MiniFyn dashboard pages, empty/error states, ScamGuard scanner/result flows, and ClipFyn export/permission states. Keep documentation versioned with releases and verify it against real UI on Android, web, and Studio.
+   - Feedback and complaints should direct users to the professional support address: `support@minifyn.com`. Tell users not to send passwords, OTPs, tokens, or private media.
    - Measure comprehension and task success (for example, support searches, repeated failed actions, abandonment, and optional usability tests) without collecting unnecessary personal data.
 
 5. **Ethical Behavioral Design & Marketing Experimentation (All Products)**:
