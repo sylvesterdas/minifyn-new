@@ -1,5 +1,5 @@
 
-import { Link as LinkIcon, QrCode, HardDrive, Key } from 'lucide-react';
+import { Link as LinkIcon, QrCode, HardDrive, Key, ShieldCheck, Video, Image as ImageIcon, BriefcaseBusiness } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
@@ -19,6 +19,7 @@ const navLinks = [
     { name: 'Generating a QR Code', href: '#generate-qr' },
     { name: 'Managing Your Links', href: '#manage-links' },
     { name: 'Using the API', href: '#using-api' },
+    { name: 'Product guides', href: '#product-guides' },
 ];
 
 export default function GuidesPage() {
@@ -97,7 +98,7 @@ export default function GuidesPage() {
                     </Card>
                 </section>
                 
-                 <section id="using-api" className="scroll-mt-24">
+                <section id="using-api" className="scroll-mt-24">
                     <Card>
                         <CardHeader>
                              <CardTitle className="flex items-center text-2xl"><Key className="mr-3 text-primary" /> Using the API</CardTitle>
@@ -111,6 +112,21 @@ export default function GuidesPage() {
                                 <li>Use this key in the `Authorization: Bearer YOUR_API_KEY` header when making requests.</li>
                                 <li>For detailed endpoint information, refer to our full <Link href="/docs/api" className="underline text-primary">API Documentation</Link>.</li>
                             </ol>
+                        </CardContent>
+                    </Card>
+                </section>
+
+                <section id="product-guides" className="scroll-mt-24">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-2xl">Product guides</CardTitle>
+                            <CardDescription>Task-focused help for the MiniFyn product family. Guides explain what to do, what to expect, and how to recover when something goes wrong.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid gap-4 sm:grid-cols-2">
+                            <Link href="/docs/guides/scamguard" className="rounded-lg border p-4 hover:border-primary"><ShieldCheck className="mb-2 text-primary" /><h3 className="font-semibold">ScamGuard</h3><p className="text-sm text-muted-foreground">Check links, understand risk results, and use QR scanning safely.</p></Link>
+                            <Link href="/docs/guides/clipfyn" className="rounded-lg border p-4 hover:border-primary"><Video className="mb-2 text-primary" /><h3 className="font-semibold">ClipFyn</h3><p className="text-sm text-muted-foreground">Prepare vertical videos, choose framing, process media, and export.</p></Link>
+                            <Link href="/docs/guides/censorfyn" className="rounded-lg border p-4 hover:border-primary"><ImageIcon className="mb-2 text-primary" /><h3 className="font-semibold">CensorFyn</h3><p className="text-sm text-muted-foreground">Redact personal information and remove image metadata.</p></Link>
+                            <Link href="/docs/guides/marketing-studio" className="rounded-lg border p-4 hover:border-primary"><BriefcaseBusiness className="mb-2 text-primary" /><h3 className="font-semibold">Marketing Studio</h3><p className="text-sm text-muted-foreground">Configure a workspace, connect services, review content, and schedule safely.</p></Link>
                         </CardContent>
                     </Card>
                 </section>
