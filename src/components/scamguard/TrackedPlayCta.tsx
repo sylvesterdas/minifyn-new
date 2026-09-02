@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 interface TrackedPlayCtaProps {
-  placement: "hero" | "footer";
+  placement: "hero" | "nav" | "footer";
+  href?: string;
   ariaLabel?: string;
   className?: string;
   badgeWidth?: number;
@@ -14,6 +15,7 @@ interface TrackedPlayCtaProps {
 
 export function TrackedPlayCta({
   placement,
+  href = "/go/scamguard-play",
   ariaLabel = "Get ScamGuard: Link Checker on Google Play",
   className = "inline-flex transition-transform hover:-translate-y-0.5",
   badgeWidth = 180,
@@ -22,20 +24,20 @@ export function TrackedPlayCta({
 }: TrackedPlayCtaProps) {
   const containerRef = useRef<HTMLAnchorElement>(null);
   const impressionFired = useRef<boolean>(false);
-  const [targetHref, setTargetHref] = useState<string>(`/go/scamguard-play?placement=${placement}`);
+  const [targetHref, setTargetHref] = useState<string>(`${href}?placement=${placement}`);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const currentParams = new URLSearchParams(window.location.search);
-      const params = new URLSearchParams();
-      params.set("placement", placement);
+      const destination = new URL(href, window.location.origin);
+      destination.searchParams.set("placement", placement);
       for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"]) {
         const val = currentParams.get(key);
-        if (val) params.set(key, val);
+        if (val) destination.searchParams.set(key, val);
       }
-      setTargetHref(`/go/scamguard-play?${params.toString()}`);
+      setTargetHref(`${destination.pathname}${destination.search}`);
     }
-  }, [placement]);
+  }, [href, placement]);
 
   useEffect(() => {
     const el = containerRef.current;

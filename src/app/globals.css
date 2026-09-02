@@ -47,6 +47,35 @@
     --input: 217 33% 17%;
     --ring: 221 72% 40%;
   }
+
+  /* ScamGuard keeps MiniFyn's shared components while using a calmer,
+     higher-contrast product identity instead of the developer-tool theme. */
+  .scamguard-theme {
+    --background: 205 64% 7%;
+    --foreground: 210 40% 96%;
+    --card: 204 50% 10%;
+    --card-foreground: 210 40% 96%;
+    --popover: 205 64% 7%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 198 88% 48%;
+    --primary-foreground: 205 70% 8%;
+    --secondary: 202 42% 16%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 204 35% 16%;
+    --muted-foreground: 210 16% 70%;
+    --accent: 188 86% 53%;
+    --accent-foreground: 205 70% 8%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 200 35% 20%;
+    --input: 200 35% 18%;
+    --ring: 188 86% 53%;
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(circle at 12% 8%, hsl(var(--primary) / 0.1), transparent 30rem),
+      radial-gradient(circle at 88% 16%, hsl(var(--accent) / 0.06), transparent 26rem);
+    background-attachment: fixed;
+  }
 }
  
 @layer base {

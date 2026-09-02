@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { TrackedPlayCta } from '@/components/scamguard/TrackedPlayCta';
 import { Smartphone, ExternalLink, ShieldCheck } from 'lucide-react';
 
 interface AppHeaderProps {
@@ -8,8 +9,10 @@ interface AppHeaderProps {
   appSlug: string;
   logoSrc: string;
   tagline?: string;
+  mobileTagline?: string;
   navLinks?: { label: string; href: string }[];
   playStoreUrl?: string;
+  playStoreBadge?: boolean;
 }
 
 export function AppHeader({
@@ -17,8 +20,10 @@ export function AppHeader({
   appSlug,
   logoSrc,
   tagline,
+  mobileTagline,
   navLinks = [],
   playStoreUrl,
+  playStoreBadge = false,
 }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
@@ -42,7 +47,12 @@ export function AppHeader({
                   by MiniFyn
                 </span>
               </div>
-              {tagline && <span className="text-[11px] text-muted-foreground hidden md:inline">{tagline}</span>}
+              {mobileTagline && (
+                <span className="text-[10px] leading-tight text-muted-foreground md:hidden">
+                  {mobileTagline}
+                </span>
+              )}
+              {tagline && <span className="hidden text-[11px] text-muted-foreground md:inline">{tagline}</span>}
             </div>
           </Link>
         </div>
@@ -75,12 +85,42 @@ export function AppHeader({
 
           {/* CTA */}
           {playStoreUrl ? (
-            <Button asChild size="sm" className="gap-2 font-medium shadow-sm">
-              <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
-                <Smartphone className="h-4 w-4" />
-                <span>Get on Google Play</span>
-              </a>
-            </Button>
+            playStoreBadge ? (
+              appSlug === 'scamguard' ? (
+                <TrackedPlayCta
+                  placement="nav"
+                  href={playStoreUrl}
+                  ariaLabel={`Get ${appName} on Google Play`}
+                  className="inline-flex shrink-0 transition-transform hover:-translate-y-0.5"
+                  badgeWidth={135}
+                  badgeHeight={45}
+                  imgClassName="h-9 w-auto"
+                />
+              ) : (
+                <a
+                  href={playStoreUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Get ${appName} on Google Play`}
+                  className="inline-flex shrink-0 transition-transform hover:-translate-y-0.5"
+                >
+                  <Image
+                    src="/images/google-play-badge.svg"
+                    alt="Get it on Google Play"
+                    width={135}
+                    height={45}
+                    className="h-9 w-auto"
+                  />
+                </a>
+              )
+            ) : (
+              <Button asChild size="sm" className="gap-2 font-medium shadow-sm">
+                <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
+                  <Smartphone className="h-4 w-4" />
+                  <span>Get on Google Play</span>
+                </a>
+              </Button>
+            )
           ) : (
             <Button asChild variant="outline" size="sm" className="gap-1.5 text-xs">
               <Link href={`/${appSlug}/legal/privacy`}>

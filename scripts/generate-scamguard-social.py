@@ -48,18 +48,15 @@ def add_motifs(image):
     w, h = image.size
     overlay = Image.new("RGBA", image.size, (0, 0, 0, 0))
     d = ImageDraw.Draw(overlay)
-    cyan = (91, 202, 230, 35)
-    amber = (255, 185, 35, 28)
-    points = [(int(w*.04), int(h*.18)), (int(w*.24), int(h*.06)), (int(w*.43), int(h*.22)),
-              (int(w*.13), int(h*.82)), (int(w*.38), int(h*.70)), (int(w*.92), int(h*.12))]
-    for a, b in zip(points, points[1:]):
-        d.line((*a, *b), fill=cyan, width=max(1, w // 800))
-    for i, (x, y) in enumerate(points):
-        r = max(3, w // 240)
-        d.ellipse((x-r, y-r, x+r, y+r), fill=amber if i % 3 == 0 else cyan)
-    for radius in (int(w*.10), int(w*.18), int(w*.28)):
-        cx, cy = int(w*.84), int(h*.48)
-        d.ellipse((cx-radius, cy-radius, cx+radius, cy+radius), outline=cyan, width=max(1, w//700))
+    cyan = (91, 202, 230, 82)
+    red = (248, 113, 113, 62)
+    d.ellipse((int(w*.56), int(h*.16), int(w*.98), int(h*.84)), outline=cyan, width=max(2, w // 500))
+    d.line((int(w*.36), int(h*.62), int(w*.94), int(h*.39)), fill=cyan, width=max(2, w // 500))
+    card_x, card_y = int(w*.42), int(h*.075)
+    card_w, card_h = int(w*.23), int(h*.12)
+    d.rounded_rectangle((card_x, card_y, card_x + card_w, card_y + card_h), radius=int(w*.018), fill=(69, 10, 19, 100), outline=red, width=max(2, w // 700))
+    d.text((card_x + int(w*.018), card_y + int(h*.02)), "DELIVERY FAILED", font=font(FONT_BOLD, max(12, w // 78)), fill=(254, 202, 202, 180))
+    d.text((card_x + int(w*.018), card_y + int(h*.062)), "Your package is on hold.", font=font(FONT_REGULAR, max(11, w // 92)), fill=(254, 226, 226, 160))
     image.paste(overlay, (0, 0), overlay)
 
 
@@ -91,19 +88,19 @@ def add_copy(image, x, y, max_width, scale):
     eyebrow_font = font(FONT_BOLD, int(22 * scale))
     headline_font = font(FONT_BOLD, int(56 * scale))
     body_font = font(FONT_REGULAR, int(23 * scale))
-    pill = "AI-POWERED LINK PROTECTION"
+    pill = "PAUSE. CHECK. DECIDE."
     pb = draw.textbbox((0, 0), pill, font=eyebrow_font)
     px, py = int(17*scale), int(10*scale)
     draw.rounded_rectangle((x, y, x + pb[2] + 2*px, y + pb[3] + 2*py), radius=int(18*scale), fill=(255, 176, 0, 32), outline=(255, 176, 0, 150), width=max(1, int(2*scale)))
     draw.text((x+px, y+py-2), pill, font=eyebrow_font, fill=(255, 194, 51, 255))
     y += pb[3] + 2*py + int(30*scale)
-    lines = wrap_text(draw, "Check suspicious links before you open them.", headline_font, max_width)
+    lines = wrap_text(draw, "One convincing link could be all it takes.", headline_font, max_width)
     line_height = int(68 * scale)
     for line in lines:
         draw.text((x, y), line, font=headline_font, fill=(247, 251, 252, 255))
         y += line_height
     y += int(18*scale)
-    body = "Fast layered checks, cloud reputation, and AI analysis in one privacy-first app."
+    body = "Check suspicious messages, QR codes, and unfamiliar links before you open them."
     for line in wrap_text(draw, body, body_font, max_width):
         draw.text((x, y), line, font=body_font, fill=(166, 192, 202, 255))
         y += int(34*scale)

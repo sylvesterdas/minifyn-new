@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { TrackedPlayCta } from '@/components/scamguard/TrackedPlayCta';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
 import {
+  AlertTriangle,
   BadgeCheck,
   BrainCircuit,
   CheckCircle2,
@@ -21,15 +20,15 @@ import {
 const siteUrl = 'https://www.minifyn.com';
 const pageUrl = `/scamguard`;
 const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.minifyn.linkguard';
-const title = 'ScamGuard: AI Link Checker for Android | MiniFyn';
+const title = 'ScamGuard: Check Suspicious Links Before You Open | MiniFyn';
 const description =
-  'ScamGuard: Link Checker is MiniFyn’s Android app for reviewing suspicious URLs, QR links, and browser handoffs before you open them, with Free, Pro, and AI Mode checks.';
+  'Check suspicious SMS, QR codes, and unfamiliar links before you open them with ScamGuard: Link Checker for Android.';
 const socialImageBase = `${siteUrl}/images/scamguard-social`;
 const ogImageUrl = `${socialImageBase}/scamguard-og-1200x630.png`;
 const twitterImageUrl = `${socialImageBase}/scamguard-twitter-1600x900.png`;
 const squareImageUrl = `${socialImageBase}/scamguard-square-1200x1200.png`;
 const fourThreeImageUrl = `${socialImageBase}/scamguard-social-1200x900.png`;
-const socialImageAlt = 'ScamGuard Link Checker showing AI Mode analysis on Android';
+const socialImageAlt = 'ScamGuard Link Checker showing a suspicious link check before opening';
 
 export const metadata: Metadata = {
   title,
@@ -101,13 +100,6 @@ const useCases = [
   'Offer, lottery, reward, or KYC messages',
   'Unknown links shared in chats or social posts',
   'Browser handoffs where you want a quick local warning',
-];
-
-const trustPoints = [
-  'Android package: com.minifyn.linkguard',
-  'Production checks use /api/scamguard/v1/check',
-  'AI model metadata uses /api/scamguard/v1/model-manifest',
-  'Published app privacy policy and terms',
 ];
 
 const currentCapabilities = [
@@ -294,130 +286,119 @@ export default function ScamGuardPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      <section className="relative overflow-hidden py-14 md:py-20">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(10,95,144,0.2),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(34,197,94,0.12),transparent_30%)]" />
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:26px_26px]" />
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
-            <div className="space-y-8 text-center">
+      <section className="relative overflow-hidden py-8 sm:py-12 lg:py-20">
+        <div className="absolute inset-0 -z-20 bg-[linear-gradient(118deg,hsl(205_64%_7%)_0%,hsl(202_62%_11%)_56%,hsl(194_60%_9%)_100%)]" />
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_8%_26%,hsl(0_72%_51%/0.13),transparent_28%),radial-gradient(circle_at_78%_45%,hsl(var(--primary)/0.2),transparent_30%)]" />
+
+        <div className="container mx-auto max-w-6xl px-4 md:px-6">
+          <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(340px,0.92fr)]">
+            <div className="text-center">
+              <div className="mx-auto mb-6 max-w-sm rounded-2xl rounded-bl-md border border-red-400/35 bg-red-950/45 p-4 text-left shadow-xl lg:hidden">
+                <div className="flex items-center justify-between gap-3 text-xs font-semibold tracking-wide text-red-200">
+                  <span>DELIVERY FAILED</span>
+                  <span className="font-normal text-red-300/80">Now</span>
+                </div>
+                <p className="mt-2 text-sm leading-5 text-red-50">
+                  Your package is on hold. Pay a small fee now to reschedule.
+                </p>
+                <p className="mt-2 text-xs text-red-300">delivery-check.example/4xQ</p>
+              </div>
+
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/75 px-3 py-1.5 text-sm text-muted-foreground backdrop-blur">
                 <ShieldCheck className="h-4 w-4 text-primary" />
                 Android link review app by MiniFyn
               </div>
 
-              <div className="space-y-5">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="relative h-16 w-16 overflow-hidden rounded-2xl border shadow-lg bg-[#004f7a] ring-1 ring-white/10">
-                    <Image
-                      src="/images/scamguard-logo.png"
-                      alt="ScamGuard: Link Checker logo"
-                      fill
-                      className="object-cover scale-110"
-                      priority
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <h1 className="text-5xl font-semibold text-foreground sm:text-6xl lg:text-7xl">
-                      ScamGuard: Link Checker
-                    </h1>
-                    <p className="mt-1 text-xl text-muted-foreground sm:text-2xl">
-                      Check suspicious links before you click.
-                    </p>
-                  </div>
-                </div>
+              <p className="mt-6 text-base font-semibold text-primary sm:text-lg">ScamGuard: Link Checker</p>
+              <h1 className="mx-auto mt-2 max-w-3xl text-[2.35rem] font-semibold leading-[1.05] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+                One convincing link could be all it takes.
+              </h1>
+              <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-xl sm:leading-8">
+                Check suspicious messages, QR codes, and unfamiliar links before you open them.
+              </p>
 
-                <p className="mx-auto max-w-2xl text-lg leading-8 text-muted-foreground sm:text-[1.1rem]">
-                  ScamGuard: Link Checker helps people review suspicious URLs from messages, emails, QR codes,
-                  chats, and Android link handoffs before opening them. It gives users a practical way to pause,
-                  inspect, and spot scam or phishing-style risk signals.
+              <div className="mt-6 flex flex-col items-center gap-2">
+                <TrackedPlayCta placement="hero" />
+                <p className="text-xs font-medium tracking-[0.16em] text-muted-foreground">PAUSE. CHECK. DECIDE.</p>
+              </div>
+
+              <div className="mx-auto mt-6 max-w-sm rounded-2xl border border-primary/25 bg-background/70 p-4 text-left shadow-xl backdrop-blur lg:hidden">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">ScamGuard check</p>
+                  <p className="inline-flex items-center gap-1 text-xs font-semibold text-amber-300">
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                    Elevated signals
+                  </p>
+                </div>
+                <p className="mt-3 text-lg font-semibold text-foreground">Review before opening</p>
+                <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                  Brand mismatch and an unfamiliar destination were detected.
                 </p>
               </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Built By</p>
-                  <p className="mt-2 text-base font-semibold text-foreground">MiniFyn</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Platform</p>
-                  <div className="mt-2 inline-flex items-center justify-center gap-2 text-base font-semibold text-foreground">
-                    <Smartphone className="h-4.5 w-4.5 text-primary" />
-                    Android
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Focus</p>
-                  <p className="mt-2 text-base font-semibold text-foreground">Link risk checks</p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                <Button asChild size="lg" variant="outline" className="rounded-full px-6">
-                  <Link href="/scamguard/legal/privacy">View Privacy Policy</Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="rounded-full px-6">
-                  <Link href="/scamguard/legal/terms">View Terms</Link>
-                </Button>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Use case</p>
-                  <p className="mt-2 text-sm text-foreground">Review links and QR destinations first</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-background/55 px-5 py-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Availability</p>
-                  <p className="mt-2 text-sm text-foreground">Android on Google Play</p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap justify-center gap-2">
-                {trustPoints.map((point) => (
-                  <Badge
-                    key={point}
-                    variant="outline"
-                    className="rounded-full border-primary/20 bg-background/60 px-3 py-1 text-sm text-foreground/85"
-                  >
-                    {point}
-                  </Badge>
-                ))}
-              </div>
             </div>
 
-            <div className="flex justify-center">
-              <div className="relative mx-auto w-full max-w-[320px]">
-                <div className="absolute inset-x-8 bottom-6 top-8 -z-10 rounded-[3rem] bg-primary/15 blur-3xl" />
-                <div className="p-4">
-                  <div className="mb-4 flex items-center justify-between rounded-2xl border border-white/10 bg-background/65 px-4 py-3">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Android app</p>
-                      <p className="mt-1 text-lg font-semibold">URL Scanner</p>
-                    </div>
-                    <div className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                      MiniFyn
-                    </div>
-                  </div>
-
-                  <div className="mx-auto w-full rounded-[2.5rem] border border-zinc-800 bg-zinc-950 p-2.5 shadow-2xl">
-                    <div className="mx-auto mb-2 h-1.5 w-20 rounded-full bg-zinc-700" />
-                    <div className="overflow-hidden rounded-[2rem] border border-black/20 bg-black">
-                      <Image
-                        src="/images/scamguard-link-checker-ai.png"
-                        alt="ScamGuard Link Checker URL Scanner in AI Mode on Android"
-                        width={1080}
-                        height={2400}
-                        className="h-auto w-full"
-                      />
-                    </div>
-                  </div>
-
+            <div className="relative hidden min-h-[560px] items-center justify-center lg:flex">
+              <div className="absolute left-0 top-12 z-0 w-64 -rotate-3 rounded-2xl rounded-bl-md border border-red-400/35 bg-red-950/55 p-4 shadow-2xl backdrop-blur">
+                <div className="flex items-center justify-between gap-3 text-xs font-semibold tracking-wide text-red-200">
+                  <span>DELIVERY FAILED</span>
+                  <span className="font-normal text-red-300/80">Now</span>
                 </div>
+                <p className="mt-2 text-sm leading-5 text-red-50">
+                  Your package is on hold. Pay a small fee now to reschedule.
+                </p>
+                <p className="mt-2 text-xs text-red-300">delivery-check.example/4xQ</p>
+              </div>
 
-                <div className="mt-4 flex justify-center">
-                  <TrackedPlayCta placement="hero" />
+              <div className="absolute left-6 right-0 top-1/2 z-20 h-px -rotate-6 bg-gradient-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_18px_hsl(var(--primary))]" />
+              <div className="absolute right-0 top-28 z-30 flex h-16 w-16 items-center justify-center rounded-[1.25rem_1.25rem_1.75rem_1.75rem] border border-cyan-200/60 bg-cyan-900/80 text-cyan-100 shadow-[0_0_35px_hsl(var(--primary)/0.35)]">
+                <ShieldCheck className="h-8 w-8" />
+              </div>
+
+              <div className="relative z-10 ml-16 w-full max-w-[300px]">
+                <div className="absolute inset-x-6 bottom-5 top-8 -z-10 rounded-[3rem] bg-primary/20 blur-3xl" />
+                <div className="rounded-[2.5rem] border border-zinc-700 bg-zinc-950 p-2.5 shadow-2xl">
+                  <div className="mx-auto mb-2 h-1.5 w-20 rounded-full bg-zinc-700" />
+                  <div className="min-h-[440px] rounded-[2rem] border border-sky-950/80 bg-[linear-gradient(180deg,#092536,#061923)] px-5 py-8">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200">ScamGuard check</p>
+                    <h2 className="mt-3 text-2xl font-semibold text-white">Check a link</h2>
+                    <p className="mt-2 text-sm leading-5 text-slate-300">Review it before you hand it to your browser.</p>
+                    <div className="mt-6 rounded-xl border border-sky-800/80 bg-slate-950/60 px-3 py-3 text-xs text-slate-200">
+                      delivery-check.example/4xQ
+                    </div>
+                    <div className="mt-3 rounded-xl bg-sky-300 px-3 py-3 text-center text-sm font-semibold text-sky-950">
+                      Check link
+                    </div>
+                    <div className="mt-6 rounded-2xl border border-amber-300/35 bg-amber-950/25 p-4">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-amber-200">
+                        <AlertTriangle className="h-4 w-4" />
+                        Elevated risk signals
+                      </div>
+                      <p className="mt-2 text-xs leading-5 text-slate-200">
+                        The destination does not match the delivery message and is unfamiliar to this check.
+                      </p>
+                    </div>
+                    <p className="mt-6 text-center text-xs font-medium tracking-[0.16em] text-sky-200">PAUSE. CHECK. DECIDE.</p>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-white/10 bg-card/35">
+        <div className="container mx-auto grid max-w-5xl gap-px px-4 py-5 text-center sm:grid-cols-3 md:px-6">
+          <div className="px-4 py-3">
+            <p className="text-sm font-semibold text-foreground">Check only when you choose</p>
+            <p className="mt-1 text-xs text-muted-foreground">Built around user-initiated link review.</p>
+          </div>
+          <div className="border-white/10 px-4 py-3 sm:border-x">
+            <p className="text-sm font-semibold text-foreground">Optional local history</p>
+            <p className="mt-1 text-xs text-muted-foreground">Keep or disable on-device history.</p>
+          </div>
+          <div className="px-4 py-3">
+            <p className="text-sm font-semibold text-foreground">Available for Android</p>
+            <p className="mt-1 text-xs text-muted-foreground">Install from Google Play.</p>
           </div>
         </div>
       </section>
@@ -453,10 +434,10 @@ export default function ScamGuardPage() {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Current check set</h2>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Get a clearer answer before you open a link</h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              The current app combines local checks, cloud reputation, signed risk policy, and AI-assisted review
-              so users can understand risk without needing a security background.
+              ScamGuard combines local checks, cloud reputation, signed risk policy, and AI-assisted review so you
+              can understand the warning signs without needing a security background.
             </p>
           </div>
 
@@ -482,10 +463,10 @@ export default function ScamGuardPage() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid gap-8 lg:grid-cols-2">
             <div className="rounded-3xl border bg-background/80 p-8 shadow-sm">
-              <h2 className="text-2xl font-bold sm:text-3xl">When people use it</h2>
+              <h2 className="text-2xl font-bold sm:text-3xl">Use it when a link feels off</h2>
               <p className="mt-4 text-muted-foreground">
-                ScamGuard is designed for common, real-world situations where an unfamiliar link appears unexpectedly
-                and the cautious choice is to verify first.
+                These are the everyday moments when pausing to check can help you make a more informed decision
+                before opening an unfamiliar destination.
               </p>
               <ul className="mt-6 grid gap-3">
                 {useCases.map((item) => (
@@ -498,12 +479,12 @@ export default function ScamGuardPage() {
             </div>
 
             <div className="rounded-3xl border bg-background/80 p-8 shadow-sm">
-              <h2 className="text-2xl font-bold sm:text-3xl">What users can manage</h2>
+              <h2 className="text-2xl font-bold sm:text-3xl">Stay in control of your checks</h2>
               <div className="mt-6 space-y-5 text-muted-foreground">
-                <p>History is optional and stored on device when enabled.</p>
-                <p>Daily caution reminders and app announcements can be turned off in settings.</p>
-                <p>Trusted quick-check domains and preferred browser handoff settings can be managed from the app.</p>
-                <p>Diagnostics show app version, active plan, and AI analysis version for easier support and review.</p>
+                <p>Keep history optional and stored on your device when enabled.</p>
+                <p>Turn daily caution reminders and app announcements off whenever you choose.</p>
+                <p>Manage trusted quick-check domains and preferred browser handoff settings from the app.</p>
+                <p>Use diagnostics to see app version, active plan, and AI analysis version when you need support.</p>
               </div>
             </div>
           </div>
@@ -513,10 +494,10 @@ export default function ScamGuardPage() {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Free, Pro, and AI Mode</h2>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Choose how much context you want before deciding</h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              ScamGuard has different checking levels depending on how often you review links and how much context
-              you want before deciding.
+              Start with everyday checks, then add deeper reputation or AI-assisted context when you review links
+              more often or need more detail.
             </p>
           </div>
 
@@ -551,10 +532,10 @@ export default function ScamGuardPage() {
           <div className="mx-auto max-w-4xl rounded-[2rem] border bg-background/85 p-8 shadow-sm md:p-10">
             <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
               <div>
-                <h2 className="text-3xl font-bold tracking-tight">Policies, ownership, and support</h2>
+                <h2 className="text-3xl font-bold tracking-tight">Trust, privacy, and support</h2>
                 <p className="mt-4 text-muted-foreground">
-                  This page is intended to be a stable public home for the app. It helps connect the
-                  product name, the publisher, the Android listing, the package id, and the app’s legal documents.
+                  Find the information you need to understand the app, review its policies, and get support before
+                  you install or use ScamGuard.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Button asChild variant="outline">
@@ -568,7 +549,7 @@ export default function ScamGuardPage() {
               </div>
 
               <div className="rounded-3xl border bg-card/60 p-6">
-                <h3 className="text-xl font-semibold">What this page makes clear</h3>
+                <h3 className="text-xl font-semibold">Before you install</h3>
                 <ul className="mt-5 space-y-3 text-muted-foreground">
                   <li className="flex gap-3">
                     <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -588,7 +569,7 @@ export default function ScamGuardPage() {
                   </li>
                   <li className="flex gap-3">
                     <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                    The app uses MiniFyn link-check and AI-model API routes.
+                    Checks are designed to start when you choose to review a link.
                   </li>
                 </ul>
               </div>
