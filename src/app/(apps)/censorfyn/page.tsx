@@ -471,6 +471,9 @@ export default function CensorFynPage() {
                 </p>
                 <div className="flex flex-wrap gap-3 pt-2">
                   <Button asChild variant="outline">
+                    <Link href="/docs/guides/censorfyn">User Guide</Link>
+                  </Button>
+                  <Button asChild variant="outline">
                     <Link href="/censorfyn/legal/privacy">Privacy Policy</Link>
                   </Button>
                   <Button asChild variant="outline">

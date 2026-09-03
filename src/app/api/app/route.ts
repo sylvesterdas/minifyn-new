@@ -47,7 +47,7 @@ const APPS: AppMetadata[] = [
     playstoreURL: "https://play.google.com/store/apps/details?id=com.minifyn.censorfyn",
     appstoreURL: null,
     logoUrl: "https://www.minifyn.com/images/censorfyn/logo_transparent.png",
-    published: false,
+    published: true,
   },
   {
     name: "ClipFyn: Video Preparation",
