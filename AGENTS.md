@@ -160,7 +160,8 @@ node scripts/e2e-pricing-and-billing.mjs
    - AndroidX Media3 hardware encoding with 9:16 vertical safe-zone centering.
    - Aspect ratio modes (Fill & Crop, Gaussian Blur Letterbox, Original).
    - Google AdMob UMP integration and lifetime Pro billing.
-   - Production Access granted on Google Play Console; store linked in Google AdMob.
+   - Production bundle live on Google Play Production track.
+   - Google AdMob account linkage, app review, and GDPR/US-state CMP privacy messages configured.
 3. **CensorFyn**:
    - 100% On-device image redaction (BlazeFace, OCR PII parsing, Barcode/QR, Freehand gesture drawing).
    - Auto screenshot cropping (`ScreenshotCropService`) for status bar and navigation bar removal.
@@ -184,12 +185,12 @@ node scripts/e2e-pricing-and-billing.mjs
 
 ### ⏳ Upcoming Focus & Active Priorities
 
-1. **MiniFyn Web & Free Tools**:
-   - **Universal Link Expander & Hop Tracer (`/tools/link-expander`)**: Expands shortened redirect chains safely without executing target scripts.
+1. **CensorFyn Production Access & Launch**:
+   - Monitor Google Play production-access review status.
+   - Once approved, complete production release rollout and in-product contextual guidance.
 
-2. **Store Creatives & ClipFyn Production Launch**:
-   - **AdMob Review & CMP**: Monitor AdMob app review completion (2-3 days) and enable GDPR/US-state privacy messages.
-   - **Production Promotion**: Promote validated ClipFyn release bundle to Google Play Production track.
+2. **MiniFyn Web & Free Tools**:
+   - **Universal Link Expander & Hop Tracer (`/tools/link-expander`)**: Expands shortened redirect chains safely without executing target scripts.
 
 3. **Desktop Extension**:
    - Build a lightweight **MiniFyn + ScamGuard Chrome Extension** with 1-click URL shortening and inline link safety warnings on desktop.
