@@ -307,8 +307,8 @@ export default function ClipFynPage() {
           </div>
 
           {/* Right Mockup */}
-          <div className="md:col-span-5 flex justify-center">
-            <div className="relative w-full max-w-[290px] overflow-hidden rounded-2xl border-[4px] border-border/80 bg-black p-0.5 shadow-2xl shadow-primary/15">
+          <div className="md:col-span-5 flex justify-center pt-4 md:pt-0">
+            <div className="relative w-full max-w-[200px] sm:max-w-[240px] md:max-w-[280px] overflow-hidden rounded-2xl border-[3px] sm:border-[4px] border-border/80 bg-black p-0.5 shadow-2xl shadow-primary/15">
               <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-xl bg-card">
                 <Image
                   src={`${visualBase}/screenshot_1_welcome.jpg`}
