@@ -15,6 +15,13 @@ import {
   Video,
   Eye,
   Share2,
+  Zap,
+  AlertOctagon,
+  Flame,
+  Check,
+  X,
+  Gauge,
+  Film,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,63 +71,67 @@ const screenshots = [
 
 const whyCards = [
   {
-    title: "No Surprise Platform Crops",
-    description: "Social media and messaging platforms often force-crop horizontal videos unpredictably. ClipFyn gives you full preview control beforehand.",
+    title: "Bypass Aggressive Android Compression",
+    description: "Social media upload engines crush high-bitrate Android uploads. ClipFyn pre-conditions your footage to exact 1080p CFR BT.709 standards so platforms ingest it cleanly without quality loss.",
+    icon: Flame,
+  },
+  {
+    title: "Safe-Zone & Aspect Control",
+    description: "Never lose crucial heads, captions, or product details to blind algorithmic crops. Choose Fill & Crop, Blurred Sidebars, or Native framing with live side-by-side preview.",
     icon: Crop,
   },
   {
-    title: "100% On-Device Processing",
-    description: "Video transcoding, cropping, and blurred-background fits are rendered directly on your phone hardware. Zero video uploads to external servers.",
-    icon: ShieldCheck,
+    title: "100% On-Device Hardware Speed",
+    description: "Renders directly on your phone using Android MediaCodec hardware acceleration. Instant exports, zero battery drain, and zero video uploads to external servers.",
+    icon: Zap,
   },
   {
-    title: "Smart Hardware Acceleration",
-    description: "Leverages Android's native hardware media codecs (MediaCodec) for ultra-fast exports that save battery and preserve source clarity.",
-    icon: Video,
-  },
-  {
-    title: "Side-by-Side Comparison",
-    description: "Inspect original vs rendered framing side-by-side to guarantee your focal points remain sharp and properly centered.",
-    icon: Eye,
+    title: "Studio Clarity Without a $1,200 iPhone",
+    description: "Your Android camera is already great. ClipFyn fixes the upload pipeline so your Reels and Shorts look as crisp and fluid as top-tier creator content.",
+    icon: Film,
   },
 ];
 
 const useCases = [
-  "Preparing landscape videos for TikTok, Instagram Reels, and YouTube Shorts",
-  "Fitting widescreen clips with aesthetic blurred-background sidebars",
-  "Checking video resolution and codecs before sending over messaging apps",
-  "Pre-cropping home videos without lossy multi-pass cloud re-encoding",
-  "Sharing directly via the Android system share sheet",
+  "Pre-conditioning sharp Android camera footage for Instagram Reels, TikTok & Shorts",
+  "Fitting widescreen horizontal videos into 9:16 vertical feeds with aesthetic blurred sidebars",
+  "Fixing Variable Frame Rate (VFR) jitter into locked 30 FPS Constant Frame Rate (CFR)",
+  "Checking focal framing side-by-side before publishing to prevent bad platform crops",
+  "Exporting directly via Android system share sheet with zero watermarks or cloud waitlists",
 ];
 
 const trustPoints = [
   "Package: com.minifyn.clipfyn",
+  "1080p 30 FPS CFR Standardized",
   "100% On-Device / Zero Video Uploads",
-  "Android MediaCodec Hardware Accelerated",
-  "Vertical Crop & Blurred Fit Options",
+  "Zero Watermarks / Instant Export",
   "Publisher: MiniFyn (UDYAM-KL-12-0136086)",
 ];
 
 const faqs = [
   {
+    question: "Why do Android videos look worse when uploaded to Instagram/Reels?",
+    answer: "Most social apps on Android use generalized cloud compression profiles that aggressively downsample bitrates, drop frames on variable framerate (VFR) videos, and misalign color matrix profiles. ClipFyn pre-renders your video into standardized 1080p 30 FPS CFR with BT.709 color profiles, allowing social platforms to ingest your file cleanly with minimal re-encoding distortion.",
+  },
+  {
+    question: "Do I need an expensive flagship phone to get high quality?",
+    answer: "No. The main issue isn't your phone's camera sensor—it's how the social media apps re-encode Android media during upload. ClipFyn standardizes your video locally before upload so you get clean, crisp playback from your current device.",
+  },
+  {
     question: "Does ClipFyn upload my videos to any server?",
-    answer: "No. ClipFyn processes all video files 100% locally on your Android device using the system's hardware media engine. Your personal video files are never uploaded to MiniFyn servers.",
+    answer: "No. ClipFyn processes all video files 100% locally on your Android device using the system's hardware media engine (MediaCodec). Your personal video files never leave your device.",
   },
   {
     question: "What formatting modes does ClipFyn support?",
-    answer: "ClipFyn offers 3 primary preparation layouts: (1) 9:16 Vertical Center/Pan Crop for full-screen short-form platforms, (2) Fit with Blurred Background sidebars (maintains entire source frame without cropping content), and (3) Original Aspect Ratio preservation.",
+    answer: "ClipFyn offers 3 primary layouts: (1) 9:16 Vertical Center/Pan Crop for full-screen short-form platforms, (2) Fit with Blurred Background sidebars (preserves entire source frame with aesthetic blurred wings), and (3) Original Aspect Ratio preservation.",
   },
   {
-    question: "Does ClipFyn guarantee passthrough quality on third-party platforms?",
-    answer: "ClipFyn prepares broadly compatible video files with standardized aspect ratios and container formats. However, external platforms (like Instagram, TikTok, or YouTube) always apply their own compression algorithms upon upload.",
+    question: "Does ClipFyn add watermarks to my exports?",
+    answer: "Never. All exports from ClipFyn are completely watermark-free and render at full native quality.",
   },
   {
     question: "Is ClipFyn free to use?",
-    answer: "Yes, ClipFyn is free to use. An optional one-time Google Play in-app purchase is available to remove banner ads.",
-  },
-  {
-    question: "How do I report bugs or suggest new features?",
-    answer: "You can submit private feedback directly on Google Play or email the developer at sylvesterdas.dev@gmail.com.",
+    answer: "Yes, ClipFyn is free to use. An optional one-time Google Play in-app purchase is available if you wish to remove banner ads and support independent development.",
   },
 ];
 
@@ -234,103 +245,134 @@ export default function ClipFynPage() {
       />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-background via-card/50 to-background py-16 md:py-24">
-        <div className="container mx-auto grid max-w-6xl gap-12 px-4 sm:px-6 md:grid-cols-12 md:items-center">
-          
-          {/* Left Text */}
-          <div className="md:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-              <Clapperboard className="h-4 w-4" /> Android Video Preparation App
-            </div>
+      <section className="relative overflow-hidden border-b bg-gradient-to-b from-background via-card/30 to-background py-16 md:py-24">
+        {/* Subtle Lens Flare and Spotlight Glow */}
+        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-[120px]" />
+        <div className="pointer-events-none absolute right-10 top-1/3 -z-10 h-72 w-72 rounded-full bg-accent/15 blur-[100px]" />
 
-            <div className="flex items-center gap-4">
-              <div className="relative h-16 w-16 overflow-hidden rounded-2xl border bg-card p-1 shadow-lg sm:h-20 sm:w-20">
-                <Image
-                  src={`${visualBase}/logo.png`}
-                  alt="ClipFyn Logo"
-                  fill
-                  className="object-contain p-1"
-                  priority
-                />
+        <div className="container mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
+            
+            {/* Left Headline & Pitch */}
+            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
+                <Film className="h-3.5 w-3.5" /> For Android Creators &amp; Influencers
               </div>
-              <div>
-                <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl text-foreground">
-                  ClipFyn
+
+              <div className="space-y-3">
+                <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.1]">
+                  Why do Android Reels look blurry? <br />
+                  <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500 bg-clip-text text-transparent">
+                    It&apos;s not your camera.
+                  </span>
                 </h1>
-                <p className="text-sm font-medium text-muted-foreground">by MiniFyn</p>
-              </div>
-            </div>
-
-            <p className="text-xl leading-relaxed text-muted-foreground sm:text-2xl">
-              Prepare videos on Android for broadly compatible sharing, with clear layout controls, frame preview, and no server uploads.
-            </p>
-
-            {/* Quick Specs Grid */}
-            <div className="grid gap-3 sm:grid-cols-3 pt-2">
-              <div className="rounded-2xl border bg-background/70 px-4 py-3">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Built By</p>
-                <p className="mt-1 text-sm font-semibold text-foreground">MiniFyn</p>
-              </div>
-              <div className="rounded-2xl border bg-background/70 px-4 py-3">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Platform</p>
-                <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                  <Smartphone className="h-4 w-4 text-primary" /> Android
+                <p className="text-lg leading-relaxed text-muted-foreground sm:text-xl">
+                  Social apps use aggressive compression engines on Android uploads, destroying bitrates and dropping frames. 
+                  ClipFyn pre-conditions your video to exact <strong>1080p CFR BT.709</strong> standards so platforms ingest your footage with studio-grade clarity.
                 </p>
               </div>
-              <div className="rounded-2xl border bg-background/70 px-4 py-3">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Processing</p>
-                <p className="mt-1 text-sm font-semibold text-blue-500">100% On-Device</p>
+
+              {/* Problem/Solution Contrast Callout */}
+              <div className="grid gap-3 sm:grid-cols-2 text-left pt-1">
+                <div className="rounded-2xl border border-red-500/25 bg-red-950/20 p-3.5 backdrop-blur">
+                  <div className="flex items-center gap-2 text-xs font-bold text-red-400 uppercase tracking-wide">
+                    <X className="h-4 w-4 shrink-0 text-red-400" /> Raw Android Upload
+                  </div>
+                  <p className="mt-1.5 text-xs text-red-200/80 leading-relaxed">
+                    Crushed bitrates, variable framerate stutter, and unpredictable automatic head-cropping.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-cyan-400/30 bg-cyan-950/25 p-3.5 backdrop-blur">
+                  <div className="flex items-center gap-2 text-xs font-bold text-cyan-300 uppercase tracking-wide">
+                    <Check className="h-4 w-4 shrink-0 text-cyan-400" /> Pre-Rendered with ClipFyn
+                  </div>
+                  <p className="mt-1.5 text-xs text-cyan-100/90 leading-relaxed">
+                    Locked 30 FPS CFR, BT.709 color profiles, and safe-zone 9:16 framing with zero quality loss.
+                  </p>
+                </div>
+              </div>
+
+              {/* CTAs */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+                <TrackedPlayCta placement="hero" badgeWidth={180} badgeHeight={54} imgClassName="h-13 w-auto" />
+                <Button asChild variant="outline" size="lg" className="h-12 border-border/80 hover:bg-card">
+                  <Link href="#breakdown">See How It Works</Link>
+                </Button>
+              </div>
+
+              {/* Trust Badges */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1">
+                {trustPoints.map((point) => (
+                  <Badge
+                    key={point}
+                    variant="outline"
+                    className="rounded-full border-accent/20 bg-background/70 px-3 py-1 text-xs text-foreground/90 backdrop-blur"
+                  >
+                    <CheckCircle2 className="mr-1.5 h-3 w-3 text-cyan-400" />
+                    {point}
+                  </Badge>
+                ))}
               </div>
             </div>
 
-            {/* CTAs */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <TrackedPlayCta placement="hero" badgeWidth={175} badgeHeight={52} imgClassName="h-12 w-auto" />
-              <Button asChild variant="outline" size="lg" className="h-12">
-                <Link href="/clipfyn/legal/privacy">Privacy Policy</Link>
-              </Button>
-            </div>
+            {/* Right Visual Comparison Mockup */}
+            <div className="lg:col-span-5 flex justify-center">
+              <div className="relative w-full max-w-[280px] sm:max-w-[320px]">
+                {/* Glow behind device */}
+                <div className="absolute inset-0 -z-10 rounded-[2.5rem] bg-gradient-to-tr from-primary/30 to-accent/30 blur-2xl" />
 
-            {/* Trust Badges */}
-            <div className="flex flex-wrap gap-2 pt-2">
-              {trustPoints.map((point) => (
-                <Badge
-                  key={point}
-                  variant="outline"
-                  className="rounded-full border-primary/20 bg-background/60 px-3 py-1 text-xs text-foreground/85"
-                >
-                  <CheckCircle2 className="mr-1.5 h-3 w-3 text-primary" />
-                  {point}
-                </Badge>
-              ))}
-            </div>
-          </div>
+                {/* Studio Frame container */}
+                <div className="overflow-hidden rounded-3xl border border-border/80 bg-zinc-950/90 p-2 shadow-2xl backdrop-blur">
+                  {/* Top Bar Header */}
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-border/40 text-[11px] text-muted-foreground font-mono">
+                    <span className="flex items-center gap-1.5 text-cyan-400 font-semibold">
+                      <Gauge className="h-3.5 w-3.5" /> 1080p CFR 30FPS
+                    </span>
+                    <span className="rounded bg-primary/20 px-1.5 py-0.5 text-[10px] text-primary-foreground font-sans">
+                      BT.709 SDR
+                    </span>
+                  </div>
 
-          {/* Right Mockup */}
-          <div className="md:col-span-5 flex justify-center pt-4 md:pt-0">
-            <div className="relative w-full max-w-[200px] sm:max-w-[240px] md:max-w-[280px] overflow-hidden rounded-2xl border-[3px] sm:border-[4px] border-border/80 bg-black p-0.5 shadow-2xl shadow-primary/15">
-              <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-xl bg-card">
-                <Image
-                  src={`${visualBase}/screenshot_1_welcome.jpg`}
-                  alt="ClipFyn Home Interface"
-                  fill
-                  className="object-cover"
-                  priority
-                />
+                  {/* Phone Screen Mockup */}
+                  <div className="relative aspect-[9/18.5] w-full overflow-hidden rounded-2xl bg-black mt-2">
+                    <Image
+                      src={`${visualBase}/screenshot_3_comparison_preview.jpg`}
+                      alt="ClipFyn Side-by-Side Comparison Preview"
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+
+                    {/* Interactive Comparison Floating Tag */}
+                    <div className="absolute bottom-3 inset-x-3 rounded-xl bg-zinc-950/85 border border-cyan-400/40 p-2.5 backdrop-blur text-center shadow-lg">
+                      <p className="text-[10px] uppercase font-bold tracking-widest text-cyan-300">
+                        Side-by-Side Split Preview
+                      </p>
+                      <p className="text-xs text-zinc-200 mt-0.5">
+                        Inspect focal clarity before publishing
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
+          </div>
         </div>
       </section>
 
       {/* Why ClipFyn Exists */}
-      <section className="border-b bg-card/40 py-16 md:py-24">
+      <section id="breakdown" className="border-b bg-card/40 py-16 md:py-24">
         <div className="container mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Why ClipFyn Exists</h2>
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-400">
+              The Android Creator&apos;s Equalizer
+            </span>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
+              Why Your Content Deserves ClipFyn
+            </h2>
             <p className="text-muted-foreground text-base sm:text-lg">
-              Posting horizontal or unconventional videos to modern vertical video apps often results in bad crops or blurred faces. ClipFyn gives you full control before you share.
+              You put hours into filming, lighting, and scripting. Don&apos;t let mobile platform compression engines sabotage your reach and viewer perception.
             </p>
           </div>
 
@@ -338,8 +380,8 @@ export default function ClipFynPage() {
             {whyCards.map((card) => {
               const Icon = card.icon;
               return (
-                <div key={card.title} className="rounded-3xl border bg-background/85 p-6 shadow-sm space-y-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <div key={card.title} className="rounded-3xl border bg-background/85 p-6 shadow-sm space-y-3 transition-colors hover:border-cyan-400/40">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-400">
                     <Icon className="h-6 w-6" />
                   </div>
                   <h3 className="text-xl font-bold text-foreground">{card.title}</h3>
