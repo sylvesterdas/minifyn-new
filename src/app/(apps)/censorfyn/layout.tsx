@@ -7,7 +7,7 @@ export default function CensorFynLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground selection:bg-primary/20">
+    <div className="censorfyn-theme flex min-h-screen flex-col bg-background text-foreground selection:bg-primary/20">
       <AppHeader
         appName="CensorFyn"
         appSlug="censorfyn"
@@ -19,6 +19,7 @@ export default function CensorFynLayout({
           { label: "Privacy & Security", href: "/censorfyn#security" },
         ]}
         playStoreUrl="https://play.google.com/store/apps/details?id=com.minifyn.censorfyn"
+        playStoreBadge
       />
       <main className="flex-1 flex flex-col">{children}</main>
       <AppFooter

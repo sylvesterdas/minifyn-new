@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { TrackedPlayCta } from "@/components/censorfyn/TrackedPlayCta";
 
 const siteUrl = "https://www.minifyn.com";
 const pageUrl = "/censorfyn";
@@ -285,13 +286,8 @@ export default function CensorFynPage() {
 
             {/* CTAs */}
             <div className="flex flex-wrap items-center gap-4 pt-2">
-              <Button asChild size="lg" className="gap-2 font-semibold shadow-md">
-                <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
-                  <Smartphone className="h-5 w-5" />
-                  <span>Get on Google Play</span>
-                </a>
-              </Button>
-              <Button asChild variant="outline" size="lg">
+              <TrackedPlayCta placement="hero" badgeWidth={175} badgeHeight={52} imgClassName="h-12 w-auto" />
+              <Button asChild variant="outline" size="lg" className="h-12">
                 <Link href="/censorfyn/legal/privacy">Privacy Policy</Link>
               </Button>
             </div>
@@ -377,14 +373,14 @@ export default function CensorFynPage() {
             {screenshots.map((s, idx) => (
               <div
                 key={idx}
-                className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition-all hover:border-primary/50 hover:shadow-lg"
+                className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:border-primary/60 hover:shadow-xl hover:-translate-y-1"
               >
                 <div className="relative aspect-[9/18] w-full overflow-hidden bg-muted/40">
                   <Image
                     src={s.src}
                     alt={s.title}
                     fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="object-cover"
                     sizes="(max-width: 768px) 100vw, 20vw"
                   />
                 </div>
@@ -469,7 +465,7 @@ export default function CensorFynPage() {
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   This page serves as the verified public home for CensorFyn, connecting the product identity, the publisher, the Google Play listing, and the official legal policies.
                 </p>
-                <div className="flex flex-wrap gap-3 pt-2">
+                <div className="flex flex-wrap items-center gap-3 pt-2">
                   <Button asChild variant="outline">
                     <Link href="/docs/guides/censorfyn">User Guide</Link>
                   </Button>
@@ -479,12 +475,7 @@ export default function CensorFynPage() {
                   <Button asChild variant="outline">
                     <Link href="/censorfyn/legal/terms">Terms of Use</Link>
                   </Button>
-                  <Button asChild>
-                    <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
-                      <Smartphone className="mr-2 h-4 w-4" />
-                      Google Play
-                    </a>
-                  </Button>
+                  <TrackedPlayCta placement="card" badgeWidth={135} badgeHeight={42} imgClassName="h-10 w-auto" />
                 </div>
               </div>
 
@@ -556,12 +547,7 @@ export default function CensorFynPage() {
           </p>
 
           <div className="flex items-center justify-center pt-2">
-            <Button asChild size="lg" className="gap-2 font-semibold shadow-lg">
-              <a href={playStoreUrl} target="_blank" rel="noopener noreferrer">
-                <Smartphone className="h-5 w-5" />
-                <span>Get on Google Play</span>
-              </a>
-            </Button>
+            <TrackedPlayCta placement="footer" badgeWidth={180} badgeHeight={54} imgClassName="h-14 w-auto" />
           </div>
 
           <p className="text-xs text-muted-foreground pt-4">

@@ -104,6 +104,34 @@
       radial-gradient(circle at 85% 20%, hsl(var(--accent) / 0.08), transparent 28rem);
     background-attachment: fixed;
   }
+
+  /* CensorFyn offline media redaction theme: charcoal midnight canvas with amber & gold security accents */
+  .censorfyn-theme {
+    --background: 220 20% 7%;
+    --foreground: 45 30% 95%;
+    --card: 220 18% 10%;
+    --card-foreground: 45 30% 95%;
+    --popover: 220 20% 7%;
+    --popover-foreground: 45 30% 95%;
+    --primary: 38 92% 50%;
+    --primary-foreground: 220 20% 7%;
+    --secondary: 220 15% 15%;
+    --secondary-foreground: 45 30% 95%;
+    --muted: 220 14% 14%;
+    --muted-foreground: 220 10% 70%;
+    --accent: 45 93% 58%;
+    --accent-foreground: 220 20% 7%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 15% 20%;
+    --input: 220 15% 17%;
+    --ring: 38 92% 50%;
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(circle at 15% 10%, hsl(var(--primary) / 0.12), transparent 30rem),
+      radial-gradient(circle at 85% 20%, hsl(var(--accent) / 0.06), transparent 26rem);
+    background-attachment: fixed;
+  }
 }
  
 @layer base {
