@@ -367,11 +367,11 @@ export default function ClipFynPage() {
           </div>
 
           {/* Screenshot Cards */}
-          <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="mt-14 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 max-w-6xl mx-auto">
             {screenshots.map((s, idx) => (
               <div
                 key={idx}
-                className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:border-primary/60 hover:shadow-xl hover:-translate-y-1"
+                className="group flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border bg-card transition-all duration-300 hover:border-primary/60 hover:shadow-xl hover:-translate-y-1"
               >
                 <div className="relative aspect-[9/18] w-full overflow-hidden bg-muted/40">
                   <Image
@@ -379,12 +379,12 @@ export default function ClipFynPage() {
                     alt={s.title}
                     fill
                     className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 33vw"
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, 33vw"
                   />
                 </div>
-                <div className="p-4 space-y-1.5 flex-1 flex flex-col justify-between">
-                  <h3 className="font-semibold text-sm text-foreground">{s.title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                <div className="p-2.5 sm:p-4 space-y-1 sm:space-y-1.5 flex-1 flex flex-col justify-between">
+                  <h3 className="font-semibold text-xs sm:text-sm text-foreground line-clamp-1 sm:line-clamp-none">{s.title}</h3>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug sm:leading-relaxed line-clamp-2 sm:line-clamp-none">
                     {s.description}
                   </p>
                 </div>
