@@ -7,7 +7,7 @@ export default function ClipFynLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground selection:bg-primary/20">
+    <div className="clipfyn-theme flex min-h-screen flex-col bg-background text-foreground selection:bg-primary/20">
       <AppHeader
         appName="ClipFyn"
         appSlug="clipfyn"
@@ -16,6 +16,8 @@ export default function ClipFynLayout({
         navLinks={[
           { label: "Overview", href: "/clipfyn" },
         ]}
+        playStoreUrl="https://play.google.com/store/apps/details?id=com.minifyn.clipfyn"
+        playStoreBadge
       />
       <main className="flex-1 flex flex-col">{children}</main>
       <AppFooter
