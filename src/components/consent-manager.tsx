@@ -14,7 +14,7 @@ export function ConsentManager() {
         <Script
             id="google-funding-choices"
             src={`https://fundingchoicesmessages.google.com/i/${publisherId}?ers=1`}
-            strategy="beforeInteractive"
+            strategy="afterInteractive"
             async
         />
     );
