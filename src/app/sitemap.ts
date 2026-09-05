@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next';
-
-
+import { getAllBlogPosts } from '@/lib/blog';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,9 +10,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModifiedClipFyn = new Date('2026-08-14').toISOString();
   const lastModifiedCensorFyn = new Date('2026-08-16').toISOString();
 
-  // 1. Static pages
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${siteUrl}/`, lastModified: new Date().toISOString(), changeFrequency: 'weekly', priority: 1.0 },
+    { url: `${siteUrl}/blog`, lastModified: new Date().toISOString(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${siteUrl}/pricing`, lastModified: new Date().toISOString(), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${siteUrl}/features`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${siteUrl}/contact`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.6 },
@@ -57,5 +56,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/censorfyn/legal/terms`, lastModified: lastModifiedCensorFyn, changeFrequency: 'yearly', priority: 0.3 },
   ];
 
-  return staticRoutes;
+  try {
+    const blogPosts = await getAllBlogPosts();
+    const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+      url: `${siteUrl}/blog/${post.slug}`,
+      lastModified: new Date(post.datePublished).toISOString(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    }));
+    return [...staticRoutes, ...blogRoutes];
+  } catch {
+    return staticRoutes;
+  }
 }

@@ -12,16 +12,16 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: '/blog',
-        destination: 'https://blog.minifyn.com',
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'blog.minifyn.com',
+          },
+        ],
+        destination: 'https://www.minifyn.com/blog/:path*',
         permanent: true,
       },
-      {
-        source: '/blog/:slug*',
-        destination: 'https://blog.minifyn.com/:slug*',
-        permanent: true,
-      },
-      // Legacy LinkGuard -> ScamGuard Redirect
       {
         source: '/linkguard',
         destination: '/scamguard',
@@ -77,24 +77,16 @@ const nextConfig = {
   },
   images: {
     formats: ['image/avif', 'image/webp'],
+    localPatterns: [
+      {
+        pathname: '/api/og',
+        search: '?*',
+      },
+    ],
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdn.hashnode.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdn.jsdelivr.net',
-        port: '',
-        pathname: '/**',
+        hostname: '**',
       },
     ],
   },

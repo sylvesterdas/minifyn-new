@@ -6,7 +6,7 @@ import Logo from './logo';
 const footerLinks = {
     product: [
         { href: '/features', label: 'Features' },
-        { href: 'https://blog.minifyn.com', label: 'Blog' },
+        { href: '/blog', label: 'Blog' },
         { href: '/tools', label: 'Developer Tools' },
         { href: '/pricing', label: 'Pricing' },
     ],

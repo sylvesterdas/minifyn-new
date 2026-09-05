@@ -12,7 +12,7 @@ import { useState } from 'react';
 
 const navLinks = [
     { href: "/", label: "Home" },
-    { href: "https://blog.minifyn.com", label: "Blog" },
+    { href: "/blog", label: "Blog" },
     { href: "/features", label: "Features" },
     { href: "/pricing", label: "Pricing" },
     { href: "/docs", label: "Docs" },
