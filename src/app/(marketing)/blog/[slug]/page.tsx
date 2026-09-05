@@ -3,12 +3,24 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getBlogPostBySlug, getAllBlogPosts } from '@/lib/blog';
-import { Calendar, Clock, ArrowLeft, Share2, Tag, BookOpen, Shield, Sparkles } from 'lucide-react';
+import { Calendar, Clock, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { BlogCodeInteractions } from '@/components/blog-code-interactions';
+import { BlogAdaptiveCta } from '@/components/blog-adaptive-cta';
 import 'highlight.js/styles/github-dark-dimmed.css';
 
 export const revalidate = 3600;
+
+function splitContentForMidCta(html: string): [string, string | null] {
+  const pTags = [...html.matchAll(/<\/p>/gi)];
+  if (pTags.length < 5) {
+    return [html, null];
+  }
+  const midIndex = Math.floor(pTags.length / 2);
+  const targetMatch = pTags[midIndex];
+  const splitPos = (targetMatch.index || 0) + 4;
+  return [html.slice(0, splitPos), html.slice(splitPos)];
+}
 
 export async function generateStaticParams() {
   const posts = await getAllBlogPosts();
@@ -73,6 +85,8 @@ export default async function BlogPostPage({
   if (!post) {
     notFound();
   }
+
+  const [firstHalf, secondHalf] = splitContentForMidCta(post.contentHtml);
 
   const relatedPosts = allPosts
     .filter((p) => p.slug !== post.slug && p.tags.some((t) => post.tags.includes(t)))
@@ -211,8 +225,18 @@ export default async function BlogPostPage({
 
         <div
           className="prose prose-slate dark:prose-invert max-w-none text-foreground leading-relaxed prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-img:border prose-pre:border prose-pre:bg-muted/50"
-          dangerouslySetInnerHTML={{ __html: post.contentHtml }}
+          dangerouslySetInnerHTML={{ __html: firstHalf }}
         />
+
+        {secondHalf && (
+          <>
+            <BlogAdaptiveCta tags={post.tags} variant="in-article" />
+            <div
+              className="prose prose-slate dark:prose-invert max-w-none text-foreground leading-relaxed prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-img:border prose-pre:border prose-pre:bg-muted/50"
+              dangerouslySetInnerHTML={{ __html: secondHalf }}
+            />
+          </>
+        )}
 
         <div className="mt-14 border-t pt-8">
           <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-3">
@@ -231,25 +255,7 @@ export default async function BlogPostPage({
           </div>
         </div>
 
-        <div className="mt-12 rounded-2xl border bg-gradient-to-br from-primary/10 via-background to-accent/10 p-8 text-center sm:text-left sm:flex sm:items-center sm:justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
-              <Sparkles className="h-3.5 w-3.5" /> Powered by MiniFyn
-            </div>
-            <h3 className="text-xl font-bold tracking-tight text-foreground">
-              Boost your link performance & web security
-            </h3>
-            <p className="text-sm text-muted-foreground max-w-md">
-              Shorten links in ~15ms, generate branded QR codes, and trace phishing threats with ScamGuard.
-            </p>
-          </div>
-          <Link
-            href="/"
-            className="mt-4 sm:mt-0 inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-all shrink-0"
-          >
-            Try MiniFyn Free
-          </Link>
-        </div>
+        <BlogAdaptiveCta tags={post.tags} variant="bottom" />
 
         {relatedPosts.length > 0 && (
           <div className="mt-16 border-t pt-10">
