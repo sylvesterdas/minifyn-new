@@ -1,4 +1,5 @@
 import { Marked } from 'marked';
+import hljs from 'highlight.js';
 import fallbackManifest from '@/content/blog-manifest.json';
 
 export interface BlogPostMeta {
@@ -27,6 +28,23 @@ const GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/sylvesterdas/Arti
 const marked = new Marked({
   gfm: true,
   breaks: true,
+  renderer: {
+    code({ text, lang }: { text: string; lang?: string }) {
+      const validLang = lang && hljs.getLanguage(lang) ? lang : '';
+      let highlighted = '';
+      try {
+        if (validLang) {
+          highlighted = hljs.highlight(text, { language: validLang }).value;
+        } else {
+          highlighted = hljs.highlightAuto(text).value;
+        }
+      } catch {
+        highlighted = text;
+      }
+      const displayLang = lang || 'code';
+      return `<div class="relative group my-6 rounded-xl overflow-hidden border border-border/60 bg-[#0d1117] shadow-sm"><div class="flex items-center justify-between px-4 py-2 border-b border-border/40 bg-muted/40 text-xs font-mono text-muted-foreground"><span class="font-semibold text-primary/90">${displayLang}</span><button type="button" class="copy-code-btn inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" data-code="${encodeURIComponent(text)}">Copy</button></div><pre class="p-4 overflow-x-auto text-sm leading-relaxed font-mono !bg-transparent !my-0"><code class="hljs ${validLang || 'plaintext'}">${highlighted}</code></pre></div>`;
+    },
+  },
 });
 
 export function isBrokenOrTemporaryHost(url: string | undefined): boolean {
@@ -43,6 +61,10 @@ export function resolvePostCover(cover: string | undefined, title: string, tag: 
 
 export function sanitizeMarkdownContent(rawContent: string): string {
   return rawContent
+    .replace(/!\[(.*?)\]\(\[(https?:\/\/[^\s\)]+)\]\([^\)]+\)\s*(?:align=["']?[^"'\s>]+["']?)?\)/g, '![$1]($2)')
+    .replace(/!\[(.*?)\]\((https?:\/\/[^\s\)]+)\s+align=["']?[^"'\s>]+["']?\)/g, '![$1]($2)')
+    .replace(/!\[(.*?)\]\(\[(https?:\/\/[^\s\)]+)\]\([^\)]+\)\)/g, '![$1]($2)')
+    .replace(/%\[(https?:\/\/[^\]]+)\]/g, '[$1]($1)')
     .replace(/!\[(.*?)\]\(https?:\/\/(i\.ibb\.co|n8n\.sylvesterdas\.com)\/[^\)]+\)/gi, '')
     .replace(/<img[^>]*src=["']https?:\/\/(i\.ibb\.co|n8n\.sylvesterdas\.com)\/[^"']*["'][^>]*>/gi, '');
 }

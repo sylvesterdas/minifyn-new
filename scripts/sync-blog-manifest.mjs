@@ -14,6 +14,10 @@ function resolvePostCover(cover, title, tag = 'Tech') {
 
 function sanitizeMarkdownContent(rawContent) {
   return rawContent
+    .replace(/!\[(.*?)\]\(\[(https?:\/\/[^\s\)]+)\]\([^\)]+\)\s*(?:align=["']?[^"'\s>]+["']?)?\)/g, '![$1]($2)')
+    .replace(/!\[(.*?)\]\((https?:\/\/[^\s\)]+)\s+align=["']?[^"'\s>]+["']?\)/g, '![$1]($2)')
+    .replace(/!\[(.*?)\]\(\[(https?:\/\/[^\s\)]+)\]\([^\)]+\)\)/g, '![$1]($2)')
+    .replace(/%\[(https?:\/\/[^\]]+)\]/g, '[$1]($1)')
     .replace(/!\[(.*?)\]\(https?:\/\/(i\.ibb\.co|n8n\.sylvesterdas\.com)\/[^\)]+\)/gi, '')
     .replace(/<img[^>]*src=["']https?:\/\/(i\.ibb\.co|n8n\.sylvesterdas\.com)\/[^"']*["'][^>]*>/gi, '');
 }

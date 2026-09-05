@@ -5,6 +5,8 @@ import type { Metadata } from 'next';
 import { getBlogPostBySlug, getAllBlogPosts } from '@/lib/blog';
 import { Calendar, Clock, ArrowLeft, Share2, Tag, BookOpen, Shield, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
+import { BlogCodeInteractions } from '@/components/blog-code-interactions';
+import 'highlight.js/styles/github-dark-dimmed.css';
 
 export const revalidate = 3600;
 
@@ -132,6 +134,7 @@ export default async function BlogPostPage({
 
   return (
     <article className="min-h-screen bg-background pb-20">
+      <BlogCodeInteractions />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
