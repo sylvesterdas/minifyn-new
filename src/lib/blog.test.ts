@@ -1,7 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { parseFrontmatter, calculateReadingTime, getAllBlogPosts, getAllTags, getBlogPostBySlug } from './blog';
 
 describe('blog utility', () => {
+  const originalFetch = globalThis.fetch;
+
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network offline')));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('parses YAML frontmatter correctly', () => {
     const rawMarkdown = `---
 title: "Test Post Title"

@@ -59,7 +59,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const blogPosts = await getAllBlogPosts();
     const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => {
-      const coverUrl = post.cover.startsWith('/') ? `${siteUrl}${post.cover}` : post.cover;
+      const rawUrl = post.cover.startsWith('/') ? `${siteUrl}${post.cover}` : post.cover;
+      const coverUrl = rawUrl ? rawUrl.replace(/&/g, '&amp;') : undefined;
       return {
         url: `${siteUrl}/blog/${post.slug}`,
         lastModified: new Date(post.datePublished).toISOString(),
