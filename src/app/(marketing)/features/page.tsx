@@ -66,6 +66,10 @@ const proFeatures: FeatureItem[] = [
     description: "Manage and analyze your links in a lightning-fast workspace with zero advertisements.",
   },
   {
+    title: "High-Speed Developer API",
+    description: "Automate high-volume link creation inside your applications and production pipelines.",
+  },
+  {
     title: "Custom Branded Slugs",
     description: "Build instant brand recognition and trust with personalized link aliases.",
     isComingSoon: true,

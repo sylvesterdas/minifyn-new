@@ -17,19 +17,23 @@ const freeFeatures = [
   { text: '20 Links / Day', included: true },
   { text: 'Links Expire in 60 Days', included: true },
   { text: 'Basic Clicks (7-day history)', included: true },
+  { text: 'Instant Downloadable QR Codes', included: true },
   { text: 'Developer API Access', included: true },
-  { text: '100% Ad-Free Experience', included: false },
-  { text: 'Advanced Analytics', included: false },
-  { text: 'Links Never Expire', included: false },
+  { text: 'Automatic Threat & Phishing Shield', included: true },
+  { text: 'Permanent Links That Never Expire', included: false },
+  { text: '1-Year Deep Audience Analytics', included: false },
+  { text: '100% Ad-Free Clean UI', included: false },
+  { text: 'Priority Direct Support', included: false },
 ];
 
 const proFeatures = [
   { text: '100 Links / Day', included: true },
-  { text: 'Links Never Expire', included: true },
+  { text: 'Permanent Links That Never Expire', included: true },
+  { text: '1-Year Deep Audience Analytics', included: true },
   { text: '100% Ad-Free Clean UI', included: true },
-  { text: 'Advanced (Geo & Referrers, 1-year history)', included: true },
   { text: 'Developer API Access', included: true },
-  { text: 'Custom Slugs (Coming Soon)', included: true },
+  { text: 'Custom Branded Slugs (Coming Soon)', included: true },
+  { text: 'Priority Direct Support', included: true },
 ];
 
 function FeatureList({ features }: { features: { text: string; included: boolean }[] }) {

@@ -10,7 +10,7 @@ const siteUrl = 'https://www.minifyn.com';
 
 export function generateMetadata(): Metadata {
     const title = 'Pricing Plans | MiniFyn';
-    const description = 'Choose the perfect plan for your needs. Start for free or upgrade to Pro for advanced features like unlimited link expiration and higher usage limits.';
+    const description = 'Choose the perfect plan for your needs. Start for free or upgrade to Pro for advanced features like permanent links and higher usage limits.';
     const ogImageUrl = `${siteUrl}/og.png`;
 
     return {
