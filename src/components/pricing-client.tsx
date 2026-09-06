@@ -61,7 +61,8 @@ export function PricingPageClient({ initialCountry }: { initialCountry?: string 
   const [interval, setInterval] = useState<'monthly' | 'yearly'>('monthly');
   const router = useRouter();
 
-  const activePricing = currency === 'INR' ? getPlanPricing('in') : countryPricing;
+  const usdPricing = countryPricing.currency === 'USD' ? countryPricing : getPlanPricing('tier1');
+  const activePricing = currency === 'INR' ? getPlanPricing('in') : usdPricing;
 
   const handleUpgradeClick = () => {
     const href = user ? '/dashboard/settings/billing' : `/auth/signup?plan=pro`;
