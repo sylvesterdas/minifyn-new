@@ -16,120 +16,100 @@ export const metadata: Metadata = {
 };
 
 interface FeatureItem {
-  benefit: string;
-  name: string;
+  title: string;
   description: string;
   isComingSoon?: boolean;
 }
 
 const freeFeatures: FeatureItem[] = [
   {
-    benefit: "Frictionless First Impressions",
-    name: "Instant URL Shortening",
-    description: "Transform long, messy URLs into neat, shareable links in one tap to eliminate visual clutter and boost click confidence.",
+    title: "Instant Clean Links in One Tap",
+    description: "Shorten up to 20 links daily to remove visual clutter and boost click confidence.",
   },
   {
-    benefit: "Worry-Free Temporary Campaigns",
-    name: "60-Day Active Lifecycle",
-    description: "Keep your shared assets lean and active without manual maintenance—ideal for seasonal promotions, social posts, and quick event shares.",
+    title: "Auto-Expiring 60-Day Links",
+    description: "Keep links self-cleaning for temporary shares, seasonal promotions, and quick posts.",
   },
   {
-    benefit: "Immediate Engagement Visibility",
-    name: "7-Day Real-Time Click Insights",
-    description: "Know instantly when and how often your links are engaged with, giving you clarity on audience response as campaigns launch.",
+    title: "Live 7-Day Click Tracking",
+    description: "See real-time audience engagement the moment your campaigns go live.",
   },
   {
-    benefit: "Seamless Real-World Connection",
-    name: "Instant Branded QR Codes",
-    description: "Bridge offline audiences to digital destinations effortlessly with downloadable, high-resolution QR codes that scan reliably every time.",
+    title: "Instant Downloadable QR Codes",
+    description: "Bridge offline print and real-world media to digital destinations in seconds.",
   },
   {
-    benefit: "Effortless Workflow Automation",
-    name: "High-Performance Developer API",
-    description: "Automate link creation straight inside your workflows and apps with minimal latency, saving hours of manual copy-pasting.",
+    title: "High-Speed Developer API",
+    description: "Automate link shortening inside your apps and workflows with sub-second latency.",
   },
   {
-    benefit: "Proactive Audience Protection",
-    name: "Automated Threat & Phishing Filter",
-    description: "Protect your recipients and your reputation with automated screening that blocks malicious destinations before links go live.",
+    title: "Automatic Threat & Phishing Shield",
+    description: "Protect your recipients and your reputation by blocking unsafe domains automatically.",
   },
 ];
 
 const proFeatures: FeatureItem[] = [
   {
-    benefit: "Unrestricted Campaign Growth",
-    name: "High-Volume Link Creation (100/day)",
-    description: "Scale your marketing outreach and team workflows freely without hitting daily roadblocks or throttling.",
+    title: "Unthrottled 100 Links / Day",
+    description: "Scale campaigns and outreach freely without hitting daily limits or bottlenecks.",
   },
   {
-    benefit: "Zero Link Rot & Permanent Peace of Mind",
-    name: "Non-Expiring Links",
-    description: "Never worry about broken links or lost traffic again. Your printed collateral, documentation, and evergreen campaigns remain permanently active.",
+    title: "Permanent Links That Never Expire",
+    description: "Never lose traffic again—your printed collateral and evergreen links stay active forever.",
   },
   {
-    benefit: "360° Strategic Audience Intelligence",
-    name: "Granular Geo & Referrer Analytics (1 Year)",
-    description: "Make confident marketing decisions with deep country-by-country data, device breakdowns, and source attribution retained for 365 days.",
+    title: "1-Year Deep Audience Analytics",
+    description: "Unlock full country, device, and referrer insights retained for 365 days.",
   },
   {
-    benefit: "Distraction-Free, Premium Focus",
-    name: "100% Ad-Free Clean UI",
-    description: "Focus purely on managing and analyzing your links in a blazing-fast, distraction-free environment with zero ads.",
+    title: "100% Distraction-Free Ad-Free UI",
+    description: "Manage and analyze your links in a lightning-fast workspace with zero advertisements.",
   },
   {
-    benefit: "Memorable Brand Recognition",
-    name: "Custom Branded Slugs",
-    description: "Reinforce your authority and brand recall with custom aliases that readers recognize and trust at a glance.",
+    title: "Custom Branded Slugs",
+    description: "Build instant brand recognition and trust with personalized link aliases.",
     isComingSoon: true,
   },
   {
-    benefit: "Direct Reassurance When It Matters Most",
-    name: "Priority Support & Rapid Assistance",
-    description: "Rest easy knowing dedicated help is just an email away, ensuring your mission-critical campaigns never skip a beat.",
+    title: "Priority Direct Support",
+    description: "Get rapid assistance so your critical links and campaigns never stop running.",
   },
 ];
 
 function FeatureCard({
-  benefit,
   title,
   description,
   isPro = false,
   isComingSoon = false,
 }: {
-  benefit: string;
   title: string;
   description: string;
   isPro?: boolean;
   isComingSoon?: boolean;
 }) {
   return (
-    <div className="relative pl-9 space-y-1">
-      <dt className="font-semibold text-foreground">
+    <div className="relative pl-10 space-y-1">
+      <dt className="flex items-center gap-2">
         <div
           className={cn(
-            "absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-lg",
-            isPro ? "bg-primary" : "bg-secondary"
+            "absolute left-0 top-0.5 flex h-7 w-7 items-center justify-center rounded-lg shadow-sm",
+            isPro ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
           )}
         >
           {isPro ? (
-            <Unlock className="h-4 w-4 text-primary-foreground" />
+            <Unlock className="h-4 w-4" />
           ) : (
-            <Lock className="h-4 w-4 text-secondary-foreground" />
+            <Lock className="h-4 w-4" />
           )}
         </div>
-        <span className="text-primary font-medium text-xs tracking-wide uppercase block">
-          {benefit}
-        </span>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-base text-foreground font-semibold">{title}</span>
-          {isComingSoon && (
-            <Badge variant="outline" className="border-primary/50 text-primary text-[10px] py-0 px-1.5">
-              Coming Soon
-            </Badge>
-          )}
-        </div>
+        <span className="text-lg font-bold tracking-tight text-foreground">{title}</span>
+        {isComingSoon && (
+          <Badge variant="outline" className="border-primary/50 text-primary text-[10px] py-0 px-1.5 shrink-0">
+            Coming Soon
+          </Badge>
+        )}
       </dt>
-      <dd className="text-sm text-muted-foreground leading-relaxed pt-0.5">{description}</dd>
+      <dd className="text-sm text-muted-foreground leading-relaxed">{description}</dd>
     </div>
   );
 }
@@ -160,9 +140,8 @@ export default function FeaturesPage() {
               <dl className="grid sm:grid-cols-2 gap-8 text-base leading-7">
                 {freeFeatures.map((feature) => (
                   <FeatureCard
-                    key={feature.name}
-                    benefit={feature.benefit}
-                    title={feature.name}
+                    key={feature.title}
+                    title={feature.title}
                     description={feature.description}
                   />
                 ))}
@@ -179,9 +158,8 @@ export default function FeaturesPage() {
               <dl className="grid sm:grid-cols-2 gap-8 text-base leading-7">
                 {proFeatures.map((feature) => (
                   <FeatureCard
-                    key={feature.name}
-                    benefit={feature.benefit}
-                    title={feature.name}
+                    key={feature.title}
+                    title={feature.title}
                     description={feature.description}
                     isPro
                     isComingSoon={feature.isComingSoon}
@@ -206,36 +184,27 @@ export default function FeaturesPage() {
               <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-4">
                 <Zap className="h-8 w-8" />
               </div>
-              <span className="text-primary font-medium text-xs uppercase tracking-wide mb-1">
-                Zero Friction, Maximum Retention
-              </span>
-              <h3 className="text-xl font-semibold">Blazing Fast & Clean</h3>
+              <h3 className="text-xl font-bold tracking-tight">Sub-15ms Instant Redirects</h3>
               <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                No clutter, no ads, just instantaneous redirects (~15ms) that respect your users' time and never lose impatient visitors.
+                No clutter, no intermediate ads, and edge-routed redirects so you never lose impatient clicks.
               </p>
             </div>
             <div className="flex flex-col items-center">
               <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-4">
                 <Cpu className="h-8 w-8" />
               </div>
-              <span className="text-primary font-medium text-xs uppercase tracking-wide mb-1">
-                Total Clarity on Every Campaign
-              </span>
-              <h3 className="text-xl font-semibold">Intelligent & Insightful</h3>
+              <h3 className="text-xl font-bold tracking-tight">Rich Previews & Live Insights</h3>
               <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                Automatic metadata previews give your shared links instant social credibility, paired with analytics that reveal exactly where your audience engages.
+                Automatic metadata previews give your links social authority, paired with live click attribution.
               </p>
             </div>
             <div className="flex flex-col items-center">
               <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-4">
                 <ShieldCheck className="h-8 w-8" />
               </div>
-              <span className="text-primary font-medium text-xs uppercase tracking-wide mb-1">
-                Bulletproof Credibility & Protection
-              </span>
-              <h3 className="text-xl font-semibold">Secure & Developer-Friendly</h3>
+              <h3 className="text-xl font-bold tracking-tight">Proactive Scam & Abuse Shield</h3>
               <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                Built-in malicious URL screening protects your audience, while an edge-optimized API allows your systems to scale effortlessly.
+                Continuous threat scanning protects your audience while our high-speed API scales seamlessly.
               </p>
             </div>
           </div>
