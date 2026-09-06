@@ -5,7 +5,7 @@ import { auth as adminAuth, db } from "@/lib/firebase-admin";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { resolveCountryFromRequest } from "@/lib/geo";
+import { resolveCountryFromRequest, resolveValidatedCountry } from "@/lib/geo";
 import {
   getOrCreatePayPalPlans,
   getPayPalSubscriptionDetails,
@@ -32,7 +32,7 @@ export async function getPayPalConfig(countryHint?: string | null): Promise<{ er
     // Server-side tamper-proof geo resolution (fallback to countryHint only if headers unresolvable)
     const hdrs = await headers();
     const ip = hdrs.get("x-forwarded-for") ?? hdrs.get("remote-addr");
-    const detectedCountry = (await resolveCountryFromRequest({ headers: hdrs, ip })) || countryHint;
+    const detectedCountry = (await resolveValidatedCountry({ headers: hdrs, ip })) || countryHint;
     const tier = resolvePricingTier(detectedCountry);
     const plans = await getOrCreatePayPalPlans(tier);
     return {
@@ -78,7 +78,7 @@ export async function initiatePayPalSubscription(
   try {
     const hdrs = await headers();
     const ip = hdrs.get("x-forwarded-for") ?? hdrs.get("remote-addr");
-    const detectedCountry = (await resolveCountryFromRequest({ headers: hdrs, ip })) || countryHint;
+    const detectedCountry = (await resolveValidatedCountry({ headers: hdrs, ip })) || countryHint;
     const tier = resolvePricingTier(detectedCountry);
     const plans = await getOrCreatePayPalPlans(tier);
     const planId = planType === "monthly" ? plans.monthlyPlanId : plans.yearlyPlanId;

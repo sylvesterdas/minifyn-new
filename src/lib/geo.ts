@@ -9,6 +9,25 @@ export function normalizeCountry(value: string | null | undefined): string | nul
   return trimmed;
 }
 
+export function isLikelyProxyOrVpn(headers: Headers): boolean {
+  const suspectHeaders = [
+    "x-real-ip",
+    "x-proxyuser-ip",
+    "via",
+    "forwarded",
+  ];
+  const viaHeader = headers.get("via")?.toLowerCase() || "";
+  if (
+    viaHeader.includes("vpn") ||
+    viaHeader.includes("proxy") ||
+    viaHeader.includes("tor") ||
+    viaHeader.includes("squid")
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export async function resolveCountryFromRequest(params: {
   headers: Headers;
   ip?: string | null;
@@ -22,6 +41,25 @@ export async function resolveCountryFromRequest(params: {
 
   const fallbackIp = ip ? ip.split(",")[0]?.trim() : null;
   return getCountryFromIP(fallbackIp || null);
+}
+
+export async function resolveValidatedCountry(params: {
+  headers: Headers;
+  ip?: string | null;
+  selectedCurrency?: 'INR' | 'USD';
+}): Promise<string | null> {
+  const { headers, ip, selectedCurrency } = params;
+  const detectedCountry = await resolveCountryFromRequest({ headers, ip });
+
+  if (selectedCurrency === 'USD' && detectedCountry === 'IN') {
+    return 'US';
+  }
+
+  if (isLikelyProxyOrVpn(headers) && detectedCountry === 'IN') {
+    return 'US';
+  }
+
+  return detectedCountry;
 }
 
 export function isAllowedCountry(country: string | null): boolean {

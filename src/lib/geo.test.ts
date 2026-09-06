@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resolveCountryFromRequest, isAllowedCountry, normalizeCountry } from "@/lib/geo";
+import { resolveCountryFromRequest, resolveValidatedCountry, isAllowedCountry, normalizeCountry } from "@/lib/geo";
 
 describe("Geolocation & Country Detection Tests", () => {
   it("normalizes country codes correctly", () => {
@@ -43,5 +43,22 @@ describe("Geolocation & Country Detection Tests", () => {
     expect(isAllowedCountry("DE")).toBe(true);
     expect(isAllowedCountry("GB")).toBe(true);
     expect(isAllowedCountry(null)).toBe(true);
+  });
+
+  it("detects proxy/vpn headers and prevents regional arbitrage", async () => {
+    const vpnHeaders = new Headers({
+      "x-vercel-ip-country": "IN",
+      via: "1.1 squid-proxy, 2.0 openvpn-exit",
+    });
+    const country = await resolveValidatedCountry({ headers: vpnHeaders });
+    expect(country).toBe("US");
+  });
+
+  it("safeguards USD currency selection against IN pricing tier", async () => {
+    const headers = new Headers({
+      "x-vercel-ip-country": "IN",
+    });
+    const country = await resolveValidatedCountry({ headers, selectedCurrency: "USD" });
+    expect(country).toBe("US");
   });
 });

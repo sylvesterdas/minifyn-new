@@ -7,7 +7,7 @@ import { auth as adminAuth, db } from "@/lib/firebase-admin";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { isAllowedCountry, resolveCountryFromRequest } from "@/lib/geo";
+import { isAllowedCountry, resolveCountryFromRequest, resolveValidatedCountry } from "@/lib/geo";
 import { getPlanPricing, resolvePricingTier, type PricingTier } from "@/lib/plans";
 
 function getRazorpayCredentials() {
@@ -154,7 +154,7 @@ export async function createRazorpaySubscription(
   // Server-side tamper-proof country resolution (never trust client parameter)
   const hdrs = await headers();
   const ip = hdrs.get("x-forwarded-for") ?? hdrs.get("remote-addr");
-  const detectedCountry = await resolveCountryFromRequest({ headers: hdrs, ip });
+  const detectedCountry = await resolveValidatedCountry({ headers: hdrs, ip });
   const tier = resolvePricingTier(detectedCountry);
 
   try {
