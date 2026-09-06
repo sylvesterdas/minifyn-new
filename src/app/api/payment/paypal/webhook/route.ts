@@ -11,6 +11,19 @@ export async function POST(req: NextRequest) {
 
     console.log(`[PayPal Webhook] Received event: ${eventType} (ID: ${event.id})`);
 
+    if (event.id) {
+      const eventRef = db.ref(`webhook_events/paypal/${event.id}`);
+      const eventSnap = await eventRef.get();
+      if (eventSnap.exists()) {
+        console.warn(`[PayPal Webhook] Duplicate event ignored (ID: ${event.id}).`);
+        return NextResponse.json({ received: true, note: "duplicate_ignored" });
+      }
+      await eventRef.set({
+        processedAt: Date.now(),
+        eventType,
+      });
+    }
+
     const subscriptionId = resource.id || resource.billing_agreement_id;
 
     if (!subscriptionId && !resource.custom_id) {

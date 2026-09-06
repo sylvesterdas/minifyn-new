@@ -5,24 +5,27 @@ import { NextRequest } from "next/server";
 vi.mock("@/lib/firebase-admin", () => {
   const mockUpdate = vi.fn().mockResolvedValue(undefined);
   const mockSet = vi.fn().mockResolvedValue(undefined);
-  const mockGet = vi.fn().mockResolvedValue({
-    exists: () => true,
-    val: () => ({
-      user_123: {
-        email: "testuser@example.com",
-        subscription: {
-          id: "I-TESTSUB123",
-          status: "active",
-        },
-      },
+  const mockRef = vi.fn((path?: string) => ({
+    get: vi.fn().mockImplementation(async () => {
+      if (path?.startsWith("webhook_events")) {
+        return { exists: () => false, val: () => null };
+      }
+      return {
+        exists: () => true,
+        val: () => ({
+          user_123: {
+            email: "testuser@example.com",
+            subscription: {
+              id: "I-TESTSUB123",
+              status: "active",
+            },
+          },
+        }),
+      };
     }),
-  });
-
-  const mockRef = vi.fn().mockReturnValue({
-    get: mockGet,
     update: mockUpdate,
     set: mockSet,
-  });
+  }));
 
   return {
     db: {

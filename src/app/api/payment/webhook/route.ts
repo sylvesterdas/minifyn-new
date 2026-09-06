@@ -98,6 +98,20 @@ export async function POST(req: NextRequest) {
 
     const event = JSON.parse(body);
     const eventType = event.event;
+    const eventId = event.event_id || event.id;
+
+    if (eventId) {
+      const eventRef = db.ref(`webhook_events/razorpay/${eventId}`);
+      const eventSnap = await eventRef.get();
+      if (eventSnap.exists()) {
+        console.warn(`[Razorpay Webhook] Duplicate event ignored (ID: ${eventId}).`);
+        return NextResponse.json({ status: "duplicate_ignored" });
+      }
+      await eventRef.set({
+        processedAt: Date.now(),
+        eventType,
+      });
+    }
 
     // Handle all subscription-related events
     const relevantEvents = [
