@@ -104,6 +104,18 @@ node scripts/e2e-pricing-and-billing.mjs
 
 ---
 
+## 🔁 Cross-Repo Sync Obligations
+
+The following values in this repo are **manually maintained** and must be updated whenever sibling repos release:
+
+| File | Field | Source of truth |
+|---|---|---|
+| `src/app/(apps)/scamguard/page.tsx` | `softwareVersion` in JSON-LD | `ScamGuard/pubspec.yaml` `version` field (semver only, drop build number) |
+| `src/app/(marketing)/pricing/page.tsx` | JSON-LD `OfferCatalog` prices | `src/lib/plans.ts` `PRICING_CONFIG` — do **not** hardcode currency or amounts |
+
+These are not auto-generated. A code review found `softwareVersion: '2.4.2'` in JSON-LD while the live app was `v2.5.0`, and the `OfferCatalog` hardcoded INR for all visitors regardless of resolved country. After any ScamGuard app release, check `softwareVersion` immediately.
+
+
 ## 📱 5. SEO, App Routing & Mobile API Security
 
 - **App Suite Canonical URLs**:

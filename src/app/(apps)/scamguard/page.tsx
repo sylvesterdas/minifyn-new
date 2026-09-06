@@ -220,7 +220,7 @@ export default function ScamGuardPage() {
       priceCurrency: 'INR',
     },
     downloadUrl: playStoreUrl,
-    softwareVersion: '2.4.2',
+    softwareVersion: '2.5.0',
     featureList: [
       'Suspicious URL checks',
       'QR code link scanning',

@@ -2,10 +2,13 @@
 import type { Metadata } from 'next';
 import type { OfferCatalog, WithContext } from 'schema-dts';
 import { PricingPageClient } from '@/components/pricing-client';
+import { headers } from 'next/headers';
+import { resolveCountryFromRequest } from '@/lib/geo';
+import { getPlanPricingForCountry } from '@/lib/plans';
 
 const siteUrl = 'https://www.minifyn.com';
 
-export async function generateMetadata(): Promise<Metadata> {
+export function generateMetadata(): Metadata {
     const title = 'Pricing Plans | MiniFyn';
     const description = 'Choose the perfect plan for your needs. Start for free or upgrade to Pro for advanced features like unlimited link expiration and higher usage limits.';
     const ogImageUrl = `${siteUrl}/og.png`;
@@ -39,14 +42,12 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
-
-import { headers } from 'next/headers';
-import { resolveCountryFromRequest } from '@/lib/geo';
-
 export default async function PricingPage() {
   const hdrs = await headers();
   const ip = hdrs.get('x-forwarded-for') ?? hdrs.get('remote-addr');
   const country = await resolveCountryFromRequest({ headers: hdrs, ip });
+
+  const pricing = getPlanPricingForCountry(country);
 
   const jsonLd: WithContext<OfferCatalog> = {
     '@context': 'https://schema.org',
@@ -57,21 +58,21 @@ export default async function PricingPage() {
             '@type': 'Offer',
             name: 'Free Plan',
             price: '0.00',
-            priceCurrency: 'INR',
+            priceCurrency: pricing.currency,
             description: 'Perfect for personal use and getting started with our platform.',
         },
         {
             '@type': 'Offer',
             name: 'Pro Plan Monthly',
-            price: '149.00',
-            priceCurrency: 'INR',
+            price: pricing.monthlyPrice.toFixed(2),
+            priceCurrency: pricing.currency,
             description: 'For power users and businesses who need more links and advanced analytics.',
         },
         {
             '@type': 'Offer',
             name: 'Pro Plan Yearly',
-            price: '999.00',
-            priceCurrency: 'INR',
+            price: pricing.yearlyPrice.toFixed(2),
+            priceCurrency: pricing.currency,
             description: 'For power users and businesses who need more links and advanced analytics, with a discount for yearly payment.',
         }
     ]
