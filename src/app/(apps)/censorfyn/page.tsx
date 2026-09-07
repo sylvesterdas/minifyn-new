@@ -36,7 +36,7 @@ const visualBase = "/images/censorfyn";
 const playStoreUrl = "https://play.google.com/store/apps/details?id=com.minifyn.censorfyn";
 const title = "CensorFyn: 100% Offline Media Redaction & Privacy App | MiniFyn";
 const description =
-  "CensorFyn is an offline, privacy-first Android app by MiniFyn that automatically detects and irreversibly redacts faces, passports, credit cards, PII text, and QR codes with true pixel destruction.";
+  "CensorFyn is an offline, privacy-first Android app by MiniFyn that automatically detects and irreversibly redacts faces, passports, credit cards, PII text, and QR codes in photos and videos with true pixel destruction and audio muting.";
 
 const screenshots = [
   {
@@ -130,6 +130,14 @@ const faqs = [
     question: "Does CensorFyn remove EXIF and GPS location metadata?",
     answer: "Yes. By default, CensorFyn strips all camera metadata, device serials, capture timestamps, and precise GPS location coordinates from exported images to prevent secondary location tracking.",
   },
+  {
+    question: "Can CensorFyn redact videos and mute audio tracks?",
+    answer: "Yes. CensorFyn includes a full hardware-accelerated video redaction engine using AndroidX Media3 Transformer and custom OpenGL ES shaders. You can track moving faces or sensitive areas across keyframes and optionally strip/mute the entire audio track on export.",
+  },
+  {
+    question: "How do I verify an audit manifest?",
+    answer: "You can use CensorFyn's built-in Audit Manifest Verifier under More Tools, or compute a SHA-256 hash using any standard terminal utility (sha256sum) to confirm the exported file matches the cryptographic digest in the companion JSON manifest.",
+  },
 ];
 
 export const metadata: Metadata = {
@@ -185,8 +193,9 @@ export default function CensorFynPage() {
       "Auto-detect faces, passports, driver's licenses, and credit cards",
       "Regex PII scanner for phone numbers, emails, addresses, and national IDs",
       "Irreversible pixel destruction redaction (Blur, Pixelate, Solid Color)",
+      "Hardware-accelerated offline video redaction with keyframe tracking & audio muting",
       "Automatic EXIF & GPS metadata stripping",
-      "Optional Audit Mode for legal chain of custody SHA-256 manifest",
+      "Cryptographic SHA-256 legal audit manifest generator and verifier",
     ],
     sameAs: playStoreUrl,
   };
