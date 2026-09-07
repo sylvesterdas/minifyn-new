@@ -8,14 +8,14 @@ export async function GET(
   const { slug } = await props.params;
 
   if (!slug) {
-    return NextResponse.redirect(new URL("/not-found", request.url));
+    return new NextResponse(null, { status: 404 });
   }
 
   try {
     const link = await getLinkBySlug(slug);
 
     if (!link || !link.longUrl) {
-      return NextResponse.redirect(new URL("/not-found", request.url));
+      return new NextResponse(null, { status: 404 });
     }
 
     const forwarded = request.headers.get("x-forwarded-for");
@@ -44,10 +44,10 @@ export async function GET(
           : `https://${link.longUrl}`;
       destinationUrl = new URL(rawTarget);
       if (destinationUrl.protocol !== "http:" && destinationUrl.protocol !== "https:") {
-        return NextResponse.redirect(new URL("/not-found", request.url));
+        return new NextResponse(null, { status: 404 });
       }
     } catch {
-      return NextResponse.redirect(new URL("/not-found", request.url));
+      return new NextResponse(null, { status: 404 });
     }
 
     const response = NextResponse.redirect(destinationUrl.toString(), 307);
@@ -55,7 +55,6 @@ export async function GET(
     return response;
   } catch (error) {
     console.error(`[Go Route] Error resolving slug '${slug}':`, error);
-    return NextResponse.redirect(new URL("/not-found", request.url));
+    return new NextResponse(null, { status: 404 });
   }
 }
-

@@ -1,8 +1,14 @@
 
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Link2Off } from 'lucide-react';
-import { Suspense } from 'react'; // Import Suspense
+import { Suspense } from 'react';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
+
 
 export default function NotFound() {
   return (
