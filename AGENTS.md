@@ -182,42 +182,25 @@ These are not auto-generated. A code review found `softwareVersion: '2.4.2'` in 
    - Destructive raster pixel modifications (Gaussian blur, Mosaic pixelation, Solid blackout) & EXIF/GPS stripping.
    - SHA-256 legal audit manifest generator.
    - **Multi-Language Play Store Listings Published**: `en-US`, `en-GB`, `es-419`, `es-ES`, `pt-BR`, `de-DE`, `fr-FR`, `hi-IN`.
+   - **Production bundle live on Google Play Production track.**
 4. **MiniFyn Web Platform**:
    - Next.js 16 Edge Route Handlers (`~15ms` 307 redirects).
    - Aggregated daily click metrics (`analytics_summary`) saving 95%+ DB footprint.
    - Dual-gateway payments (Razorpay + PayPal PPP regional tiers).
-   - Web utilities: Code Minifier, JSON Formatter, JWT Debugger, and Branded QR Code Generator.
+   - Web utilities: Code Minifier, JSON Formatter, JWT Debugger, Branded QR Code Generator, and Universal Link Expander & Hop Tracer (`/tools/link-expander`).
    - ScamGuard Trust & Inspection Banner embedded on `mnfy.in/[slug]+` inspection views.
+   - Public MiniFyn Help Center and Documentation Hub (`/help`, `/docs`, `/docs/guides/*`) across MiniFyn, ScamGuard, ClipFyn, CensorFyn, and Studio.
 5. **Marketing Cockpit (`scamguard-studio`)**:
    - Multi-tenant Fastify/React operational dashboard.
    - AES-256 BYO credentials vault and Gemini Flash AI batch composer.
-   - Buffer integration and safety heuristics engine.
+   - Buffer integration, safety heuristics engine, and ethical behavioral marketing experimentation standards.
 
 ---
 
 ### ⏳ Upcoming Focus & Active Priorities
 
-1. **CensorFyn Production Access & Launch**:
-   - Monitor Google Play production-access review status.
-   - Once approved, complete production release rollout and in-product contextual guidance.
-
-2. **MiniFyn Web & Free Tools**:
-   - **Universal Link Expander & Hop Tracer (`/tools/link-expander`)**: Expands shortened redirect chains safely without executing target scripts.
-
-3. **Desktop Extension**:
+1. **Desktop Extension**:
    - Build a lightweight **MiniFyn + ScamGuard Chrome Extension** with 1-click URL shortening and inline link safety warnings on desktop.
 
-4. **Universal How-To & Guided Usefulness Program (All Products)**:
-   - **Started/completed for the current rollout**: public MiniFyn Help Center and documentation hub at `/help` and `/docs`, with product guides under `/docs/guides/*` for MiniFyn, ScamGuard, ClipFyn, CensorFyn, and Marketing Studio.
-   - **Started/completed for the current rollout**: ScamGuard native Help Center, ClipFyn native Help Center from Settings, and Marketing Studio Help & Support dashboard page.
-   - **Deferred**: CensorFyn in-product help and contextual UI changes remain deferred while the app is in Google Play production-access review; public CensorFyn documentation may continue to be maintained.
-   - Continue adding plain-language, task-first how-tos for every major feature, setting, permission, export flow, and paid capability. Write for first-time users: explain purpose, prerequisites, next steps, expected results, privacy implications, recovery from mistakes, and troubleshooting.
-   - Add contextual links from MiniFyn dashboard pages, empty/error states, ScamGuard scanner/result flows, and ClipFyn export/permission states. Keep documentation versioned with releases and verify it against real UI on Android, web, and Studio.
-   - Feedback and complaints should direct users to the professional support address: `support@minifyn.com`. Tell users not to send passwords, OTPs, tokens, or private media.
-   - Measure comprehension and task success (for example, support searches, repeated failed actions, abandonment, and optional usability tests) without collecting unnecessary personal data.
-
-5. **Ethical Behavioral Design & Marketing Experimentation (All Products)**:
-   - Research how visual context, copy, defaults, sequencing, perceived effort, trust cues, progress feedback, social proof, color, imagery, sound, and pricing presentation affect comprehension, confidence, activation, retention, and ethical conversion for each product.
-   - Brainstorm and test hypotheses for product UX and marketing graphics, including calm versus urgent safety framing for ScamGuard, privacy/control versus transformation outcomes for CensorFyn, before/after and creator-confidence framing for ClipFyn, clarity/speed/trust framing for MiniFyn tools, and reliability/operational-control framing for Marketing Studio.
-   - Treat examples such as clouds-versus-coins backgrounds as hypotheses, not universal rules: run controlled A/B or sequential tests with a defined primary metric, guardrail metrics, audience/context, sample-size rationale, and stop criteria. Record the result and confidence level in an experiment log.
-   - Use behavioral psychology to reduce confusion and help users make informed choices—not dark patterns. No fabricated scarcity, deceptive urgency, disguised ads, coercive defaults, manipulative consent flows, exploitative vulnerability targeting, or unsubstantiated claims. Respect privacy, accessibility, cultural context, and the existing app-specific ad/payment rules.
+2. **In-Product Contextual Guidance**:
+   - Expand interactive walkthroughs and contextual help across MiniFyn mobile apps.
