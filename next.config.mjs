@@ -34,6 +34,22 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    const backendUrl = process.env.EXTERNAL_API_URL || process.env.NEXT_PUBLIC_GO_BACKEND_URL;
+    if (backendUrl) {
+      return [
+        {
+          source: '/api/tools/link-expander',
+          destination: `${backendUrl}/api/tools/link-expander`,
+        },
+        {
+          source: '/api/shorten',
+          destination: `${backendUrl}/api/shorten`,
+        },
+      ];
+    }
+    return [];
+  },
   async headers() {
     return [
       {
