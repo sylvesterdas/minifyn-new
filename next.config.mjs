@@ -47,6 +47,14 @@ const nextConfig = {
             source: '/api/shorten',
             destination: `${backendUrl}/api/shorten`,
           },
+          {
+            source: '/api/payment/webhook',
+            destination: `${backendUrl}/api/payment/webhook`,
+          },
+          {
+            source: '/api/payment/paypal/webhook',
+            destination: `${backendUrl}/api/payment/paypal/webhook`,
+          },
         ],
         afterFiles: [],
         fallback: [],
