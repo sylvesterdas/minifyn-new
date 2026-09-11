@@ -32,13 +32,22 @@ const footerLinks = {
     ],
 };
 
-const FooterLink = ({ href, label }: { href: string; label: string }) => (
-    <li>
-        <Link href={href} className="text-muted-foreground transition-colors hover:text-foreground">
-            {label}
-        </Link>
-    </li>
-);
+const FooterLink = ({ href, label }: { href: string; label: string }) => {
+    const isStaticAsset = href.endsWith('.xml') || href.endsWith('.txt') || href.startsWith('http');
+    return (
+        <li>
+            {isStaticAsset ? (
+                <a href={href} className="text-muted-foreground transition-colors hover:text-foreground">
+                    {label}
+                </a>
+            ) : (
+                <Link href={href} className="text-muted-foreground transition-colors hover:text-foreground">
+                    {label}
+                </Link>
+            )}
+        </li>
+    );
+};
 
 function FooterColumn({ title, links }: { title: string; links: { href: string; label: string }[] }) {
     return (

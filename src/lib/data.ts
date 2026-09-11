@@ -219,7 +219,15 @@ const generateShortCode = (length = 6): string => {
     return result;
 }
 
+export const isValidSlug = (slug: string): boolean => {
+    if (!slug || typeof slug !== 'string') return false;
+    const trimmed = slug.trim();
+    if (!trimmed || trimmed.length > 256) return false;
+    return !/[.#$[\]/\x00-\x1f\x7f]/.test(trimmed);
+};
+
 export const isSlugTaken = async (slug: string): Promise<boolean> => {
+    if (!isValidSlug(slug)) return false;
     const snapshot: DataSnapshot = await db.ref(`urls/${slug}`).once('value');
     return snapshot.exists();
 }
@@ -300,6 +308,7 @@ export const createShortLink = async ({ longUrl, userId, isVerifiedUser }: Creat
 }
 
 export const getLinkBySlug = async (slug: string): Promise<Link | null> => {
+    if (!isValidSlug(slug)) return null;
     const snapshot: DataSnapshot = await db.ref(`urls/${slug}`).once('value');
     
     if (!snapshot.exists()) {
@@ -376,6 +385,7 @@ export interface ClickData {
 }
 
 export const recordClick = async (slug: string, clickData: ClickData): Promise<void> => {
+    if (!isValidSlug(slug)) return;
     try {
         const today = format(new Date(), 'yyyy-MM-dd');
         const linkRef = db.ref(`urls/${slug}`);
