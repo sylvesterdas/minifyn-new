@@ -9,7 +9,8 @@ import { BlogCodeInteractions } from '@/components/blog-code-interactions';
 import { BlogAdaptiveCta } from '@/components/blog-adaptive-cta';
 import 'highlight.js/styles/github-dark-dimmed.css';
 
-export const revalidate = 3600;
+export const revalidate = 86400;
+export const dynamicParams = false;
 
 function splitContentForMidCta(html: string): [string, string | null] {
   const pTags = [...html.matchAll(/<\/p>/gi)];
@@ -24,7 +25,7 @@ function splitContentForMidCta(html: string): [string, string | null] {
 
 export async function generateStaticParams() {
   const posts = await getAllBlogPosts();
-  return posts.slice(0, 50).map((post) => ({
+  return posts.map((post) => ({
     slug: post.slug,
   }));
 }

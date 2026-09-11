@@ -2,6 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "./route";
 import { NextRequest } from "next/server";
 
+const { verifyPayPalWebhookSignature } = vi.hoisted(() => ({
+  verifyPayPalWebhookSignature: vi.fn().mockResolvedValue(true),
+}));
+
+vi.mock("@/lib/paypal", () => ({ verifyPayPalWebhookSignature }));
+
 vi.mock("@/lib/firebase-admin", () => {
   const mockUpdate = vi.fn().mockResolvedValue(undefined);
   const mockSet = vi.fn().mockResolvedValue(undefined);
@@ -37,7 +43,20 @@ vi.mock("@/lib/firebase-admin", () => {
 
 describe("PayPal Webhook Route Handler", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+	vi.clearAllMocks();
+	verifyPayPalWebhookSignature.mockResolvedValue(true);
+  });
+
+  it("rejects a webhook when PayPal signature verification fails", async () => {
+    verifyPayPalWebhookSignature.mockResolvedValueOnce(false);
+    const req = new NextRequest("http://localhost:3000/api/payment/paypal/webhook", {
+      method: "POST",
+      body: JSON.stringify({ id: "WH-INVALID", event_type: "BILLING.SUBSCRIPTION.ACTIVATED" }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(403);
   });
 
   it("handles BILLING.SUBSCRIPTION.ACTIVATED event and activates Pro", async () => {

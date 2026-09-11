@@ -70,6 +70,7 @@ All environment variables follow unified standard names without duplicate `_TEST
 | `RAZORPAY_WEBHOOK_SECRET` | Secret to verify Razorpay webhook signatures | **Sensitive** |
 | `PAYPAL_CLIENT_ID` | PayPal REST API Client ID | Non-sensitive |
 | `PAYPAL_CLIENT_SECRET` | PayPal REST API Secret Key | **Sensitive** |
+| `PAYPAL_WEBHOOK_ID` | PayPal webhook ID used for signature verification | Non-sensitive |
 | `PAYPAL_ENVIRONMENT` | `'live'` in Production, `'sandbox'` in Dev/Preview | Non-sensitive |
 | `SMTP_HOST` | SMTP server (`smtp.zeptomail.in` in Prod, Mailtrap in Dev) | Non-sensitive |
 | `SMTP_PORT` | SMTP port (`587` in Prod, `2525` in Dev) | Non-sensitive |

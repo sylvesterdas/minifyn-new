@@ -1,11 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase-admin";
+import { verifyPayPalWebhookSignature } from "@/lib/paypal";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
-    const event = await req.json();
+    const contentLength = Number(req.headers.get("content-length") || "0");
+    if (contentLength > 1024 * 1024) {
+      return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+    }
+
+    const rawBody = await req.text();
+    if (rawBody.length > 1024 * 1024) {
+      return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+    }
+
+    const verified = await verifyPayPalWebhookSignature(rawBody, {
+      transmissionId: req.headers.get("paypal-transmission-id") || "",
+      transmissionTime: req.headers.get("paypal-transmission-time") || "",
+      certUrl: req.headers.get("paypal-cert-url") || "",
+      authAlgo: req.headers.get("paypal-auth-algo") || "",
+      transmissionSig: req.headers.get("paypal-transmission-sig") || "",
+    });
+    if (!verified) {
+      return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
+    }
+
+    const event = JSON.parse(rawBody);
     const eventType = event.event_type as string;
     const resource = event.resource || {};
 

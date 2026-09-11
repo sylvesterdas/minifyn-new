@@ -22,8 +22,11 @@ export interface BlogPost extends BlogPostMeta {
   rawContent: string;
 }
 
-const GITHUB_REPO_TREE_URL = 'https://api.github.com/repos/sylvesterdas/Articles/git/trees/main?recursive=1';
 const GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/sylvesterdas/Articles/main';
+
+const blogManifest = (fallbackManifest as BlogPostMeta[])
+  .slice()
+  .sort((a, b) => new Date(b.datePublished).getTime() - new Date(a.datePublished).getTime());
 
 const marked = new Marked({
   gfm: true,
@@ -109,80 +112,7 @@ export function calculateReadingTime(text: string): string {
 }
 
 export async function getAllBlogPosts(): Promise<BlogPostMeta[]> {
-  try {
-    const res = await fetch(GITHUB_REPO_TREE_URL, {
-      next: { revalidate: 3600 },
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
-      },
-    } as RequestInit);
-
-    if (!res.ok) {
-      return fallbackManifest as BlogPostMeta[];
-    }
-
-    const json = await res.json();
-    const mdFiles = (json.tree || []).filter((f: any) => typeof f.path === 'string' && f.path.endsWith('.md'));
-
-    if (!mdFiles.length) {
-      return fallbackManifest as BlogPostMeta[];
-    }
-
-    const posts: BlogPostMeta[] = [];
-    const concurrency = 20;
-
-    for (let i = 0; i < mdFiles.length; i += concurrency) {
-      const batch = mdFiles.slice(i, i + concurrency);
-      const results = await Promise.all(
-        batch.map(async (file: any) => {
-          try {
-            const rawRes = await fetch(`${GITHUB_RAW_BASE_URL}/${file.path}`, {
-              next: { revalidate: 3600 },
-            } as RequestInit);
-            if (!rawRes.ok) return null;
-            const text = await rawRes.text();
-            const { data } = parseFrontmatter(text);
-
-            const title = data.title || '';
-            const tags = Array.isArray(data.tags) ? data.tags : [];
-            const primaryTag = tags[0] || 'Tech';
-            const cover = resolvePostCover(data.cover, title, primaryTag);
-            const ogImage = resolvePostCover(data.ogImage || data.cover, title, primaryTag);
-
-            return {
-              filename: file.path,
-              cuid: data.cuid || file.path.replace('.md', ''),
-              title,
-              seoTitle: data.seoTitle || title,
-              seoDescription: data.seoDescription || '',
-              datePublished: data.datePublished ? new Date(data.datePublished).toISOString() : new Date().toISOString(),
-              slug: data.slug || file.path.replace('.md', ''),
-              cover,
-              ogImage,
-              tags,
-              canonical: data.canonical || `https://www.minifyn.com/blog/${data.slug || ''}`,
-            } as BlogPostMeta;
-          } catch {
-            return null;
-          }
-        })
-      );
-
-      for (const r of results) {
-        if (r && r.slug) posts.push(r);
-      }
-    }
-
-    if (posts.length > 0) {
-      posts.sort((a, b) => new Date(b.datePublished).getTime() - new Date(a.datePublished).getTime());
-      return posts;
-    }
-
-    return fallbackManifest as BlogPostMeta[];
-  } catch {
-    return fallbackManifest as BlogPostMeta[];
-  }
+  return blogManifest;
 }
 
 export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
@@ -195,7 +125,7 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
 
   try {
     const rawRes = await fetch(`${GITHUB_RAW_BASE_URL}/${meta.filename}`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 86400 },
     } as RequestInit);
 
     if (!rawRes.ok) {

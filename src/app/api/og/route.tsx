@@ -6,8 +6,8 @@ export const runtime = 'edge';
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const title = searchParams.get('title') || 'MiniFyn Engineering & Tech Insights';
-    const tag = searchParams.get('tag') || 'Tech';
+    const title = (searchParams.get('title') || 'MiniFyn Engineering & Tech Insights').slice(0, 140);
+    const tag = (searchParams.get('tag') || 'Tech').slice(0, 40);
 
     return new ImageResponse(
       (
@@ -119,6 +119,9 @@ export async function GET(req: NextRequest) {
       {
         width: 1200,
         height: 630,
+        headers: {
+          'Cache-Control': 'public, s-maxage=2592000, stale-while-revalidate=604800',
+        },
       }
     );
   } catch {

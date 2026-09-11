@@ -51,6 +51,54 @@ export async function getPayPalAccessToken(): Promise<string> {
   return token;
 }
 
+export interface PayPalWebhookHeaders {
+  transmissionId: string;
+  transmissionTime: string;
+  certUrl: string;
+  authAlgo: string;
+  transmissionSig: string;
+}
+
+export async function verifyPayPalWebhookSignature(
+  rawBody: string,
+  headers: PayPalWebhookHeaders,
+): Promise<boolean> {
+  const webhookId = process.env.PAYPAL_WEBHOOK_ID || '';
+  if (!webhookId || Object.values(headers).some((value) => !value)) {
+    return false;
+  }
+
+  let webhookEvent: unknown;
+  try {
+    webhookEvent = JSON.parse(rawBody);
+  } catch {
+    return false;
+  }
+
+  const token = await getPayPalAccessToken();
+  const response = await fetch(`${getPayPalBaseUrl()}/v1/notifications/verify-webhook-signature`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      transmission_id: headers.transmissionId,
+      transmission_time: headers.transmissionTime,
+      cert_url: headers.certUrl,
+      auth_algo: headers.authAlgo,
+      transmission_sig: headers.transmissionSig,
+      webhook_id: webhookId,
+      webhook_event: webhookEvent,
+    }),
+    cache: 'no-store',
+  });
+
+  if (!response.ok) return false;
+  const result = (await response.json()) as { verification_status?: string };
+  return result.verification_status === 'SUCCESS';
+}
+
 export interface PayPalPlanConfig {
   productId: string;
   monthlyPlanId: string;
