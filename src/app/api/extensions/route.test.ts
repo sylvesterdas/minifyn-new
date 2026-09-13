@@ -11,7 +11,7 @@ describe('/api/extensions catalog', () => {
     expect(response.headers.get('access-control-allow-origin')).toBe('*');
     const data = await response.json();
     expect(data).toEqual(expect.arrayContaining([
-      expect.objectContaining({ id: 'scamguard-link-checker', published: false, storeUrl: null }),
+      expect.objectContaining({ id: 'scamguard-link-checker', status: 'submitted', published: false, storeUrl: null }),
       expect.objectContaining({ id: 'minifyn-url-shortener', published: false, storeUrl: null }),
     ]));
   });

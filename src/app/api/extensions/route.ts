@@ -1,49 +1,10 @@
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
+import { EXTENSIONS } from '@/lib/extensions';
 
 export const dynamic = 'force-dynamic';
-
-export type ExtensionStatus = 'in_development' | 'submitted' | 'published';
-
-export interface ExtensionMetadata {
-  id: string;
-  name: string;
-  description: string;
-  browser: 'chrome';
-  version: string | null;
-  status: ExtensionStatus;
-  published: boolean;
-  logoUrl: string;
-  websiteUrl: string;
-  storeUrl: string | null;
-}
-
-export const EXTENSIONS: ExtensionMetadata[] = [
-  {
-    id: 'scamguard-link-checker',
-    name: 'ScamGuard: Link Checker',
-    description: 'Check visible link warning signs locally before opening a site.',
-    browser: 'chrome',
-    version: null,
-    status: 'in_development',
-    published: false,
-    logoUrl: 'https://www.minifyn.com/images/scamguard-logo.png',
-    websiteUrl: 'https://www.minifyn.com/scamguard',
-    storeUrl: null,
-  },
-  {
-    id: 'minifyn-url-shortener',
-    name: 'MiniFyn: URL Shortener',
-    description: 'Create and manage MiniFyn short links from Chrome.',
-    browser: 'chrome',
-    version: null,
-    status: 'in_development',
-    published: false,
-    logoUrl: 'https://www.minifyn.com/images/minifyn-logo.png',
-    websiteUrl: 'https://www.minifyn.com',
-    storeUrl: null,
-  },
-];
+export { EXTENSIONS } from '@/lib/extensions';
+export type { ExtensionMetadata, ExtensionStatus } from '@/lib/extensions';
 
 const payload = JSON.stringify(EXTENSIONS);
 const etag = `"${crypto.createHash('md5').update(payload).digest('hex')}"`;

@@ -7,6 +7,7 @@ import { BarChart, Key, Zap, QrCode, Link as LinkIcon, ClipboardPaste, Wand, Bar
 import { DeveloperApiSection } from '@/components/developer-api-section';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { publishedExtensions } from '@/lib/extensions';
 
 
 
@@ -70,6 +71,7 @@ const features = [
 ];
 
 export default function Home() {
+    const extensions = publishedExtensions;
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
@@ -254,6 +256,48 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {extensions.length > 0 && (
+          <section className="relative w-full border-t bg-background py-16 md:py-24">
+            <div className="container mx-auto px-4 md:px-6">
+              <div className="mb-10 flex flex-col items-center space-y-3 text-center">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+                  <ShieldCheck className="h-3.5 w-3.5" /> Browser extensions
+                </div>
+                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">MiniFyn in your browser</h2>
+                <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
+                  Install MiniFyn tools that are available in the Chrome Web Store.
+                </p>
+              </div>
+              <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+                {extensions.map((extension) => (
+                  <Link
+                    key={extension.id}
+                    href={extension.storeUrl!}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex flex-col justify-between rounded-3xl border bg-card p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl"
+                  >
+                    <div className="space-y-4">
+                      <div className="relative h-14 w-14 overflow-hidden rounded-2xl border bg-background p-1 shadow-sm">
+                        <Image src={extension.logoUrl} alt={`${extension.name} icon`} fill className="object-contain" sizes="56px" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-foreground transition-colors group-hover:text-primary">{extension.name}</h3>
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{extension.description}</p>
+                      </div>
+                    </div>
+                    <div className="mt-6 border-t pt-6">
+                      <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all group-hover:gap-2.5">
+                        <span>Get it from Chrome Web Store</span><ArrowRight className="h-4 w-4" />
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section id="how-it-works" className="relative w-full py-12 md:py-24 lg:py-32 bg-card/50">
           <div className="container mx-auto px-4 md:px-6 relative">
