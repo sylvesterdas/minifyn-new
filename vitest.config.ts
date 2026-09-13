@@ -8,6 +8,9 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './vitest.setup.ts',
+    // The extension owns its Node test runner; keep those files out of the
+    // browser-oriented Next.js Vitest suite.
+    exclude: ['browser-extension/**', 'node_modules/**'],
   },
   resolve: {
     alias: {
