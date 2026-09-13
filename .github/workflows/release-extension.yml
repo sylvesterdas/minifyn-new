@@ -1,0 +1,55 @@
+name: release-extension
+
+on:
+  push:
+    tags:
+      - "mf-ext-v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (mf-ext-v<major>.<minor>.<patch>)"
+        required: true
+      ref:
+        description: "Branch, tag, or commit to package (defaults to tag)"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.ref || github.event.inputs.tag) || github.ref }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Check and build extension
+        run: cd browser-extension && npm run check
+      - name: Validate package metadata
+        run: |
+          set -euo pipefail
+          tag="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}"
+          version="${tag#mf-ext-v}"
+          node -e "const m=require('./browser-extension/manifest.json'); if(m.version !== process.argv[1]) process.exit(1)" "$version"
+      - name: Package release assets
+        run: |
+          set -euo pipefail
+          tag="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}"
+          archive="minifyn-${tag}.zip"
+          (cd browser-extension/dist && zip -qr "../../${archive}" .)
+          shasum -a 256 "$archive" > "${archive}.sha256"
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            minifyn-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}.zip
+            minifyn-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}.zip.sha256

@@ -19,6 +19,7 @@
 
 # production
 /build
+/browser-extension/dist/
 
 # misc
 .DS_Store
