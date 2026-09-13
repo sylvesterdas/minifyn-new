@@ -200,8 +200,28 @@ These are not auto-generated. A code review found `softwareVersion: '2.4.2'` in 
 
 ### ⏳ Upcoming Focus & Active Priorities
 
-1. **Desktop Extension**:
-   - Build a lightweight **MiniFyn + ScamGuard Chrome Extension** with 1-click URL shortening and inline link safety warnings on desktop.
+1. **Desktop Extensions**:
+   - Build two separately listed and released products: the **MiniFyn URL Shortener extension** in this repository and the **ScamGuard Link Checker extension** in the ScamGuard repository. Their permissions, privacy disclosures, versions, tests, and release workflows must remain separate.
 
 2. **In-Product Contextual Guidance**:
    - Expand interactive walkthroughs and contextual help across MiniFyn mobile apps.
+
+### MiniFyn URL Shortener browser extension plan (planned; not implemented)
+
+**Product and boundaries**
+
+- Own the MiniFyn extension source, tests, store assets, and dedicated CI/release workflow in this backend repository, under an extension-specific directory. Do not put ScamGuard checking, heuristics, or branding into this package.
+- The extension is a compact toolbar popup and context-menu action for shortening the current HTTP(S) page or a user-selected link, with an editable URL field, one-click copy, clear errors, and a link to the MiniFyn dashboard/API-key page. Do not request access to page content when a tab URL or context-menu link URL suffices.
+- Users generate their own key at `/dashboard/settings/api-keys` and explicitly paste it into the extension. `POST /api/shorten` already accepts `Authorization: Bearer <key>` and `{ "url": "https://..." }`, and returns `shortUrl`; the endpoint currently rewrites to the Go service, so validate the deployed contract before release. The extension does not add an authentication endpoint or separate payment system.
+- Explain that the extension sends the URL being shortened and the user's key to MiniFyn. Never send the key to a third party, include it in telemetry, place it in a URL/query string, or commit it. Mask the saved key, offer a visible remove-key action, use extension-only local storage rather than synced storage, and avoid logging request headers. Warn that anyone with access to an unlocked browser profile may use a locally stored key; users can revoke it in the dashboard.
+- Validate HTTP(S) input before submission. Display server-side unsafe-URL, unauthorized/revoked-key, daily-limit, network, and timeout responses distinctly. Never imply that creating a short link certifies its destination as safe. Avoid duplicate submissions and copy only the successful returned URL.
+- No background URL collection, automatic shortening, content scripts, or broad site permissions for the first release. Request the minimum permissions needed for toolbar and context-menu invocation and access only to the MiniFyn API origin. Review the permissions and data-use disclosures for each target store.
+
+**Delivery and quality gates**
+
+1. Build a browser-neutral core and a Manifest V3 Chrome/Edge adapter. Keep store-specific manifests/assets in the extension directory. Firefox, Opera, and Safari are later ports subject to browser-specific tests and store review; Safari requires its own Apple packaging/distribution path.
+2. Create focused tests for URL selection, invalid schemes, API request/response handling, key replacement/removal, 401/429 errors, retry behavior, copy, and no key leakage into logs or sync storage. Test popup and context-menu flows in a real browser against a controlled test endpoint; verify that a created link appears in the correct account and respects existing plan limits. Keep production smoke tests non-destructive and use a dedicated test account/key.
+3. Add a standalone extension CI workflow that lints, typechecks, tests, builds/minifies, scans the package for secrets/unwanted files, validates its manifest and permissions, and uploads a reviewable ZIP artifact. Path-filter extension checks where useful, but rerun contract tests when `/api/shorten`, its rewrite, or key validation changes. Keep this workflow separate from the Next.js deployment and do not auto-publish from the website release pipeline.
+4. Use an independent extension version and release tag/dispatch. Produce a reproducible package with checksums and store notes; submit to Chrome first, then Edge after browser smoke tests. Report built, submitted, approved, and live states separately. Store publication requires review of the final package/listing and explicit authorization; creating this plan does not publish anything.
+5. Prepare privacy/support pages and store assets before submission: truthful description of URL/key transmission, data retention, permission purposes, screenshots of real extension UI, support contact, and a beginner-first setup/revocation guide. Maintain distinct store listings for MiniFyn and ScamGuard.
+6. Before publishing, confirm ownership and readiness of the Chrome Web Store publisher account (registration fee, verified contact email, two-step verification) and Microsoft Edge Partner Center publisher account. One publisher may own two distinct listings; store credentials and upload tokens belong in store/CI secrets, never in the repository. Firefox/Opera accounts and Apple Developer membership are needed only when those ports are scheduled.
