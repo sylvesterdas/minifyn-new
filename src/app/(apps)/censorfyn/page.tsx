@@ -188,6 +188,7 @@ export default function CensorFynPage() {
       priceCurrency: "INR",
     },
     downloadUrl: playStoreUrl,
+    softwareVersion: "1.6.0",
     featureList: [
       "100% On-device offline processing",
       "Auto-detect faces, passports, driver's licenses, and credit cards",
