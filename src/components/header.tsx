@@ -48,10 +48,10 @@ export function Header() {
             ) : (
                 <>
                     <Button asChild variant="ghost">
-                        <Link href="/auth/signin">Sign In</Link>
+                        <Link prefetch={false} href="/auth/signin">Sign In</Link>
                     </Button>
                     <Button asChild>
-                        <Link href="/auth/signup">Sign Up</Link>
+                        <Link prefetch={false} href="/auth/signup">Sign Up</Link>
                     </Button>
                 </>
             )}
@@ -86,12 +86,12 @@ export function Header() {
                       ) : (
                         <div className="flex flex-col space-y-2">
                             <Button asChild variant="outline" className="w-full">
-                                <Link href="/auth/signin" onClick={() => setIsMobileMenuOpen(false)}>
+                                <Link prefetch={false} href="/auth/signin" onClick={() => setIsMobileMenuOpen(false)}>
                                     Sign In
                                 </Link>
                             </Button>
                             <Button asChild className="w-full">
-                                <Link href="/auth/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                                <Link prefetch={false} href="/auth/signup" onClick={() => setIsMobileMenuOpen(false)}>
                                     Sign Up
                                 </Link>
                             </Button>

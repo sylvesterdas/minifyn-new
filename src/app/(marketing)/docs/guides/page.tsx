@@ -88,7 +88,7 @@ export default function GuidesPage() {
                         </CardHeader>
                         <CardContent>
                              <ol className="list-decimal list-inside space-y-3 text-muted-foreground text-base">
-                                <li><Link href="/auth/signin" className="underline text-primary">Sign in</Link> to your account.</li>
+                                <li><Link prefetch={false} href="/auth/signin" className="underline text-primary">Sign in</Link> to your account.</li>
                                 <li>Navigate to the "Dashboard".</li>
                                 <li>Click on the "Links" tab in the sidebar to see all your links.</li>
                                 <li>Use the action menu (three dots) on each link to copy, edit, or delete it.</li>
@@ -106,7 +106,7 @@ export default function GuidesPage() {
                         </CardHeader>
                         <CardContent>
                              <ol className="list-decimal list-inside space-y-3 text-muted-foreground text-base">
-                                <li><Link href="/auth/signin" className="underline text-primary">Sign in</Link> to your account.</li>
+                                <li><Link prefetch={false} href="/auth/signin" className="underline text-primary">Sign in</Link> to your account.</li>
                                 <li>Navigate to <Link href="/dashboard/settings/api-keys" className="underline text-primary">Settings &gt; API Keys</Link>.</li>
                                 <li>Click the "Generate New Key" button to get your API key.</li>
                                 <li>Use this key in the `Authorization: Bearer YOUR_API_KEY` header when making requests.</li>

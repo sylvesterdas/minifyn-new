@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { getAllBlogPosts } from '@/lib/blog';
 
-export const revalidate = 86400;
+export const revalidate = false;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = 'https://www.minifyn.com';

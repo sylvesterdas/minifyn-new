@@ -214,7 +214,7 @@ export default function FeaturesPage() {
           </div>
           <div className="mt-12 text-center">
             <Button asChild size="lg">
-              <NextLink href="/auth/signup">Experience the Difference</NextLink>
+              <NextLink prefetch={false} href="/auth/signup">Experience the Difference</NextLink>
             </Button>
           </div>
         </div>

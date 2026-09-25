@@ -166,7 +166,7 @@ export default async function LinkInfoPage(props: Props) {
               Want to shorten, track, and protect your own links?
             </p>
             <Button asChild variant="outline" size="sm" className="font-medium gap-1">
-              <Link href="/auth/signup">
+              <Link prefetch={false} href="/auth/signup">
                 Get Started Free
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>

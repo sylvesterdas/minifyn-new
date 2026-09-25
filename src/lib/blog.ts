@@ -28,6 +28,10 @@ const blogManifest = (fallbackManifest as BlogPostMeta[])
   .slice()
   .sort((a, b) => new Date(b.datePublished).getTime() - new Date(a.datePublished).getTime());
 
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 const marked = new Marked({
   gfm: true,
   breaks: true,
@@ -39,7 +43,7 @@ const marked = new Marked({
         if (validLang) {
           highlighted = hljs.highlight(text, { language: validLang }).value;
         } else {
-          highlighted = hljs.highlightAuto(text).value;
+          highlighted = escapeHtml(text);
         }
       } catch {
         highlighted = text;
@@ -125,8 +129,8 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
 
   try {
     const rawRes = await fetch(`${GITHUB_RAW_BASE_URL}/${meta.filename}`, {
-      next: { revalidate: 86400 },
-    } as RequestInit);
+      cache: 'force-cache',
+    });
 
     if (!rawRes.ok) {
       return null;

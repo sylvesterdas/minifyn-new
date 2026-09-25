@@ -9,7 +9,7 @@ import { BlogCodeInteractions } from '@/components/blog-code-interactions';
 import { BlogAdaptiveCta } from '@/components/blog-adaptive-cta';
 import 'highlight.js/styles/github-dark-dimmed.css';
 
-export const revalidate = 86400;
+export const revalidate = false;
 export const dynamicParams = false;
 
 function splitContentForMidCta(html: string): [string, string | null] {

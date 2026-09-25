@@ -122,7 +122,7 @@ export function DeveloperApiSection() {
                 </div>
                 <div className="mt-8 text-center">
                     <Button asChild size="lg">
-                        <Link href="/auth/signup">Get your API Key</Link>
+                        <Link prefetch={false} href="/auth/signup">Get your API Key</Link>
                     </Button>
                 </div>
             </div>

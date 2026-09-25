@@ -188,7 +188,7 @@ export function UrlShortenerForm() {
                 className="w-full font-semibold"
                 onClick={handleSignUpClick}
               >
-                <Link href="/auth/signup">Sign Up for More Links</Link>
+                <Link prefetch={false} href="/auth/signup">Sign Up for More Links</Link>
               </Button>
             </div>
           ) : (

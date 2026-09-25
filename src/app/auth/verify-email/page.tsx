@@ -19,7 +19,7 @@ export default function VerifyEmailPage() {
         <CardContent className="flex flex-col items-center justify-center gap-4">
           <MailCheck className="h-16 w-16 text-primary" />
           <Button asChild>
-            <Link href="/auth/signin">Back to Sign In</Link>
+            <Link prefetch={false} href="/auth/signin">Back to Sign In</Link>
           </Button>
         </CardContent>
       </Card>

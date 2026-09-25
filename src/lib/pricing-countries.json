@@ -1,0 +1,5 @@
+{
+  "tier1": ["US", "GB", "CA", "AU", "DE", "FR", "JP", "NL", "SE", "CH", "SG", "NZ", "IE", "NO", "DK", "FI", "AT", "BE", "LU", "IS", "IL", "AE", "QA", "HK", "KR", "IT", "ES", "PT", "TW", "MO", "KW", "BH"],
+  "tier2": ["BR", "MX", "PL", "TR", "MY", "TH", "ZA", "RO", "AR", "CL", "CO", "ID", "CZ", "HU", "GR", "BG", "HR", "SK", "SI", "EE", "LV", "LT", "PE", "UY", "CR", "PA", "SA", "OM", "RS", "VN", "PH", "UA"],
+  "unknown": ["XX", "ZZ", "T1", "EU"]
+}

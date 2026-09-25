@@ -153,7 +153,7 @@ export function SignInPageComponent() {
                     </Button>
                     <div className="text-center text-sm">
                         Don&apos;t have an account?{' '}
-                        <Link href="/auth/signup" className="underline">
+                        <Link prefetch={false} href="/auth/signup" className="underline">
                             Sign up
                         </Link>
                     </div>

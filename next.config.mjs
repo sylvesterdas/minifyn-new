@@ -1,4 +1,7 @@
+import { readFileSync } from 'node:fs';
 import bundleAnalyzer from '@next/bundle-analyzer';
+
+const pricingCountries = JSON.parse(readFileSync(new URL('./src/lib/pricing-countries.json', import.meta.url), 'utf8'));
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -36,9 +39,20 @@ const nextConfig = {
   },
   async rewrites() {
     const backendUrl = process.env.EXTERNAL_API_URL || process.env.NEXT_PUBLIC_GO_BACKEND_URL;
-    if (backendUrl) {
-      return {
-        beforeFiles: [
+    const countryRewrite = (value, tier) => ({
+      source: '/pricing',
+      has: [{ type: 'header', key: 'x-vercel-ip-country', ...(value && { value }) }],
+      destination: `/pricing/${tier}`,
+    });
+    const pricingRewrites = [
+      countryRewrite('IN', 'in'),
+      countryRewrite(`(?:${pricingCountries.unknown.join('|')})`, 'tier1'),
+      countryRewrite(`(?:${pricingCountries.tier1.join('|')})`, 'tier1'),
+      countryRewrite(`(?:${pricingCountries.tier2.join('|')})`, 'tier2'),
+      countryRewrite(undefined, 'tier3'),
+    ];
+    const backendRewrites = backendUrl
+      ? [
           {
             source: '/api/tools/link-expander',
             destination: `${backendUrl}/api/tools/link-expander`,
@@ -47,12 +61,13 @@ const nextConfig = {
             source: '/api/shorten',
             destination: `${backendUrl}/api/shorten`,
           },
-        ],
-        afterFiles: [],
-        fallback: [],
-      };
-    }
-    return [];
+        ]
+      : [];
+    return {
+      beforeFiles: [...pricingRewrites, ...backendRewrites],
+      afterFiles: [],
+      fallback: [],
+    };
   },
   async headers() {
     return [
@@ -96,17 +111,16 @@ const nextConfig = {
     ];
   },
   images: {
-    formats: ['image/avif', 'image/webp'],
+    formats: ['image/webp'],
     localPatterns: [
       {
         pathname: '/**',
       },
     ],
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
+      { protocol: 'https', hostname: 'cdn.hashnode.com' },
+      { protocol: 'https', hostname: 'cdn.jsdelivr.net' },
+      { protocol: 'https', hostname: 'flagcdn.com' },
     ],
   },
   allowedDevOrigins: ['192.168.1.8', '10.217.12.20', '10.0.2.2', 'localhost', '**.cloudworkstations.dev'],
