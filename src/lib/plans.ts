@@ -1,4 +1,8 @@
+import pricingCountries from './pricing-countries.json';
+
 export type PricingTier = 'in' | 'tier1' | 'tier2' | 'tier3';
+
+export const PRICING_TIERS: PricingTier[] = ['in', 'tier1', 'tier2', 'tier3'];
 
 export interface PlanPricing {
   tier: PricingTier;
@@ -12,17 +16,9 @@ export interface PlanPricing {
   yearlyMonthlyEquivalent: string;
 }
 
-// Tier 1: High-Income Economies (US, UK, Western Europe, Japan, Nordics, Australia, etc.)
-const TIER_1_COUNTRIES = new Set([
-  'US', 'GB', 'CA', 'AU', 'DE', 'FR', 'JP', 'NL', 'SE', 'CH', 'SG', 'NZ', 'IE', 'NO', 'DK', 'FI',
-  'AT', 'BE', 'LU', 'IS', 'IL', 'AE', 'QA', 'HK', 'KR', 'IT', 'ES', 'PT', 'TW', 'MO', 'KW', 'BH'
-]);
+const TIER_1_COUNTRIES = new Set(pricingCountries.tier1);
 
-// Tier 2: Upper-Middle Income & Emerging Tech Hubs (Latin America, Eastern Europe, Southeast Asia, etc.)
-const TIER_2_COUNTRIES = new Set([
-  'BR', 'MX', 'PL', 'TR', 'MY', 'TH', 'ZA', 'RO', 'AR', 'CL', 'CO', 'ID', 'CZ', 'HU', 'GR', 'BG',
-  'HR', 'SK', 'SI', 'EE', 'LV', 'LT', 'PE', 'UY', 'CR', 'PA', 'SA', 'OM', 'RS', 'VN', 'PH', 'UA'
-]);
+const TIER_2_COUNTRIES = new Set(pricingCountries.tier2);
 
 // Tier 3: Developing Economies (South Asia, Sub-Saharan Africa, Central America, etc.)
 // Any country not in IN, TIER_1, or TIER_2 automatically maps here if detected, or Tier 1 as fallback for unknown.

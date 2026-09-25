@@ -326,7 +326,7 @@ export function SignUpPageComponent() {
                     <SubmitButton disabled={!emailVerified || !validatePassword(password) || !termsAccepted || isLoadingPayment} pending={isSigningUp} plan={selectedPlan} />
                     <div className="text-center text-sm">
                         Already have an account?{' '}
-                        <Link href="/auth/signin" className="underline">
+                        <Link prefetch={false} href="/auth/signin" className="underline">
                             Sign in
                         </Link>
                     </div>

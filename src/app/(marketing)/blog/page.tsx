@@ -3,7 +3,7 @@ import { getAllBlogPosts, getAllTags } from '@/lib/blog';
 import { Suspense } from 'react';
 import { BlogIndexClient } from '@/components/blog-index-client';
 
-export const revalidate = 86400;
+export const revalidate = false;
 
 export const metadata: Metadata = {
   title: 'MiniFyn Blog | Tech Insights, URL Optimization & Developer Guides',

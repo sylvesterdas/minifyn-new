@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { getPlanPricingForCountry, getPlanPricing } from '@/lib/plans';
+import { getPlanPricing, type PricingTier } from '@/lib/plans';
 
 const freeFeatures = [
   { text: '20 Links / Day', included: true },
@@ -55,12 +55,12 @@ function FeatureList({ features }: { features: { text: string; included: boolean
   );
 }
 
-export function PricingPageClient({ initialCountry }: { initialCountry?: string | null }) {
+export function PricingPageClient({ tier }: { tier: PricingTier }) {
   const { user, isLoading: isAuthLoading } = useAuth();
-  const countryPricing = getPlanPricingForCountry(initialCountry);
+  const countryPricing = getPlanPricing(tier);
 
   const [currency, setCurrency] = useState<'INR' | 'USD'>(
-    initialCountry && initialCountry !== 'IN' ? 'USD' : 'INR'
+    tier === 'in' ? 'INR' : 'USD'
   );
   const [interval, setInterval] = useState<'monthly' | 'yearly'>('monthly');
   const router = useRouter();
@@ -189,7 +189,7 @@ export function PricingPageClient({ initialCountry }: { initialCountry?: string 
               </Button>
             ) : (
               <Button asChild size="lg" className="w-full">
-                <Link href="/auth/signup?plan=free">Get Started for Free</Link>
+                <Link prefetch={false} href="/auth/signup?plan=free">Get Started for Free</Link>
               </Button>
             )}
           </CardFooter>

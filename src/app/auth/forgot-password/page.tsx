@@ -77,7 +77,7 @@ export default function ForgotPasswordPage() {
             </form>
             <div className="mt-4 text-center text-sm pb-6">
                 Remember your password?{' '}
-                <Link href="/auth/signin" className="underline">
+                <Link prefetch={false} href="/auth/signin" className="underline">
                     Sign in
                 </Link>
             </div>
