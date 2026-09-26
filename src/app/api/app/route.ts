@@ -60,17 +60,6 @@ const APPS: AppMetadata[] = [
     logoUrl: "https://www.minifyn.com/images/clipfyn/logo.png",
     published: true,
   },
-  {
-    name: "Marketing Studio",
-    tagline: "Autonomous Marketing Operations",
-    description: "Multi-tenant autonomous marketing and content operations cockpit for solo developers, founders, and indie hacker product studios.",
-    packageId: "com.minifyn.studio",
-    webUrl: "https://www.minifyn.com",
-    playstoreURL: null,
-    appstoreURL: null,
-    logoUrl: "https://www.minifyn.com/images/studio-logo.png",
-    published: false,
-  },
 ];
 
 const APPS_JSON = JSON.stringify(APPS);
