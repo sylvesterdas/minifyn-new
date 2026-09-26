@@ -35,6 +35,16 @@ const nextConfig = {
         destination: '/scamguard/:path*',
         permanent: true,
       },
+      {
+        source: '/marketing-studio/:path*',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/docs/guides/marketing-studio',
+        destination: '/docs/guides',
+        permanent: true,
+      },
     ];
   },
   async rewrites() {

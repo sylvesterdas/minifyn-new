@@ -1,5 +1,5 @@
 
-import { Link as LinkIcon, QrCode, HardDrive, Key, ShieldCheck, Video, Image as ImageIcon, BriefcaseBusiness } from 'lucide-react';
+import { Link as LinkIcon, QrCode, HardDrive, Key, ShieldCheck, Video, Image as ImageIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
@@ -126,7 +126,6 @@ export default function GuidesPage() {
                             <Link href="/docs/guides/scamguard" className="rounded-lg border p-4 hover:border-primary"><ShieldCheck className="mb-2 text-primary" /><h3 className="font-semibold">ScamGuard</h3><p className="text-sm text-muted-foreground">Check links, understand risk results, and use QR scanning safely.</p></Link>
                             <Link href="/docs/guides/clipfyn" className="rounded-lg border p-4 hover:border-primary"><Video className="mb-2 text-primary" /><h3 className="font-semibold">ClipFyn</h3><p className="text-sm text-muted-foreground">Prepare vertical videos, choose framing, process media, and export.</p></Link>
                             <Link href="/docs/guides/censorfyn" className="rounded-lg border p-4 hover:border-primary"><ImageIcon className="mb-2 text-primary" /><h3 className="font-semibold">CensorFyn</h3><p className="text-sm text-muted-foreground">Redact personal information and remove image metadata.</p></Link>
-                            <Link href="/docs/guides/marketing-studio" className="rounded-lg border p-4 hover:border-primary"><BriefcaseBusiness className="mb-2 text-primary" /><h3 className="font-semibold">Marketing Studio</h3><p className="text-sm text-muted-foreground">Configure a workspace, connect services, review content, and schedule safely.</p></Link>
                         </CardContent>
                     </Card>
                 </section>

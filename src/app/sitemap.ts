@@ -38,7 +38,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/docs/guides/scamguard`, lastModified: new Date().toISOString(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/docs/guides/clipfyn`, lastModified: new Date().toISOString(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/docs/guides/censorfyn`, lastModified: new Date().toISOString(), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${siteUrl}/docs/guides/marketing-studio`, lastModified: new Date().toISOString(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/docs`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/docs/api`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${siteUrl}/docs/guides`, lastModified: lastModifiedStatic, changeFrequency: 'monthly', priority: 0.7 },

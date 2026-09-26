@@ -86,7 +86,6 @@ URL shortener, link management, developer tools, and app marketing/APIs for the 
   - ClipFyn and CensorFyn: Production.
   - Web tools: minifier, JSON, JWT, QR, `/tools/link-expander`.
   - Docs: `/help`, `/docs`.
-  - `scamguard-studio` marketing cockpit.
 - Priorities: two separate desktop extensions (MiniFyn Shortener here, ScamGuard Link Checker in ScamGuard) and in-product guidance.
 
 ## MiniFyn URL Shortener extension (published, `browser-extension/`)
