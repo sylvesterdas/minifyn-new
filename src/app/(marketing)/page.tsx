@@ -280,7 +280,7 @@ export default function Home() {
                   >
                     <div className="space-y-4">
                       <div className="relative h-14 w-14 overflow-hidden rounded-2xl border bg-background p-1 shadow-sm">
-                        <Image src={extension.logoUrl} alt={`${extension.name} icon`} fill className="object-contain" sizes="56px" />
+                        <Image src={new URL(extension.logoUrl).pathname} alt={`${extension.name} icon`} fill className="object-contain" sizes="56px" />
                       </div>
                       <div>
                         <h3 className="text-xl font-bold text-foreground transition-colors group-hover:text-primary">{extension.name}</h3>

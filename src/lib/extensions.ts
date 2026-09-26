@@ -36,12 +36,12 @@ export const EXTENSIONS: ExtensionMetadata[] = [
     name: 'MiniFyn: URL Shortener',
     description: 'Create and manage MiniFyn short links from Chrome.',
     browser: 'chrome',
-    version: null,
-    status: 'in_development',
-    published: false,
+    version: '0.1.0',
+    status: 'published',
+    published: true,
     logoUrl: 'https://www.minifyn.com/images/minifyn-logo.png',
     websiteUrl: 'https://www.minifyn.com',
-    storeUrl: null,
+    storeUrl: 'https://chromewebstore.google.com/detail/minifyn-url-shortener/lppblpgaeklhkcjlonkmldjfocagjifc',
   },
 ];
 

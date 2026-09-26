@@ -12,7 +12,7 @@ describe('/api/extensions catalog', () => {
     const data = await response.json();
     expect(data).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: 'scamguard-link-checker', status: 'published', published: true, storeUrl: 'https://chromewebstore.google.com/detail/scamguard-link-checker/cendbppkhplamddjfnbhgbejnpmfmlbi' }),
-      expect.objectContaining({ id: 'minifyn-url-shortener', published: false, storeUrl: null }),
+      expect.objectContaining({ id: 'minifyn-url-shortener', status: 'published', published: true, storeUrl: 'https://chromewebstore.google.com/detail/minifyn-url-shortener/lppblpgaeklhkcjlonkmldjfocagjifc' }),
     ]));
   });
 
