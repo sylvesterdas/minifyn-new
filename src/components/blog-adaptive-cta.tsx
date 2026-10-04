@@ -106,9 +106,9 @@ export function BlogAdaptiveCta({ tags = [], variant = 'bottom' }: BlogAdaptiveC
                     Recommended Android App
                   </span>
                 </div>
-                <h4 className="text-base font-bold text-foreground">
+                <p className="text-base font-bold text-foreground">
                   {app.name}: {app.tagline}
-                </h4>
+                </p>
                 <p className="text-xs text-muted-foreground mt-0.5 max-w-xl">
                   {app.description}
                 </p>
@@ -139,9 +139,9 @@ export function BlogAdaptiveCta({ tags = [], variant = 'bottom' }: BlogAdaptiveC
                   Free Security Utility
                 </span>
               </div>
-              <h4 className="text-base font-bold text-foreground">
+              <p className="text-base font-bold text-foreground">
                 Universal Link Expander & Safety Scanner
-              </h4>
+              </p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Paste any shortened or suspicious URL to safely unmask redirect chains and verify Web Risk security ratings.
               </p>

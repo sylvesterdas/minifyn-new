@@ -14,7 +14,7 @@ import { publishedExtensions } from '@/lib/extensions';
 
 
 const siteTitle = 'MiniFyn - Simple URL Shortener';
-const siteDescription = 'The simplest way to shorten, share, and track your links.';
+const siteDescription = 'Free URL shortener with click analytics, QR codes and a developer API. Shorten, share and track links, and check suspicious URLs with ScamGuard.';
 const siteUrl = 'https://www.minifyn.com';
 
 export const metadata: Metadata = {
@@ -91,7 +91,7 @@ export default function Home() {
         
         <section className="relative w-full py-20 md:py-32 lg:py-40 overflow-hidden">
           <div className="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none">
-            <h2 className="text-[20vw] font-bold text-primary/20 select-none">MiniFyn</h2>
+            <div aria-hidden="true" className="text-[20vw] font-bold text-primary/20 select-none">MiniFyn</div>
           </div>
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col items-center space-y-4 text-center">

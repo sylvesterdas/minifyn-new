@@ -48,7 +48,7 @@ export function AppFooter({
 
           {/* Legal & Policies */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold tracking-wider uppercase text-foreground">Legal &amp; Privacy</h4>
+            <h2 className="text-sm font-semibold tracking-wider uppercase text-foreground">Legal &amp; Privacy</h2>
             <ul className="space-y-2.5 text-sm text-muted-foreground">
               <li>
                 <Link href={`/${appSlug}/legal/privacy`} className="transition-colors hover:text-foreground">
@@ -70,7 +70,7 @@ export function AppFooter({
 
           {/* Apps & Downloads */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold tracking-wider uppercase text-foreground">MiniFyn Apps</h4>
+            <h2 className="text-sm font-semibold tracking-wider uppercase text-foreground">MiniFyn Apps</h2>
             <ul className="space-y-2.5 text-sm text-muted-foreground">
               <li>
                 <Link href="/censorfyn" className={`transition-colors hover:text-foreground ${appSlug === 'censorfyn' ? 'font-medium text-foreground' : ''}`}>

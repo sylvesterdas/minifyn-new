@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { EXTENSIONS } from '@/lib/extensions';
 
 export const dynamic = 'force-dynamic';
-export { EXTENSIONS } from '@/lib/extensions';
 export type { ExtensionMetadata, ExtensionStatus } from '@/lib/extensions';
 
 const payload = JSON.stringify(EXTENSIONS);

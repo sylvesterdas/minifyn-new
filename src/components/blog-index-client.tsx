@@ -14,8 +14,22 @@ interface BlogIndexClientProps {
 
 export function BlogIndexClient({ allPosts, tags }: BlogIndexClientProps) {
   const searchParams = useSearchParams();
-  const activeTag = searchParams.get('tag') || undefined;
-  const query = searchParams.get('q') || undefined;
+  return (
+    <BlogIndexView
+      allPosts={allPosts}
+      tags={tags}
+      activeTag={searchParams.get('tag') || undefined}
+      query={searchParams.get('q') || undefined}
+    />
+  );
+}
+
+export function BlogIndexView({
+  allPosts,
+  tags,
+  activeTag,
+  query,
+}: BlogIndexClientProps & { activeTag?: string; query?: string }) {
   const filteredPosts = allPosts.filter((post) => {
     const matchesTag = !activeTag || post.tags.some((tag) => tag.toLowerCase() === activeTag.toLowerCase());
     const matchesQuery =
@@ -42,6 +56,12 @@ export function BlogIndexClient({ allPosts, tags }: BlogIndexClientProps) {
           </h1>
           <p className="mt-4 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
             Deep-dives into URL shortening, web security, developer utilities, and modern tech tutorials.
+          </p>
+          <p className="mt-4 text-sm md:text-base text-muted-foreground max-w-3xl mx-auto">
+            Practical, code-first articles written by the team behind MiniFyn, ScamGuard, ClipFyn and CensorFyn. Learn how
+            to spot phishing links and scam URLs, harden Node.js and Next.js apps, migrate to modern JavaScript APIs, process
+            video with FFmpeg, protect privacy in images, and build faster, more reliable software. Filter by topic below or
+            browse the latest posts.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-2 max-w-3xl mx-auto">

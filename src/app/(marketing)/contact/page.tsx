@@ -11,7 +11,7 @@ import type { ContactPage, WithContext } from 'schema-dts';
 
 export const metadata: Metadata = {
   title: 'Contact Us | MiniFyn',
-  description: 'Get in touch with the MiniFyn team.',
+  description: 'Contact the MiniFyn team for account help, billing questions, abuse reports, partnerships or feedback on ScamGuard, ClipFyn and CensorFyn.',
   alternates: {
     canonical: 'https://www.minifyn.com/contact',
   },
@@ -81,11 +81,24 @@ export default function ContactPage() {
             </Button>
           </div>
         </form>
+
+        <section className="mt-16 space-y-4 text-muted-foreground leading-relaxed">
+          <h2 className="text-2xl font-semibold text-foreground">How we can help</h2>
+          <p>
+            Write to us about account access, Pro billing and payments, API keys, short links that are not redirecting, or questions about ScamGuard, ClipFyn and CensorFyn. Partnership requests and product feedback are always welcome.
+          </p>
+          <p>
+            To help us answer quickly, include the short link or app involved, your device and browser or app version, and any error message you saw. Please never send passwords, one-time codes or full card numbers.
+          </p>
+          <p>
+            To report a phishing, malware or spam link created with MiniFyn, use the <Link href="/help/report-abuse" className="text-primary hover:underline">Report Abuse</Link> page so it reaches our review team directly.
+          </p>
+        </section>
       </div>
       
       <div className="container mx-auto px-4 pb-12 md:pb-24">
         <div className="mt-16 text-center border-t pt-12 max-w-4xl mx-auto">
-          <h3 className="text-2xl font-semibold">Need a faster answer?</h3>
+          <h2 className="text-2xl font-semibold">Need a faster answer?</h2>
           <p className="mt-2 text-muted-foreground">
             Check our FAQ for answers to common questions.
           </p>

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "ClipFyn Privacy Policy | MiniFyn",
-  description: "How ClipFyn handles videos, advertising, age signals, and purchases.",
+  description: "ClipFyn Privacy Policy: how the Android app processes videos on your device and handles advertising, age signals and in-app purchases.",
   alternates: { canonical: "https://www.minifyn.com/clipfyn/legal/privacy" },
 };
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { parseFrontmatter, calculateReadingTime, getAllBlogPosts, getAllTags, getBlogPostBySlug } from './blog';
+import { parseFrontmatter, calculateReadingTime, getAllBlogPosts, getAllTags, getBlogPostBySlug, buildBlogTitle, buildBlogDescription, normalizeHeadingLevels } from './blog';
 
 describe('blog utility', () => {
   const originalFetch = globalThis.fetch;
@@ -64,5 +64,40 @@ This is a test article body.`;
   it('returns null for non-existent post slug', async () => {
     const post = await getBlogPostBySlug('non-existent-article-slug-xyz-12345');
     expect(post).toBeNull();
+  });
+});
+
+describe('blog SEO helpers', () => {
+  it('appends the blog suffix when the title fits', () => {
+    expect(buildBlogTitle('Short title')).toBe('Short title | MiniFyn Blog');
+  });
+
+  it('truncates long titles to 60 characters without the suffix', () => {
+    const title = buildBlogTitle('A very long article title that goes on and on about many different topics in detail');
+    expect(title.length).toBeLessThanOrEqual(60);
+    expect(title).not.toContain('| MiniFyn Blog');
+  });
+
+  it('pads short descriptions with content text', () => {
+    const description = buildBlogDescription('Too short.', 'This is the body of the article with plenty of extra words to make it long enough.');
+    expect(description.length).toBeGreaterThanOrEqual(70);
+    expect(description.length).toBeLessThanOrEqual(160);
+  });
+
+  it('truncates long descriptions to 160 characters', () => {
+    expect(buildBlogDescription('word '.repeat(60)).length).toBeLessThanOrEqual(160);
+  });
+
+  it('normalizes heading levels without skips', () => {
+    const tokens = [
+      { type: 'heading', depth: 1 },
+      { type: 'heading', depth: 4 },
+      { type: 'paragraph' },
+      { type: 'heading', depth: 4 },
+      { type: 'heading', depth: 2 },
+      { type: 'heading', depth: 3 },
+    ];
+    normalizeHeadingLevels(tokens);
+    expect(tokens.filter((t) => t.type === 'heading').map((t) => t.depth)).toEqual([2, 3, 3, 3, 4]);
   });
 });

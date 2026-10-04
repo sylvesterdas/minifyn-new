@@ -1,6 +1,11 @@
 import { Footer } from '@/components/footer';
 import Link from 'next/link';
 import Logo from '@/components/logo';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+};
 
 export default function AuthLayout({
   children,

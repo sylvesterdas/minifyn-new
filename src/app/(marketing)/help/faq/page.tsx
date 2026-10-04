@@ -16,7 +16,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const metadata: Metadata = {
   title: 'FAQ | MiniFyn Help Center',
-  description: 'Find answers to frequently asked questions about MiniFyn.',
+  description: 'Answers to common MiniFyn questions about short links, link expiry, analytics, QR codes, the API, Pro plans, billing and account security.',
   alternates: {
     canonical: 'https://www.minifyn.com/help/faq',
   },
@@ -91,6 +91,7 @@ export default function FaqPage() {
               <h1 className="text-4xl font-bold">Frequently Asked Questions</h1>
               <p className="mt-2 text-lg text-muted-foreground">Find answers to the most common questions about MiniFyn.</p>
           </div>
+          <h2 className="sr-only">Questions and answers</h2>
           <Accordion type="single" collapsible className="w-full">
               {faqs.map((faq, index) => (
                   <AccordionItem value={`item-${index}`} key={index}>
@@ -103,7 +104,7 @@ export default function FaqPage() {
           </Accordion>
 
           <div className="mt-16 text-center border-t pt-12">
-            <h3 className="text-2xl font-semibold">Still have questions?</h3>
+            <h2 className="text-2xl font-semibold">Still have questions?</h2>
             <p className="mt-2 text-muted-foreground">
               If you can't find what you're looking for, we're here to help.
             </p>

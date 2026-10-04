@@ -34,9 +34,9 @@ const siteUrl = "https://www.minifyn.com";
 const pageUrl = "/censorfyn";
 const visualBase = "/images/censorfyn";
 const playStoreUrl = "https://play.google.com/store/apps/details?id=com.minifyn.censorfyn";
-const title = "CensorFyn: 100% Offline Media Redaction & Privacy App | MiniFyn";
+const title = "CensorFyn: Offline Photo & Video Redaction App | MiniFyn";
 const description =
-  "CensorFyn is an offline, privacy-first Android app by MiniFyn that automatically detects and irreversibly redacts faces, passports, credit cards, PII text, and QR codes in photos and videos with true pixel destruction and audio muting.";
+  "Offline Android app that detects and permanently redacts faces, IDs, card numbers, personal text and QR codes in photos and videos on your device.";
 
 const screenshots = [
   {

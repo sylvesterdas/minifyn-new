@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "ClipFyn Terms of Use | MiniFyn",
-  description: "Terms governing use of the ClipFyn Android app.",
+  description: "Terms of Use for the ClipFyn Android video preparation app, covering licences, purchases, ads, your content and limitations of liability.",
   alternates: { canonical: "https://www.minifyn.com/clipfyn/legal/terms" },
 };
 

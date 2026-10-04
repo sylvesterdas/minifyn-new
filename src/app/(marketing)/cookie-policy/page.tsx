@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Cookie Policy | MiniFyn',
-  description: 'Read our Cookie Policy to understand how we use cookies.',
+  description: 'MiniFyn Cookie Policy: which cookies and similar technologies we use, why we use them, and how to manage or withdraw your consent.',
   alternates: {
     canonical: 'https://www.minifyn.com/cookie-policy',
   },

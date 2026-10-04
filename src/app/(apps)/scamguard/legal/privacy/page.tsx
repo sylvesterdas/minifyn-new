@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "ScamGuard: Link Checker Privacy Policy | MiniFyn",
-  description: "Read the ScamGuard: Link Checker Privacy Policy.",
+  description: "ScamGuard: Link Checker Privacy Policy explaining which link data is checked, what stays on your device, what is sent for analysis and your rights.",
 };
 
 export default function ScamGuardPrivacyPage() {

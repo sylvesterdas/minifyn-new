@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { getBlogPostBySlug, getAllBlogPosts } from '@/lib/blog';
+import { getBlogPostBySlug, getAllBlogPosts, buildBlogTitle, buildBlogDescription, markdownToPlainText } from '@/lib/blog';
 import { Calendar, Clock, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { BlogCodeInteractions } from '@/components/blog-code-interactions';
@@ -45,13 +45,13 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${post.seoTitle || post.title} | MiniFyn Blog`;
-  const description = post.seoDescription || post.title;
+  const title = buildBlogTitle(post.seoTitle || post.title);
+  const description = buildBlogDescription(post.seoDescription || post.title, markdownToPlainText(post.rawContent));
   const canonicalUrl = `https://www.minifyn.com/blog/${post.slug}`;
   const imageUrl = post.ogImage || post.cover;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: canonicalUrl,
@@ -97,7 +97,7 @@ export default async function BlogPostPage({
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: post.title,
-    description: post.seoDescription || post.title,
+    description: buildBlogDescription(post.seoDescription || post.title, markdownToPlainText(post.rawContent)),
     datePublished: post.datePublished,
     dateModified: post.datePublished,
     mainEntityOfPage: {
@@ -240,9 +240,9 @@ export default async function BlogPostPage({
         )}
 
         <div className="mt-14 border-t pt-8">
-          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-3">
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-3">
             Tags & Topics
-          </h3>
+          </h2>
           <div className="flex flex-wrap gap-2">
             {post.tags.map((t) => (
               <Link
@@ -273,9 +273,9 @@ export default async function BlogPostPage({
                   <span className="text-[11px] font-medium text-primary mb-1">
                     #{rel.tags[0] || 'guide'}
                   </span>
-                  <h4 className="text-sm font-bold tracking-tight text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                  <h3 className="text-sm font-bold tracking-tight text-foreground group-hover:text-primary transition-colors line-clamp-2">
                     {rel.title}
-                  </h4>
+                  </h3>
                   <span className="text-[11px] text-muted-foreground mt-3 flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     {format(new Date(rel.datePublished), 'MMM d, yyyy')}

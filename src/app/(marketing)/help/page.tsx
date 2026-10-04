@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'Help Center | MiniFyn',
-  description: 'Find answers, guides, and support for MiniFyn.',
+  description: 'MiniFyn Help Center: FAQs, step-by-step guides, API docs, abuse reporting and support for MiniFyn, ScamGuard, ClipFyn and CensorFyn.',
   alternates: {
     canonical: 'https://www.minifyn.com/help',
   },
@@ -76,10 +76,23 @@ export default function HelpPage() {
               </Link>
           ))}
         </div>
+
+        <section className="mt-16 space-y-4 text-muted-foreground leading-relaxed">
+          <h2 className="text-2xl font-semibold text-foreground">Find the right answer faster</h2>
+          <p>
+            Start with the FAQ for quick answers about short links, link expiry, analytics, QR codes, Pro plans and billing. The guides cover step-by-step tasks for MiniFyn and our apps, including ScamGuard for checking suspicious links, ClipFyn for preparing videos and CensorFyn for offline photo and video redaction.
+          </p>
+          <p>
+            If you find a short link that leads to phishing, malware or other harmful content, use Report Abuse so our team can review and disable it. For account, payment or technical problems, contact support with a description of the issue, the affected link or device, and any error message you saw.
+          </p>
+          <p>
+            Never share passwords, one-time codes or full card numbers with anyone claiming to be MiniFyn support. We will never ask for them.
+          </p>
+        </section>
       </div>
       <div className="container mx-auto px-4 pb-12 md:pb-24">
         <div className="mt-16 text-center border-t pt-12 max-w-4xl mx-auto">
-          <h3 className="text-2xl font-semibold">Still need help?</h3>
+          <h2 className="text-2xl font-semibold">Still need help?</h2>
           <p className="mt-2 text-muted-foreground">
             If you can't find what you're looking for, you can always reach out to us directly.
           </p>

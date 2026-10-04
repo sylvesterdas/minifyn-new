@@ -15,7 +15,7 @@ import Script from 'next/script';
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.minifyn.com'),
   title: 'MiniFyn - Simple URL Shortener',
-  description: 'The simplest way to shorten, share, and track your links',
+  description: 'Free URL shortener with click analytics, QR codes and a developer API. Shorten, share and track links, and check suspicious URLs with ScamGuard.',
   icons: {
     icon: '/favicon.svg',
   },

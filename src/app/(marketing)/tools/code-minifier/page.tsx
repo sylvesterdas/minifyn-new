@@ -8,7 +8,7 @@ import { ToolSeo } from '@/components/tool-seo';
 
 export const metadata: Metadata = {
     title: 'Code Minifier | MiniFyn Tools',
-    description: 'Minify single or multiple JavaScript, CSS, HTML, and JSON files for production with our fast, client-side tool. Reduce file sizes and improve your website\'s performance for free.',
+    description: 'Minify JavaScript, CSS, HTML and JSON files for production with a fast, free, client-side tool. Shrink file sizes and speed up your website.',
     alternates: {
         canonical: 'https://www.minifyn.com/tools/code-minifier',
     },

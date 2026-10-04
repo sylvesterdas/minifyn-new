@@ -34,7 +34,7 @@ const visualBase = "/images/clipfyn";
 const playStoreUrl = "https://play.google.com/store/apps/details?id=com.minifyn.clipfyn";
 const title = "ClipFyn: Android Video Preparation for Sharing | MiniFyn";
 const description =
-  "ClipFyn is an Android video preparation app that inspects and prepares videos locally for broadly compatible sharing, with crop, fit, preview, save, and share controls.";
+  "ClipFyn is an Android app that prepares videos on-device for compatible sharing, with crop, fit, preview, save and share controls.";
 
 const screenshots = [
   {

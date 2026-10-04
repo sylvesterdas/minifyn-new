@@ -95,6 +95,19 @@ export default function ToolsPage() {
                 </Link>
             ))}
         </div>
+
+        <section className="max-w-3xl mx-auto mt-16 space-y-4 text-muted-foreground leading-relaxed">
+          <h2 className="text-2xl font-semibold text-foreground">Free developer utilities that respect your data</h2>
+          <p>
+            MiniFyn tools are built for the small, everyday jobs that slow developers down: shrinking JavaScript, CSS and HTML before a deploy, tidying an API response so you can read it, checking what is inside a JSON Web Token, or finding out where a shortened link really goes.
+          </p>
+          <p>
+            The code minifier, JSON formatter and JWT debugger run entirely in your browser, so source code, tokens and payloads are never uploaded. That makes them safe to use with internal configs and test credentials, and they keep working quickly even on large files.
+          </p>
+          <p>
+            Link Expander is the exception: it follows redirect chains from our server so you can see every hop and the final destination without visiting the page yourself. All tools are free to use with no sign-up, and the URL shortener adds click analytics and QR codes when you create a free account.
+          </p>
+        </section>
       </div>
     </>
   );

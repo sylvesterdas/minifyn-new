@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Shipping and Delivery Policy | MiniFyn',
-  description: 'Learn about our policy on shipping and delivery for digital services.',
+  description: 'How MiniFyn delivers its digital services: instant access to Pro features after payment, no physical shipping and what to do if access fails.',
   alternates: {
     canonical: 'https://www.minifyn.com/shipping-and-delivery-policy',
   },
