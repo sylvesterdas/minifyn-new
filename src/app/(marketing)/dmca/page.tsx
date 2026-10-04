@@ -6,7 +6,7 @@ import { ExternalLink } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'DMCA Policy | MiniFyn',
-  description: 'Our policy for handling DMCA takedown notices.',
+  description: 'How to submit a DMCA takedown notice or counter-notice to MiniFyn, what information to include and how we handle infringing short links.',
   alternates: {
     canonical: 'https://www.minifyn.com/dmca',
   },

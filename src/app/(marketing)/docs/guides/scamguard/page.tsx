@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata: Metadata = { title: 'ScamGuard Help | MiniFyn', description: 'Learn how to check links and understand ScamGuard results.' };
+export const metadata: Metadata = { title: 'ScamGuard Help | MiniFyn', description: 'ScamGuard help: how to check suspicious links and QR codes, what no obvious risk, suspicious and high risk results mean, and how to stay safe.' };
 
 export default function ScamGuardGuide() { return <Guide title="ScamGuard" intro="Check links before opening them and use the result as one safety signal—not a guarantee." sections={[
   ['Check a link', ['Open ScamGuard and paste the URL or message into the scanner.', 'If several links are found, select the link you want to inspect.', 'Review the result before opening the destination.']],

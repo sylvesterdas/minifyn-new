@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Terms of Service | MiniFyn',
-  description: 'Read the Terms of Service for using MiniFyn.',
+  description: 'MiniFyn Terms of Service covering accounts, short links, the API, paid plans, acceptable use, liability and how these terms can change.',
   alternates: {
     canonical: 'https://www.minifyn.com/terms',
   },

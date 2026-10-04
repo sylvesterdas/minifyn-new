@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'How-to Guides | MiniFyn Help Center',
-  description: 'Step-by-step guides for using MiniFyn features.',
+  description: 'Step-by-step MiniFyn guides: check shortened links, debug JWTs, format JSON, strip image metadata, redact personal data and prep videos for Reels.',
   alternates: {
     canonical: 'https://www.minifyn.com/docs/guides',
   },

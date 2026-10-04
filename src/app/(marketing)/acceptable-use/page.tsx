@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Acceptable Use Policy | MiniFyn',
-  description: 'Read our Acceptable Use Policy.',
+  description: 'MiniFyn Acceptable Use Policy: what links and content are not allowed, how abuse is handled, and what happens to accounts that break the rules.',
   alternates: {
     canonical: 'https://www.minifyn.com/acceptable-use',
   },

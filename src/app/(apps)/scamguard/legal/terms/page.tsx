@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "ScamGuard: Link Checker Terms of Use | MiniFyn",
-  description: "Read the ScamGuard: Link Checker Terms of Use.",
+  description: "Terms of Use for ScamGuard: Link Checker, covering how link checks work, the limits of scam detection, subscriptions and your responsibilities.",
 };
 
 export default function ScamGuardTermsPage() {

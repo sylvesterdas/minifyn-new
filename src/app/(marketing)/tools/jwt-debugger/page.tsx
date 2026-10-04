@@ -8,7 +8,7 @@ import { ToolSeo } from '@/components/tool-seo';
 
 export const metadata: Metadata = {
     title: 'JWT Debugger | MiniFyn Tools',
-    description: 'Decode and inspect JSON Web Tokens (JWTs) instantly. A secure, client-side tool to validate and debug your tokens without ever sending data to a server.',
+    description: 'Decode and inspect JSON Web Tokens instantly. A client-side JWT debugger that shows header, payload and expiry without sending tokens to a server.',
     alternates: {
         canonical: 'https://www.minifyn.com/tools/jwt-debugger',
     },

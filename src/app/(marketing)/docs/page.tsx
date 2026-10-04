@@ -56,8 +56,21 @@ export default function DocsPage() {
         ))}
       </div>
 
+      <section className="mt-16 space-y-4 text-muted-foreground leading-relaxed">
+        <h2 className="text-2xl font-semibold text-foreground">Getting started with MiniFyn</h2>
+        <p>
+          The how-to guides walk through everyday tasks step by step: checking a shortened link before you open it, preparing videos for Reels and Shorts with ClipFyn, redacting personal information and removing location data with CensorFyn, and using ScamGuard to spot risky links and QR codes.
+        </p>
+        <p>
+          The API reference is for developers who want to create short links from their own apps, scripts or browser extensions. Requests to <code>POST /api/shorten</code> are authenticated with an API key sent as a Bearer token, and the reference covers request fields, responses, error codes and rate limits.
+        </p>
+        <p>
+          Developer guides for decoding JWTs and formatting JSON pair with the free browser-based tools, so you can learn the concept and try it straight away without uploading your data.
+        </p>
+      </section>
+
       <div className="mt-16 text-center border-t pt-12">
-        <h3 className="text-2xl font-semibold">Need More Help?</h3>
+        <h2 className="text-2xl font-semibold">Need More Help?</h2>
         <p className="mt-2 text-muted-foreground">
           If you can't find what you're looking for, check out these resources.
         </p>

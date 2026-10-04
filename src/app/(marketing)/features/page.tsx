@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 
 export const metadata: Metadata = {
   title: 'Features | MiniFyn',
-  description: 'Discover the powerful features of MiniFyn URL Shortener, from free QR codes and developer API access to advanced analytics and permanent links with our Pro plan.',
+  description: 'Explore MiniFyn URL shortener features: free QR codes, developer API access, click analytics and permanent links with the Pro plan.',
   alternates: {
     canonical: 'https://www.minifyn.com/features',
   },

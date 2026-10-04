@@ -85,6 +85,19 @@ export function PricingView({ tier }: { tier: PricingTier }) {
           </p>
         </div>
         <PricingPageClient tier={tier} />
+
+        <section className="mt-16 max-w-3xl mx-auto space-y-4 text-muted-foreground leading-relaxed">
+          <h2 className="text-2xl font-semibold text-foreground">Which plan is right for you?</h2>
+          <p>
+            The Free plan suits personal use and occasional sharing. You can create up to 20 short links a day, download QR codes, use the developer API and see basic click counts for the last 7 days. Free links expire after 60 days, and every link is screened by our automatic threat and phishing shield.
+          </p>
+          <p>
+            Pro is built for creators, marketers and businesses whose links need to keep working. It raises the limit to 100 links a day, makes links permanent so printed QR codes and published URLs never break, keeps a year of audience analytics, removes ads and includes priority support.
+          </p>
+          <p>
+            Pro is available monthly or yearly. Payments in India support UPI, cards and netbanking, and international customers can pay by card or PayPal. Prices are shown in INR or USD based on your location.
+          </p>
+        </section>
       </div>
     </>
   );

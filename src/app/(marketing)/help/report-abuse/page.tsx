@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Report Abuse | MiniFyn Help Center',
-  description: 'How to report malicious or abusive links created with MiniFyn.',
+  description: 'Report phishing, malware, spam or other abusive short links created with MiniFyn. Learn what details to include so our team can act quickly.',
   alternates: {
     canonical: 'https://www.minifyn.com/help/report-abuse',
   },
@@ -30,7 +30,7 @@ export default function ReportAbusePage() {
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <h3 className="font-semibold text-lg">How to File a Report</h3>
+                <h2 className="font-semibold text-lg">How to File a Report</h2>
                 <p className="text-muted-foreground">
                     To report a link, please go to our contact page and provide the following information in your message:
                 </p>

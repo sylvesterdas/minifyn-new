@@ -24,8 +24,16 @@ export interface BlogPost extends BlogPostMeta {
 
 const GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/sylvesterdas/Articles/main';
 
+const META_OVERRIDES: Record<string, Partial<Pick<BlogPostMeta, 'seoTitle' | 'seoDescription'>>> = {
+  'installation-vs-deployment-demystifying-software-setup-and-delivery': {
+    seoTitle: 'Installation vs Deployment: Key Differences Explained',
+    seoDescription:
+      'Installation vs deployment explained: what each term means, how they differ, and when developers and ops teams use each, with real-world examples.',
+  },
+};
+
 const blogManifest = (fallbackManifest as BlogPostMeta[])
-  .slice()
+  .map((post) => ({ ...post, ...META_OVERRIDES[post.slug] }))
   .sort((a, b) => new Date(b.datePublished).getTime() - new Date(a.datePublished).getTime());
 
 function escapeHtml(text: string): string {
@@ -53,6 +61,60 @@ const marked = new Marked({
     },
   },
 });
+
+const TITLE_MAX = 60;
+const DESCRIPTION_MIN = 70;
+const DESCRIPTION_MAX = 160;
+const BLOG_TITLE_SUFFIX = ' | MiniFyn Blog';
+
+function truncateAtWord(text: string, max: number): string {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max + 1);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : text.slice(0, max))
+    .replace(/[\s:;,\-–—|&]+$/, '')
+    .replace(/\s+(a|an|the|and|or|of|to|for|with|in|on|from|vs\.?|by)$/i, '');
+}
+
+export function buildBlogTitle(seoTitle: string): string {
+  const base = seoTitle.trim();
+  if (base.length + BLOG_TITLE_SUFFIX.length <= TITLE_MAX) return `${base}${BLOG_TITLE_SUFFIX}`;
+  return truncateAtWord(base, TITLE_MAX);
+}
+
+export function markdownToPlainText(markdown: string): string {
+  return markdown
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+\.)\s+/gm, '')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/[`*_~|]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function buildBlogDescription(seoDescription: string, fallbackText = ''): string {
+  let description = seoDescription.trim();
+  if (description.length < DESCRIPTION_MIN && fallbackText) {
+    const extra = fallbackText.startsWith(description) ? fallbackText : `${description} ${fallbackText}`.trim();
+    description = extra;
+  }
+  if (description.length <= DESCRIPTION_MAX) return description;
+  return `${truncateAtWord(description, DESCRIPTION_MAX - 1)}…`;
+}
+
+export function normalizeHeadingLevels(tokens: { type: string; depth?: number }[]): void {
+  const stack: { original: number; normalized: number }[] = [];
+  for (const token of tokens) {
+    if (token.type !== 'heading' || typeof token.depth !== 'number') continue;
+    const original = token.depth;
+    while (stack.length && stack[stack.length - 1].original >= original) stack.pop();
+    const normalized = Math.min(stack.length ? stack[stack.length - 1].normalized + 1 : 2, 6);
+    stack.push({ original, normalized });
+    token.depth = normalized;
+  }
+}
 
 export function isBrokenOrTemporaryHost(url: string | undefined): boolean {
   if (!url) return true;
@@ -138,7 +200,9 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
 
     const rawText = await rawRes.text();
     const { content } = parseFrontmatter(rawText);
-    const contentHtml = await marked.parse(content);
+    const tokens = marked.lexer(content);
+    normalizeHeadingLevels(tokens);
+    const contentHtml = marked.parser(tokens);
     const readingTime = calculateReadingTime(content);
 
     return {

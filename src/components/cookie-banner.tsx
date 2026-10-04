@@ -41,7 +41,7 @@ export function CookieBanner() {
                         <Cookie className="h-8 w-8 text-primary" />
                     </div>
                     <div className="flex-grow">
-                        <h3 className="font-semibold">We use cookies</h3>
+                        <h2 className="text-base font-semibold">We use cookies</h2>
                         <p className="text-sm text-muted-foreground">
                             We use cookies to enhance your experience and analyze our traffic. By clicking "Accept", you consent to our use of cookies. Read our{' '}
                             <Link href="/cookie-policy" className="underline">
