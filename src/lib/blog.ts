@@ -32,7 +32,10 @@ const META_OVERRIDES: Record<string, Partial<Pick<BlogPostMeta, 'seoTitle' | 'se
   },
 };
 
-const HIDDEN_SLUGS = new Set(['ai-smart-tech-reshaping-grocery-stores-test']);
+const HIDDEN_SLUGS = new Set([
+  'ai-smart-tech-reshaping-grocery-stores-test',
+  'migrating-from-moment-js-to-javascript-s-new-temporal-api',
+]);
 
 const blogManifest = (fallbackManifest as BlogPostMeta[])
   .filter((post) => !HIDDEN_SLUGS.has(post.slug))

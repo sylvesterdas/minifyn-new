@@ -46,6 +46,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/blog/migrating-from-moment-js-to-javascript-s-new-temporal-api',
+        destination: '/blog/migrating-from-moment-js-to-the-modern-javascript-temporal-api',
+        permanent: true,
+      },
+      {
         source: '/blog/ai-smart-tech-reshaping-grocery-stores-test',
         destination: '/blog/how-ai-and-smart-tech-are-quietly-reshaping-the-grocery-store-scene',
         permanent: true,
