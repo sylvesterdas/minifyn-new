@@ -1,15 +1,9 @@
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import type { Metadata } from 'next';
 import type { FAQPage, WithContext } from 'schema-dts';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { LifeBuoy, ShieldAlert, ArrowRight } from 'lucide-react';
+import { LifeBuoy, ShieldAlert, ChevronDown } from 'lucide-react';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 
 
@@ -53,7 +47,7 @@ const faqs = [
     },
     {
         question: "Is my payment information secure?",
-        answer: "Yes, absolutely. We use <a href='https://razorpay.com/security/' target='_blank' rel='noopener noreferrer' class='text-primary underline'>Razorpay</a>, a leading and secure payment gateway, to handle all transactions. We do not store any of your sensitive credit card information on our servers. All payment data is handled directly by Razorpay."
+        answer: "Yes. Payments in India are processed by <a href='https://razorpay.com/security/' target='_blank' rel='noopener noreferrer' class='text-primary underline'>Razorpay</a> (UPI, cards and netbanking), and international payments by PayPal. We never store your card details on our servers; all payment data is handled directly by these providers."
     },
     {
         question: "Is there a developer API?",
@@ -92,16 +86,27 @@ export default function FaqPage() {
               <p className="mt-2 text-lg text-muted-foreground">Find answers to the most common questions about MiniFyn.</p>
           </div>
           <h2 className="sr-only">Questions and answers</h2>
-          <Accordion type="single" collapsible className="w-full">
-              {faqs.map((faq, index) => (
-                  <AccordionItem value={`item-${index}`} key={index}>
-                      <AccordionTrigger className="text-lg text-left">{faq.question}</AccordionTrigger>
-                      <AccordionContent className="text-base text-muted-foreground prose prose-invert">
-                        <div dangerouslySetInnerHTML={{ __html: faq.answer }} />
-                      </AccordionContent>
-                  </AccordionItem>
+          <div className="w-full">
+              {faqs.map((faq) => (
+                  <details key={faq.question} className="group border-b">
+                      <summary className="flex cursor-pointer list-none items-center justify-between py-4 text-lg font-medium hover:underline [&::-webkit-details-marker]:hidden">
+                        {faq.question}
+                        <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-180" />
+                      </summary>
+                      <div className="pb-4 text-base text-muted-foreground" dangerouslySetInnerHTML={{ __html: faq.answer }} />
+                  </details>
               ))}
-          </Accordion>
+          </div>
+
+          <section className="mt-16 space-y-4 text-muted-foreground leading-relaxed">
+            <h2 className="text-2xl font-semibold text-foreground">Getting more from MiniFyn</h2>
+            <p>
+              MiniFyn turns long, messy URLs into short links you can share anywhere, with QR codes and click analytics built in. Every link is checked against our threat and phishing blocklist before it is created, so the people who click your links stay safe.
+            </p>
+            <p>
+              If your question is about a specific short link, include the link itself when you contact us. For billing questions, mention the email on your account and the payment method you used. Developers can find endpoints, authentication and examples in the <Link href="/docs/api" className="text-primary hover:underline">API documentation</Link>, and step-by-step walkthroughs in our <Link href="/docs/guides" className="text-primary hover:underline">guides</Link>.
+            </p>
+          </section>
 
           <div className="mt-16 text-center border-t pt-12">
             <h2 className="text-2xl font-semibold">Still have questions?</h2>
