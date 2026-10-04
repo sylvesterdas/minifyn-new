@@ -32,7 +32,10 @@ const META_OVERRIDES: Record<string, Partial<Pick<BlogPostMeta, 'seoTitle' | 'se
   },
 };
 
+const HIDDEN_SLUGS = new Set(['ai-smart-tech-reshaping-grocery-stores-test']);
+
 const blogManifest = (fallbackManifest as BlogPostMeta[])
+  .filter((post) => !HIDDEN_SLUGS.has(post.slug))
   .map((post) => ({ ...post, ...META_OVERRIDES[post.slug] }))
   .sort((a, b) => new Date(b.datePublished).getTime() - new Date(a.datePublished).getTime());
 

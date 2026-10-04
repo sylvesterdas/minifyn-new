@@ -45,6 +45,11 @@ const nextConfig = {
         destination: '/docs/guides',
         permanent: true,
       },
+      {
+        source: '/blog/ai-smart-tech-reshaping-grocery-stores-test',
+        destination: '/blog/how-ai-and-smart-tech-are-quietly-reshaping-the-grocery-store-scene',
+        permanent: true,
+      },
     ];
   },
   async rewrites() {
