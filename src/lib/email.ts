@@ -1,6 +1,6 @@
 "use server";
 
-import nodemailer from "nodemailer";
+import nodemailer, { type Transporter } from "nodemailer";
 
 const host = process.env.SMTP_HOST || process.env.MAILTRAP_HOST;
 const portStr = process.env.SMTP_PORT || process.env.MAILTRAP_PORT;
@@ -8,7 +8,7 @@ const user = process.env.SMTP_USER || process.env.MAILTRAP_USER;
 const pass = process.env.SMTP_PASS || process.env.MAILTRAP_PASS;
 const from = process.env.SMTP_FROM || "MiniFyn <noreply@minifyn.com>";
 
-let transporter: nodemailer.Transporter | null = null;
+let transporter: Transporter | null = null;
 
 if (host && portStr && user && pass) {
   const port = parseInt(portStr, 10);
